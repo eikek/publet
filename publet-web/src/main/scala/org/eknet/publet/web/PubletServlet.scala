@@ -11,10 +11,10 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 class PubletServlet extends HttpServlet {
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
-
+    resp.getOutputStream.println("<html><body><h1>Success</h1></body></html>")
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) {
-
+    resp.getOutputStream.println("<html><body><h1>Success</h1></body></html>")
   }
 }
