@@ -12,8 +12,8 @@ object PubletBuild extends Build {
   lazy val root = Project(id = "publet", 
     base = file("."),
     settings = Project.defaultSettings ++ buildSettings
-  )  aggregate (PubletWebBuild.web)
-
+  ) aggregate (PubletWebBuild.web) 
+ 
   val buildSettings = Seq(
     name := "publet",
     libraryDependencies ++= commonDeps
