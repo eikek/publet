@@ -24,7 +24,7 @@ trait SourceRegistry {
   }
 
   def getSource(name: Symbol): PubletSource = sourceMap.get(name) match {
-    case null => sys.error("No source registered")
+    case null => sys.error("No source registered: "+ name.name)
     case s => s
   }
 }
