@@ -1,5 +1,9 @@
+import io.Source
+import java.io.FileWriter
+import java.util.Properties
 import sbt._
 import Keys._
+import pamflet.PamfletPlugin.PamfletKeys._
 
 object Resolvers {
   
@@ -11,10 +15,10 @@ object PubletBuild extends Build {
 
   lazy val root = Project(id = "publet", 
     base = file("."),
-    settings = Project.defaultSettings ++ buildSettings
+    settings = buildSettings
   ) aggregate (PubletWebBuild.web) 
  
-  val buildSettings = Seq(
+  val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet",
     libraryDependencies ++= commonDeps
   )

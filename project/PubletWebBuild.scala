@@ -5,10 +5,10 @@ import BundlePlugin._
 object PubletWebBuild extends Build {
   lazy val web = Project(id = "publet-web", 
     base = file("publet-web"),
-    settings = Project.defaultSettings ++ buildProperties
+    settings = buildProperties
   )
 
-  val buildProperties = Seq(
+  val buildProperties = Project.defaultSettings ++ Seq(
     name := "publet-web",
     libraryDependencies ++= deps
   ) ++ bundleSettings
