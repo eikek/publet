@@ -1,8 +1,10 @@
 import sbt._
 import Keys._
 import BundlePlugin._
+import Dependencies._
 
-object PubletWebBuild extends Build {
+object WebBuild extends Build {
+
   lazy val web = Project(id = "publet-web", 
     base = file("publet-web"),
     settings = buildProperties
@@ -12,8 +14,6 @@ object PubletWebBuild extends Build {
     name := "publet-web",
     libraryDependencies ++= deps
   ) ++ bundleSettings
-  
-  val deps = Seq(
-    "javax.servlet" % "servlet-api" % "2.5"
-  )
+
+  val deps = Seq(servletApi)
 }
