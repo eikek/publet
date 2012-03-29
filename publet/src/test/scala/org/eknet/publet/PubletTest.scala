@@ -15,7 +15,19 @@ object PubletTest {
   def main(args: Array[String]) {
     val publ = Publet()
     publ.addSource(new FilesystemSource("/tmp/publet"))
-    publ.mount("/*", new DefaultConverterEngine)
+
+    val conveng = new DefaultConverterEngine
+    val md2html = (data:Data) => { println("md->html"); data }
+    val html2text = (data:Data) => { println("html->text"); data }
+    val html2pdf = (data:Data) => { println("html->pdf"); data }
+    val pdf2text = (data:Data) => { println("pdf->text"); data }
+
+    conveng.addConverter(ContentType.markdown, ContentType.html, md2html)
+    conveng.addConverter(ContentType.html, ContentType.text, html2text)
+    conveng.addConverter(ContentType.html, ContentType.pdf, html2pdf)
+    conveng.addConverter(ContentType.pdf, ContentType.text, pdf2text)
+
+    publ.mount("/*", conveng)
     publ.mount("/pamflet/*", new PassThrough)
 
     val uri = Uri("local:///test/hello.txt")
