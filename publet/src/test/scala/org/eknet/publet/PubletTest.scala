@@ -18,7 +18,7 @@ object PubletTest {
     publ.mount("/*", new DefaultConverterEngine)
     publ.mount("/pamflet/*", new PassThrough)
 
-    val uri = Uri("local:///hello.html")
+    val uri = Uri("local:///test/hello.txt")
     publ.process(uri) match {
       case Left(x) => throw x
       case Right(x) => x match {
