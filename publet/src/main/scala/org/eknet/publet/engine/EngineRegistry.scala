@@ -1,6 +1,5 @@
 package org.eknet.publet.engine
 
-import util.matching.Regex
 import java.util.concurrent.ConcurrentHashMap
 import collection.JavaConversions._
 
@@ -11,23 +10,19 @@ import collection.JavaConversions._
  */
 trait EngineRegistry {
 
-  private val engineMap = new ConcurrentHashMap[Symbol, Engine]()
-
-  type Engine = (Regex, PubletEngine)
+  private val engineMap: java.util.Map[Symbol, PubletEngine] = new ConcurrentHashMap[Symbol, PubletEngine]()
 
   /**
    * Returns the map of registered engines.
    *
    * @return
    */
-  def engines: Map[Symbol, Engine] = engineMap.toMap
+  def engines: Map[Symbol, PubletEngine] = engineMap.toMap
 
-  def addEngine(urlPattern: Regex, engine: PubletEngine) {
-    engineMap.put(engine.name, (urlPattern, engine))
+  def addEngine(engine: PubletEngine) {
+    engineMap.put(engine.name, engine)
   }
 
-  def getEngine(name: Symbol): Option[(Regex, PubletEngine)] = Option(engineMap.get(name))
-
-  protected[publet] def registeredEngines: List[Engine] = engineMap.values().toList
+  def getEngine(name: Symbol): Option[PubletEngine] = Option(engineMap.get(name))
 
 }

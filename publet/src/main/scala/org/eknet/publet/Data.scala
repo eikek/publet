@@ -10,16 +10,14 @@ import tools.nsc.io.{File, Streamable}
  */
 trait Data {
 
-  def contentType: String
+  def contentType: ContentType
 
   def content: InputStream
   
   def contentAsBytes: Array[Byte] = Streamable.bytes(content)
 }
 
-class FileData(file: File, ct: String) extends Data {
-
-  def contentType = ct
+case class FileData(file: File, contentType: ContentType) extends Data {
 
   def content = file.inputStream()
 
@@ -27,6 +25,6 @@ class FileData(file: File, ct: String) extends Data {
 
 object Data {
 
-  def apply(file: File, ct: String): Data = new FileData(file, ct)
-  def apply(file: File): Data = Data(file, file.extension)
+  def apply(file: File, ct: ContentType): Data = new FileData(file, ct)
+  def apply(file: File): Data = Data(file, ContentType(file))
 }

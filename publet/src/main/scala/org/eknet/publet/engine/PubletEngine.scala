@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{Data, Named}
+import org.eknet.publet.{ContentType, Data, Named}
 
 
 /**
@@ -10,6 +10,16 @@ import org.eknet.publet.{Data, Named}
  */
 trait PubletEngine extends Named {
 
-  def process(data: Data): Either[Exception, Data]
+  /**
+   * Processes one of the given data inputs to an output format.
+   * There must be at least one element in the Seq
+   * <p>
+   * The input are different format variations of the same content.
+   * </p>
+   *
+   * @param data
+   * @return
+   */
+  def process(data: Seq[Data], target: ContentType): Either[Exception, Data]
 
 }

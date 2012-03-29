@@ -1,10 +1,8 @@
 package org.eknet.publet.source
 
-import java.net.URI
-import org.eknet.publet.Data
 import tools.nsc.io.{File, Directory}
 import java.nio.file.{Paths, Path, StandardCopyOption, Files => JFiles}
-import org.eknet.publet.impl.Conversions._
+import org.eknet.publet.{Uri, Data}
 
 /**
  *
@@ -22,12 +20,12 @@ class FilesystemSource(root: Directory) extends PubletSource {
 
   def name = 'local
 
-  def lookup(uri: URI) = {
+  def lookup(uri: Uri) = {
     val file = relativeFile(uri)
     if (file.exists) Option(Data(file)) else None
   }
 
-  def push(uri: URI)(data: Data) {
+  def push(uri: Uri)(data: Data) {
     val file = relativeFile(uri)
     if (!file.exists) file.parent.createDirectory(force = true, failIfExists = true)
 
@@ -35,5 +33,5 @@ class FilesystemSource(root: Directory) extends PubletSource {
     JFiles.copy(data.content, path, StandardCopyOption.REPLACE_EXISTING)
   }
 
-  private def relativeFile(uri: URI) = File(root / uri.validPath)
+  private def relativeFile(uri: Uri) = File(root / uri.path)
 }

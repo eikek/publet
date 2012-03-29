@@ -1,46 +1,58 @@
 package org.eknet.publet.impl
 
 import org.eknet.publet.source.SourceRegistry
-import java.net.URI
-import org.eknet.publet.{Data, Publet}
-import org.eknet.publet.engine.{PubletEngine, EngineRegistry}
 import org.eknet.publet.impl.Conversions._
+import collection.mutable.ListBuffer
+import org.eknet.publet.{Uri, ContentType, Data, Publet}
+import org.eknet.publet.engine.{EngineResolver, EngineRegistry}
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-protected[publet] class PubletImpl extends Publet with EngineRegistry with SourceRegistry {
+protected[publet] class PubletImpl extends Publet with EngineResolver with EngineRegistry with SourceRegistry {
 
-  
-  def process(uri: URI): Either[Exception, Option[Data]] = {
+
+  def process(uri: Uri, target: ContentType) = process(uri.urisFor(target).head)
+
+  def process(uri: Uri): Either[Exception, Option[Data]] = {
     Predef.ensuring(uri != null, "null is illegal")
 
+    //lookup engine for uri pattern
+    val engine = resolveEngine(uri).getOrElse(sys.error("No engine found for uri: "+ uri))
+    
     // lookup the source
-    getSource(uri.schemeSymbol).lookup(uri) match {
+    findSourceFor(uri) match {
       case None => Right(None)
-      case Some(data) => {
-        //lookup the engine according to the uri scheme
-        engineFor(uri) match {
-          case Left(x) => Left(x)
-          case Right(engine) => engine.process(data)
-        }
-      }
+      //lookup the engine according to the uri scheme and process data
+      case Some(data) => engine.process(data, uri.targetType.get)
     }
   }
 
+
   /**
-   * Finds the engine to use for the given uri.
+   * Finds resources that matches the name of the specified uri
+   * but not necessarily the file extension.
+   * <p>
+   * For example, finds a `title.md` if a `title.html` is requested,
+   * while `title.html` will be the first one on the Seq if it exists.
+   * </p>
    *
    * @param uri
    * @return
    */
-  private def engineFor(uri: URI): Either[Exception, PubletEngine] = {
-    registeredEngines.find(_._1.pattern.matcher(uri.getPath).matches()) match {
-      case None => Left(new RuntimeException("No engine found for: "+ uri))
-      case Some(e) => Right(e._2)
-    }    
+  private def findSourceFor(uri: Uri): Option[Seq[Data]] = {
+    val source = getSource(uri.schemeSymbol)
+    val buffer = new ListBuffer[Data]
+
+    // create a list of uris of all known extensions
+    val urilist = uri.urisForTarget.toSeq ++
+      ContentType.all.filter(_ != uri.targetType).flatMap( _.extensions.map(uri.withExtension(_)) )
+    
+    //lookup all uris and returns list of results
+    urilist.foreach (source.lookup(_).flatten( buffer.+= ))
+    if (buffer.isEmpty) None else Some(buffer.toSeq)
   }
 
 }

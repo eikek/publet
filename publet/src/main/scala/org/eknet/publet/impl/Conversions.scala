@@ -1,6 +1,5 @@
 package org.eknet.publet.impl
 
-import java.net.URI
 import org.eknet.publet.Data
 
 /**
@@ -10,24 +9,11 @@ import org.eknet.publet.Data
  */
 protected[publet] object Conversions {
 
-  implicit def toSymbolUri(uri:URI) = new SymbolUri(uri)
 
-  class SymbolUri(uri: URI) {
-
-    def schemeSymbol = uri.getScheme match {
-      case null => sys.error("URI is not absolute! Scheme is missing")
-      case s => Symbol(s)
-    }
-
-    def validPath: String = Option(uri.getPath).filterNot(_.isEmpty).get
-
-  }
-  
   implicit def toOptionalEither(v: Either[Exception, Data]): Either[Exception, Option[Data]] = {
     v match {
       case Right(data) => Right(Option(data))
       case Left(x) => Left(x)
     }
   }
-  
 }

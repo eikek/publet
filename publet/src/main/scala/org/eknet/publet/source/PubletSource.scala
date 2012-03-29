@@ -1,7 +1,6 @@
 package org.eknet.publet.source
 
-import java.net.URI
-import org.eknet.publet.{Data, Named}
+import org.eknet.publet.{Uri, Data, Named}
 
 /**
  *
@@ -10,9 +9,15 @@ import org.eknet.publet.{Data, Named}
  */
 trait PubletSource extends Named {
 
-  def lookup(uri: URI): Option[Data]
+  /**
+   * Looks up the resource as specified by the uri
+   *
+   * @param uri
+   * @return
+   */
+  def lookup(uri: Uri): Option[Data]
 
-  def push(uri: URI)(data: Data)
+  def push(uri: Uri)(data: Data)
 
-  def pushFunction(uri:URI) = push(uri)_
+  def pushFunction(uri:Uri) = push(uri)_
 }

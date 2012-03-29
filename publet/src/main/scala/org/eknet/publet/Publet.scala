@@ -1,8 +1,7 @@
 package org.eknet.publet
 
-import engine.EngineRegistry
+import engine.{PassThrough, PubletEngine, EngineRegistry}
 import impl.PubletImpl
-import java.net.URI
 import source.SourceRegistry
 
 /**
@@ -20,12 +19,34 @@ trait Publet extends SourceRegistry with EngineRegistry {
    * @param uri
    * @return
    */
-  def process(uri: URI): Either[Exception, Option[Data]]
+  def process(uri: Uri): Either[Exception, Option[Data]]
+
+  /**
+   * Processes the source at the given URI and retursn
+   * the transformed result according to the specified
+   * target format.
+   * <p>
+   * If no source is found, $none is returned, otherwise
+   * an exception is thrown if the source file could not
+   * be transformed.
+   * </p>
+   *
+   * @param uri
+   * @param targetType
+   * @return
+   */
+  def process(uri: Uri, targetType: ContentType): Either[Exception, Option[Data]]
+
+  def mount(urlPattern: String, engine: PubletEngine)
 
 }
 
 object Publet {
 
-  def apply() = new PubletImpl
+  def apply() = {
+    val p = new PubletImpl
+    p.addEngine(new PassThrough)
+    p
+  }
 
 }
