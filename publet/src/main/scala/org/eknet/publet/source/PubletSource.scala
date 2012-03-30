@@ -1,6 +1,6 @@
 package org.eknet.publet.source
 
-import org.eknet.publet.{Uri, Data, Named}
+import org.eknet.publet.{Uri, Page, Named}
 
 /**
  *
@@ -15,9 +15,9 @@ trait PubletSource extends Named {
    * @param uri
    * @return
    */
-  def lookup(uri: Uri): Option[Data]
+  def lookup(uri: Uri): Option[Page]
 
-  def push(uri: Uri)(data: Data)
+  def push(uri: Uri)(data: Page)
 
   def pushFunction(uri:Uri) = push(uri)_
 }

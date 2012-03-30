@@ -31,7 +31,7 @@ trait EngineResolver {
   }
 
   protected[publet] def resolveEngine(uri: Uri): Option[PubletEngine] = {
-    def keyget(keys: List[Glob]): Option[PubletEngine] = keys match {
+    def keyget(keys: List[Glob]): Option[PubletEngine] =  (keys: @unchecked) match {
       case Nil => None
       case a :: tail if a.matches(uri) => get(a) match {
         case None =>  { println(a); println(tail); keyget(tail) }

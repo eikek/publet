@@ -1,6 +1,6 @@
 package org.eknet.publet.impl
 
-import org.eknet.publet.Data
+import org.eknet.publet.Page
 
 /**
  *
@@ -10,7 +10,7 @@ import org.eknet.publet.Data
 protected[publet] object Conversions {
 
 
-  implicit def toOptionalEither(v: Either[Exception, Data]): Either[Exception, Option[Data]] = {
+  implicit def toOptionalEither(v: Either[Exception, Page]): Either[Exception, Option[Page]] = {
     v match {
       case Right(data) => Right(Option(data))
       case Left(x) => Left(x)

@@ -3,7 +3,7 @@ package org.eknet.publet.impl
 import org.eknet.publet.source.SourceRegistry
 import org.eknet.publet.impl.Conversions._
 import collection.mutable.ListBuffer
-import org.eknet.publet.{Uri, ContentType, Data, Publet}
+import org.eknet.publet.{Uri, ContentType, Page, Publet}
 import org.eknet.publet.engine.{EngineResolver, EngineRegistry}
 
 /**
@@ -16,7 +16,7 @@ protected[publet] class PubletImpl extends Publet with EngineResolver with Engin
 
   def process(uri: Uri, target: ContentType) = process(uri.urisFor(target).head)
 
-  def process(uri: Uri): Either[Exception, Option[Data]] = {
+  def process(uri: Uri): Either[Exception, Option[Page]] = {
     Predef.ensuring(uri != null, "null is illegal")
 
     //lookup engine for uri pattern
@@ -42,9 +42,9 @@ protected[publet] class PubletImpl extends Publet with EngineResolver with Engin
    * @param uri
    * @return
    */
-  private def findSourceFor(uri: Uri): Option[Seq[Data]] = {
+  private def findSourceFor(uri: Uri): Option[Seq[Page]] = {
     val source = getSource(uri.schemeSymbol)
-    val buffer = new ListBuffer[Data]
+    val buffer = new ListBuffer[Page]
 
     // create a list of uris of all known extensions
     val urilist = uri.urisForTarget.toSeq ++

@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{ContentType, Data, Named}
+import org.eknet.publet.{ContentType, Page, Named}
 
 
 /**
@@ -20,6 +20,6 @@ trait PubletEngine extends Named {
    * @param data
    * @return
    */
-  def process(data: Seq[Data], target: ContentType): Either[Exception, Data]
+  def process(data: Seq[Page], target: ContentType): Either[Exception, Page]
 
 }

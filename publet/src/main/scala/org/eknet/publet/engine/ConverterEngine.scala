@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.Data
+import org.eknet.publet.Page
 
 /**
  *
@@ -9,7 +9,7 @@ import org.eknet.publet.Data
  */
 trait ConverterEngine extends PubletEngine {
 
-  type Converter = Data => Data
+  type Converter = Page => Page
 
 }
 

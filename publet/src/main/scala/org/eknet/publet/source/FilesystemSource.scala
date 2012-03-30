@@ -2,7 +2,7 @@ package org.eknet.publet.source
 
 import tools.nsc.io.{File, Directory}
 import java.nio.file.{Paths, Path, StandardCopyOption, Files => JFiles}
-import org.eknet.publet.{Uri, Data}
+import org.eknet.publet.{Uri, Page}
 
 /**
  *
@@ -22,10 +22,10 @@ class FilesystemSource(root: Directory) extends PubletSource {
 
   def lookup(uri: Uri) = {
     val file = relativeFile(uri)
-    if (file.exists) Option(Data(file)) else None
+    if (file.exists) Option(Page(file)) else None
   }
 
-  def push(uri: Uri)(data: Data) {
+  def push(uri: Uri)(data: Page) {
     val file = relativeFile(uri)
     if (!file.exists) file.parent.createDirectory(force = true, failIfExists = true)
 

@@ -19,7 +19,7 @@ trait Publet extends SourceRegistry with EngineRegistry {
    * @param uri
    * @return
    */
-  def process(uri: Uri): Either[Exception, Option[Data]]
+  def process(uri: Uri): Either[Exception, Option[Page]]
 
   /**
    * Processes the source at the given URI and retursn
@@ -35,7 +35,7 @@ trait Publet extends SourceRegistry with EngineRegistry {
    * @param targetType
    * @return
    */
-  def process(uri: Uri, targetType: ContentType): Either[Exception, Option[Data]]
+  def process(uri: Uri, targetType: ContentType): Either[Exception, Option[Page]]
 
   def mount(urlPattern: String, engine: PubletEngine)
 

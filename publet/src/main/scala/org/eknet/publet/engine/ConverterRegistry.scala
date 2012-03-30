@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{Data, ContentType}
+import org.eknet.publet.{Page, ContentType}
 import collection._
 
 /**
@@ -24,7 +24,7 @@ trait ConverterRegistry {
 
     type Converter = ConverterEngine#Converter
 
-    val idconv: Converter = (x:Data) => x
+    val idconv: Converter = (x:Page) => x
     private val converters = mutable.Map[(ContentType, ContentType), Converter]()
     private val nodes = mutable.Map[ContentType, List[ContentType]]()
 

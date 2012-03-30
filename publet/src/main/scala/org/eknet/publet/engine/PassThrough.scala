@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{ContentType, Data}
+import org.eknet.publet.{ContentType, Page}
 
 
 /**
@@ -12,6 +12,6 @@ class PassThrough extends PubletEngine {
 
   def name = 'source
 
-  def process(data: Seq[Data], target: ContentType) = Right(data.head)
+  def process(data: Seq[Page], target: ContentType) = Right(data.head)
 
 }
