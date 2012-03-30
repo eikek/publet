@@ -1,6 +1,6 @@
 package org.eknet.publet
 
-import engine.{PassThrough, DefaultConverterEngine}
+import engine.{TextToHtml, PassThrough, DefaultConverterEngine}
 import io.Source
 import org.eknet.publet.source.FilesystemPartition
 
@@ -26,11 +26,12 @@ object PubletTest {
     conveng.addConverter(ContentType.html, ContentType.text, html2text)
     conveng.addConverter(ContentType.html, ContentType.pdf, html2pdf)
     conveng.addConverter(ContentType.pdf, ContentType.text, pdf2text)
+    conveng.addConverter(ContentType.text, ContentType.html, TextToHtml)
 
     publ.register("/*", conveng)
     publ.register("/pamflet/*", PassThrough)
 
-    val path = Path("/test/hello.xml")
+    val path = Path("/test/hello.html")
     publ.process(path) match {
       case Left(x) => throw x
       case Right(x) => x match {
