@@ -10,5 +10,5 @@ object PubletBuild extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
   
-  lazy val deps = Seq()
+  lazy val deps = Seq(Dependencies.knockoff)
 }

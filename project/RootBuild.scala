@@ -35,6 +35,7 @@ object Dependencies {
 
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
   val servletApi = "javax.servlet" % "servlet-api" % "2.5"
+  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16"
 
 }
 

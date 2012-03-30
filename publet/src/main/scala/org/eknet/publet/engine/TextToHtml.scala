@@ -13,18 +13,19 @@ object TextToHtml extends ConverterEngine#Converter {
   
   def apply(page: Page) = {
     val buffer = ListBuffer[String]()
-    buffer + "<html>"
+    buffer += "<html>"
     for (line <- Source.fromInputStream(page.content).getLines()) {
       if (buffer.length == 1) {
-        buffer + "<head><title>"+ line +"</title></head>"
-        buffer + "<body>"
-        buffer + "<p>"
+        buffer += "<head><title>"+ line +"</title></head>"
+        buffer += "<body>"
+        buffer += "<h1>"+ line +"</h1>"
+        buffer += "<p>"
       } else {
-        buffer + line
+        buffer += line
       }
     }
-    buffer + "</p></body>"
-    buffer + "</html>"
+    buffer += "</p></body>"
+    buffer += "</html>"
     val str = buffer.mkString("\n") .replaceAll("\\n\\n", "</p><p>")
     Page(str, ContentType.html)
   }

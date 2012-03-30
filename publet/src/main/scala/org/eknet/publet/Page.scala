@@ -4,6 +4,7 @@ import tools.nsc.io.{File, Streamable}
 import collection.mutable.ListBuffer
 import java.io.{ByteArrayInputStream, InputStream}
 import io.Source
+import xml.Node
 
 /**
  *
@@ -19,6 +20,8 @@ trait Page {
   def lastModification: Option[Long]
   
   def contentAsBytes: Array[Byte] = Streamable.bytes(content)
+  
+  def contentAsString = Source.fromInputStream(content).getLines().mkString("\n")
 }
 
 case class FilePage(file: File, contentType: ContentType) extends Page {
@@ -35,7 +38,6 @@ case class StringPage(str: String, contentType: ContentType) extends Page {
 }
 
 case class LinePage(buf: Iterable[String], ct: ContentType) extends StringPage(buf.mkString("\n"), ct)
-  
 
 object Page {
 
