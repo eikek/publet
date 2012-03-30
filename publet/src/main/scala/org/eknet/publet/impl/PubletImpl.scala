@@ -1,35 +1,34 @@
 package org.eknet.publet.impl
 
-import org.eknet.publet.source.SourceRegistry
 import org.eknet.publet.impl.Conversions._
 import collection.mutable.ListBuffer
-import org.eknet.publet.{Uri, ContentType, Page, Publet}
-import org.eknet.publet.engine.{EngineResolver, EngineRegistry}
+import org.eknet.publet.engine.EngineResolver
+import org.eknet.publet.source.RootPartition
+import org.eknet.publet._
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-protected[publet] class PubletImpl extends Publet with EngineResolver with EngineRegistry with SourceRegistry {
+protected[publet] class PubletImpl extends RootPartition with Publet with EngineResolver {
 
 
-  def process(uri: Uri, target: ContentType) = process(uri.urisFor(target).head)
+  def process(path: Path, target: ContentType) = process(path.pathsFor(target).head)
 
-  def process(uri: Uri): Either[Exception, Option[Page]] = {
-    Predef.ensuring(uri != null, "null is illegal")
+  def process(path: Path): Either[Exception, Option[Page]] = {
+    Predef.ensuring(path != null, "null is illegal")
 
     //lookup engine for uri pattern
-    val engine = resolveEngine(uri).getOrElse(sys.error("No engine found for uri: "+ uri))
+    val engine = resolveEngine(path).getOrElse(sys.error("No engine found for uri: "+ path))
     
     // lookup the source
-    findSourceFor(uri) match {
+    findSourceFor(path) match {
       case None => Right(None)
       //lookup the engine according to the uri scheme and process data
-      case Some(data) => engine.process(data, uri.targetType.get)
+      case Some(data) => engine.process(data, path.targetType.get)
     }
   }
-
 
   /**
    * Finds resources that matches the name of the specified uri
@@ -39,16 +38,19 @@ protected[publet] class PubletImpl extends Publet with EngineResolver with Engin
    * while `title.html` will be the first one on the Seq if it exists.
    * </p>
    *
-   * @param uri
+   * @param path
    * @return
    */
-  private def findSourceFor(uri: Uri): Option[Seq[Page]] = {
-    val source = getSource(uri.schemeSymbol)
+  private def findSourceFor(path: Path): Option[Seq[Page]] = {
+    val part = resolvePartition(path).get
+    val source = part._2
+    val sourcePath = part._1
     val buffer = new ListBuffer[Page]
 
     // create a list of uris of all known extensions
-    val urilist = uri.urisForTarget.toSeq ++
-      ContentType.all.filter(_ != uri.targetType).flatMap( _.extensions.map(uri.withExtension(_)) )
+    val ft = new FileName(path.strip(sourcePath))
+    val urilist = ft.pathsForTarget.toSeq ++
+      ContentType.all.filter(_ != ft.targetType).flatMap( _.extensions.map(ft.withExtension(_)) )
     
     //lookup all uris and returns list of results
     urilist.foreach (source.lookup(_).flatten( buffer.+= ))

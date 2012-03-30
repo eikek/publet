@@ -2,7 +2,7 @@ package org.eknet.publet
 
 import engine.{PassThrough, DefaultConverterEngine}
 import io.Source
-import org.eknet.publet.source.FilesystemSource
+import org.eknet.publet.source.FilesystemPartition
 
 
 /**
@@ -14,7 +14,7 @@ object PubletTest {
 
   def main(args: Array[String]) {
     val publ = Publet()
-    publ.addSource(new FilesystemSource("/tmp/publet"))
+    publ.mount(Path("/"), new FilesystemPartition("/tmp/publet"))
 
     val conveng = new DefaultConverterEngine
     val md2html = (data:Page) => { println("md->html"); data }
@@ -27,14 +27,14 @@ object PubletTest {
     conveng.addConverter(ContentType.html, ContentType.pdf, html2pdf)
     conveng.addConverter(ContentType.pdf, ContentType.text, pdf2text)
 
-    publ.mount("/*", conveng)
-    publ.mount("/pamflet/*", new PassThrough)
+    publ.register("/*", conveng)
+    publ.register("/pamflet/*", PassThrough)
 
-    val uri = Uri("local:///test/hello.txt")
-    publ.process(uri) match {
+    val path = Path("/test/hello.txt")
+    publ.process(path) match {
       case Left(x) => throw x
       case Right(x) => x match {
-        case None => println("Not found: " + uri)
+        case None => println("Not found: " + path)
         case Some(data) => println(data.contentType); Source.createBufferedSource(data.content).getLines().foreach(println)
       }
     }
