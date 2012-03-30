@@ -2,6 +2,7 @@ package org.eknet.publet.engine
 
 import org.eknet.publet.{Page, ContentType}
 import collection._
+import mutable.ListBuffer
 
 /**
  *
@@ -17,7 +18,7 @@ trait ConverterRegistry {
 
   protected[engine] def converterFor(source: ContentType, target: ContentType): Option[ConverterEngine#Converter] = {
     if (source == target) Some(graph.idconv)
-    else Some(graph.converterChain(source, target))
+    else graph.converterChain(source, target)
   }
 
   private class Graph {
@@ -35,7 +36,7 @@ trait ConverterRegistry {
       nodes.put(t, List())
     }
 
-    def converterChain(s: ContentType, e: ContentType): Converter = {
+    def converterChain(s: ContentType, e: ContentType): Option[Converter] = {
       //Dijkstra
       val distance = mutable.Map[ContentType, Int]()
       val predecessor = mutable.Map[ContentType, ContentType]()
@@ -67,9 +68,11 @@ trait ConverterRegistry {
         path.prepend(z)
       }
       //create tuples that define the converter
-      val tuples = path zip  path.tail
-      //create function by composing all converters
-      tuples.foldLeft(idconv)((c, t) => c.andThen(converters.get(t).get))
+      path zip  path.tail match {
+        case ListBuffer() => None
+        //create function by composing all converters
+        case tuples => Some( tuples.foldLeft(idconv)((c, t) => c.andThen(converters.get(t).get)) )
+      }
     }
   }
 }

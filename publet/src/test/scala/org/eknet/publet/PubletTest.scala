@@ -30,7 +30,7 @@ object PubletTest {
     publ.register("/*", conveng)
     publ.register("/pamflet/*", PassThrough)
 
-    val path = Path("/test/hello.txt")
+    val path = Path("/test/hello.xml")
     publ.process(path) match {
       case Left(x) => throw x
       case Right(x) => x match {

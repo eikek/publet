@@ -14,7 +14,10 @@ class DefaultConverterEngine extends ConverterEngine with ConverterRegistry {
 
   def process(data: Seq[Page], target: ContentType) = {
     process(data.head, target).fold(Left(_), _ match {
-      case None => process(data.tail, target)
+      case None => data.tail match {
+        case List() => Left(new RuntimeException("no converter found"))
+        case tail => process(tail, target)
+      }
       case Some(x) => Right(x)
     })
   }

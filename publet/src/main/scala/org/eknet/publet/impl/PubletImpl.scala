@@ -20,7 +20,8 @@ protected[publet] class PubletImpl extends RootPartition with Publet with Engine
     Predef.ensuring(path != null, "null is illegal")
 
     //lookup engine for uri pattern
-    val engine = resolveEngine(path).getOrElse(sys.error("No engine found for uri: "+ path))
+    val engine = resolveEngine(path)
+      .getOrElse(sys.error("No engine found for uri: "+ path))
     
     // lookup the source
     findSourceFor(path) match {
