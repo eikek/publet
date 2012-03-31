@@ -23,7 +23,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
       .getOrElse(sys.error("No engine found for uri: "+ path))
     
     // lookup the source
-    findSourceFor(path) match {
+    findSources(path) match {
       case None => Right(None)
       //lookup the engine according to the uri scheme and process data
       case Some(data) => engine.process(path, data, path.targetType.get)
@@ -41,8 +41,9 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
    * @param path
    * @return
    */
-  private def findSourceFor(path: Path): Option[Seq[Content]] = {
-    val part = resolveMount(path).get
+  def findSources(path: Path): Option[Seq[Content]] = {
+    Predef.ensuring(path != null, "null is illegal")
+    val part = resolveMount(path).getOrElse(sys.error("No partition mounted for path: "+ path))
     val source = part._2
     val sourcePath = part._1
     val buffer = new ListBuffer[Content]
@@ -51,13 +52,12 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
     val ft = new FileName(path.strip(sourcePath))
     val urilist = ft.pathsForTarget.toSeq ++
       ContentType.all.filter(_ != ft.targetType).flatMap( _.extensions.map(ft.withExtension(_)) )
-    
     //lookup all uris and returns list of results
     urilist.foreach (source.lookup(_).flatten( buffer.+= ))
     if (buffer.isEmpty) None else Some(buffer.toSeq)
   }
 
-  override def addEngine(engine: PubletEngine) = {
+  override def addEngine(engine: PubletEngine) {
     engine match {
       case e: InstallCallback => e.onInstall(this)
       case _ => ()

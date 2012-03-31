@@ -49,24 +49,20 @@ trait EngineResolver {
     mountMap.put(glob, engine)
   }
 
-  protected[publet] def resolveEngine(path: Path): Option[PubletEngine] = {
+  def resolveEngine(path: Path): Option[PubletEngine] = {
     def keyget(keys: List[Glob]): Option[PubletEngine] =  (keys: @unchecked) match {
       case Nil => None
-      case a :: tail if a.matches(path.asString) => get(a) match {
-        case None =>  { println(a); println(tail); keyget(tail) }
+      case a :: tail if a.matches(path.asString) => mountMap.get(a) match {
+        case None =>  { keyget(tail) }
         case r @ Some(x) => r
       }
       case a :: tail if !a.matches(path.asString) => keyget(tail)
     }
+    def sortedKeys = {
+      val longestFirst = (x: Glob, y: Glob) => x.compare(y) > 0
+      mountMap.keys.toList.sortWith(longestFirst)
+    }
     keyget(sortedKeys)
   }
-
-  private def get(k: Glob): Option[PubletEngine] = mountMap.get(k)
-
-  private def sortedKeys = {
-    val longestFirst = (x: Glob, y: Glob) => x.compare(y) > 0
-    mountMap.keys.toList.sortWith(longestFirst)
-  }
-
 
 }

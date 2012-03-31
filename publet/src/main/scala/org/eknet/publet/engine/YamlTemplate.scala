@@ -22,7 +22,7 @@ trait YamlTemplate extends HtmlTemplate with InstallCallback {
 
   override def headerContent(path: Path, content: Content) = {
     val base = path.relativeRoot + randPath + "/"
-    """<link href="""" + base+"yaml/simple-page.css" + """" rel="stylesheet" type="text/css"/>
+    """<link href="""" + base+"yaml/single-page.css" + """" rel="stylesheet" type="text/css"/>
     """
   }
 
