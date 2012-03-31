@@ -37,7 +37,7 @@ object Dependencies {
   val servletApi = "javax.servlet" % "servlet-api" % "2.5"
   val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16"
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
-  val commonsLang = "org.apache.commons" % "commons-lang3" % "3.1"
+//  val commonsLang = "org.apache.commons" % "commons-lang3" % "3.1"
 }
 
 

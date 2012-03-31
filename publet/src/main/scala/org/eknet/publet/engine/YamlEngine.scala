@@ -3,11 +3,6 @@ package org.eknet.publet.engine
 import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.source.Partitions
 import org.eknet.publet._
-import org.apache.commons.lang3.StringEscapeUtils
-import util.Random
-import sbt.std.Streams
-import collection.mutable.ListBuffer
-import util.matching.Regex
 import java.util.UUID
 
 /**
@@ -41,7 +36,7 @@ class YamlEngine(engine: PubletEngine) extends PubletEngine with InstallCallback
 
   private def template(path: Path, content: Content) = {
     val base = ("../" * path.parent.size) + randPath+ "/"
-    val title = StringEscapeUtils.escapeHtml4(path.fileName.name).toString
+    val title = path.fileName.name
 
     """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
