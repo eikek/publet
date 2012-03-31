@@ -8,11 +8,11 @@ import org.eknet.publet.Path
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 30.03.12 21:00
  */
-trait MountManager {
+trait MountManager[T] {
 
-  private val mounts = mutable.Map[Path, Partition]()
+  private val mounts = mutable.Map[Path, T]()
 
-  def mount(path: Path, part: Partition) {
+  def mount(path: Path, part: T) {
     Predef.ensuring(path != null, "null")
     Predef.ensuring(part != null, "null")
     if (isMounted(path)) sys.error("Path already mounted")
@@ -21,11 +21,11 @@ trait MountManager {
 
   def isMounted(path: Path): Boolean = mounts.contains(path)
 
-  def isMounted(p: Partition => Boolean): Boolean = mounts.values.exists(p)
+  def isMounted(p: T => Boolean): Boolean = mounts.values.exists(p)
 
-  def partitionAt(path: Path): Option[Partition] = mounts.get(path)
+  def getMountAt(path: Path): Option[T] = mounts.get(path)
   
-  def resolvePartition(path: Path): Option[(Path, Partition)] = {
+  def resolveMount(path: Path): Option[(Path, T)] = {
     val list = mounts.keys.toList.sorted
     list.find((a) => path.prefixedBy(a)).map(key => (key, mounts.get(key).get))
   }

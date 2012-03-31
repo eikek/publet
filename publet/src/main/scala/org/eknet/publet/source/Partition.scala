@@ -1,6 +1,7 @@
 package org.eknet.publet.source
 
 import org.eknet.publet.{Path, Content, Named}
+import tools.nsc.io.Directory
 
 
 /**

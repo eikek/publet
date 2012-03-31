@@ -5,6 +5,7 @@ import collection.mutable.ListBuffer
 import java.io.{ByteArrayInputStream, InputStream}
 import io.Source
 import xml.Node
+import java.net.URL
 
 /**
  *
@@ -24,26 +25,44 @@ trait Content {
   def contentAsString = Source.fromInputStream(content).getLines().mkString("\n")
 }
 
-case class FilePage(file: File, contentType: ContentType) extends Content {
+case class FileContent(file: File, contentType: ContentType) extends Content {
   def content = file.inputStream()
 
   def lastModification = Some(file.lastModified)
 }
 
-case class StringPage(str: String, contentType: ContentType) extends Content {
+case class StringContent(str: String, contentType: ContentType) extends Content {
   
   def content = new ByteArrayInputStream(str.getBytes("UTF-8"))
 
   def lastModification = None
 }
 
-case class LinePage(buf: Iterable[String], ct: ContentType) extends StringPage(buf.mkString("\n"), ct)
+case class LinesContent(buf: Iterable[String], ct: ContentType) extends StringContent(buf.mkString("\n"), ct)
+
+case class StreamContent(content: InputStream, contentType: ContentType) extends Content {
+  def lastModification = None
+}
+
+case class UrlContent(url: URL, contentType: ContentType) extends Content {
+  def content = url.openStream()
+
+  def lastModification = None
+}
 
 object Content {
 
-  def apply(file: File, ct: ContentType): Content = new FilePage(file, ct)
+  def apply(file: File, ct: ContentType): Content = new FileContent(file, ct)
   def apply(file: File): Content = Content(file, ContentType(file))
 
-  def apply(lines: Iterable[String], ct: ContentType): Content = new LinePage(lines, ct)
-  def apply(str: String, ct: ContentType):Content = StringPage(str, ct)
+  def apply(lines: Iterable[String], ct: ContentType): Content = new LinesContent(lines, ct)
+  def apply(str: String, ct: ContentType):Content = StringContent(str, ct)
+  
+  def apply(in: InputStream, ct: ContentType): Content = new StreamContent(in, ct)
+  
+  def apply(url: URL): Content = {
+    val ct = Path(url.getFile).targetType.get
+    Content(url, ct)
+  }
+  def apply(url: URL, ct: ContentType): Content = new UrlContent(url, ct)
 }

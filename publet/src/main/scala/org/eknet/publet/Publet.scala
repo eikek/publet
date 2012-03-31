@@ -2,6 +2,7 @@ package org.eknet.publet
 
 import engine._
 import impl.PubletImpl
+import postproc.PostProcessor
 import source.{Partition, MountManager}
 
 /**
@@ -9,7 +10,7 @@ import source.{Partition, MountManager}
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:06
  */
-trait Publet extends MountManager with EngineResolver {
+trait Publet extends MountManager[Partition] with EngineResolver {
 
   /**
    * Processes the source at the given URI and returns
@@ -38,6 +39,8 @@ trait Publet extends MountManager with EngineResolver {
   def process(path: Path, targetType: ContentType): Either[Exception, Option[Content]]
 
 
+  def install(path: Path, proc:PostProcessor)
+  
 }
 
 object Publet {

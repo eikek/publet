@@ -39,8 +39,6 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
 
   def / (p: Path) = Path(segments ++ p.segments, absolute)
 
-  def / (p: String) = Path(segments ++ Path(p).segments, absolute)
-
   def compare(that: Path) = that.size - size
 }
 

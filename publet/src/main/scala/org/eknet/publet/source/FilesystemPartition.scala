@@ -8,17 +8,17 @@ import org.eknet.publet.{Path, Content}
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 23:41
  */
-class FilesystemPartition(root: Directory) extends Partition {
+class FilesystemPartition(root: Directory, val name: Symbol) extends Partition {
   
   Predef.ensuring(root != null, "dir must not be null")
   Predef.ensuring(root.isValid, "Not a directory")
 
   if (!root.exists) root.createDirectory(force = true, failIfExists = true)
-  
+
+  def this(root: Directory) = this(root, 'local)
+
   def this(path: Path) = this(Directory(path.toAbsolute.asString))
   def this(str: String) = this(Path(str))
-
-  def name = 'local
 
   def lookup(path: Path) = {
     val file = relativeFile(path)
