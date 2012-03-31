@@ -30,6 +30,12 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
 
   lazy val fileName = new FileName(segments.last)
 
+  /**
+   * Returns a concatenation of '../' up to the root
+   *
+   */
+  lazy val relativeRoot = ("../" * parent.size)
+
   def prefixedBy(p: Path): Boolean = {
     if (p.size > size) false
     else segments.slice(0, p.size) == p.segments

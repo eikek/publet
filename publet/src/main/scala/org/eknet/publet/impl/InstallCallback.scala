@@ -11,6 +11,6 @@ import org.eknet.publet.Publet
  */
 trait InstallCallback {
 
-  def onInstall(publ: Publet)
+  def onInstall(publ: Publet) {}
 
 }
