@@ -1,6 +1,6 @@
 package org.eknet.publet.source
 
-import org.eknet.publet.{Path, Page, Named}
+import org.eknet.publet.{Path, Content, Named}
 
 
 /**
@@ -16,6 +16,6 @@ trait Partition extends Named {
    * @param path
    * @return
    */
-  def lookup(path: Path): Option[Page]
+  def lookup(path: Path): Option[Content]
 
 }

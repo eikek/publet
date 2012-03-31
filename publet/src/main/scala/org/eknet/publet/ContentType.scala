@@ -18,8 +18,10 @@ object ContentType {
   val pdf = ContentType('pdf, Set("pdf"))
   val markdown = ContentType('markdown, Set("md", "markdown"))
   val xml = ContentType('xml, Set("xml"))
+  val css = ContentType('css, Set("css"))
+  val javascript = ContentType('javascript, Set("js"))
 
-  val all = Seq(text, html, pdf, markdown, xml)
+  val all = Seq(text, html, pdf, markdown, xml, css, javascript)
   
   def apply(f: File): ContentType = apply(f.extension)
   

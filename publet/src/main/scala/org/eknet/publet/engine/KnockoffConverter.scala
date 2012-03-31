@@ -3,7 +3,7 @@ package org.eknet.publet.engine
 import com.tristanhunt.knockoff.DefaultDiscounter._
 import com.tristanhunt.knockoff._
 import io.Source
-import org.eknet.publet.{ContentType, Page}
+import org.eknet.publet.{ContentType, Content}
 
 /**
  *
@@ -12,9 +12,9 @@ import org.eknet.publet.{ContentType, Page}
  */
 object KnockoffConverter extends ConverterEngine#Converter {
 
-  def apply(page: Page) = {
+  def apply(page: Content) = {
     val xhtml = toXHTML( knockoff( page.contentAsString ) )
-    Page(xhtml.toString(), ContentType.html)
+    Content(xhtml.toString(), ContentType.html)
   }
 
 }

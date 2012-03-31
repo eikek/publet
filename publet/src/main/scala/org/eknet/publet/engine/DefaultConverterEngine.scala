@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{ContentType, Page}
+import org.eknet.publet.{ContentType, Content}
 
 
 /**
@@ -8,11 +8,11 @@ import org.eknet.publet.{ContentType, Page}
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 29.03.12 12:46
  */
-class DefaultConverterEngine extends ConverterEngine with ConverterRegistry {
+object DefaultConverterEngine extends PubletEngine with ConverterEngine with ConverterRegistry {
 
   def name = 'convert
 
-  def process(data: Seq[Page], target: ContentType) = {
+  def process(data: Seq[Content], target: ContentType) = {
     process(data.head, target).fold(Left(_), _ match {
       case None => data.tail match {
         case List() => Left(new RuntimeException("no converter found"))
@@ -22,14 +22,14 @@ class DefaultConverterEngine extends ConverterEngine with ConverterRegistry {
     })
   }
   
-  private def process(data: Page, target: ContentType): Either[Exception, Option[Page]] = {
+  private def process(data: Content, target: ContentType): Either[Exception, Option[Content]] = {
     try {
       converterFor(data.contentType, target) match {
         case None => Right(None)
         case Some(c) => Right(Option(c(data)))
       }
     } catch {
-      case e: Exception => Left[Exception, Option[Page]](e)
+      case e: Exception => Left[Exception, Option[Content]](e)
     }
   }
 }

@@ -1,6 +1,7 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.Page
+import org.eknet.publet.{ContentType, Content}
+
 
 /**
  *
@@ -9,12 +10,14 @@ import org.eknet.publet.Page
  */
 trait ConverterEngine extends PubletEngine {
 
-  type Converter = Page => Page
+  type Converter = Content => Content
+
+  def addConverter(s: ContentType, t: ContentType, c: ConverterEngine#Converter)
 
 }
 
 object ConverterEngine {
 
-  def apply(): ConverterEngine = new DefaultConverterEngine
+  def apply(): ConverterEngine = DefaultConverterEngine
 
 }

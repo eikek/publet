@@ -1,6 +1,6 @@
 package org.eknet.publet
 
-import engine.{KnockoffConverter, TextToHtml, PassThrough, DefaultConverterEngine}
+import engine.{KnockoffConverter, PassThrough, DefaultConverterEngine}
 import io.Source
 import org.eknet.publet.source.FilesystemPartition
 
@@ -16,17 +16,16 @@ object PubletTest {
     val publ = Publet()
     publ.mount(Path("/"), new FilesystemPartition("/tmp/publet"))
 
-    val conveng = new DefaultConverterEngine
-    val md2html = (data:Page) => { println("md->html"); data }
-    val html2text = (data:Page) => { println("html->text"); data }
-    val html2pdf = (data:Page) => { println("html->pdf"); data }
-    val pdf2text = (data:Page) => { println("pdf->text"); data }
+    val conveng = DefaultConverterEngine
+    val md2html = (data:Content) => { println("md->html"); data }
+    val html2text = (data:Content) => { println("html->text"); data }
+    val html2pdf = (data:Content) => { println("html->pdf"); data }
+    val pdf2text = (data:Content) => { println("pdf->text"); data }
 
     conveng.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
     conveng.addConverter(ContentType.html, ContentType.text, html2text)
     conveng.addConverter(ContentType.html, ContentType.pdf, html2pdf)
     conveng.addConverter(ContentType.pdf, ContentType.text, pdf2text)
-    conveng.addConverter(ContentType.text, ContentType.html, TextToHtml)
 
     publ.register("/*", conveng)
     publ.register("/pamflet/*", PassThrough)

@@ -1,7 +1,7 @@
 package org.eknet.publet.source
 
 import tools.nsc.io.{File, Directory}
-import org.eknet.publet.{Path, Page}
+import org.eknet.publet.{Path, Content}
 
 /**
  *
@@ -22,7 +22,7 @@ class FilesystemPartition(root: Directory) extends Partition {
 
   def lookup(path: Path) = {
     val file = relativeFile(path)
-    if (file.exists) Option(Page(file)) else None
+    if (file.exists) Option(Content(file)) else None
   }
 
 //  def push(uri: Uri)(data: Page) {

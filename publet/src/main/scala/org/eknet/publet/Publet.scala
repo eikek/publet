@@ -1,8 +1,8 @@
 package org.eknet.publet
 
-import engine.{EngineResolver, PassThrough}
+import engine._
 import impl.PubletImpl
-import source.MountManager
+import source.{Partition, MountManager}
 
 /**
  *
@@ -19,7 +19,7 @@ trait Publet extends MountManager with EngineResolver {
    * @param path
    * @return
    */
-  def process(path: Path): Either[Exception, Option[Page]]
+  def process(path: Path): Either[Exception, Option[Content]]
 
   /**
    * Processes the source at the given URI and retursn
@@ -35,7 +35,7 @@ trait Publet extends MountManager with EngineResolver {
    * @param targetType
    * @return
    */
-  def process(path: Path, targetType: ContentType): Either[Exception, Option[Page]]
+  def process(path: Path, targetType: ContentType): Either[Exception, Option[Content]]
 
 
 }
@@ -46,6 +46,15 @@ object Publet {
     val p = new PubletImpl
     p.addEngine(PassThrough)
     p
+  }
+  
+  def default(path: Path, part: Partition): Publet = {
+    val publ = Publet()
+    val conv = DefaultConverterEngine
+    publ.register("/*", conv)
+    conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
+    publ.mount(path, part)
+    publ
   }
 
 }

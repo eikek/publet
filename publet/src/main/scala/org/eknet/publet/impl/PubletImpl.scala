@@ -16,7 +16,7 @@ protected[publet] class PubletImpl extends RootPartition with Publet with Engine
 
   def process(path: Path, target: ContentType) = process(path.pathsFor(target).head)
 
-  def process(path: Path): Either[Exception, Option[Page]] = {
+  def process(path: Path): Either[Exception, Option[Content]] = {
     Predef.ensuring(path != null, "null is illegal")
 
     //lookup engine for uri pattern
@@ -42,11 +42,11 @@ protected[publet] class PubletImpl extends RootPartition with Publet with Engine
    * @param path
    * @return
    */
-  private def findSourceFor(path: Path): Option[Seq[Page]] = {
+  private def findSourceFor(path: Path): Option[Seq[Content]] = {
     val part = resolvePartition(path).get
     val source = part._2
     val sourcePath = part._1
-    val buffer = new ListBuffer[Page]
+    val buffer = new ListBuffer[Content]
 
     // create a list of uris of all known extensions
     val ft = new FileName(path.strip(sourcePath))
