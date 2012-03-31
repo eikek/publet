@@ -20,19 +20,29 @@ trait EngineResolver {
    */
   def engines: Map[Symbol, PubletEngine] = engineMap.toMap
 
+  /**
+   * Adds the engine without registering a url pattern
+   * @param engine
+   */
   def addEngine(engine: PubletEngine) {
     engineMap.put(engine.name, engine)
   }
 
-  def getEngine(name: Symbol): Option[PubletEngine] = engineMap.get(name)
+  /**
+   * Returns an engine by name.
+   *
+   * @param name
+   * @return
+   */
+  def getEngine(name: Symbol) = engineMap.get(name)
 
-  private def get(k: Glob): Option[PubletEngine] = mountMap.get(k)
-
-  private def sortedKeys = {
-    val longestFirst = (x: Glob, y: Glob) => x.compare(y) > 0
-    mountMap.keys.toList.sortWith(longestFirst)
-  }
-
+  /**
+   * Adds the given engine and registers it to the specified
+   * url pattern.
+   *
+   * @param urlPattern
+   * @param engine
+   */
   def register(urlPattern: String, engine: PubletEngine) {
     val glob = Glob(urlPattern)
     addEngine(engine)
@@ -50,5 +60,13 @@ trait EngineResolver {
     }
     keyget(sortedKeys)
   }
+
+  private def get(k: Glob): Option[PubletEngine] = mountMap.get(k)
+
+  private def sortedKeys = {
+    val longestFirst = (x: Glob, y: Glob) => x.compare(y) > 0
+    mountMap.keys.toList.sortWith(longestFirst)
+  }
+
 
 }

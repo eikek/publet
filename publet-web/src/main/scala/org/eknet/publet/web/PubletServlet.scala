@@ -3,7 +3,6 @@ package org.eknet.publet.web
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import org.eknet.publet.{Content, ContentType, Path, Publet}
 import org.eknet.publet.source.{Partitions, FilesystemPartition}
-import org.eknet.publet.postproc.YamlTemplate
 
 
 /**
@@ -14,7 +13,6 @@ import org.eknet.publet.postproc.YamlTemplate
 class PubletServlet extends HttpServlet {
 
   private val publet = Publet.default(Path.root, new FilesystemPartition("/tmp/publet"))
-  publet.install(Path.root, YamlTemplate)
 
   def action(req: HttpServletRequest, resp: HttpServletResponse) {
     

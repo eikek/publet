@@ -27,7 +27,9 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
   lazy val asString = (if (absolute) "/" else "") + segments.mkString(String.valueOf(Path.sep))
   
   lazy val size = segments.length
-  
+
+  lazy val fileName = new FileName(segments.last)
+
   def prefixedBy(p: Path): Boolean = {
     if (p.size > size) false
     else segments.slice(0, p.size) == p.segments

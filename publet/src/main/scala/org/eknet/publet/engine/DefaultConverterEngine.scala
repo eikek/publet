@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{ContentType, Content}
+import org.eknet.publet.{Path, ContentType, Content}
 
 
 /**
@@ -12,11 +12,11 @@ object DefaultConverterEngine extends PubletEngine with ConverterEngine with Con
 
   def name = 'convert
 
-  def process(data: Seq[Content], target: ContentType) = {
+  def process(path: Path, data: Seq[Content], target: ContentType) = {
     process(data.head, target).fold(Left(_), _ match {
       case None => data.tail match {
         case List() => Left(new RuntimeException("no converter found"))
-        case tail => process(tail, target)
+        case tail => process(path, tail, target)
       }
       case Some(x) => Right(x)
     })

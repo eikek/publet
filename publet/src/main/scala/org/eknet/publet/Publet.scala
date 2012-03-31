@@ -2,7 +2,6 @@ package org.eknet.publet
 
 import engine._
 import impl.PubletImpl
-import postproc.PostProcessor
 import source.{Partition, MountManager}
 
 /**
@@ -38,9 +37,6 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    */
   def process(path: Path, targetType: ContentType): Either[Exception, Option[Content]]
 
-
-  def install(path: Path, proc:PostProcessor)
-  
 }
 
 object Publet {
@@ -54,8 +50,8 @@ object Publet {
   def default(path: Path, part: Partition): Publet = {
     val publ = Publet()
     val conv = DefaultConverterEngine
-    publ.register("/*", conv)
     conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
+    publ.register("/*", new YamlEngine(conv))
     publ.mount(path, part)
     publ
   }

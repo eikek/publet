@@ -9,6 +9,8 @@ class FileName(val path: Path) {
 
   Predef.ensuring(path != null, "null filenames are illegal")
 
+  def this(path: String) = this(Path(path))
+  
   private val extRegex = """\.([a-zA-Z0-9]+)$""".r
 
   /**
@@ -34,6 +36,15 @@ class FileName(val path: Path) {
    */
   lazy val pathsForTarget = pathsFor(targetType.getOrElse(sys.error("Target type cannot be determined: " + path)))
 
+
+  lazy val name = {
+    val ext = extRegex.findFirstIn(path.asString)
+    if (ext.isDefined) {
+      path.segments.last.substring(0, path.segments.last.length() - ext.get.length())
+    } else {
+      path.segments.last
+    }
+  }
 
   /**
    * Returns a new path with the specified extension

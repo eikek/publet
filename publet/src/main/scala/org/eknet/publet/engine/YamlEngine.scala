@@ -1,37 +1,43 @@
-package org.eknet.publet.postproc
+package org.eknet.publet.engine
 
+import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.source.Partitions
-import org.eknet.publet.{ContentType, Path, Publet, Content}
-import xml.XML
-
+import org.eknet.publet._
 
 /**
+ * A "meta" engine that wraps the output of its delegate in a YAML
+ * page.
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 31.03.12 12:26
+ * @since 31.03.12 16:17
  */
-object YamlTemplate extends PostProcessor {
-
-  def process(path: Path, content: Content) = {
-    if (content.contentType == ContentType.html) {
-      val c = content.contentAsString
-      val title = "project"
-      val css = ("../" * path.parent.segments.length) + "yaml/simple-page.css"
-      Content(template(c, title, css), ContentType.html)
-    } else {
-      content
-    }
-  }
+class YamlEngine(engine: PubletEngine) extends PubletEngine with InstallCallback {
   
-  override def onInstall(publ: Publet) {
+  def name = 'yaml
+
+  def onInstall(publ: Publet) {
     publ.mount(Path("/yaml"), Partitions.yamlPartition)
+  }
+
+  def process(path:Path, data: Seq[Content], target: ContentType) = {
+    val content = engine.process(path, data, target)
+    content.fold(a=> content, c => {
+      if (c.contentType == ContentType.html) {
+        val cstr = c.contentAsString
+        val title = path.fileName.name
+        val css = ("../" * path.parent.size) + "yaml/simple-page.css"
+        Right(Content(template(cstr, title, css), ContentType.html))
+      } else {
+        content
+      }
+    })
   }
 
   private def template(content: String, title: String, css: String) = {
     (<html>
       <head>
         <title> { title } </title>
-        <link href={ css } rel="stylesheet" type="text/css"/>
+          <link href={ css } rel="stylesheet" type="text/css"/>
       </head>
       <body>
         <header>
@@ -47,7 +53,7 @@ object YamlTemplate extends PostProcessor {
               <section class="ym-grid linearize-level-1">
                 <article class="ym-g66 ym-gl content">
 
-                   $$$content$$$
+                  $$$content$$$
 
                 </article></section>
             </div>
