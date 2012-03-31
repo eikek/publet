@@ -9,3 +9,14 @@
 
 /* import print layout | Druck-Layout einbinden */
 @import url(print/print.css);
+
+pre {
+    line-height:1.5em;
+    margin: 1.5em 0 0 0;
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 5px;
+    border: black dashed thin;
+}
+pre, code { color:#800; }

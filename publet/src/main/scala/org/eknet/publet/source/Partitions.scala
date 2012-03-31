@@ -16,4 +16,5 @@ object Partitions {
 
   lazy val yamlPartition = classpath(Path("../themes/yaml"))
 
+  lazy val highlightPartition = classpath(Path("../themes/highlight"))
 }

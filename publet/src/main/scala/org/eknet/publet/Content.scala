@@ -2,17 +2,17 @@ package org.eknet.publet
 
 import tools.nsc.io.{File, Streamable}
 import collection.mutable.ListBuffer
-import java.io.{ByteArrayInputStream, InputStream}
 import io.Source
 import xml.Node
 import java.net.URL
+import java.io.{OutputStream, ByteArrayInputStream, InputStream}
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:08
  */
-trait Content {
+abstract class Content {
 
   def contentType: ContentType
 
@@ -20,7 +20,16 @@ trait Content {
   
   def lastModification: Option[Long]
   
-  def contentAsBytes: Array[Byte] = Streamable.bytes(content)
+  //def contentAsBytes: Array[Byte] = Streamable.bytes(content)
+  def copyTo(out: OutputStream) {
+    val buff = new Array[Byte](1024)
+    var len = 0
+    val in = content
+    while (len != -1) {
+      len = in.read(buff)
+      out.write(buff, 0, len)
+    }
+  }
   
   def contentAsString = Source.fromInputStream(content).getLines().mkString("\n")
 }

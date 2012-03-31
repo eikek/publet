@@ -3,6 +3,7 @@ package org.eknet.publet.web
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import org.eknet.publet.{Content, ContentType, Path, Publet}
 import org.eknet.publet.source.{Partitions, FilesystemPartition}
+import java.net.URLDecoder
 
 
 /**
@@ -12,11 +13,10 @@ import org.eknet.publet.source.{Partitions, FilesystemPartition}
  */
 class PubletServlet extends HttpServlet {
 
-  private val publet = Publet.default(Path.root, new FilesystemPartition("/tmp/publet"))
+  private val publet = Publet.default(Path.root, new FilesystemPartition("/home/eike/temp/publet"))
 
   def action(req: HttpServletRequest, resp: HttpServletResponse) {
-    
-    val path = Path(req.getRequestURI).strip
+    val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
     val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
 
     html.fold(writeError(_, path, resp), writePage(_, path, resp))
@@ -31,7 +31,7 @@ class PubletServlet extends HttpServlet {
     val out = resp.getOutputStream
     page match {
       case None => resp.sendError(HttpServletResponse.SC_NOT_FOUND)
-      case Some(p) => out.println(p.contentAsString)
+      case Some(p) => p.copyTo(out)
     }
   }
 
