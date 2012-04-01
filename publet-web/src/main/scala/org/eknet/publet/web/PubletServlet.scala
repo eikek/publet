@@ -5,9 +5,12 @@ import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
 import engine.PassThrough
-import source.{Partitions, FilesystemPartition}
+import source.FilesystemPartition
 import tools.nsc.io.File
-import io.Source
+import scala.collection.JavaConversions._
+import org.apache.commons.fileupload.FileItem
+import org.apache.commons.fileupload.servlet.ServletFileUpload
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
 
 
 /**
@@ -109,7 +112,7 @@ class PubletServlet extends HttpServlet {
         publet.push(path, StringContent(body, ContentType(Symbol(target))))
       }
     }
-    new UploadSupport(req).uploads match {
+    uploads(req) match {
       case List() =>
       case list => {
         val target = path.targetType.get
@@ -127,5 +130,14 @@ class PubletServlet extends HttpServlet {
       }
     }
     publish(path, resp)
+  }
+
+  private def uploads(req: HttpServletRequest): List[FileItem] = {
+    if (req.getContentType.startsWith("multipart")) {
+      val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
+      items.collect({case p:FileItem => p}).filter(!_.isFormField).toList
+    } else {
+      List[FileItem]()
+    }
   }
 }
