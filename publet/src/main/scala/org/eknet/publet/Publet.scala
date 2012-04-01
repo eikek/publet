@@ -69,13 +69,13 @@ object Publet {
 
     val conv = ConverterEngine()
     conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
-    publ.register("/*", new YamlEngine(conv, 'default))
+    publ.register("/*", new YamlEngine('default, conv))
     
-    val editEngine = new HtmlTemplateEngine('editor) with EditTemplate
-    publ.addEngine(new YamlEngine(editEngine, 'edit))
+    val editEngine = new HtmlTemplateEngine('editor, PassThrough) with EditTemplate
+    publ.addEngine(new YamlEngine('edit, editEngine))
 
-    val uploadEngine = new HtmlTemplateEngine('uploader) with UploadTemplate
-    publ.addEngine(new YamlEngine(uploadEngine, 'upload))
+    val uploadEngine = new HtmlTemplateEngine('uploader, PassThrough) with UploadTemplate
+    publ.addEngine(new YamlEngine('upload, uploadEngine))
     publ
   }
 
