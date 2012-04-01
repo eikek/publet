@@ -12,9 +12,9 @@ import java.util.UUID
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 31.03.12 16:17
  */
-class YamlEngine(engine: PubletEngine) extends PubletEngine with YamlTemplate with HighlightTemplate {
+class YamlEngine(engine: PubletEngine, val name: Symbol) extends PubletEngine with YamlTemplate with HighlightTemplate {
 
-  def name = 'yaml
+  def this(engine: PubletEngine) = this(engine, 'yaml)
 
   def process(path:Path, data: Seq[Content], target: ContentType) = {
     val content = engine.process(path, data, target)

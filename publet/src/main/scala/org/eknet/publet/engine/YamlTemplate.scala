@@ -58,11 +58,12 @@ trait YamlTemplate extends HtmlTemplate with InstallCallback {
       <div class="ym-wrapper">
         <div class="ym-wbox">
           <section class="ym-grid linearize-level-1">
-            <article class="ym-gl content">
-            """ +
+
+            """ + // <article class="ym-gl content">
       content.contentAsString +
+      // </article>
       """
-             </article></section>
+           </section>
          </div>
        </div>
      </div>

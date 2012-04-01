@@ -1,6 +1,6 @@
 package org.eknet.publet
 
-import engine.{KnockoffConverter, PassThrough, DefaultConverterEngine}
+import engine.{ConverterEngine, KnockoffConverter, PassThrough, DefaultConverterEngine}
 import io.Source
 import org.eknet.publet.source.FilesystemPartition
 
@@ -16,7 +16,7 @@ object PubletTest {
     val publ = Publet()
     publ.mount(Path("/"), new FilesystemPartition("/tmp/publet"))
 
-    val conveng = DefaultConverterEngine
+    val conveng = ConverterEngine()
     val md2html = (data:Content) => { println("md->html"); data }
     val html2text = (data:Content) => { println("html->text"); data }
     val html2pdf = (data:Content) => { println("html->pdf"); data }

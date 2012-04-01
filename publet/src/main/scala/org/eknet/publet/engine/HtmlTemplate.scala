@@ -26,7 +26,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  protected def title(path: Path, content: Content): String = path.fileName.name
+  protected def title(path: Path, content: Content): String = path.fileName.name.replace("_", " ")
 
   /**
    * Applies a template to the given content. Title and header data are obtained

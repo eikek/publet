@@ -8,11 +8,11 @@ import org.eknet.publet.{Path, ContentType, Content}
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 29.03.12 12:46
  */
-object DefaultConverterEngine extends PubletEngine with ConverterEngine with ConverterRegistry {
+class DefaultConverterEngine(val name: Symbol) extends PubletEngine with ConverterEngine with ConverterRegistry {
 
-  def name = 'convert
+  def this() = this('convert)
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = {
+  def process(path: Path, data: Seq[Content], target: ContentType): Either[Exception, Content] = {
     process(data.head, target).fold(Left(_), _ match {
       case None => data.tail match {
         case List() => Left(new RuntimeException("no converter found"))

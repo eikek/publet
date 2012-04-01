@@ -5,7 +5,7 @@ import collection.mutable.ListBuffer
 import io.Source
 import xml.Node
 import java.net.URL
-import java.io.{OutputStream, ByteArrayInputStream, InputStream}
+import java.io.{FileOutputStream, OutputStream, ByteArrayInputStream, InputStream}
 
 /**
  *
@@ -17,7 +17,14 @@ abstract class Content {
   def contentType: ContentType
 
   def content: InputStream
-  
+
+  /**
+   * If this is writeable, return the output stream to write to.
+   *
+   * @return
+   */
+  def output: Option[OutputStream]
+
   def lastModification: Option[Long]
   
   //def contentAsBytes: Array[Byte] = Streamable.bytes(content)
@@ -29,6 +36,8 @@ abstract class Content {
       len = in.read(buff)
       out.write(buff, 0, len)
     }
+    out.flush();
+    out.close();
   }
   
   def contentAsString = Source.fromInputStream(content).getLines().mkString("\n")
@@ -38,6 +47,8 @@ case class FileContent(file: File, contentType: ContentType) extends Content {
   def content = file.inputStream()
 
   def lastModification = Some(file.lastModified)
+
+  def output = Some(file.outputStream())
 }
 
 case class StringContent(str: String, contentType: ContentType) extends Content {
@@ -45,18 +56,24 @@ case class StringContent(str: String, contentType: ContentType) extends Content 
   def content = new ByteArrayInputStream(str.getBytes("UTF-8"))
 
   def lastModification = None
+
+  def output = None
 }
 
 case class LinesContent(buf: Iterable[String], ct: ContentType) extends StringContent(buf.mkString("\n"), ct)
 
 case class StreamContent(content: InputStream, contentType: ContentType) extends Content {
   def lastModification = None
+
+  def output = None
 }
 
 case class UrlContent(url: URL, contentType: ContentType) extends Content {
   def content = url.openStream()
 
   def lastModification = None
+
+  def output = Some(url.openConnection().getOutputStream)
 }
 
 object Content {

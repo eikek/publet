@@ -37,6 +37,20 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    */
   def process(path: Path, targetType: ContentType): Either[Exception, Option[Content]]
 
+  def process(path: Path, targetType: ContentType, engine: PubletEngine): Either[Exception, Option[Content]]
+
+  /**
+   * Copies the given content to the content at the specified path.
+   *
+   * If no content exists at the given path, `false` is returned. On
+   * successful write `true` is returned.
+   *
+   * @param path
+   * @param content
+   * @return
+   */
+  def push(path: Path, content: Content): Either[Exception, Boolean]
+
 }
 
 object Publet {
@@ -49,10 +63,15 @@ object Publet {
   
   def default(path: Path, part: Partition): Publet = {
     val publ = Publet()
-    val conv = DefaultConverterEngine
-    conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
-    publ.register("/*", new YamlEngine(conv))
     publ.mount(path, part)
+
+    val conv = ConverterEngine()
+    conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
+    publ.register("/*", new YamlEngine(conv, 'default))
+    
+    val editEngine = new HtmlTemplateEngine('editor) with EditTemplate
+    publ.addEngine(new YamlEngine(editEngine, 'edit))
+
     publ
   }
 

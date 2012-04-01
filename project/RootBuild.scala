@@ -15,8 +15,7 @@ object RootBuild extends Build {
   ) aggregate (WebBuild.web, PubletBuild.publet)
  
   val buildSettings = Project.defaultSettings ++ Seq(
-    name := "publet-root",
-    libraryDependencies ++= commonDeps
+    name := "publet-root"
   )
 
   override lazy val settings = super.settings ++ Seq(
@@ -25,15 +24,12 @@ object RootBuild extends Build {
     sbtPlugin := true,
     resolvers := Seq(Resolvers.eknet)
   )
-
-  val commonDeps = Seq(
-    "org.slf4j" % "slf4j-api" % "1.6.4"
-  )
 }
 
 object Dependencies {
 
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1"
   val servletApi = "javax.servlet" % "servlet-api" % "2.5"
   val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16"
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"

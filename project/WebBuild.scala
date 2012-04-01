@@ -15,5 +15,5 @@ object WebBuild extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
-  val deps = Seq(servletApi)
+  val deps = Seq(servletApi, slf4jApi, logbackClassic)
 }

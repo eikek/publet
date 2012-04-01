@@ -18,6 +18,6 @@ trait ConverterEngine extends PubletEngine {
 
 object ConverterEngine {
 
-  def apply(): ConverterEngine = DefaultConverterEngine
+  def apply(): DefaultConverterEngine = new DefaultConverterEngine
 
 }

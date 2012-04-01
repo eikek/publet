@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import BundlePlugin._
+import Dependencies._
 
 object PubletBuild extends Build {
 
@@ -10,5 +11,5 @@ object PubletBuild extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
   
-  lazy val deps = Seq(Dependencies.knockoff)
+  lazy val deps = Seq(knockoff, slf4jApi)
 }

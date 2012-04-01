@@ -28,7 +28,13 @@
 
     /* Layout Module Configuration */
     #main .ym-wrapper {
-        max-width: 60em;
+        max-width: 62em;
         margin: 0 auto;
+    }
+
+    .ym-form textarea {
+        height: 500px;
+        font-size: large;
+        font-family: monospace;
     }
 }
