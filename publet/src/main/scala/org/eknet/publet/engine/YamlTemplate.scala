@@ -51,6 +51,7 @@ trait YamlTemplate extends HtmlTemplate with InstallCallback {
       <div class="ym-wrapper">
         <div class="ym-wbox">
           <h1> """ + pageTitle + """ </h1>
+          <a href="?edit" style="display:inline; float:right" class="ym-clearfix">Edit</a>
         </div>
       </div>
     </header>

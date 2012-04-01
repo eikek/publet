@@ -4,8 +4,10 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
+import engine.PassThrough
 import source.{Partitions, FilesystemPartition}
 import tools.nsc.io.File
+import io.Source
 
 
 /**
@@ -22,8 +24,12 @@ class PubletServlet extends HttpServlet {
   }
   
   def edit(path: Path, resp: HttpServletResponse) {
-    val html = publet.process(path, ContentType.markdown, publet.getEngine('edit).get)
-    html.fold(writeError(_, path, resp), writePage(_, path, resp))
+    if (path.targetType.get.mime._1 == "text") {
+      val html = publet.process(path, ContentType.markdown, publet.getEngine('edit).get)
+      html.fold(writeError(_, path, resp), writePage(_, path, resp))
+    } else {
+      createNew(path, resp)
+    }
   }
 
   def writeError(ex: Exception, path: Path, resp: HttpServletResponse) {
@@ -34,15 +40,28 @@ class PubletServlet extends HttpServlet {
   def writePage(page: Option[Content], path: Path, resp: HttpServletResponse) {
     val out = resp.getOutputStream
     page match {
-      case None => publet.create(path, ContentType.markdown) match {
-        case Left(x) => writeError(x, path, resp)
-        case Right(x) => edit(path, resp)
-      }
+      case None => createNew(path, resp)
       case Some(p) => p.copyTo(out)
     }
   }
 
-
+  def createNew(path: Path, resp: HttpServletResponse) {
+    val out = resp.getOutputStream
+    val targetType = path.targetType.get
+    if (targetType.mime._1 == "text") {
+      publet.getEngine('edit).get.process(path, Seq(StringContent("", ContentType.markdown)), ContentType.markdown) match {
+        case Left(x) => writeError(x, path, resp)
+        case Right(x) => x.copyTo(out)
+      }
+    } else {
+      publet.getEngine('upload).get.process(path, Seq(StringContent("", targetType)), targetType) match {
+        case Left(x) => writeError(x, path, resp)
+        case Right(x) => x.copyTo(out)
+      }
+    } 
+  }
+  
+  
   protected def publet = getServletContext.getAttribute("publet") match {
     case null => sys.error("publet servlet not initialized")
     case p: Publet => p
@@ -63,10 +82,14 @@ class PubletServlet extends HttpServlet {
       log.info("Initialize publet root to: "+ np)
       app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(np)))
     }
+    publet.register("/index.html", PassThrough)
   }
 
-  def publetPath(req: HttpServletRequest) =  Path(URLDecoder
-    .decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
+  def publetPath(req: HttpServletRequest) = {
+    val p = Path(URLDecoder
+      .decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
+    if (p.isRoot) (p / Path("index.html")) else p
+  }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
     val path = publetPath(req)
@@ -81,7 +104,26 @@ class PubletServlet extends HttpServlet {
     Option(req.getParameter("page")) match {
       case None =>
       case Some(body) => {
-        publet.push(path, StringContent(body, ContentType.markdown))
+        val target = Option(req.getParameter("type")).getOrElse("markdown")
+        log.debug("Create {} file", target)
+        publet.push(path, StringContent(body, ContentType(Symbol(target))))
+      }
+    }
+    new UploadSupport(req).uploads match {
+      case List() =>
+      case list => {
+        val target = path.targetType.get
+        list.foreach(fi => {
+          log.debug("Create {} file", target)
+          publet.push(path, StreamContent(fi.getInputStream, target))
+        })
+      }
+    }
+
+    Option(req.getParameter("file")) match {
+      case None =>
+      case Some(data) => {
+
       }
     }
     publish(path, resp)

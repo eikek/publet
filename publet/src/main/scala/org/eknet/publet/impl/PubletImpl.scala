@@ -37,7 +37,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
 
   def push(path: Path, content: Content): Either[Exception, Boolean] = {
     findSources(path) match {
-      case None => Right(false)
+      case None => create(path, content.contentType); push(path, content)
       case Some(c) => c.head.output match {
         case None => Left(sys.error("not writeable"))
         case Some(out) => try {

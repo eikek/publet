@@ -37,6 +37,7 @@ trait HtmlTemplate {
    * @return
    */
   def applyTemplate(path: Path, content: Content): Content
- 
+
+  def actionString(path: Path): String = path.segments.last
   
 }

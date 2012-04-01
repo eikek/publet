@@ -42,7 +42,7 @@ trait Publet extends MountManager[Partition] with EngineResolver {
   /**
    * Copies the given content to the content at the specified path.
    *
-   * If no content exists at the given path, `false` is returned. On
+   * If no content exists at the given path it is created. On
    * successful write `true` is returned.
    *
    * @param path
@@ -74,6 +74,8 @@ object Publet {
     val editEngine = new HtmlTemplateEngine('editor) with EditTemplate
     publ.addEngine(new YamlEngine(editEngine, 'edit))
 
+    val uploadEngine = new HtmlTemplateEngine('uploader) with UploadTemplate
+    publ.addEngine(new YamlEngine(uploadEngine, 'upload))
     publ
   }
 

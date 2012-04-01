@@ -29,7 +29,8 @@ class FilesystemPartition(root: Directory, val name: Symbol) extends Partition {
     val file: File = (Path(root) / path).withExtension(target.extensions.head)
     if (file.exists) Left(new RuntimeException("File already exists"))
     else {
-      file.parent.createDirectory(force = true, failIfExists = true)
+      if(!file.parent.exists)
+        file.parent.createDirectory(force = true, failIfExists = true)
       file.touch(); 
       Right(FileContent(file, ContentType.html)) 
     }
