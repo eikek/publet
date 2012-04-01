@@ -18,19 +18,18 @@ class PubletServlet extends HttpServlet {
   
   private val publet = Publet.default(Path.root, new FilesystemPartition("/home/eike/temp/publet"))
 
-  def publish(req: HttpServletRequest, resp: HttpServletResponse) {
-    val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
+  def publish(path: Path, resp: HttpServletResponse) {
     val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
     html.fold(writeError(_, path, resp), writePage(_, path, resp))
   }
   
-  def edit(req: HttpServletRequest, resp: HttpServletResponse) {
-    val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
+  def edit(path: Path, resp: HttpServletResponse) {
     val html = publet.process(path, ContentType.markdown, publet.getEngine('edit).get)
     html.fold(writeError(_, path, resp), writePage(_, path, resp))
   }
 
   def writeError(ex: Exception, path: Path, resp: HttpServletResponse) {
+    log.error("Error!", ex)
     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
 //    resp.getOutputStream.println("<h3>PATH: "+ path.asString+ "</h3>")
   }
@@ -38,26 +37,30 @@ class PubletServlet extends HttpServlet {
   def writePage(page: Option[Content], path: Path, resp: HttpServletResponse) {
     val out = resp.getOutputStream
     page match {
-      case None => resp.sendError(HttpServletResponse.SC_NOT_FOUND)
+      case None => publet.create(path, ContentType.markdown) match {
+        case Left(x) => writeError(x, path, resp)
+        case Right(x) => edit(path, resp)
+      }
       case Some(p) => p.copyTo(out)
     }
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
+    val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
     Option(req.getParameter("edit")) match {
-      case None => publish(req, resp)
-      case Some(_) => edit(req, resp)
+      case None => publish(path, resp)
+      case Some(_) => edit(path, resp)
     }
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) {
+    val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
     Option(req.getParameter("page")) match {
       case None =>
       case Some(body) => {
-        val path = Path(URLDecoder.decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
         publet.push(path, StringContent(body, ContentType.markdown))
       }
     }
-    publish(req, resp)
+    publish(path, resp)
   }
 }

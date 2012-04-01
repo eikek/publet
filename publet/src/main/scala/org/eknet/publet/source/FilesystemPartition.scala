@@ -1,7 +1,7 @@
 package org.eknet.publet.source
 
 import tools.nsc.io.{File, Directory}
-import org.eknet.publet.{Path, Content}
+import org.eknet.publet.{ContentType, FileContent, Path, Content}
 
 /**
  *
@@ -25,12 +25,15 @@ class FilesystemPartition(root: Directory, val name: Symbol) extends Partition {
     if (file.exists) Option(Content(file)) else None
   }
 
-//  def push(uri: Uri)(data: Page) {
-//    val file = relativeFile(uri)
-//    if (!file.exists) file.parent.createDirectory(force = true, failIfExists = true)
-//    val path: Path = Paths.get(file.toURI)
-//    JFiles.copy(data.content, path, StandardCopyOption.REPLACE_EXISTING)
-//  }
+  def create(path: Path, target: ContentType) = {
+    val file: File = (Path(root) / path).withExtension(target.extensions.head)
+    if (file.exists) Left(new RuntimeException("File already exists"))
+    else {
+      file.parent.createDirectory(force = true, failIfExists = true)
+      file.touch(); 
+      Right(FileContent(file, ContentType.html)) 
+    }
+  }
 
   private def relativeFile(path: Path):File = (Path(root) / path)
 }

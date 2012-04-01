@@ -15,6 +15,9 @@ trait  EditTemplate extends HtmlTemplate {
 
   private def template(path: Path, content: Content): String = {
     """
+    <h3>Edit Page</h3>
+    <p>If you'd like to write markdown syntax, <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
+    is the syntax definition.</p>
     <form action="""" + actionString(path) + """" method="post" class="ym-form linearize-form ym-full" >
       <div class="ym-fbox-text">
         <textarea name="page">

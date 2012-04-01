@@ -1,7 +1,7 @@
 package org.eknet.publet.source
 
-import org.eknet.publet.{Path, Content, Named}
 import tools.nsc.io.Directory
+import org.eknet.publet.{ContentType, Path, Content, Named}
 
 
 /**
@@ -19,4 +19,11 @@ trait Partition extends Named {
    */
   def lookup(path: Path): Option[Content]
 
+  /**
+   * Creates a new resource at the specified path.
+   *
+   * @param path
+   * @return
+   */
+  def create(path: Path, target: ContentType): Either[Exception, Content]
 }

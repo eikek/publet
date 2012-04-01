@@ -41,4 +41,9 @@ class RootPartition extends Partition with MountManager[Partition] {
     urilist.foreach (source.lookup(_).flatten( buffer.+= ))
     if (buffer.isEmpty) None else Some(buffer.toSeq)
   }
+
+  def create(path: Path, target: ContentType) = resolveMount(path) match {
+    case None => Left(new RuntimeException("no partition mounted for path: "+ path))
+    case Some(part) => part._2.create(path.strip(part._1), target)
+  }
 }

@@ -76,7 +76,7 @@ trait YamlTemplate extends HtmlTemplate with InstallCallback {
      </footer>
 
      <!-- full skip link functionality in webkit browsers -->
-     <script src="""" +  base + "core/js/yaml-focusfix.js" + """"></script>
+     <script src="""" + base + "yaml/core/js/yaml-focusfix.js" + """"></script>
   </body>
 </html>
     """

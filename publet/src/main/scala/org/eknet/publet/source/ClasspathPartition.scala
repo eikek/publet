@@ -1,7 +1,7 @@
 package org.eknet.publet.source
 
 import org.eknet.publet.Content._
-import org.eknet.publet.{Content, Path}
+import org.eknet.publet.{ContentType, Content, Path}
 
 /**
  *
@@ -20,5 +20,7 @@ class ClasspathPartition(root: Path, val name: Symbol) extends Partition {
     else
       Some(Content(url))
   }
+
+  def create(path: Path, target: ContentType) = Left(new RuntimeException("Cannot create resources in classpath"))
 
 }

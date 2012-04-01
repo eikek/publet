@@ -51,6 +51,8 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    */
   def push(path: Path, content: Content): Either[Exception, Boolean]
 
+  def create(path: Path, contentType: ContentType): Either[Exception, Content]
+
 }
 
 object Publet {
