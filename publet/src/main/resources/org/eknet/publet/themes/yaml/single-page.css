@@ -16,19 +16,19 @@
         /*border: black dashed thin;*/
     /*}*/
 
-    #main {
+/*    #main {
         background: #aaadae;
-    }
+    } */
     #main .ym-wrapper {
         background: #fff;
     }
     body {
-        background: #eee;
+        background: #fff;
     }
 
     /* Layout Module Configuration */
     #main .ym-wrapper {
-        max-width: 62em;
+        max-width: 70em;
         margin: 0 auto;
     }
 
