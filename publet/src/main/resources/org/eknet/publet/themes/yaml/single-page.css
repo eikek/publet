@@ -12,13 +12,13 @@
 
 @media screen {
     /*pre {*/
-        /*padding: 5px;*/
-        /*border: black dashed thin;*/
+    /*padding: 5px;*/
+    /*border: black dashed thin;*/
     /*}*/
 
-/*    #main {
-        background: #aaadae;
-    } */
+    /*    #main {
+       background: #aaadae;
+   } */
     #main .ym-wrapper {
         background: #fff;
     }
@@ -28,13 +28,26 @@
 
     /* Layout Module Configuration */
     #main .ym-wrapper {
-        max-width: 70em;
+        max-width: 50em;
         margin: 0 auto;
+        font-size: 105%;
+        font-family: "Warnock Pro", "Goudy Old Style", "Book Antiqua", Georgia, serif;
+        color: #222;
     }
 
     .ym-form textarea {
         height: 500px;
-        font-size: large;
         font-family: monospace;
+    }
+}
+
+@media all {
+    pre, code {
+        color: #000;
+        font-family: "Lucida Console", monospace;
+        font-size: 100%;
+    }
+    pre {
+        border-left: dotted thin #aaaaaa;
     }
 }

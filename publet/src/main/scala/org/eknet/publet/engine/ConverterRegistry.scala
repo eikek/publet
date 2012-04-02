@@ -12,8 +12,8 @@ import mutable.ListBuffer
 trait ConverterRegistry {
   private val graph = new Graph
 
-  def addConverter(s: ContentType, t: ContentType, c: ConverterEngine#Converter) {
-    graph.add(s, t, c)
+  def addConverter(mapping: (ContentType, ContentType), c: ConverterEngine#Converter) {
+    graph.add(mapping, c)
   }
 
   protected[engine] def converterFor(source: ContentType, target: ContentType): Option[ConverterEngine#Converter] = {
@@ -29,11 +29,11 @@ trait ConverterRegistry {
     private val converters = mutable.Map[(ContentType, ContentType), Converter]()
     private val nodes = mutable.Map[ContentType, List[ContentType]]()
 
-    def add(s: ContentType, t: ContentType, c: Converter) {
-      converters.put((s, t), c)
-      val list = nodes.get(s).getOrElse(List())
-      nodes.put(s, t :: list)
-      nodes.put(t, List())
+    def add(mapping: (ContentType, ContentType), c: Converter) {
+      converters.put(mapping, c)
+      val list = nodes.get(mapping._1).getOrElse(List())
+      nodes.put(mapping._1, mapping._2 :: list)
+      nodes.put(mapping._2, List())
     }
 
     def converterChain(s: ContentType, e: ContentType): Option[Converter] = {

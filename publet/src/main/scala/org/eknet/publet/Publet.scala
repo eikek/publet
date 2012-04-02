@@ -1,6 +1,7 @@
 package org.eknet.publet
 
 import engine._
+import ContentType._
 import impl.PubletImpl
 import source.{Partition, MountManager}
 
@@ -68,7 +69,7 @@ object Publet {
     publ.mount(path, part)
 
     val conv = ConverterEngine()
-    conv.addConverter(ContentType.markdown, ContentType.html, KnockoffConverter)
+    conv.addConverter(markdown -> html, KnockoffConverter)
     publ.register("/*", new YamlEngine('default, conv))
     
     val editEngine = new HtmlTemplateEngine('editor, PassThrough) with EditTemplate

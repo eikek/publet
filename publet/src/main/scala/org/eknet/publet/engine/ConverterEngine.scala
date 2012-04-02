@@ -12,7 +12,7 @@ trait ConverterEngine extends PubletEngine {
 
   type Converter = Content => Content
 
-  def addConverter(s: ContentType, t: ContentType, c: ConverterEngine#Converter)
+  def addConverter(mapping: (ContentType, ContentType), c: ConverterEngine#Converter)
 
 }
 
