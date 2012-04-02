@@ -58,7 +58,13 @@ case class StringContent(str: String, contentType: ContentType) extends Content 
   def output = None
 }
 
-case class LinesContent(buf: Iterable[String], ct: ContentType) extends StringContent(buf.mkString("\n"), ct)
+case class LinesContent(buf: Iterable[String], contentType: ContentType) extends Content {
+  def content = new ByteArrayInputStream(buf.mkString("\n").getBytes("UTF-8"))
+
+  def output = None
+
+  def lastModification = None
+}
 
 case class StreamContent(content: InputStream, contentType: ContentType) extends Content {
   def lastModification = None

@@ -10,7 +10,7 @@ import org.eknet.publet.{Path, Content, ContentType}
  * This is only applied if the delegating engine returns a content
  * of type 'html. Others are passed through as is. This is required
  * to be able to serve css and js contents properly.
- * 
+ *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 31.03.12 16:17
  */

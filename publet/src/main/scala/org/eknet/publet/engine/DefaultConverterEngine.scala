@@ -15,7 +15,7 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
   def process(path: Path, data: Seq[Content], target: ContentType): Either[Exception, Content] = {
     process(data.head, target).fold(Left(_), _ match {
       case None => data.tail match {
-        case List() => Left(new RuntimeException("no converter found"))
+        case Nil => Left(new RuntimeException("no converter found"))
         case tail => process(path, tail, target)
       }
       case Some(x) => Right(x)
