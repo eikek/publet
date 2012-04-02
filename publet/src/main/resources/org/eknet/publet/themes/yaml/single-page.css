@@ -38,6 +38,9 @@
     .ym-form textarea {
         height: 500px;
         font-family: monospace;
+        line-height: 1.2;
+        font-size: medium;
+        font-style: oblique
     }
 }
 
