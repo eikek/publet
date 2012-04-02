@@ -1,6 +1,6 @@
 package org.eknet.publet
 
-import tools.nsc.io.File
+import java.io.File
 
 /**
  *
@@ -24,7 +24,9 @@ object ContentType {
 
   val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif)
   
-  def apply(f: File): ContentType = apply(f.extension)
+  def apply(f: File): ContentType = apply(extension(f))
+  
+  private def extension(f: File): String = Path(f).extension.get
   
   def apply(ext: String): ContentType = {
     all.find(_.extensions.contains(ext.toLowerCase))

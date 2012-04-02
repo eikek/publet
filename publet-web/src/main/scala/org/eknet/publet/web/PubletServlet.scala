@@ -4,13 +4,12 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
-import engine.PassThrough
 import source.FilesystemPartition
-import tools.nsc.io.File
 import scala.collection.JavaConversions._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import java.io.File
 
 
 /**

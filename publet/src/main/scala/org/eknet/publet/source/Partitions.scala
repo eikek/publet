@@ -1,7 +1,7 @@
 package org.eknet.publet.source
 
-import tools.nsc.io.Directory
 import org.eknet.publet.Path
+import java.io.File
 
 /**
  *
@@ -10,7 +10,7 @@ import org.eknet.publet.Path
  */
 object Partitions {
 
-  def directory(root: Directory) = new FilesystemPartition(root)
+  def directory(root: File) = new FilesystemPartition(root)
 
   def classpath(root: Path) = new ClasspathPartition(root)
 

@@ -1,8 +1,7 @@
 package org.eknet.publet
 
-import tools.nsc.io.{Directory, File}
 import collection.immutable.List
-
+import java.io.File
 
 /**
  *
@@ -69,11 +68,7 @@ object Path {
   
   def apply(f: File): Path = Path(f.toURI.getPath)
   
-  def apply(d: Directory): Path = Path(d.toURI.getPath)
-  
-  implicit def toFile(p: Path): File = File(p.asString)
-
-  implicit def toDirectory(p: Path): Directory = Directory(p.asString)
+  implicit def toFile(p: Path): File = new File(p.asString)
 
   implicit def pathToFilename(p: Path): FileName = new FileName(p)
 

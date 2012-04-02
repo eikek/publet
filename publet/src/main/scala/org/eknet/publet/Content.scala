@@ -1,11 +1,9 @@
 package org.eknet.publet
 
-import tools.nsc.io.{File, Streamable}
-import collection.mutable.ListBuffer
 import io.Source
-import xml.Node
 import java.net.URL
-import java.io.{FileOutputStream, OutputStream, ByteArrayInputStream, InputStream}
+import java.io._
+
 
 /**
  *
@@ -44,11 +42,11 @@ abstract class Content {
 }
 
 case class FileContent(file: File, contentType: ContentType) extends Content {
-  def content = file.inputStream()
+  def content = new FileInputStream(file);
 
   def lastModification = Some(file.lastModified)
 
-  def output = Some(file.outputStream())
+  def output = Some(new FileOutputStream(file))
 }
 
 case class StringContent(str: String, contentType: ContentType) extends Content {
