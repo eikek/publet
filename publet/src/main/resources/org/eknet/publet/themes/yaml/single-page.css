@@ -50,4 +50,16 @@
     pre {
         border-left: dotted thin #aaaaaa;
     }
+    pre .label {
+        font-family: inherit;
+        padding: 0;
+        line-height: inherit;
+        font-size: inherit;
+        color: inherit;
+        background: inherit;
+        white-space: inherit;
+        letter-spacing: inherit;
+        vertical-align: inherit;
+        display: inline;
+    }
 }
