@@ -4,7 +4,7 @@ import org.eknet.publet.impl.Conversions._
 import collection.mutable.ListBuffer
 import org.eknet.publet._
 import engine.{PubletEngine, EngineResolver}
-import resource.{ContentResource, RootPartition}
+import resource.{ContainerResource, ContentResource, RootPartition}
 
 /**
  *
@@ -88,6 +88,15 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
 
   def create(path: Path, contentType: ContentType) = createContent(path.withExtension(contentType.extensions.head))
 
+  def children(path: Path) = {
+    lookup(path) match {
+      case None => List()
+      case Some(r) => r match {
+        case cr: ContainerResource => cr.children
+        case _ => List()
+      }
+    }
+  }
 }
 
 

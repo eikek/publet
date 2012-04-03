@@ -26,21 +26,40 @@ trait Partition {
    */
   def children: Iterable[_ <: Resource]
 
+  /** Returns whether the given path maps to an existing
+   * resource.
+   *
+   * @param path
+   * @return
+   */
   def hasEntry(path: Path): Boolean = lookup(path).isDefined
 
+  /** Creates a new content resource at the specified path.
+   * The resource must not exist.
+   *
+   * @param path
+   * @return
+   */
   def createContent(path: Path): ContentResource
 
+  /** Creates a new container resource at the specified path.
+   * The resource must not exist.
+   *
+   * @param path
+   * @return
+   */
   def createContainer(path: Path): ContainerResource
 
 }
 
 object Partition {
 
-  def directory(root: File) = new FilesystemPartition(root, 'local)
+  def directory(root: File): FilesystemPartition = directory(root, 'local)
+  def directory(root: File, id: Symbol) = new FilesystemPartition(root, id)
 
-  def classpath(root: Path, clazz: Class[_]) = new ClasspathPartition('classpath, clazz, root)
+  def classpath(root: Path, clazz: Class[_]): ClasspathPartition = classpath(root, clazz, 'classpath)
+  def classpath(root: Path, clazz: Class[_], id: Symbol) = new ClasspathPartition(id, clazz, root)
 
   lazy val yamlPartition = classpath(Path("../themes/yaml"), classOf[Partition])
-
   lazy val highlightPartition = classpath(Path("../themes/highlight"), classOf[Partition])
 }
