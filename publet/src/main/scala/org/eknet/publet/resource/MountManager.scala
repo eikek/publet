@@ -39,7 +39,7 @@ class MountManager[T] {
     list.find(a => path.prefixedBy(a)).map(key => key -> mounts.get(key).get)
   }
   
-  def pathEndsInMountpoint(p: Path): Boolean = tree.contains(p.segments.last)
-  
-  def nextSegments(path: Path): List[String] = tree.get(path.segments.last).getOrElse(List())
+  protected[publet] def pathEndsInMountpoint(p: Path): Boolean = tree.contains(p.segments.last)
+
+  protected[publet] def nextSegments(path: Path): List[String] = tree.get(path.segments.last).getOrElse(List())
 }

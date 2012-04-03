@@ -3,7 +3,7 @@ package org.eknet.publet
 import engine._
 import ContentType._
 import impl.PubletImpl
-import resource.{Partition, MountManager}
+import resource._
 
 /**
  *
@@ -52,7 +52,18 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    */
   def push(path: Path, content: Content): Either[Exception, Boolean]
 
-  def create(path: Path, contentType: ContentType): Either[Exception, Content]
+  /**
+   * Returns the children of this partition.
+   *
+   * @return
+   */
+  def children: Iterable[_ <: Resource]
+
+  def hasEntry(path: Path): Boolean
+
+  def createContent(path: Path): ContentResource
+
+  def createContainer(path: Path): ContainerResource
 
 }
 

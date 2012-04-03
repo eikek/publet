@@ -22,5 +22,5 @@ class FileResource(f: File, root: Path) extends AbstractLocalResource(f, root) w
 
   def contentType = ContentType(f)
 
-  override def toString = f.toString
+  override def toString = "File["+ f.toString +"]"
 }

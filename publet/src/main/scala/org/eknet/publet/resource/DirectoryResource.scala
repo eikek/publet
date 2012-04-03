@@ -29,4 +29,6 @@ class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir
   def create() {
     dir.mkdir()
   }
+
+  override def toString = "Directory["+ dir.toString +"]"
 }

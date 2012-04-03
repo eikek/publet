@@ -47,6 +47,8 @@ trait ContentResource extends Resource {
     out.flush();
   }
 
+  val isContainer = false
+
   def toContent: Content = new Content {
     def contentType = self.contentType
 

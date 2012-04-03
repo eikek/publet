@@ -1,8 +1,6 @@
 package org.eknet.publet.resource
 
 import org.eknet.publet.{ContentType, Path}
-import java.awt.image.renderable.ContextualRenderedImageFactory
-import java.io.{FileOutputStream, OutputStream}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -23,11 +21,16 @@ class RootPartition extends MountManager[Partition] with Partition {
     }
   }
 
-  def children = mountedPaths.map(p => new PathResource(this, Path("/"+ p.segments.head)))
+  def children = rootMountChildren ++ mountedPaths.filter(!_.isRoot).map(p => new PathResource(this, Path("/"+ p.segments.head)))
 
-  def createContent(path: Path) = null
+  def createContent(path: Path) = resolveMount(path).get._2.createContent(path)
 
-  def createContainer(path: Path) = null
+  def createContainer(path: Path) = resolveMount(path).get._2.createContainer(path)
+  
+  def rootMountChildren = resolveMount(Path.root) match {
+    case Some(p) => p._2.children
+    case None => List()
+  }
 }
 
 object RootPartition {
@@ -77,6 +80,9 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
       case _ => sys.error("unreachable code path")
     }
   }
+
+  override def toString = "Virtual["+path+"]"
+  
 }
 
 private class RootResource(rp: RootPartition) extends PathResource(rp, Path.root) {

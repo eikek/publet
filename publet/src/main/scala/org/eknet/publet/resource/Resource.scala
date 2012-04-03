@@ -19,6 +19,8 @@ trait Resource {
 
   def path: Path
 
+  def isContainer: Boolean
+
   /**
    * Returns the parent container. For the
    * root this is invalid.

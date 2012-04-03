@@ -49,5 +49,6 @@ class UrlResource(val url: URL) extends ContentResource {
   }
 
   def contentType = ContentType(path)
-  
+
+  override def toString = "Url["+url+"]"
 }

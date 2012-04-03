@@ -84,7 +84,6 @@ class PubletServlet extends HttpServlet {
       log.info("Initialize publet root to: "+ np)
       app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(np, 'publetroot)))
     }
-//    publet.register("/index.html", PassThrough)
   }
 
   def publetPath(req: HttpServletRequest) = {

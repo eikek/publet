@@ -27,4 +27,5 @@ trait ContainerResource extends Resource {
    */
   def child(name: String): Option[Resource]
 
+  val isContainer = true
 }

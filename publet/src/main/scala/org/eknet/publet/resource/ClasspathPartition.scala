@@ -19,4 +19,6 @@ class ClasspathPartition(val id: Symbol, clazz: Class[_], root: Path) extends Pa
   def createContent(path: Path) = sys.error("Cannot create contents on class path partitions")
 
   def createContainer(path: Path) = sys.error("Cannot create contents on class path partitions")
+
+  override def toString = clazz +"/"+ root
 }
