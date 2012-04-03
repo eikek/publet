@@ -3,7 +3,7 @@ package org.eknet.publet.engine
 import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.{Publet, Content, Path}
 import java.util.UUID
-import org.eknet.publet.source.Partitions
+import org.eknet.publet.resource.Partition
 
 /**
  *
@@ -16,7 +16,7 @@ trait HighlightTemplate extends InstallCallback with HtmlTemplate {
 
   override def onInstall(publ: Publet) {
     super.onInstall(publ)
-    publ.mount(Path("/"+randomRoot+"/highlight"), Partitions.highlightPartition)
+    publ.mount(Path("/"+randomRoot+"/highlight"), Partition.highlightPartition)
   }
 
   override def headerContent(path: Path, content: Content) = {

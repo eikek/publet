@@ -46,6 +46,8 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
 
   def / (p: Path) = Path(segments ++ p.segments, absolute)
 
+  def / (s: String) = child(s)
+
   def compare(that: Path) = that.size - size
 }
 
@@ -71,5 +73,7 @@ object Path {
   implicit def toFile(p: Path): File = new File(p.asString)
 
   implicit def pathToFilename(p: Path): FileName = new FileName(p)
+
+  implicit def fileToPath(f: File): Path = Path(f.toURI.getPath)
 
 }

@@ -4,7 +4,7 @@ import org.eknet.publet.impl.Conversions._
 import collection.mutable.ListBuffer
 import org.eknet.publet._
 import engine.{PubletEngine, EngineResolver}
-import source.RootPartition
+import resource.{ContentResource, RootPartition}
 
 /**
  *
@@ -57,6 +57,37 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
     }
     super.addEngine(engine)
   }
+
+  /**
+   * Finds resources that matches the name of the specified uri
+   * but not necessarily the file extension.
+   * <p>
+   * For example, finds a `title.md` if a `title.html` is requested,
+   * while `title.html` will be the first one on the Seq if it exists.
+   * </p>
+   *
+   * @param path
+   * @return
+   */
+  def findSources(path: Path): Option[Seq[Content]] = {
+    Predef.ensuring(path != null, "null is illegal")
+    val part = resolveMount(path).getOrElse(sys.error("No partition mounted for path: "+ path))
+    val source = part._2
+    val sourcePath = part._1
+    val buffer = new ListBuffer[Content]
+
+    // create a list of uris of all known extensions
+    val ft = new FileName(path.strip(sourcePath))
+    val urilist = ft.pathsForTarget.toSeq ++
+      ContentType.all.filter(_ != ft.targetType).flatMap( _.extensions.map(ft.withExtension(_)) )
+    //lookup all uris and returns list of results
+    urilist.map(source.lookup).filter(o => o.isDefined && o.get.isInstanceOf[ContentResource])
+      .map(or => or.get.asInstanceOf[ContentResource].toContent).flatten(buffer.+=)
+    if (buffer.isEmpty) None else Some(buffer.toSeq)
+  }
+
+  def create(path: Path, contentType: ContentType) = createContent(path.withExtension(contentType.extensions.head))
+
 }
 
 

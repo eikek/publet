@@ -3,7 +3,7 @@ package org.eknet.publet
 import engine._
 import ContentType._
 import impl.PubletImpl
-import source.{Partition, MountManager}
+import resource.{Partition, MountManager}
 
 /**
  *

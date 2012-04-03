@@ -11,6 +11,7 @@ case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String,
 
 object ContentType {
 
+  val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
   val text = ContentType('text, Set("txt", "text"), ("text", "plain"))
   val html = ContentType('html, Set("html", "htm"), ("text", "html"))
   val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))

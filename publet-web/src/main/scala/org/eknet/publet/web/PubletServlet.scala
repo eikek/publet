@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
-import source.FilesystemPartition
+import resource.FilesystemPartition
 import scala.collection.JavaConversions._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -78,11 +78,11 @@ class PubletServlet extends HttpServlet {
     val app = getServletContext
     if (publetRoot.startsWith(File.separator)) {
       log.info("Initialize publet root to: "+ publetRoot)
-      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(publetRoot)))
+      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(publetRoot, 'publetroot)))
     } else {
       val np = new java.io.File(".").getAbsolutePath+ File.separator+ publetRoot
       log.info("Initialize publet root to: "+ np)
-      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(np)))
+      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(np, 'publetroot)))
     }
 //    publet.register("/index.html", PassThrough)
   }

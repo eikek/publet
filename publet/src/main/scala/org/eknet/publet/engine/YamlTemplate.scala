@@ -3,8 +3,7 @@ package org.eknet.publet.engine
 import java.util.UUID
 import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.{Publet, ContentType, Content, Path}
-import org.eknet.publet.source.Partitions
-
+import org.eknet.publet.resource.Partition
 
 /**
  *
@@ -17,7 +16,7 @@ trait YamlTemplate extends HtmlTemplate with InstallCallback {
 
   override def onInstall(publ: Publet) {
     super.onInstall(publ)
-    publ.mount(Path("/"+randPath+"/yaml"), Partitions.yamlPartition)
+    publ.mount(Path("/"+randPath+"/yaml"), Partition.yamlPartition)
   }
 
   override def headerContent(path: Path, content: Content) = {

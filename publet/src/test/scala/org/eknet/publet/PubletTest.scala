@@ -3,7 +3,7 @@ package org.eknet.publet
 import engine._
 import org.eknet.publet.ContentType._
 import io.Source
-import org.eknet.publet.source.FilesystemPartition
+import resource.FilesystemPartition
 
 
 /**
@@ -15,7 +15,7 @@ object PubletTest {
 
   def main(args: Array[String]) {
     val publ = Publet()
-    publ.mount(Path("/"), new FilesystemPartition("/tmp/publet"))
+    publ.mount(Path("/"), new FilesystemPartition("/tmp/publet", 'localtest))
 
     val conveng = ConverterEngine()
     val md2html = (data:Content) => { println("md->html"); data }
