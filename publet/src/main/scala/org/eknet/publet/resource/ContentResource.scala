@@ -1,8 +1,6 @@
 package org.eknet.publet.resource
 
 import java.io.{OutputStream, InputStream}
-import org.eknet.publet.{Content, ContentType}
-
 
 /** A resource that has some content associated. It is always
  * readable and optional writeable.
@@ -24,29 +22,18 @@ trait ContentResource extends Resource {
   def contentType: ContentType
 
   def copyTo(out: OutputStream) {
-    copy(inputStream, out)
+    Content.copy(inputStream, out)
   }
 
   def writeFrom(in: InputStream) {
     if (!isWriteable) sys.error("Resource '"+path+"' not writeable")
     else {
       val out = outputStream.get
-      copy(in, out)
+      Content.copy(in, out)
       out.close()
     }
   }
   
-  private def copy(in: InputStream, out: OutputStream) {
-    val buff = new Array[Byte](1024)
-    var len = 0
-    val in = inputStream
-    while (len != -1) {
-      len = in.read(buff)
-      out.write(buff, 0, len)
-    }
-    out.flush();
-  }
-
   val isContainer = false
 
   def toContent: Content = new Content {

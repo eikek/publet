@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
 import java.net.URL
-import org.eknet.publet.{ContentType, Path}
+import org.eknet.publet.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

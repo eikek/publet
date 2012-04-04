@@ -1,10 +1,9 @@
 package org.eknet.publet
 
 import engine._
-import org.eknet.publet.ContentType._
 import io.Source
-import resource.FilesystemPartition
-
+import resource.{ContentType, Content, FilesystemPartition}
+import ContentType._
 
 /**
  *

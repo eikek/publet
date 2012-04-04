@@ -1,6 +1,7 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{ContentType, Content, Path}
+import org.eknet.publet.resource.{ContentType, Content}
+import org.eknet.publet.Path
 
 /**
  *

@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
-import resource.FilesystemPartition
+import resource.{ContentType, Content, FilesystemPartition}
 import scala.collection.JavaConversions._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -51,12 +51,12 @@ class PubletServlet extends HttpServlet {
     val out = resp.getOutputStream
     val targetType = path.targetType.get
     if (targetType.mime._1 == "text") {
-      publet.getEngine('edit).get.process(path, Seq(StringContent("", ContentType.markdown)), ContentType.markdown) match {
+      publet.getEngine('edit).get.process(path, Seq(Content("", ContentType.markdown)), ContentType.markdown) match {
         case Left(x) => writeError(x, path, resp)
         case Right(x) => x.copyTo(out)
       }
     } else {
-      publet.getEngine('upload).get.process(path, Seq(StringContent("", targetType)), targetType) match {
+      publet.getEngine('upload).get.process(path, Seq(Content("", targetType)), targetType) match {
         case Left(x) => writeError(x, path, resp)
         case Right(x) => x.copyTo(out)
       }
@@ -107,7 +107,7 @@ class PubletServlet extends HttpServlet {
       case Some(body) => {
         val target = Option(req.getParameter("type")).getOrElse("markdown")
         log.debug("Create {} file", target)
-        publet.push(path, StringContent(body, ContentType(Symbol(target))))
+        publet.push(path, Content(body, ContentType(Symbol(target))))
       }
     }
     uploads(req) match {
@@ -116,7 +116,7 @@ class PubletServlet extends HttpServlet {
         val target = path.targetType.get
         list.foreach(fi => {
           log.debug("Create {} file", target)
-          publet.push(path, StreamContent(fi.getInputStream, target))
+          publet.push(path, Content(fi.getInputStream, target))
         })
       }
     }

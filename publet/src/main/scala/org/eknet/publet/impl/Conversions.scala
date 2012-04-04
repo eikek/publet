@@ -1,6 +1,6 @@
 package org.eknet.publet.impl
 
-import org.eknet.publet.Content
+import org.eknet.publet.resource.Content
 
 /**
  *

@@ -4,7 +4,7 @@ import org.eknet.publet.impl.Conversions._
 import collection.mutable.ListBuffer
 import org.eknet.publet._
 import engine.{PubletEngine, EngineResolver}
-import resource.{ContainerResource, ContentResource, RootPartition}
+import resource._
 
 /**
  *
@@ -29,24 +29,22 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
   def process(path: Path, target: ContentType, engine: PubletEngine): Either[Exception, Option[Content]] = {
     // lookup the source
     findSources(path) match {
-      case None => Right(None)
+      case Nil => Right(None)
       //lookup the engine according to the uri scheme and process data
-      case Some(data) => engine.process(path, data, target)
+      case data => engine.process(path, data.map(_.toContent), target)
     }
   }
 
   def push(path: Path, content: Content): Either[Exception, Boolean] = {
     findSources(path) match {
-      case None => create(path, content.contentType); push(path, content)
-      case Some(c) => c.head.output match {
-        case None => Left(sys.error("not writeable"))
-        case Some(out) => try {
-          content.copyTo(out)
+      case Nil => create(path, content.contentType); push(path, content)
+      case c => {
+        if (c.head.isWriteable) {
+          c.head.writeFrom(content.content)
           Right(true)
-        } catch {
-          case e: Exception => Left(e)
         }
-      }
+        else Left(new RuntimeException("Resource not writeable"))
+      } 
     }
   }
 
@@ -69,21 +67,19 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
    * @param path
    * @return
    */
-  def findSources(path: Path): Option[Seq[Content]] = {
+  def findSources(path: Path): Seq[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
     val part = resolveMount(path).getOrElse(sys.error("No partition mounted for path: "+ path))
     val source = part._2
     val sourcePath = part._1
-    val buffer = new ListBuffer[Content]
 
     // create a list of uris of all known extensions
     val ft = new FileName(path.strip(sourcePath))
-    val urilist = ft.pathsForTarget.toSeq ++
+    val urilist = ft.pathsForTarget ++
       ContentType.all.filter(_ != ft.targetType).flatMap( _.extensions.map(ft.withExtension(_)) )
     //lookup all uris and returns list of results
     urilist.map(source.lookup).filter(o => o.isDefined && o.get.isInstanceOf[ContentResource])
-      .map(or => or.get.asInstanceOf[ContentResource].toContent).flatten(buffer.+=)
-    if (buffer.isEmpty) None else Some(buffer.toSeq)
+      .map(or => or.get.asInstanceOf[ContentResource]).toSeq
   }
 
   def create(path: Path, contentType: ContentType) = createContent(path.withExtension(contentType.extensions.head))

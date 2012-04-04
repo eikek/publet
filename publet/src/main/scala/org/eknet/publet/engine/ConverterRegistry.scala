@@ -1,6 +1,6 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.{Content, ContentType}
+import org.eknet.publet.resource.{ContentType, Content}
 import collection._
 import mutable.ListBuffer
 

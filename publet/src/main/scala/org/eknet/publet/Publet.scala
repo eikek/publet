@@ -1,9 +1,9 @@
 package org.eknet.publet
 
 import engine._
+import resource._
 import ContentType._
 import impl.PubletImpl
-import resource._
 
 /**
  *

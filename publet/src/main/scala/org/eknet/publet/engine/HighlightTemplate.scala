@@ -1,9 +1,9 @@
 package org.eknet.publet.engine
 
 import org.eknet.publet.impl.InstallCallback
-import org.eknet.publet.{Publet, Content, Path}
+import org.eknet.publet.resource.{Content, Partition}
 import java.util.UUID
-import org.eknet.publet.resource.Partition
+import org.eknet.publet.{Path, Publet}
 
 /**
  *

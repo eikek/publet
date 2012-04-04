@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
 import java.io.{FileOutputStream, FileInputStream, File}
-import org.eknet.publet.{ContentType, Path}
+import org.eknet.publet.Path
 
 /**
  *

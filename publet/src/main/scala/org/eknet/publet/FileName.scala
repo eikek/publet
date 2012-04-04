@@ -1,5 +1,7 @@
 package org.eknet.publet
 
+import resource.ContentType
+
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>

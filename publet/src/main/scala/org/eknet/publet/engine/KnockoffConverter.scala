@@ -1,7 +1,7 @@
 package org.eknet.publet.engine
 
 import com.tristanhunt.knockoff.DefaultDiscounter._
-import org.eknet.publet.{ContentType, Content}
+import org.eknet.publet.resource.{ContentType, Content}
 
 /**
  * Uses the knockoff library to transform markdown markup to html.

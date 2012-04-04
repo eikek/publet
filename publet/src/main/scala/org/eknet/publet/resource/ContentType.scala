@@ -1,6 +1,8 @@
-package org.eknet.publet
+package org.eknet.publet.resource
 
 import java.io.File
+import org.eknet.publet.Path.apply
+import org.eknet.publet.Path
 
 /**
  *
@@ -24,26 +26,26 @@ object ContentType {
   val gif = ContentType('gif, Set("gif"), ("image", "gif"))
 
   val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif)
-  
+
   def apply(f: File): ContentType = apply(extension(f))
-  
+
   private def extension(f: File): String = Path(f).extension.get
-  
+
   def apply(ext: String): ContentType = {
     all.find(_.extensions.contains(ext.toLowerCase))
-      .orElse(sys.error("unknown type: "+ ext)).get
+      .orElse(sys.error("unknown type: " + ext)).get
   }
 
   def apply(name: Symbol): ContentType = {
     all.find(_.typeName == name)
-      .orElse(sys.error("Unknown type: "+ name)).get
+      .orElse(sys.error("Unknown type: " + name)).get
   }
-  
+
   def apply(mime: (String, String)): ContentType = {
     all.find(_.mime == mime)
-      .orElse(sys.error("Unknown mime type: "+ mime)).get
+      .orElse(sys.error("Unknown mime type: " + mime)).get
   }
-  
+
   def forMimeBase(t: ContentType): Seq[ContentType] = all.filter(_.mime._1 == t.mime._1)
-  
+
 }
