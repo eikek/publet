@@ -35,7 +35,7 @@ object PubletTest {
       case Left(x) => throw x
       case Right(x) => x match {
         case None => println("Not found: " + path)
-        case Some(data) => println(data.contentType); Source.createBufferedSource(data.content).getLines().foreach(println)
+        case Some(data) => println(data.contentType); Source.createBufferedSource(data.inputStream).getLines().foreach(println)
       }
     }
   }

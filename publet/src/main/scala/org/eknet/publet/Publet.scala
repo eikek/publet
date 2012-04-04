@@ -2,7 +2,6 @@ package org.eknet.publet
 
 import engine._
 import resource._
-import ContentType._
 import impl.PubletImpl
 
 /**
@@ -68,20 +67,4 @@ object Publet {
     p
   }
   
-  def default(path: Path, part: Partition): Publet = {
-    val publ = Publet()
-    publ.mount(path, part)
-
-    val conv = ConverterEngine()
-    conv.addConverter(markdown -> html, KnockoffConverter)
-    publ.register("/*", new YamlEngine('default, conv))
-    
-    val editEngine = new HtmlTemplateEngine('editor, PassThrough) with EditTemplate
-    publ.addEngine(new YamlEngine('edit, editEngine))
-
-    val uploadEngine = new HtmlTemplateEngine('uploader, PassThrough) with UploadTemplate
-    publ.addEngine(new YamlEngine('upload, uploadEngine))
-    publ
-  }
-
 }

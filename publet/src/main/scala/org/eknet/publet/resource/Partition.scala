@@ -60,6 +60,4 @@ object Partition {
   def classpath(root: Path, clazz: Class[_]): ClasspathPartition = classpath(root, clazz, 'classpath)
   def classpath(root: Path, clazz: Class[_], id: Symbol) = new ClasspathPartition(id, clazz, root)
 
-  lazy val yamlPartition = classpath(Path("../themes/yaml"), classOf[Partition])
-  lazy val highlightPartition = classpath(Path("../themes/highlight"), classOf[Partition])
 }

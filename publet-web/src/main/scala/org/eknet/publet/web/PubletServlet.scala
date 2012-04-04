@@ -11,7 +11,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import java.io.File
 
-
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -56,10 +55,14 @@ class PubletServlet extends HttpServlet {
         case Right(x) => x.copyTo(out)
       }
     } else {
-      publet.getEngine('upload).get.process(path, Seq(Content("", targetType)), targetType) match {
-        case Left(x) => writeError(x, path, resp)
-        case Right(x) => x.copyTo(out)
-      }
+      val uploadContent = UploadContent.uploadContent(path)
+      publet.resolveEngine(path).get.process(path, Seq(uploadContent), ContentType.html)
+      .fold(writeError(_, path, resp), c => writePage(Some(c), path, resp))
+      
+//      publet.getEngine('upload).get.process(path, Seq(Content("", targetType)), targetType) match {
+//        case Left(x) => writeError(x, path, resp)
+//        case Right(x) => x.copyTo(out)
+//      }
     } 
   }
   
@@ -76,14 +79,16 @@ class PubletServlet extends HttpServlet {
       .getOrElse(sys.error("No publet root specified!"))
 
     val app = getServletContext
+    val publet = PubletFactory.createPublet()
     if (publetRoot.startsWith(File.separator)) {
       log.info("Initialize publet root to: "+ publetRoot)
-      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(publetRoot, 'publetroot)))
+      publet.mount(Path.root, new FilesystemPartition(publetRoot, 'publetroot))
     } else {
       val np = new java.io.File(".").getAbsolutePath+ File.separator+ publetRoot
       log.info("Initialize publet root to: "+ np)
-      app.setAttribute("publet", Publet.default(Path.root, new FilesystemPartition(np, 'publetroot)))
+      publet.mount(Path.root, new FilesystemPartition(np, 'publetroot))
     }
+    app.setAttribute("publet", publet)
   }
 
   def publetPath(req: HttpServletRequest) = {

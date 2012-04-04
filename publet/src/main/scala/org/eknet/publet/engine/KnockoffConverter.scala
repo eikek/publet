@@ -1,7 +1,7 @@
 package org.eknet.publet.engine
 
 import com.tristanhunt.knockoff.DefaultDiscounter._
-import org.eknet.publet.resource.{ContentType, Content}
+import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 
 /**
  * Uses the knockoff library to transform markdown markup to html.
@@ -13,7 +13,7 @@ object KnockoffConverter extends ConverterEngine#Converter {
 
   def apply(page: Content) = {
     val xhtml = toXHTML( knockoff( page.contentAsString ) )
-    Content(xhtml.toString(), ContentType.html)
+    NodeContent(xhtml, ContentType.html)
   }
 
 }

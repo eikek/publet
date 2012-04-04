@@ -8,41 +8,19 @@ import java.io.{OutputStream, InputStream}
  * @author Eike Kettner eike@eknet.org
  * @since 01.04.12 14:00
  */
-trait ContentResource extends Resource {
+trait ContentResource extends Resource with Content {
   self =>
 
   override val isRoot = false
-
-  def inputStream: InputStream
 
   def outputStream: Option[OutputStream]
 
   def length: Option[Long]
 
-  def contentType: ContentType
-
-  def copyTo(out: OutputStream) {
-    Content.copy(inputStream, out)
-  }
-
   def writeFrom(in: InputStream) {
-    if (!isWriteable) sys.error("Resource '"+path+"' not writeable")
-    else {
-      val out = outputStream.get
-      Content.copy(in, out)
-      out.close()
-    }
+    Content.copy(in, outputStream.get, closeIn = false)
   }
   
   val isContainer = false
 
-  def toContent: Content = new Content {
-    def contentType = self.contentType
-
-    def output = self.outputStream
-
-    def lastModification = self.lastModification
-
-    def content = self.inputStream
-  }
 }

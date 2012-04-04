@@ -1,7 +1,6 @@
 package org.eknet.publet.impl
 
 import org.eknet.publet.impl.Conversions._
-import collection.mutable.ListBuffer
 import org.eknet.publet._
 import engine.{PubletEngine, EngineResolver}
 import resource._
@@ -31,7 +30,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
     findSources(path) match {
       case Nil => Right(None)
       //lookup the engine according to the uri scheme and process data
-      case data => engine.process(path, data.map(_.toContent), target)
+      case data => engine.process(path, data, target)
     }
   }
 
@@ -40,7 +39,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
       case Nil => create(path, content.contentType); push(path, content)
       case c => {
         if (c.head.isWriteable) {
-          c.head.writeFrom(content.content)
+          c.head.writeFrom(content.inputStream)
           Right(true)
         }
         else Left(new RuntimeException("Resource not writeable"))
