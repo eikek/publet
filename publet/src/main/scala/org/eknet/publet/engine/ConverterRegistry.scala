@@ -68,7 +68,7 @@ trait ConverterRegistry {
         path.prepend(z)
       }
       //create tuples that define the converter
-      path zip  path.tail match {
+      path zip path.tail match {
         case ListBuffer() => None
         //create function by composing all converters
         case tuples => Some( tuples.foldLeft(idconv)((c, t) => c.andThen(converters.get(t).get)) )

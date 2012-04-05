@@ -15,27 +15,29 @@ class FilesystemPartition(val root: File, val id: Symbol) extends Partition {
   def this(root: String, id: Symbol) = this(new File(root), id)
 
   def lookup(path: Path) = {
-    val r = resourceFrom(new File(root, path.segments.mkString(File.separator)))
-    if (r.exists) Some(r) else None
+    val f = new File(root, path.segments.mkString(File.separator))
+    if (f.exists()) Some(resourceFrom(f))
+    else None
   }
 
   def children = root.listFiles().map(resourceFrom)
 
-  def createContent(path: Path) = {
-    val r = fileFrom(path)
-    if (r.exists) sys.error("Resource already exists")
-    r.create(); r
-  }
+  def newContainer(path: Path) = directoryFrom(path)
 
-  def createContainer(path: Path) = {
-    val r = directoryFrom(path)
-    if (r.exists) sys.error("Resource already exists")
-    r.create(); r
-  }
-  
-  private def resourceFrom(f: File) = if (f.isDirectory)
-    new DirectoryResource(f, root) else
-    new FileResource(f, root)
+  def newContent(path: Path) = fileFrom(path)
+
+  def content(name: String) = new FileResource(new File(root, name), root)
+
+  def container(name: String) = new DirectoryResource(new File(root, name), root)
+
+  def child(name: String) = resourceFrom(new File(root, name))
+
+  def hasEntry(name: String) = new File(root, name).exists()
+
+  private def resourceFrom(f: File) = if (!f.exists()) sys.error("File does not exist.")
+    else if (f.isDirectory)
+      new DirectoryResource(f, root) else
+      new FileResource(f, root)
   
   private def fileFrom(p: Path) = new FileResource(
     new File(root, p.segments.mkString(File.separator)), root)

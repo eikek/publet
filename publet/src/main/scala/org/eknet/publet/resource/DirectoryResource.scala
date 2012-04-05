@@ -21,14 +21,16 @@ class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir
 
   def child(name: String) = {
     val f = new File(dir, name)
-    if (!f.exists) None
-    else Some(if (f.isDirectory) new DirectoryResource(f, root)
-              else new FileResource(f, root))
+    if (!f.exists) sys.error("Child does not exist")
+    else if (f.isDirectory) new DirectoryResource(f, root)
+         else new FileResource(f, root)
   }
 
   def create() {
     dir.mkdir()
   }
+
+  def hasEntry(name: String) = new File(dir, name).exists()
 
   override def toString = "Directory["+ dir.toString +"]"
 }

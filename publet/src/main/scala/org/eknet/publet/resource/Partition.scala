@@ -7,7 +7,7 @@ import org.eknet.publet.Path
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.04.12 23:43
  */
-trait Partition {
+trait Partition extends Container {
 
   def id: Symbol
 
@@ -19,37 +19,8 @@ trait Partition {
    */
   def lookup(path: Path): Option[Resource]
 
-  /**
-   * Returns the children of this partition.
-   *
-   * @return
-   */
-  def children: Iterable[_ <: Resource]
-
-  /** Returns whether the given path maps to an existing
-   * resource.
-   *
-   * @param path
-   * @return
-   */
-  def hasEntry(path: Path): Boolean = lookup(path).isDefined
-
-  /** Creates a new content resource at the specified path.
-   * The resource must not exist.
-   *
-   * @param path
-   * @return
-   */
-  def createContent(path: Path): ContentResource
-
-  /** Creates a new container resource at the specified path.
-   * The resource must not exist.
-   *
-   * @param path
-   * @return
-   */
-  def createContainer(path: Path): ContainerResource
-
+  def newContainer(path: Path): ContainerResource
+  def newContent(path: Path): ContentResource
 }
 
 object Partition {

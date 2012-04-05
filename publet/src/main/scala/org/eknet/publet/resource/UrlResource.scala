@@ -7,15 +7,15 @@ import org.eknet.publet.Path
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 23:14
  */
-class UrlResource(val url: URL) extends ContentResource {
+class UrlResource(val url: Option[URL]) extends ContentResource {
   
   Predef.ensuring(url != null, "url must not be null")
   
-  def path = Path(url.getPath)
+  def path = Path(url.get.getPath)
 
   def parent = None
 
-  def lastModification = url.openConnection().getLastModified match {
+  def lastModification = url.get.openConnection().getLastModified match {
     case 0 => None
     case x => Some(x)
   }
@@ -23,13 +23,17 @@ class UrlResource(val url: URL) extends ContentResource {
   def name = path.segments.last
 
   def isWriteable = try {
-    url.openConnection().getOutputStream
-    true
+    if (url.isDefined) {
+      url.get.openConnection().getOutputStream
+      true
+    } else {
+      false
+    }
   } catch {
     case _ => false
   }
 
-  def exists = true
+  def exists = url.isDefined
 
   def delete() {
     sys.error("deleting url not supported")
@@ -39,11 +43,11 @@ class UrlResource(val url: URL) extends ContentResource {
     sys.error("Creating url not supported")
   }
 
-  def inputStream = url.openStream()
+  def inputStream = url.get.openStream()
 
-  def outputStream = Some(url.openConnection().getOutputStream)
+  def outputStream = Some(url.get.openConnection().getOutputStream)
   
-  def length = url.openConnection().getContentLengthLong match {
+  def length = url.get.openConnection().getContentLengthLong match {
     case -1 => None
     case x => Some(x)
   }

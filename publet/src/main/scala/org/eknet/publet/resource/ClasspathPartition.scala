@@ -11,14 +11,22 @@ class ClasspathPartition(val id: Symbol, clazz: Class[_], root: Path) extends Pa
 
   def lookup(path: Path) = Option(clazz.getResource((root / path).asString)) match {
     case None => None
-    case Some(u) => Some(new UrlResource(u))
+    case Some(u) => Some(new UrlResource(Some(u)))
   }
 
   def children = List()
 
-  def createContent(path: Path) = sys.error("Cannot create contents on class path partitions")
+  def content(name: String) = new UrlResource(Option(clazz.getResource((root/name).asString)))
 
-  def createContainer(path: Path) = sys.error("Cannot create contents on class path partitions")
+  def container(name: String) = null
+
+  def child(name: String) = lookup(root/name).get
+
+  def hasEntry(name: String) = clazz.getResource((root/name).asString) != null
+
+  def newContainer(path: Path) = sys.error("Classpath partitions does not support containers.")
+
+  def newContent(path: Path) = new UrlResource(Option(clazz.getResource((root/path).asString)))
 
   override def toString = clazz +"/"+ root
 }

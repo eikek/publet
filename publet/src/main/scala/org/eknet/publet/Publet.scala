@@ -9,7 +9,7 @@ import impl.PubletImpl
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:06
  */
-trait Publet extends MountManager[Partition] with EngineResolver with Partition {
+trait Publet extends MountManager[Partition] with EngineResolver {
 
   /** Processes the source at the given URI and returns
    * the transformed result. If the source is not available

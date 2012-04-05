@@ -81,7 +81,12 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
       .map(or => or.get.asInstanceOf[ContentResource]).toSeq
   }
 
-  def create(path: Path, contentType: ContentType) = createContent(path.withExtension(contentType.extensions.head))
+  def create(path: Path, contentType: ContentType) = {
+    val t = resolveMount(path).getOrElse(sys.error("No partition mounted for path: "+ path))
+    val p = path.strip(t._1)
+    t._2.newContent(p.withExtension(contentType.extensions.head)).createWithParents()
+    //content(path.withExtension(contentType.extensions.head).segments.last).create()
+  }
 
   def children(path: Path) = {
     lookup(path) match {

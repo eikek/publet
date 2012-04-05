@@ -68,9 +68,20 @@ trait Resource {
    */
   def delete()
 
-  /**
-   * Creates this resource, if it does not exist,
+  /** Creates this resource, if it does not exist,
+   *
+   * The parent container must exist.
    *
    */
   def create()
+
+  /** Creates this resource and all parents
+   * if they don't exist.
+   */
+  def createWithParents() {
+    if (parent.isDefined && !parent.get.exists) 
+      parent.get.createWithParents()
+
+    create()
+  }
 }

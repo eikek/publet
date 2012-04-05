@@ -58,22 +58,18 @@ class PubletServlet extends HttpServlet {
       val uploadContent = UploadContent.uploadContent(path)
       publet.resolveEngine(path).get.process(path, Seq(uploadContent), ContentType.html)
       .fold(writeError(_, path, resp), c => writePage(Some(c), path, resp))
-      
-//      publet.getEngine('upload).get.process(path, Seq(Content("", targetType)), targetType) match {
-//        case Left(x) => writeError(x, path, resp)
-//        case Right(x) => x.copyTo(out)
-//      }
-    } 
+    }
   }
   
   
   protected def publet = getServletContext.getAttribute("publet") match {
-    case null => sys.error("publet servlet not initialized")
+    case null => createPublet
     case p: Publet => p
     case _ => sys.error("wrong attribute type")
   }
 
-  override def init() {
+  override def init() { createPublet }
+  def createPublet = {
     val config = getServletConfig
     val publetRoot = Option(config.getInitParameter("publetRoot"))
       .getOrElse(sys.error("No publet root specified!"))
@@ -89,6 +85,7 @@ class PubletServlet extends HttpServlet {
       publet.mount(Path.root, new FilesystemPartition(np, 'publetroot))
     }
     app.setAttribute("publet", publet)
+    publet
   }
 
   def publetPath(req: HttpServletRequest) = {
@@ -115,23 +112,10 @@ class PubletServlet extends HttpServlet {
         publet.push(path, Content(body, ContentType(Symbol(target))))
       }
     }
-    uploads(req) match {
-      case List() =>
-      case list => {
-        val target = path.targetType.get
-        list.foreach(fi => {
-          log.debug("Create {} file", target)
-          publet.push(path, Content(fi.getInputStream, target))
-        })
-      }
-    }
-
-    Option(req.getParameter("file")) match {
-      case None =>
-      case Some(data) => {
-
-      }
-    }
+    uploads(req).foreach(fi => {
+      log.debug("Create {} file", path.targetType.get)
+      publet.push(path, Content(fi.getInputStream, path.targetType.get))
+    })
     publish(path, resp)
   }
 

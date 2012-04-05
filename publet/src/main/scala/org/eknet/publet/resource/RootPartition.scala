@@ -7,7 +7,7 @@ import org.eknet.publet.Path
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 21:02
  */
-class RootPartition extends MountManager[Partition] with Partition {
+class RootPartition extends MountManager[Partition] {
   
   def id = RootPartition.id
   
@@ -24,10 +24,6 @@ class RootPartition extends MountManager[Partition] with Partition {
 
   def children = rootMountChildren ++ mountedPaths.filter(!_.isRoot).map(p => new PathResource(this, Path("/"+ p.segments.head)))
 
-  def createContent(path: Path) = resolveMount(path).get._2.createContent(path)
-
-  def createContainer(path: Path) = resolveMount(path).get._2.createContainer(path)
-  
   def rootMountChildren = resolveMount(Path.root) match {
     case Some(p) => p._2.children
     case None => List()
@@ -41,7 +37,7 @@ object RootPartition {
 
 private class PathResource(rp: RootPartition, val path: Path) extends ContainerResource {
 
-  def child(name: String) = rp.lookup(path / name)
+  def child(name: String) = rp.lookup(path / name).get
 
   def parent = if (path.isRoot) None else Some(new PathResource(rp, path.parent))
 
@@ -65,9 +61,9 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
 
   def children = rp.nextSegments(path).map(s => new PathResource(rp, path.child(s)))
 
-  def content(name: String) = childResource(name, _.createContent(path / name))
+  def content(name: String) = childResource(name, _.content(name))
 
-  def container(name: String) = childResource(name, _.createContainer(path / name))
+  def container(name: String) = childResource(name, _.container(name))
   
   private def childResource[T <: Resource: Manifest](name: String, createResource: Partition=>T): T = {
     rp.lookup(path / name) match {
@@ -81,6 +77,8 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
       case _ => sys.error("unreachable code path")
     }
   }
+
+  def hasEntry(name: String) = rp.nextSegments(path).contains(name)
 
   override def toString = "Virtual["+path+"]"
   
