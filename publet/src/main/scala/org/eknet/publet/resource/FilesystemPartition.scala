@@ -7,8 +7,10 @@ import org.eknet.publet.Path
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 22:53
  */
-class FilesystemPartition(val root: File, val id: Symbol) extends Partition {
+class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true) extends Partition {
   
+  if (!root.exists()) root.mkdirs()
+
   Predef.ensuring(root.exists(), "root directory must exist")
   Predef.ensuring(root.isDirectory, "root must be a directory")
   
