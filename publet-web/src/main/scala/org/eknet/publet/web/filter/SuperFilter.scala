@@ -27,9 +27,11 @@ class SuperFilter(val filters: List[Filter]) extends Filter {
 
 object SuperFilter {
 
-  def apply() {
+  def apply(): SuperFilter = {
     new SuperFilter(
-        PushFilesFilter ::
+        PushUploadFilter ::
+        PushContentFilter ::
+        ListContentsFilter ::
         EditFilter ::
         PublishFilter ::
       Nil

@@ -17,6 +17,10 @@ import org.eknet.publet.{Path, Publet}
  */
 trait FilterContext {
 
+  val actionAttribute = "a"
+
+  def action(req: HttpServletRequest) = Option(req.getParameter(actionAttribute))
+
   def servletContext(implicit req: HttpServletRequest) = req.getSession.getServletContext
 
   def publet(req: HttpServletRequest) = servletContext(req).getAttribute("publet") match {
@@ -26,7 +30,8 @@ trait FilterContext {
   }
 
   def uploads(req: HttpServletRequest): List[FileItem] = {
-    if (req.getContentType.startsWith("multipart")) {
+    val rct = req.getContentType
+    if (rct != null && rct.startsWith("multipart")) {
       val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
       items.collect({case p:FileItem => p}).filter(!_.isFormField).toList
     } else {

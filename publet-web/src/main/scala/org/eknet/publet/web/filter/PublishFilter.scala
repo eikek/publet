@@ -12,14 +12,9 @@ import org.eknet.publet.resource.ContentType
 object PublishFilter extends Filter with PageWriter {
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
-    req.getParameterMap.size() match {
-      case 0 => {
-        val html = publet(req).process(path(req), path(req).targetType.getOrElse(ContentType.html))
-        html.fold(writeError(_, path(req), resp), writePage(_, path(req), req, resp))
-        true
-      }
-      case _ => false
-    }
+    val html = publet(req).process(path(req), path(req).targetType.getOrElse(ContentType.html))
+    html.fold(writeError(_, path(req), resp), writePage(_, path(req), req, resp))
+    true
   }
 
 }

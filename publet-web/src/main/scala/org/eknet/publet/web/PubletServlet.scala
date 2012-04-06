@@ -1,5 +1,6 @@
 package org.eknet.publet.web
 
+import filter.SuperFilter
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.net.URLDecoder
 import org.slf4j.LoggerFactory
@@ -17,56 +18,9 @@ import java.io.File
  * @since 27.03.12 22:42
  */
 class PubletServlet extends HttpServlet {
+
   private val log = LoggerFactory.getLogger(getClass)
-
-  def publish(path: Path, resp: HttpServletResponse) {
-    val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
-    html.fold(writeError(_, path, resp), writePage(_, path, resp))
-  }
-  
-  def edit(path: Path, resp: HttpServletResponse) {
-    if (path.targetType.get.mime._1 == "text") {
-      val html = publet.process(path, ContentType.markdown, publet.getEngine('edit).get)
-      html.fold(writeError(_, path, resp), writePage(_, path, resp))
-    } else {
-      createNew(path, resp)
-    }
-  }
-
-  def writeError(ex: Exception, path: Path, resp: HttpServletResponse) {
-    log.error("Error!", ex)
-    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-  }
-
-  def writePage(page: Option[Content], path: Path, resp: HttpServletResponse) {
-    val out = resp.getOutputStream
-    page match {
-      case None => createNew(path, resp)
-      case Some(p) => p.copyTo(out)
-    }
-  }
-
-  def createNew(path: Path, resp: HttpServletResponse) {
-    val out = resp.getOutputStream
-    val targetType = path.targetType.get
-    if (targetType.mime._1 == "text") {
-      publet.getEngine('edit).get.process(path, Seq(Content("", ContentType.markdown)), ContentType.markdown) match {
-        case Left(x) => writeError(x, path, resp)
-        case Right(x) => x.copyTo(out)
-      }
-    } else {
-      val uploadContent = UploadContent.uploadContent(path)
-      publet.resolveEngine(path).get.process(path, Seq(uploadContent), ContentType.html)
-      .fold(writeError(_, path, resp), c => writePage(Some(c), path, resp))
-    }
-  }
-  
-  
-  protected def publet = getServletContext.getAttribute("publet") match {
-    case null => createPublet
-    case p: Publet => p
-    case _ => sys.error("wrong attribute type")
-  }
+  private val filter = SuperFilter()
 
   override def init() { createPublet }
   def createPublet = {
@@ -88,43 +42,11 @@ class PubletServlet extends HttpServlet {
     publet
   }
 
-  def publetPath(req: HttpServletRequest) = {
-    val p = Path(URLDecoder
-      .decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
-    if (p.isRoot) (p / Path("index.html")) else p
-  }
-
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
-    val path = publetPath(req)
-    Option(req.getParameter("edit")) match {
-      case None => publish(path, resp)
-      case Some(_) => edit(path, resp)
-    }
+    filter.handle(req, resp)
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) {
-    val path = publetPath(req)
-    Option(req.getParameter("page")) match {
-      case None =>
-      case Some(body) => {
-        val target = Option(req.getParameter("type")).getOrElse("markdown")
-        log.debug("Create {} file", target)
-        publet.push(path, Content(body, ContentType(Symbol(target))))
-      }
-    }
-    uploads(req).foreach(fi => {
-      log.debug("Create {} file", path.targetType.get)
-      publet.push(path, Content(fi.getInputStream, path.targetType.get))
-    })
-    publish(path, resp)
-  }
-
-  private def uploads(req: HttpServletRequest): List[FileItem] = {
-    if (req.getContentType.startsWith("multipart")) {
-      val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
-      items.collect({case p:FileItem => p}).filter(!_.isFormField).toList
-    } else {
-      List[FileItem]()
-    }
+    filter.handle(req, resp)
   }
 }

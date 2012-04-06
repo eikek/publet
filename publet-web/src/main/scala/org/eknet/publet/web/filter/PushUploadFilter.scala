@@ -11,7 +11,7 @@ import org.eknet.publet.resource.Content
  * @since 05.04.12 15:08
  *
  */
-object PushFilesFilter extends Filter with FilterContext {
+object PushUploadFilter extends Filter with FilterContext {
   private val log = LoggerFactory.getLogger(getClass)
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {

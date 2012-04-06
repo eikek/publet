@@ -12,9 +12,9 @@ import org.eknet.publet.resource.ContentType
 object EditFilter extends Filter with PageWriter {
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
-    Option(req.getParameter("edit")) match {
-      case None=> false
-      case Some(_) => edit(req, resp); true
+    action(req) match {
+      case Some("edit") => edit(req, resp); true
+      case _ => false
     }
   }
 

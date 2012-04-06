@@ -57,6 +57,7 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    */
   def children(path: Path): Iterable[_ <: Resource]
 
+  def lookup(path: Path): Option[Resource]
 }
 
 object Publet {
