@@ -12,11 +12,12 @@ import xml._
 object EditEngine extends PubletEngine {
 
   def editBody(path: Path, content: Content): NodeSeq = {
-    val cancelHandler = "window.location='"+path.segments.last+"'"
+    val cancelHandler = "window.location='"+path.fileName.name+".html'"
     <h3>Edit Page</h3>
     <p>If you'd like to write markdown syntax, <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
       is the syntax definition.</p>
-    <form action={ path.segments.last } method="post" class="ym-form linearize-form ym-full">
+    <div id="filesTree"></div>
+    <form action={ path.fileName.name+".html" } method="post" class="ym-form linearize-form ym-full">
       { typeSelect(path, content.contentType) }
       <div class="ym-fbox-text">
         <textarea name="page">{ content.contentAsString }</textarea>

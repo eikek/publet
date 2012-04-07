@@ -2,8 +2,8 @@ package org.eknet.publet.web
 
 import org.eknet.publet.engine._
 import org.eknet.publet.resource.ContentType._
-import template.YamlEngine
 import org.eknet.publet.Publet
+import template.{EditTemplate, YamlEngine}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -18,7 +18,7 @@ object PubletFactory {
     conv.addConverter(markdown -> html, KnockoffConverter)
     publ.register("/*", new YamlEngine('default, conv))
 
-    val editEngine = new YamlEngine('edit, EditEngine)
+    val editEngine = new YamlEngine('edit, EditEngine) with EditTemplate
     publ.addEngine(editEngine)
     publ
   }

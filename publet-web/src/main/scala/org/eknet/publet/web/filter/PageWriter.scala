@@ -25,7 +25,7 @@ trait PageWriter extends FilterContext {
     val out = resp.getOutputStream
     page match {
       case None => createNew(path, req, resp)
-      case Some(p) => p.copyTo(out)
+      case Some(p) => resp.setContentType(p.contentType.mimeString ); p.copyTo(out)
     }
   }
 

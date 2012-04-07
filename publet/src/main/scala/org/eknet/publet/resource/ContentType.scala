@@ -9,7 +9,10 @@ import org.eknet.publet.Path
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 29.03.12 10:11
  */
-case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String, String))
+case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String, String)) {
+
+  val mimeString = mime._1 +"/"+ mime._2
+}
 
 object ContentType {
 
