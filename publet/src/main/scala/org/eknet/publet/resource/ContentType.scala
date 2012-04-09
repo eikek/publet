@@ -27,6 +27,7 @@ object ContentType {
   val png = ContentType('png, Set("png"), ("image", "png"))
   val jpg = ContentType('jpg, Set("jpg", "jpeg"), ("image", "jpg"))
   val gif = ContentType('gif, Set("gif"), ("image", "gif"))
+  val json = ContentType('json, Set("json"), ("text", "plain"))
 
   val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif)
 

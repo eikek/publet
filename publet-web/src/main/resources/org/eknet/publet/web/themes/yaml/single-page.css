@@ -11,14 +11,6 @@
 @import url(print/print.css);
 
 @media screen {
-    /*pre {*/
-    /*padding: 5px;*/
-    /*border: black dashed thin;*/
-    /*}*/
-
-    /*    #main {
-       background: #aaadae;
-   } */
     #main .ym-wrapper {
         background: #fff;
     }
@@ -27,7 +19,7 @@
     }
 
     /* Layout Module Configuration */
-    #main .ym-wrapper {
+    #main .ym-wrapper2 {
         max-width: 50em;
         margin: 0 auto;
         font-size: 105%;
@@ -36,7 +28,7 @@
     }
 
     .ym-form textarea {
-        height: 500px;
+        height: 400px;
         font-family: monospace;
         line-height: 1.2;
         font-size: medium;

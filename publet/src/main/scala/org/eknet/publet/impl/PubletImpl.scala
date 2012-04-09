@@ -55,17 +55,6 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
     super.addEngine(engine)
   }
 
-  /**
-   * Finds resources that matches the name of the specified uri
-   * but not necessarily the file extension.
-   * <p>
-   * For example, finds a `title.md` if a `title.html` is requested,
-   * while `title.html` will be the first one on the Seq if it exists.
-   * </p>
-   *
-   * @param path
-   * @return
-   */
   def findSources(path: Path): Seq[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
     val part = resolveMount(path).getOrElse(sys.error("No partition mounted for path: "+ path))

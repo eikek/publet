@@ -22,6 +22,8 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
   lazy val isRoot = segments.isEmpty
 
   def child(name: String) = Path(segments ::: List(name), absolute)
+
+  def sibling(name: String) = parent.child(name)
   
   lazy val asString = (if (absolute) "/" else "") + segments.mkString(String.valueOf(Path.sep))
   

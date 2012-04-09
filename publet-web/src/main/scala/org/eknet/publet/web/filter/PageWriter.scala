@@ -1,7 +1,6 @@
 package org.eknet.publet.web.filter
 
 import org.eknet.publet.Path
-import org.eknet.publet.resource.Content._
 import org.eknet.publet.resource.{ContentType, Content}
 import org.eknet.publet.web.UploadContent
 import org.slf4j.LoggerFactory
@@ -25,7 +24,7 @@ trait PageWriter extends FilterContext {
     val out = resp.getOutputStream
     page match {
       case None => createNew(path, req, resp)
-      case Some(p) => resp.setContentType(p.contentType.mimeString ); p.copyTo(out)
+      case Some(p) => resp.setContentType(p.contentType.mimeString); p.copyTo(out)
     }
   }
 

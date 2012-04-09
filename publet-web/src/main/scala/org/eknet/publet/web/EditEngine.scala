@@ -1,22 +1,26 @@
 package org.eknet.publet.web
 
-import org.eknet.publet.Path
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 import org.eknet.publet.engine.PubletEngine
+import template.FilebrowserTemplate
 import xml._
+import org.eknet.publet.impl.InstallCallback
+import java.util.UUID
+import org.eknet.publet.resource.Partition._
+import org.eknet.publet.{Publet, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.04.12 00:17
  */
-object EditEngine extends PubletEngine {
+object EditEngine extends PubletEngine with InstallCallback {
 
   def editBody(path: Path, content: Content): NodeSeq = {
     val cancelHandler = "window.location='"+path.fileName.name+".html'"
     <h3>Edit Page</h3>
     <p>If you'd like to write markdown syntax, <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
-      is the syntax definition.</p>
-    <div id="filesTree"></div>
+      is the syntax definition. If you like to use some special html formatting, you can use standard yaml elements as
+      <a href="http://www.yaml.de/docs/index.html#yaml-typography">defined here</a>. </p>
     <form action={ path.fileName.name+".html" } method="post" class="ym-form linearize-form ym-full">
       { typeSelect(path, content.contentType) }
       <div class="ym-fbox-text">

@@ -4,10 +4,7 @@ import java.util.UUID
 import org.eknet.publet.resource.Partition._
 import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.{Publet, Path}
-import org.eknet.publet.resource.{ContentType, NodeContent}
-import xml.Attribute._
-import xml.Text._
-import xml.{Attribute, Text, Null, NodeSeq}
+import org.eknet.publet.resource.NodeContent
 
 /**
  *
@@ -15,11 +12,11 @@ import xml.{Attribute, Text, Null, NodeSeq}
  * @since 07.04.12 21:28
  */
 
-trait EditTemplate extends HtmlTemplate with InstallCallback {
+trait FilebrowserTemplate extends Yaml2ColTemplate with InstallCallback {
 
   private val randPath = UUID.randomUUID().toString
 
-  val editPartition = classpath(Path("../themes/browser"), classOf[EditTemplate])
+  val editPartition = classpath(Path("../themes/browser"), classOf[FilebrowserTemplate])
 
 
   override def onInstall(publ: Publet) {
@@ -37,4 +34,8 @@ trait EditTemplate extends HtmlTemplate with InstallCallback {
     }
   }
 
+  def yamlColumn(path: Path, content: NodeContent) = {
+    <h3>File browser</h3>
+    <div id="filesTree"></div>
+  }
 }

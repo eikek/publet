@@ -58,6 +58,21 @@ trait Publet extends MountManager[Partition] with EngineResolver {
   def children(path: Path): Iterable[_ <: Resource]
 
   def lookup(path: Path): Option[Resource]
+
+
+  /**
+   * Finds resources that matches the name of the specified uri
+   * but not necessarily the file extension.
+   * <p>
+   * For example, finds a `title.md` if a `title.html` is requested,
+   * while `title.html` will be the first one on the Seq if it exists.
+   * </p>
+   *
+   * @param path
+   * @return
+   */
+  def findSources(path: Path): Seq[ContentResource]
+
 }
 
 object Publet {
