@@ -39,9 +39,17 @@ trait FilterContext {
     }
   }
 
+  def decodePath(req: HttpServletRequest): Path = {
+    val p = Path(URLDecoder.decode(req.getRequestURI, "UTF-8"))
+    if (Option(req.getContextPath).map(!_.isEmpty).getOrElse(false)) {
+      p.strip(Path(req.getContextPath))
+    } else {
+      p
+    }
+  }
+
   def path(req: HttpServletRequest) = {
-    val p = Path(URLDecoder
-      .decode(Path(req.getRequestURI).strip.asString, "UTF-8"))
-    if (p.isRoot) (p / Path("index.html")) else p
+    val p = decodePath(req)
+    if (p.directory) p / "index.html" else p
   }
 }

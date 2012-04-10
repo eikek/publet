@@ -28,6 +28,7 @@ trait FilebrowserTemplate extends Yaml2ColTemplate with InstallCallback {
     val base = path.relativeRoot + randPath + "/"
     super.headerHtml(path, content) ++
     {
+      <link type="text/css" rel="stylesheet" href={ base + "browser/browser.css" }></link>
       <script src={ base +"browser/jquery-1.7.2.min.js" } ></script>
       <script src={ base +"browser/browser.js" } ></script>
       <script>renderFileBrowser();</script>
@@ -36,6 +37,7 @@ trait FilebrowserTemplate extends Yaml2ColTemplate with InstallCallback {
 
   def yamlColumn(path: Path, content: NodeContent) = {
     <h3>File browser</h3>
+    <pre id="containerPath"></pre>
     <div id="filesTree"></div>
   }
 }

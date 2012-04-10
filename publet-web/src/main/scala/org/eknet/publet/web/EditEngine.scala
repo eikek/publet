@@ -52,5 +52,10 @@ object EditEngine extends PubletEngine with InstallCallback {
   
   def name = 'edit
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = Right(editContent(path, data.head))
+  def process(path: Path, data: Seq[Content], target: ContentType) = {
+    if (target.mime._1 == "text")
+      Right(editContent(path, data.head))
+    else
+      Right(UploadContent.uploadContent(path))
+  }
 }

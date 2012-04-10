@@ -21,11 +21,12 @@ object ActionEngineFilter extends Filter with PageWriter {
 
   def process(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
-    if (path(req).targetType.get.mime._1 == "text") {
-      val html = publet(req).process(path(req), path(req).targetType.get, publet(req).getEngine(engineId).get)
+//    if (path(req).targetType.getOrElse(ContentType.unknown).mime._1 == "text") {
+      val targetType = path(req).targetType.getOrElse(ContentType.unknown)
+      val html = publet(req).process(path(req), targetType, publet(req).getEngine(engineId).get)
       html.fold(writeError(_, path(req), resp), writePage(_, path(req), req, resp))
-    } else {
-      createNew(path(req), req, resp)
-    }
+//    } else {
+//      createNew(path(req), req, resp)
+//    }
   }
 }

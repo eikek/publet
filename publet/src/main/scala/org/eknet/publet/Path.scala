@@ -8,25 +8,36 @@ import java.io.File
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 30.03.12 18:41
  */
-case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path] {
+case class Path(segments: List[String], absolute: Boolean, directory: Boolean) extends Ordered[Path] {
 
-  def parent = Path(segments.take(segments.length-1), absolute)
+  def parent = Path(segments.take(segments.length-1), absolute, true)
   
-  def strip = Path(segments.tail, absolute)
+  def strip = Path(segments.tail, absolute, directory)
 
   def strip(p: Path): Path = {
-    if (prefixedBy(p)) Path(segments.slice(p.size, size), absolute)
+    if (prefixedBy(p)) Path(segments.slice(p.size, size), absolute, directory)
     else this
   }
   
   lazy val isRoot = segments.isEmpty
 
-  def child(name: String) = Path(segments ::: List(name), absolute)
+  def child(name: String) = Path(segments ::: List(name), absolute, name.endsWith(String.valueOf(Path.sep)))
 
   def sibling(name: String) = parent.child(name)
   
-  lazy val asString = (if (absolute) "/" else "") + segments.mkString(String.valueOf(Path.sep))
-  
+  lazy val asString = {
+    val buf = new StringBuilder()
+    if (absolute) {
+      buf.append(String.valueOf(Path.sep))
+    }
+    buf.append(segments.mkString(String.valueOf(Path.sep)))
+    if (directory && !segments.isEmpty) {
+      buf.append(String.valueOf(Path.sep))
+    }
+
+    buf.toString()
+  }
+
   lazy val size = segments.length
 
   lazy val fileName = new FileName(segments.last)
@@ -42,11 +53,11 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
     else segments.slice(0, p.size) == p.segments
   }  
   
-  def toAbsolute = if (absolute) this else Path(segments, true)
+  def toAbsolute = if (absolute) this else Path(segments, true, directory)
   
-  def toRelative = if (!absolute) this else Path(segments, false)
+  def toRelative = if (!absolute) this else Path(segments, false, directory)
 
-  def / (p: Path) = Path(segments ++ p.segments, absolute)
+  def / (p: Path) = Path(segments ++ p.segments, absolute, p.directory)
 
   def / (s: String) = child(s)
 
@@ -55,7 +66,7 @@ case class Path(segments: List[String], absolute: Boolean) extends Ordered[Path]
 
 object Path {
 
-  val root = Path(List(), true)
+  val root = Path(List(), true, true)
 
   private val sep = '/'
   
@@ -65,8 +76,9 @@ object Path {
     else {
       val segs = str.split(sep)
       val abs = str.charAt(0) == sep
-      if (abs) new Path(segs.tail.toList, abs)
-      else new Path(segs.toList, abs)
+      val dir = str.endsWith(String.valueOf(Path.sep))
+      if (abs) new Path(segs.tail.toList, abs, dir)
+      else new Path(segs.toList, abs, dir)
     }
   }
   

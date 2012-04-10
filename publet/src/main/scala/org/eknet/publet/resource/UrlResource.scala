@@ -47,7 +47,7 @@ class UrlResource(val url: Option[URL]) extends ContentResource {
 
   def outputStream = Some(url.get.openConnection().getOutputStream)
   
-  def length = url.get.openConnection().getContentLengthLong match {
+  def length = url.get.openConnection().getContentLength match {
     case -1 => None
     case x => Some(x)
   }

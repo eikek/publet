@@ -31,6 +31,7 @@ object SuperFilter {
     new SuperFilter(
         PushUploadFilter ::
         PushContentFilter ::
+        ListContentsFilter ::
         ActionEngineFilter ::
         PublishFilter ::
       Nil

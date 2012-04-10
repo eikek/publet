@@ -19,8 +19,6 @@ object PubletFactory {
     val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
     publ.addEngine(editEngine)
 
-    val listEngine = new ListEngine(publ)
-    publ.addEngine(listEngine)
     publ
   }
 

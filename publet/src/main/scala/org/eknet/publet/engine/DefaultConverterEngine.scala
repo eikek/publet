@@ -13,13 +13,17 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
   def this() = this('convert)
 
   def process(path: Path, data: Seq[Content], target: ContentType): Either[Exception, Content] = {
-    process(data.head, target).fold(Left(_), _ match {
-      case None => data.tail match {
-        case Nil => Left(new RuntimeException("no converter found"))
-        case tail => process(path, tail, target)
-      }
-      case Some(x) => Right(x)
-    })
+    //if target type is available return it, otherwise try to process
+    data.find(_.contentType == target) match {
+      case Some(c) => Right(c)
+      case None => process(data.head, target).fold(Left(_), _ match {
+        case None => data.tail match {
+          case Nil => Left(new RuntimeException("no converter found"))
+          case tail => process(path, tail, target)
+        }
+        case Some(x) => Right(x)
+      })
+    }
   }
   
   private def process(data: Content, target: ContentType): Either[Exception, Option[Content]] = {

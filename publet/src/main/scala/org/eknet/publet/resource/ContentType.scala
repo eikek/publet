@@ -28,8 +28,9 @@ object ContentType {
   val jpg = ContentType('jpg, Set("jpg", "jpeg"), ("image", "jpg"))
   val gif = ContentType('gif, Set("gif"), ("image", "gif"))
   val json = ContentType('json, Set("json"), ("text", "plain"))
+  val icon = ContentType('icon, Set("ico"), ("image", "x-icon"))
 
-  val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif)
+  val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif, icon)
 
   def apply(f: File): ContentType = apply(extension(f))
 
