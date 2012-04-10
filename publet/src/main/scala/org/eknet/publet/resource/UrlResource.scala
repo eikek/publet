@@ -2,6 +2,7 @@ package org.eknet.publet.resource
 
 import java.net.URL
 import org.eknet.publet.Path
+import org.eknet.publet.impl.Conversions._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,11 +37,11 @@ class UrlResource(val url: Option[URL]) extends ContentResource {
   def exists = url.isDefined
 
   def delete() {
-    sys.error("deleting url not supported")
+    error("deleting url not supported")
   }
 
   def create() {
-    sys.error("Creating url not supported")
+    error("Creating url not supported")
   }
 
   def inputStream = url.get.openStream()

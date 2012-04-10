@@ -36,7 +36,7 @@ class FileName(val path: Path) {
    * and `test.htm`.
    *
    */
-  lazy val pathsForTarget = pathsFor(targetType.getOrElse(sys.error("Target type cannot be determined: " + path)))
+  lazy val pathsForTarget = pathsFor(targetType.getOrElse(error("Target type cannot be determined: " + path)))
 
 
   lazy val name = {

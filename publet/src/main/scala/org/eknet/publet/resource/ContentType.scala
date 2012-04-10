@@ -17,6 +17,7 @@ case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String,
 object ContentType {
 
   val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
+  val scal = ContentType('scala, Set("scala"), ("text", "scala"))
   val text = ContentType('text, Set("txt", "text"), ("text", "plain"))
   val html = ContentType('html, Set("html", "htm"), ("text", "html"))
   val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))
@@ -30,7 +31,7 @@ object ContentType {
   val json = ContentType('json, Set("json"), ("text", "plain"))
   val icon = ContentType('icon, Set("ico"), ("image", "x-icon"))
 
-  val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif, icon)
+  val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif, icon, scal)
 
   def apply(f: File): ContentType = apply(extension(f))
 
@@ -38,17 +39,17 @@ object ContentType {
 
   def apply(ext: String): ContentType = {
     all.find(_.extensions.contains(ext.toLowerCase))
-      .orElse(sys.error("unknown type: " + ext)).get
+      .orElse(error("unknown type: " + ext)).get
   }
 
   def apply(name: Symbol): ContentType = {
     all.find(_.typeName == name)
-      .orElse(sys.error("Unknown type: " + name)).get
+      .orElse(error("Unknown type: " + name)).get
   }
 
   def apply(mime: (String, String)): ContentType = {
     all.find(_.mime == mime)
-      .orElse(sys.error("Unknown mime type: " + mime)).get
+      .orElse(error("Unknown mime type: " + mime)).get
   }
 
   def forMimeBase(t: ContentType): Seq[ContentType] = all.filter(_.mime._1 == t.mime._1)

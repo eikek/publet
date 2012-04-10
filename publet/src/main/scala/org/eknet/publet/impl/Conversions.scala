@@ -16,4 +16,8 @@ protected[publet] object Conversions {
       case Left(x) => Left(x)
     }
   }
+
+  def throwException(msg: String): Nothing = {
+    throw new RuntimeException(msg)
+  }
 }

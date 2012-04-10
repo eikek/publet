@@ -16,7 +16,7 @@ class MountManager[T] {
   def mount(path: Path, part: T) {
     Predef.ensuring(path != null, "null")
     Predef.ensuring(part != null, "null")
-    if (isMounted(path)) sys.error("Path already mounted")
+    if (isMounted(path)) error("Path already mounted")
     else mounts.put(path, part)
     
     if (!path.isRoot) {

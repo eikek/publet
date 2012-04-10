@@ -36,7 +36,7 @@ class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true)
 
   def hasEntry(name: String) = new File(root, name).exists()
 
-  private def resourceFrom(f: File) = if (!f.exists()) sys.error("File does not exist.")
+  private def resourceFrom(f: File) = if (!f.exists()) error("File does not exist.")
     else if (f.isDirectory)
       new DirectoryResource(f, root) else
       new FileResource(f, root)

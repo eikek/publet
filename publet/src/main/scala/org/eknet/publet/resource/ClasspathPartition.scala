@@ -24,7 +24,7 @@ class ClasspathPartition(val id: Symbol, clazz: Class[_], root: Path) extends Pa
 
   def hasEntry(name: String) = clazz.getResource((root/name).asString) != null
 
-  def newContainer(path: Path) = sys.error("Classpath partitions does not support containers.")
+  def newContainer(path: Path) = error("Classpath partitions does not support containers.")
 
   def newContent(path: Path) = new UrlResource(Option(clazz.getResource((root/path).asString)))
 

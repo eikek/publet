@@ -52,11 +52,11 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
   def exists = true
 
   def delete() {
-    sys.error("Resource not available")
+    error("Resource not available")
   }
 
   def create() {
-    sys.error("Resource not available")
+    error("Resource not available")
   }
 
   def children = rp.nextSegments(path).map(s => new PathResource(rp, path.child(s)))
@@ -70,11 +70,11 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
       case Some(r) => r.asInstanceOf[T]
       case None => {
         rp.resolveMount(path / name) match {
-          case None => sys.error("No mount point for: "+ path)
+          case None => error("No mount point for: "+ path)
           case Some(part) => createResource(part._2)
         }
       }
-      case _ => sys.error("unreachable code path")
+      case _ => error("unreachable code path")
     }
   }
 

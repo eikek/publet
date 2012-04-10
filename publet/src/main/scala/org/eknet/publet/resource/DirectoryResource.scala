@@ -21,7 +21,7 @@ class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir
 
   def child(name: String) = {
     val f = new File(dir, name)
-    if (!f.exists) sys.error("Child does not exist")
+    if (!f.exists) error("Child does not exist")
     else if (f.isDirectory) new DirectoryResource(f, root)
          else new FileResource(f, root)
   }

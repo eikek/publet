@@ -12,15 +12,17 @@ object RootBuild extends Build {
   lazy val root = Project(id = "publet-root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (WebBuild.web, PubletBuild.publet)
- 
+  ) aggregate (WebBuild.web, PubletBuild.publet, ScalaScriptBuild.scalascript)
+
+  val scala = "2.9.1"
+
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-root"
   )
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.0.0-SNAPSHOT",
-    scalaVersion := "2.9.1",
+    scalaVersion := scala,
     sbtPlugin := true,
     resolvers := Seq(Resolvers.eknet)
   )
@@ -35,6 +37,8 @@ object Dependencies {
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2"
+  val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4"
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.scala
 //  val commonsLang = "org.apache.commons" % "commons-lang3" % "3.1"
 }
 
