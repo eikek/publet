@@ -38,7 +38,8 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
   def importPackages: List[String] = List(
     "org.eknet.publet.engine.scalascript.ScalaScript",
     "org.eknet.publet.resource.ContentType._",
-    "org.eknet.publet.resource.Content"
+    "org.eknet.publet.resource.Content",
+    "org.eknet.publet.resource.NodeContent"
   )
 
   lazy val testScriptStr = """

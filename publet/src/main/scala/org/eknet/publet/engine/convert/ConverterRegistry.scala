@@ -42,7 +42,7 @@ trait ConverterRegistry {
       val predecessor = mutable.Map[ContentType, ContentType]()
       val nodemap = mutable.Map() ++ nodes
       distance.put(s, 0)
-      while (!nodemap.isEmpty) {
+      while (!nodemap.isEmpty && !distance.isEmpty) {
         val next = distance.toSeq.sortBy(_._2).head._1
         if (next != e) {
           nodemap.remove(next)

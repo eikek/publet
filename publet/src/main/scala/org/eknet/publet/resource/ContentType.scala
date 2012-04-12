@@ -31,7 +31,7 @@ object ContentType {
   val json = ContentType('json, Set("json"), ("text", "plain"))
   val icon = ContentType('icon, Set("ico"), ("image", "x-icon"))
 
-  val all = Seq(text, html, pdf, markdown, xml, css, javascript, png, jpg, gif, icon, scal)
+  val all = Set(text, html, pdf, markdown, xml, css, javascript, json, png, jpg, gif, icon, scal)
 
   def apply(f: File): ContentType = apply(extension(f))
 
@@ -52,6 +52,6 @@ object ContentType {
       .orElse(error("Unknown mime type: " + mime)).get
   }
 
-  def forMimeBase(t: ContentType): Seq[ContentType] = all.filter(_.mime._1 == t.mime._1)
+  def forMimeBase(t: ContentType): Seq[ContentType] = all.toSeq.filter(_.mime._1 == t.mime._1)
 
 }
