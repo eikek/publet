@@ -1,3 +1,5 @@
+package org.eknet.publet.engine.scalascript.com.twitter.util
+
 /*
  * Copyright 2010 Twitter, Inc.
  *
@@ -14,10 +16,8 @@
  * limitations under the License.
  */
 
-package com.twitter.util
-
-import com.twitter.io.StreamIO
-import com.twitter.conversions.string._
+import org.eknet.publet.engine.scalascript.com.twitter.io.StreamIO
+import org.eknet.publet.engine.scalascript.com.twitter.conversions.string._
 import java.io._
 import java.math.BigInteger
 import java.net.URLClassLoader
@@ -102,8 +102,9 @@ class Eval(target: Option[File]) {
           new FilesystemResolver(new File(".")),
           new FilesystemResolver(new File("." + File.separator + "config"))
         ) ++ (
-          Option(System.getProperty("com.twitter.util.Eval.includePath")) map { path =>
-            new FilesystemResolver(new File(path))
+          Option(System.getProperty("com.twitter.util.Eval.includePath")) map {
+            path =>
+              new FilesystemResolver(new File(path))
           }
           )
       )
@@ -115,8 +116,9 @@ class Eval(target: Option[File]) {
    * run preprocessors on our string, returning a String that is the processed source
    */
   def sourceForString(code: String): String = {
-    preprocessors.foldLeft(code) { (acc, p) =>
-      p(acc)
+    preprocessors.foldLeft(code) {
+      (acc, p) =>
+        p(acc)
     }
   }
 
@@ -143,7 +145,9 @@ class Eval(target: Option[File]) {
   def apply[T](files: File*): T = {
     if (target.isDefined) {
       val targetDir = target.get
-      val unprocessedSource = files.map { scala.io.Source.fromFile(_).mkString }.mkString("\n")
+      val unprocessedSource = files.map {
+        scala.io.Source.fromFile(_).mkString
+      }.mkString("\n")
       val processed = sourceForString(unprocessedSource)
       val sourceChecksum = uniqueId(processed, None)
       val checksumFile = new File(targetDir, "checksum")
@@ -168,7 +172,9 @@ class Eval(target: Option[File]) {
         cleanBaseName, sourceChecksum)
       applyProcessed(className, processed, false)
     } else {
-      apply(files.map { scala.io.Source.fromFile(_).mkString }.mkString("\n"), true)
+      apply(files.map {
+        scala.io.Source.fromFile(_).mkString
+      }.mkString("\n"), true)
     }
   }
 
@@ -245,7 +251,9 @@ class Eval(target: Option[File]) {
    * @throw CompilerException if not Eval-able.
    */
   def check(files: File*) {
-    val code = files.map { scala.io.Source.fromFile(_).mkString }.mkString("\n")
+    val code = files.map {
+      scala.io.Source.fromFile(_).mkString
+    }.mkString("\n")
     check(code)
   }
 
@@ -258,7 +266,9 @@ class Eval(target: Option[File]) {
   }
 
   def findClass(className: String): Class[_] = {
-    compiler.findClass(className).getOrElse { throw new ClassNotFoundException("no such class: " + className) }
+    compiler.findClass(className).getOrElse {
+      throw new ClassNotFoundException("no such class: " + className)
+    }
   }
 
   private[util] def uniqueId(code: String, idOpt: Option[Int] = Some(jvmId)): String = {
@@ -277,8 +287,9 @@ class Eval(target: Option[File]) {
       case -1 => fileName
       case dot => fileName.substring(0, dot)
     }
-    baseName.regexSub(Eval.classCleaner) { m =>
-      "$%02x".format(m.group(0).charAt(0).toInt)
+    baseName.regexSub(Eval.classCleaner) {
+      m =>
+        "$%02x".format(m.group(0).charAt(0).toInt)
     }
   }
 
@@ -320,7 +331,9 @@ class Eval(target: Option[File]) {
       if (nestedClassPath eq null) {
         Nil
       } else {
-        nestedClassPath.split(" ").map { f => new File(relativeRoot, f).getAbsolutePath }.toList
+        nestedClassPath.split(" ").map {
+          f => new File(relativeRoot, f).getAbsolutePath
+        }.toList
       }
     } else {
       Nil
@@ -333,6 +346,7 @@ class Eval(target: Option[File]) {
 
   trait Resolver {
     def resolvable(path: String): Boolean
+
     def get(path: String): InputStream
   }
 
@@ -379,27 +393,29 @@ class Eval(target: Option[File]) {
       apply(code, maximumRecursionDepth)
 
     def apply(code: String, maxDepth: Int): String = {
-      val lines = code.lines map { line: String =>
-        val tokens = line.trim.split(' ')
-        if (tokens.length == 2 && tokens(0).equals("#include")) {
-          val path = tokens(1)
-          resolvers find { resolver: Resolver =>
-            resolver.resolvable(path)
-          } match {
-            case Some(r: Resolver) => {
-              // recursively process includes
-              if (maxDepth == 0) {
-                throw new IllegalStateException("Exceeded maximum recusion depth")
-              } else {
-                apply(StreamIO.buffer(r.get(path)).toString, maxDepth - 1)
+      val lines = code.lines map {
+        line: String =>
+          val tokens = line.trim.split(' ')
+          if (tokens.length == 2 && tokens(0).equals("#include")) {
+            val path = tokens(1)
+            resolvers find {
+              resolver: Resolver =>
+                resolver.resolvable(path)
+            } match {
+              case Some(r: Resolver) => {
+                // recursively process includes
+                if (maxDepth == 0) {
+                  throw new IllegalStateException("Exceeded maximum recusion depth")
+                } else {
+                  apply(StreamIO.buffer(r.get(path)).toString, maxDepth - 1)
+                }
               }
+              case _ =>
+                throw new IllegalStateException("No resolver could find '%s'".format(path))
             }
-            case _ =>
-              throw new IllegalStateException("No resolver could find '%s'".format(path))
+          } else {
+            line
           }
-        } else {
-          line
-        }
       }
       lines.mkString("\n")
     }
@@ -433,7 +449,7 @@ class Eval(target: Option[File]) {
       def display(pos: Position, message: String, severity: Severity) {
         severity.count += 1
         val severityName = severity match {
-          case ERROR   => "error: "
+          case ERROR => "error: "
           case WARNING => "warning: "
           case _ => ""
         }
@@ -471,10 +487,11 @@ class Eval(target: Option[File]) {
           target.asInstanceOf[VirtualDirectory].clear
         }
         case Some(t) => {
-          target.foreach { abstractFile =>
-            if (abstractFile.file == null || abstractFile.file.getName.endsWith(".class")) {
-              abstractFile.delete
-            }
+          target.foreach {
+            abstractFile =>
+              if (abstractFile.file == null || abstractFile.file.getName.endsWith(".class")) {
+                abstractFile.delete
+              }
           }
         }
       }
@@ -491,9 +508,10 @@ class Eval(target: Option[File]) {
         printf("Code follows (%d bytes)\n", code.length)
 
         var numLines = 0
-        code.lines foreach { line: String =>
-          numLines += 1
-          println(numLines.toString.padTo(5, ' ') + "| " + line)
+        code.lines foreach {
+          line: String =>
+            numLines += 1
+            println(numLines.toString.padTo(5, ' ') + "| " + line)
         }
       }
     }
@@ -546,4 +564,5 @@ class Eval(target: Option[File]) {
 
   class CompilerException(val messages: List[List[String]]) extends Exception(
     "Compiler exception " + messages.map(_.mkString("\n")).mkString("\n"))
+
 }

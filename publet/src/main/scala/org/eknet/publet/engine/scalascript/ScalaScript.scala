@@ -1,4 +1,4 @@
-package org.eknet.publet.script.scala
+package org.eknet.publet.engine.scalascript
 
 import org.eknet.publet.resource.Content
 

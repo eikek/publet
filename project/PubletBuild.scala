@@ -11,5 +11,5 @@ object PubletBuild extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
   
-  lazy val deps = Seq(knockoff, slf4jApi)
+  lazy val deps = Seq(knockoff, slf4jApi, scalaCompiler )
 }

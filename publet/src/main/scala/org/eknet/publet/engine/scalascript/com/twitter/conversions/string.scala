@@ -1,3 +1,5 @@
+package org.eknet.publet.engine.scalascript.com.twitter.conversions
+
 /*
  * Copyright 2010 Twitter, Inc.
  *
@@ -14,11 +16,10 @@
  * limitations under the License.
  */
 
-package com.twitter.conversions
-
 import scala.util.matching.Regex
 
 object string {
+
   final class RichString(wrapped: String) {
     /**
      * For every section of a string that matches a regular expression, call
@@ -74,20 +75,21 @@ object string {
      * @return a quoted string, suitable for ASCII display
      */
     def quoteC(): String = {
-      regexSub(QUOTE_RE) { m =>
-        m.matched.charAt(0) match {
-          case '\r' => "\\r"
-          case '\n' => "\\n"
-          case '\t' => "\\t"
-          case '"' => "\\\""
-          case '\\' => "\\\\"
-          case c =>
-            if (c <= 255) {
-              "\\x%02x".format(c.asInstanceOf[Int])
-            } else {
-              "\\u%04x" format c.asInstanceOf[Int]
-            }
-        }
+      regexSub(QUOTE_RE) {
+        m =>
+          m.matched.charAt(0) match {
+            case '\r' => "\\r"
+            case '\n' => "\\n"
+            case '\t' => "\\t"
+            case '"' => "\\\""
+            case '\\' => "\\\\"
+            case c =>
+              if (c <= 255) {
+                "\\x%02x".format(c.asInstanceOf[Int])
+              } else {
+                "\\u%04x" format c.asInstanceOf[Int]
+              }
+          }
       }
     }
 
@@ -104,17 +106,18 @@ object string {
      * @return an unquoted unicode string
      */
     def unquoteC() = {
-      regexSub(UNQUOTE_RE) { m =>
-        val ch = m.group(1).charAt(0) match {
-          // holy crap! this is terrible:
-          case 'u' => Character.valueOf(Integer.valueOf(m.group(1).substring(1), 16).asInstanceOf[Int].toChar)
-          case 'x' => Character.valueOf(Integer.valueOf(m.group(1).substring(1), 16).asInstanceOf[Int].toChar)
-          case 'r' => '\r'
-          case 'n' => '\n'
-          case 't' => '\t'
-          case x => x
-        }
-        ch.toString
+      regexSub(UNQUOTE_RE) {
+        m =>
+          val ch = m.group(1).charAt(0) match {
+            // holy crap! this is terrible:
+            case 'u' => Character.valueOf(Integer.valueOf(m.group(1).substring(1), 16).asInstanceOf[Int].toChar)
+            case 'x' => Character.valueOf(Integer.valueOf(m.group(1).substring(1), 16).asInstanceOf[Int].toChar)
+            case 'r' => '\r'
+            case 'n' => '\n'
+            case 't' => '\t'
+            case x => x
+          }
+          ch.toString
       }
     }
 
@@ -124,8 +127,9 @@ object string {
      */
     def unhexlify(): Array[Byte] = {
       val buffer = new Array[Byte]((wrapped.length + 1) / 2)
-      (wrapped.grouped(2).toSeq zipWithIndex) foreach { case (substr, i) =>
-        buffer(i) = Integer.parseInt(substr, 16).toByte
+      (wrapped.grouped(2).toSeq zipWithIndex) foreach {
+        case (substr, i) =>
+          buffer(i) = Integer.parseInt(substr, 16).toByte
       }
       buffer
     }
@@ -152,5 +156,6 @@ object string {
   }
 
   implicit def stringToConfiggyString(s: String) = new RichString(s)
+
   implicit def byteArrayToConfiggyByteArray(b: Array[Byte]) = new RichByteArray(b)
 }

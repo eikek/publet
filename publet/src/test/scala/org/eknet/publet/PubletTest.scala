@@ -1,6 +1,7 @@
 package org.eknet.publet
 
 import engine._
+import convert.{ConverterEngine, PassThrough, KnockoffConverter}
 import io.Source
 import resource.{ContentType, Content, FilesystemPartition}
 import ContentType._

@@ -2,6 +2,7 @@ package org.eknet.publet
 
 import engine._
 import resource._
+import convert.PassThrough
 import impl.PubletImpl
 
 /**

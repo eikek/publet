@@ -1,7 +1,8 @@
-package org.eknet.publet.engine
+package org.eknet.publet.engine.convert
 
 import org.eknet.publet.resource.{ContentType, Content}
 import org.eknet.publet.Path
+import org.eknet.publet.engine.PubletEngine
 
 /**
  *

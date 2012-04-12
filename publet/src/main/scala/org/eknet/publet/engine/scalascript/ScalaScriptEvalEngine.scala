@@ -1,4 +1,4 @@
-package org.eknet.publet.script.scala
+package org.eknet.publet.engine.scalascript
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.Path
@@ -13,9 +13,9 @@ import com.twitter.util.Eval
  * @since 10.04.12 17:06
  */
 class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends PubletEngine {
-  
+
   def process(path: Path, data: Seq[Content], target: ContentType) = {
-    data find(_.contentType == ContentType.scal) match {
+    data find (_.contentType == ContentType.scal) match {
       case Some(c) => engine.process(path, Seq(eval(c)), target)
       case None => Left(new RuntimeException("no scala script content found"))
     }
@@ -27,11 +27,11 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
 
   def boxedScript(script: String): String = {
     val body = "class\\s+([^\\s]+)\\s+".r.findFirstMatchIn(script) match {
-      case Some(m) => "\n\n%s\n\n new "+ m.group(1) +"().serve()"
+      case Some(m) => "\n\n%s\n\n new " + m.group(1) + "().serve()"
       case None => "\n\nnew %s.serve()"
     }
 
-    val templ = importPackages.map("import "+_).mkString("\n") + body
+    val templ = importPackages.map("import " + _).mkString("\n") + body
     String.format(templ, script)
   }
 

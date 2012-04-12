@@ -1,4 +1,4 @@
-package org.eknet.publet.engine
+package org.eknet.publet.engine.convert
 
 import com.tristanhunt.knockoff.DefaultDiscounter._
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
@@ -12,7 +12,7 @@ import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 object KnockoffConverter extends ConverterEngine#Converter {
 
   def apply(page: Content) = {
-    val xhtml = toXHTML( knockoff( page.contentAsString ) )
+    val xhtml = toXHTML(knockoff(page.contentAsString))
     NodeContent(xhtml, ContentType.html)
   }
 

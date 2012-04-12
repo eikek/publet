@@ -12,7 +12,7 @@ object RootBuild extends Build {
   lazy val root = Project(id = "publet-root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (WebBuild.web, PubletBuild.publet, ScalaScriptBuild.scalascript)
+  ) aggregate (WebBuild.web, PubletBuild.publet)
 
   val scala = "2.9.1"
 

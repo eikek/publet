@@ -1,4 +1,4 @@
-package com.twitter.io
+package org.eknet.publet.engine.scalascript.com.twitter.io
 
 import scala.annotation.tailrec
 import java.io.{InputStream, OutputStream, ByteArrayOutputStream}
@@ -10,9 +10,9 @@ object StreamIO {
    */
   @tailrec
   final def copy(
-                  inputStream:  InputStream,
+                  inputStream: InputStream,
                   outputStream: OutputStream,
-                  bufferSize:   Int = 1024
+                  bufferSize: Int = 1024
                   ) {
     val buf = new Array[Byte](bufferSize)
     inputStream.read(buf, 0, buf.size) match {

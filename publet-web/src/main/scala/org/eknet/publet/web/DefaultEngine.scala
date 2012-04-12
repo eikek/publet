@@ -1,7 +1,8 @@
 package org.eknet.publet.web
 
 import org.eknet.publet.resource.ContentType._
-import org.eknet.publet.engine.{PubletEngine, KnockoffConverter, ConverterEngine}
+import org.eknet.publet.engine.PubletEngine
+import org.eknet.publet.engine.convert.{ConverterEngine, KnockoffConverter}
 import org.eknet.publet.{Path, Publet}
 import template.{Yaml2ColTemplate, HighlightTemplate, YamlTemplate, HtmlTemplateEngine}
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
