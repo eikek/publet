@@ -36,7 +36,7 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
   }
 
   def importPackages: List[String] = List(
-    "org.eknet.publet.script.scala.ScalaScript",
+    "org.eknet.publet.engine.scalascript.ScalaScript",
     "org.eknet.publet.resource.ContentType._",
     "org.eknet.publet.resource.Content"
   )
