@@ -26,10 +26,16 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
   }
 
   def boxedScript(script: String): String = {
-    val body = "class\\s+([^\\s]+)\\s+".r.findFirstMatchIn(script) match {
-      case Some(m) => "\n\n%s\n\n new " + m.group(1) + "().serve()"
-      case None => "\n\nnew %s.serve()"
+    val body = """
+
+    class ScriptEval extends ScalaScript {
+       def serve() = {
+         %s
+       }
     }
+
+    new ScriptEval().serve()
+    """
 
     val templ = importPackages.map("import " + _).mkString("\n") + body
     String.format(templ, script)
@@ -37,6 +43,7 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
 
   def importPackages: List[String] = List(
     "org.eknet.publet.engine.scalascript.ScalaScript",
+    "org.eknet.publet.engine.scalascript.ScalaScript._",
     "org.eknet.publet.resource.ContentType._",
     "org.eknet.publet.resource.Content",
     "org.eknet.publet.resource.NodeContent"

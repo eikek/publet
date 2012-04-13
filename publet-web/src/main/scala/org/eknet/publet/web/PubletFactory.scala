@@ -1,8 +1,8 @@
 package org.eknet.publet.web
 
 import org.eknet.publet.Publet
-import scalascript.ScalaScriptEvalEngine
 import template._
+import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

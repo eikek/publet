@@ -1,3 +1,5 @@
+package org.eknet.publet.engine.scalascript.com.twitter.json
+
 /*
  * Copyright 2009 Robey Pointer <robeypointer@gmail.com>
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.twitter.json
 
 import scala.util.matching.Regex
 
@@ -75,20 +75,21 @@ final class ConfiggyString(wrapped: String) {
    * @return a quoted string, suitable for ASCII display
    */
   def quoteC(): String = {
-    regexSub(QUOTE_RE) { m =>
-      m.matched.charAt(0) match {
-        case '\r' => "\\r"
-        case '\n' => "\\n"
-        case '\t' => "\\t"
-        case '"' => "\\\""
-        case '\\' => "\\\\"
-        case c =>
-          if (c <= 255) {
-            "\\x%02x" format c.toInt
-          } else {
-            "\\u%04x" format c.toInt
-          }
-      }
+    regexSub(QUOTE_RE) {
+      m =>
+        m.matched.charAt(0) match {
+          case '\r' => "\\r"
+          case '\n' => "\\n"
+          case '\t' => "\\t"
+          case '"' => "\\\""
+          case '\\' => "\\\\"
+          case c =>
+            if (c <= 255) {
+              "\\x%02x" format c.toInt
+            } else {
+              "\\u%04x" format c.toInt
+            }
+        }
     }
   }
 
@@ -106,15 +107,16 @@ final class ConfiggyString(wrapped: String) {
    */
   def unquoteC() = {
     def unhex(s: String): Char = Integer.valueOf(s, 16).intValue.toChar
-    regexSub(UNQUOTE_RE) { m =>
-      val ch = m.group(1).charAt(0) match {
-        case 'u' | 'x'  => unhex(m.group(1) drop 1)
-        case 'r'        => '\r'
-        case 'n'        => '\n'
-        case 't'        => '\t'
-        case x          => x
-      }
-      ch.toString
+    regexSub(UNQUOTE_RE) {
+      m =>
+        val ch = m.group(1).charAt(0) match {
+          case 'u' | 'x' => unhex(m.group(1) drop 1)
+          case 'r' => '\r'
+          case 'n' => '\n'
+          case 't' => '\t'
+          case x => x
+        }
+        ch.toString
     }
   }
 
@@ -125,7 +127,7 @@ final class ConfiggyString(wrapped: String) {
   def unhexlify(): Array[Byte] = {
     val buffer = new Array[Byte](wrapped.length / 2)
     for (i <- 0.until(wrapped.length, 2)) {
-      buffer(i/2) = Integer.parseInt(wrapped.substring(i, i+2), 16).toByte
+      buffer(i / 2) = Integer.parseInt(wrapped.substring(i, i + 2), 16).toByte
     }
     buffer
   }
@@ -152,5 +154,6 @@ final class ConfiggyByteArray(wrapped: Array[Byte]) {
 
 object extensions {
   implicit def stringToConfiggyString(s: String): ConfiggyString = new ConfiggyString(s)
+
   implicit def byteArrayToConfiggyByteArray(b: Array[Byte]): ConfiggyByteArray = new ConfiggyByteArray(b)
 }

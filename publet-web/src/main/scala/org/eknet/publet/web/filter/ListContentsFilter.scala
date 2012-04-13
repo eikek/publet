@@ -2,7 +2,7 @@ package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.slf4j.LoggerFactory
-import com.twitter.json.Json
+import org.eknet.publet.engine.scalascript.com.twitter.json.Json
 import org.eknet.publet.{Publet, Path}
 import org.eknet.publet.resource._
 import java.net.URLDecoder

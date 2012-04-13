@@ -1,3 +1,5 @@
+package org.eknet.publet.engine.scalascript.com.twitter.json
+
 /*
  * Copyright 2009 Twitter, Inc.
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.twitter.json
 
 import extensions._
 import scala.util.Sorting
@@ -34,33 +34,36 @@ class JsonException(reason: String) extends Exception(reason)
 private class EscapedStringParser extends JavaTokenParsers {
   override protected val whiteSpace = "".r
 
-  def unicode: Parser[String] = rep1("\\u" ~> """[a-fA-F0-9]{4}""".r) ^^ { stringBytes =>
-    new String(stringBytes.map(Integer.valueOf(_, 16).intValue.asInstanceOf[Char]).toArray)
+  def unicode: Parser[String] = rep1("\\u" ~> """[a-fA-F0-9]{4}""".r) ^^ {
+    stringBytes =>
+      new String(stringBytes.map(Integer.valueOf(_, 16).intValue.asInstanceOf[Char]).toArray)
   }
 
-  def escaped: Parser[String] = "\\" ~> """[\\/bfnrt"]""".r ^^ { charStr =>
-    val char = charStr match {
-      case "r" => '\r'
-      case "n" => '\n'
-      case "t" => '\t'
-      case "b" => '\b'
-      case "f" => '\f'
-      case x => x.charAt(0)
-    }
-    char.toString
+  def escaped: Parser[String] = "\\" ~> """[\\/bfnrt"]""".r ^^ {
+    charStr =>
+      val char = charStr match {
+        case "r" => '\r'
+        case "n" => '\n'
+        case "t" => '\t'
+        case "b" => '\b'
+        case "f" => '\f'
+        case x => x.charAt(0)
+      }
+      char.toString
   }
 
   def characters: Parser[String] = """[^\"[\x00-\x1F]\\]+""".r // comment to fix emac parsing "
 
-  def string: Parser[String] = "\"" ~> rep(unicode | escaped | characters) <~ "\"" ^^ { list =>
-    list.mkString("")
+  def string: Parser[String] = "\"" ~> rep(unicode | escaped | characters) <~ "\"" ^^ {
+    list =>
+      list.mkString("")
   }
 
   def parse(s: String) = {
     parseAll(string, s) match {
       case Success(result, _) => result
-      case x @ Failure(msg, z) => throw new JsonException(x.toString)
-      case x @ Error(msg, _) => throw new JsonException(x.toString)
+      case x@Failure(msg, z) => throw new JsonException(x.toString)
+      case x@Error(msg, _) => throw new JsonException(x.toString)
     }
   }
 }
@@ -87,8 +90,9 @@ private class JsonParser extends JavaTokenParsers {
 
   lazy val stringParser = (new EscapedStringParser)
 
-  def string: Parser[String] = "\"(\\\\\\\\|\\\\\"|[^\"])*+\"".r ^^ { escapedStr =>
-    stringParser.parse(escapedStr)
+  def string: Parser[String] = "\"(\\\\\\\\|\\\\\"|[^\"])*+\"".r ^^ {
+    escapedStr =>
+      stringParser.parse(escapedStr)
   }
 
   def value: Parser[Any] = obj | arr | string | number |
@@ -97,8 +101,8 @@ private class JsonParser extends JavaTokenParsers {
   def parse(s: String) = {
     parseAll(value, s) match {
       case Success(result, _) => result
-      case x @ Failure(msg, z) => throw new JsonException(x.toString)
-      case x @ Error(msg, _) => throw new JsonException(x.toString)
+      case x@Failure(msg, z) => throw new JsonException(x.toString)
+      case x@Error(msg, _) => throw new JsonException(x.toString)
     }
   }
 }
@@ -127,16 +131,17 @@ object Json {
    */
   def quote(s: String) = {
     val charCount = s.codePointCount(0, s.length)
-    "\"" + 0.to(charCount - 1).map { idx =>
-      s.codePointAt(s.offsetByCodePoints(0, idx)) match {
-        case 0x0d => "\\r"
-        case 0x0a => "\\n"
-        case 0x09 => "\\t"
-        case 0x22 => "\\\""
-        case 0x5c => "\\\\"
-        case 0x2f => "\\/"     // to avoid sending "</"
-        case c => quotedChar(c)
-      }
+    "\"" + 0.to(charCount - 1).map {
+      idx =>
+        s.codePointAt(s.offsetByCodePoints(0, idx)) match {
+          case 0x0d => "\\r"
+          case 0x0a => "\\n"
+          case 0x09 => "\\t"
+          case 0x22 => "\\\""
+          case 0x5c => "\\\\"
+          case 0x2f => "\\/" // to avoid sending "</"
+          case c => quotedChar(c)
+        }
     }.mkString("") + "\""
   }
 
@@ -153,8 +158,11 @@ object Json {
       case list: Seq[_] =>
         list.map(build(_).body).mkString("[", ",", "]")
       case map: scala.collection.Map[_, _] =>
-        Sorting.stableSort[(Any, Any), String](map.iterator.toList, { case (k, v) => k.toString }).map { case (k, v) =>
-          quote(k.toString) + ":" + build(v).body
+        Sorting.stableSort[(Any, Any), String](map.iterator.toList, {
+          case (k, v) => k.toString
+        }).map {
+          case (k, v) =>
+            quote(k.toString) + ":" + build(v).body
         }.mkString("{", ",", "}")
       case x: JsonSerializable => x.toJson()
       case x =>
