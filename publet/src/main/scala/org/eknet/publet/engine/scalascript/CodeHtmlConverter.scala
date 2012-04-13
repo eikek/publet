@@ -10,7 +10,7 @@ import org.eknet.publet.resource.{NodeContent, Content}
  * @since 12.04.12 14:13
  */
 
-object ScalaHtmlConverter extends ConverterEngine#Converter {
+object CodeHtmlConverter extends ConverterEngine#Converter {
   def apply(v1: Content) = {
     NodeContent(<pre><code>{ v1.contentAsString }</code></pre>, html)
   }
