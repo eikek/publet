@@ -1,3 +1,4 @@
+$(document).ready(renderFileBrowser());
 
 function getContentsAsUl(pathname, f) {
     var loc = window.location;

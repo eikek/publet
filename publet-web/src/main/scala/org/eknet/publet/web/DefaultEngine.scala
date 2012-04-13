@@ -2,12 +2,12 @@ package org.eknet.publet.web
 
 import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.engine.convert.{ConverterEngine, KnockoffConverter}
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 import scala.xml.NodeSeq
 import org.eknet.publet.engine.scalascript.CodeHtmlConverter
 import template._
+import org.eknet.publet.engine.convert.{DefaultConverterEngine, KnockoffConverter}
 
 /**
  *
@@ -18,7 +18,7 @@ import template._
 class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngine {
   self =>
 
-  private val convEngine = ConverterEngine()
+  val convEngine = new DefaultConverterEngine('include)
   convEngine.addConverter(markdown -> html, KnockoffConverter)
   convEngine.addConverter(scal -> html, CodeHtmlConverter)
   convEngine.addConverter(css -> html, CodeHtmlConverter)
@@ -27,6 +27,7 @@ class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngi
   private val defaultEngine = new HtmlTemplateEngine('main, convEngine)
       with YamlTemplate
       with HighlightTemplate
+      with PubletTemplate
       with CustomCssTemplate {
 
     def publet = self.publet

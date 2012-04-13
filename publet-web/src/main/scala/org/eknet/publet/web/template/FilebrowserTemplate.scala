@@ -31,7 +31,6 @@ trait FilebrowserTemplate extends Yaml2ColTemplate with InstallCallback {
       <link type="text/css" rel="stylesheet" href={ base + "browser/browser.css" }></link>
       <script src={ base +"browser/jquery-1.7.2.min.js" } ></script>
       <script src={ base +"browser/browser.js" } ></script>
-      <script>renderFileBrowser();</script>
     }
   }
 

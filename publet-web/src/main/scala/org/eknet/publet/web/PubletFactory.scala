@@ -1,7 +1,5 @@
 package org.eknet.publet.web
 
-import org.eknet.publet.engine._
-import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.Publet
 import scalascript.ScalaScriptEvalEngine
 import template._
@@ -17,12 +15,14 @@ object PubletFactory {
 
     val defaultEngine = new DefaultEngine(publ)
     publ.register("/*", defaultEngine)
+    publ.addEngine(defaultEngine.convEngine)
 
     val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
     publ.addEngine(editEngine)
 
-    val scalaEngine = new ScalaScriptEvalEngine('eval, defaultEngine)
+    val scalaEngine = new ScalaScriptEvalEngine('eval, defaultEngine.convEngine)
     publ.addEngine(scalaEngine)
+    
     publ
   }
 
