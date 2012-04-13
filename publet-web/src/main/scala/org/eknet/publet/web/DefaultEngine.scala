@@ -6,7 +6,7 @@ import org.eknet.publet.engine.convert.{ConverterEngine, KnockoffConverter}
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 import scala.xml.NodeSeq
-import org.eknet.publet.engine.scalascript.ScalaHtmlConverter
+import org.eknet.publet.engine.scalascript.CodeHtmlConverter
 import template._
 
 /**
@@ -20,7 +20,9 @@ class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngi
 
   private val convEngine = ConverterEngine()
   convEngine.addConverter(markdown -> html, KnockoffConverter)
-  convEngine.addConverter(scal -> html, ScalaHtmlConverter)
+  convEngine.addConverter(scal -> html, CodeHtmlConverter)
+  convEngine.addConverter(css -> html, CodeHtmlConverter)
+  convEngine.addConverter(javascript -> html, CodeHtmlConverter)
 
   private val defaultEngine = new HtmlTemplateEngine('main, convEngine)
       with YamlTemplate
