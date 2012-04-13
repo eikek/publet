@@ -47,7 +47,6 @@ object EditEngine extends PubletEngine with InstallCallback {
 
     //split into 4 sublists
     val list = ContentType.forMimeBase(path.targetType.get)
-    println("size: "+list.length )
     val sz = list.length / 4
     val parts = (list take sz,
       (list drop sz) take sz,

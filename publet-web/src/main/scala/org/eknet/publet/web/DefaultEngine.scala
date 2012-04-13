@@ -4,10 +4,10 @@ import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.convert.{ConverterEngine, KnockoffConverter}
 import org.eknet.publet.{Path, Publet}
-import template.{Yaml2ColTemplate, HighlightTemplate, YamlTemplate, HtmlTemplateEngine}
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 import scala.xml.NodeSeq
 import org.eknet.publet.engine.scalascript.ScalaHtmlConverter
+import template._
 
 /**
  *
@@ -16,12 +16,19 @@ import org.eknet.publet.engine.scalascript.ScalaHtmlConverter
  */
 
 class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngine {
+  self =>
 
   private val convEngine = ConverterEngine()
   convEngine.addConverter(markdown -> html, KnockoffConverter)
   convEngine.addConverter(scal -> html, ScalaHtmlConverter)
 
-  private val defaultEngine = new HtmlTemplateEngine('main, convEngine) with YamlTemplate with HighlightTemplate
+  private val defaultEngine = new HtmlTemplateEngine('main, convEngine)
+      with YamlTemplate
+      with HighlightTemplate
+      with CustomCssTemplate {
+
+    def publet = self.publet
+  }
   defaultEngine.onInstall(publet)
 
   object SidebarEngine extends HtmlTemplateEngine('sidebar, convEngine) with Yaml2ColTemplate with HighlightTemplate {
