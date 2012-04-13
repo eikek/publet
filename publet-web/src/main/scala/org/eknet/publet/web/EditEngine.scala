@@ -45,29 +45,25 @@ object EditEngine extends PubletEngine with InstallCallback {
       </div>
     }
 
-    //split into 4 sublists
+    val cols = 4
+    //split into $cols sublists
     val list = ContentType.forMimeBase(path.targetType.get)
-    val sz = list.length / 4
-    val parts = (list take sz,
-      (list drop sz) take sz,
-      (list drop (2*sz)) take sz,
-      list drop (3*sz))
-    val max  = scala.math.max(parts._1.length,
-        scala.math.max(parts._2.length,
-          scala.math.max(parts._3.length, parts._4.length)))
+    val parts = list.grouped(list.length / cols).toList
+    val max  = parts.foldLeft(0)((i, list) => scala.math.max(i, list.length))
 
     <div class="ym-fbox-check">
     <table>
-      {
-      for (i <- 0 to (max-1)) yield {
+    {
+      for (r <- 0 to (max-1)) yield {
         <tr>
-          { if (i<parts._1.length) { <td> {snippet(parts._1(i))} </td>} else {<td></td>} }
-          { if (i<parts._2.length) { <td> {snippet(parts._2(i))} </td>} else {<td></td>} }
-          { if (i<parts._3.length) { <td> {snippet(parts._3(i))} </td>} else {<td></td>} }
-          { if (i<parts._4.length) { <td> {snippet(parts._4(i))} </td>} else {<td></td>} }
+        {
+          for (c <- 0 to (cols-1)) yield {
+            if (r < parts(c).length) {<td> {snippet(parts(c)(r))} </td>} else {<td></td>}
+          }  
+        }
         </tr>
       }
-      }
+    }
     </table>
     </div>
   }
