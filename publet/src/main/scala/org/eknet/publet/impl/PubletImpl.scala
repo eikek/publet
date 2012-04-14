@@ -20,7 +20,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
   def process(path: Path, target: ContentType) = {
     //lookup engine for uri pattern
     val engine = resolveEngine(path)
-      .getOrElse(error("No engine found for uri: "+ path))
+      .getOrElse(throwException("No engine found for uri: "+ path))
 
     process(path, target, engine)
   }
@@ -57,7 +57,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
 
   def findSources(path: Path): Seq[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
-    val part = resolveMount(path).getOrElse(error("No partition mounted for path: "+ path))
+    val part = resolveMount(path).getOrElse(throwException("No partition mounted for path: "+ path))
     val source = part._2
     val sourcePath = part._1
 
@@ -71,7 +71,7 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
   }
 
   def create(path: Path, contentType: ContentType) {
-    val t = resolveMount(path).getOrElse(error("No partition mounted for path: "+ path))
+    val t = resolveMount(path).getOrElse(throwException("No partition mounted for path: "+ path))
     val p = path.strip(t._1)
     t._2.newContent(p.withExtension(contentType.extensions.head)).createWithParents()
   }

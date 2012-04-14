@@ -3,6 +3,7 @@ package org.eknet.publet.web
 import org.eknet.publet.Publet
 import template._
 import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
+import org.eknet.publet.engine.PubletEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -20,10 +21,17 @@ object PubletFactory {
     val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
     publ.addEngine(editEngine)
 
-    val scalaEngine = new ScalaScriptEvalEngine('eval, defaultEngine.convEngine)
+    val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine.convEngine)
     publ.addEngine(scalaEngine)
     
     publ
   }
 
+  private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {
+    override def importPackages = super.importPackages ++ List(
+    "org.eknet.publet.web.WebContext",
+    "org.eknet.publet.web.AttributeMap",
+    "org.eknet.publet.web.Key"
+    )
+  }
 }

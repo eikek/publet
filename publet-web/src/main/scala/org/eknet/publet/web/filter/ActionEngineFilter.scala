@@ -2,6 +2,7 @@ package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.resource.ContentType
+import org.eknet.publet.web.WebContext
 
 /** Filter that processes the resource using the engine
  * as specified with `a=` http request parameter.
@@ -13,7 +14,7 @@ import org.eknet.publet.resource.ContentType
 object ActionEngineFilter extends Filter with PageWriter {
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
-    action(req) match {
+    WebContext().action match {
       case Some(engine) => process(req, resp, engine); true
       case _ => false
     }
@@ -21,12 +22,10 @@ object ActionEngineFilter extends Filter with PageWriter {
 
   def process(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
-//    if (path(req).targetType.getOrElse(ContentType.unknown).mime._1 == "text") {
-      val targetType = path(req).targetType.getOrElse(ContentType.unknown)
-      val html = publet(req).process(path(req), targetType, publet(req).getEngine(engineId).get)
-      html.fold(writeError(_, path(req), resp), writePage(_, path(req), req, resp))
-//    } else {
-//      createNew(path(req), req, resp)
-//    }
+    val path = WebContext().requestPath
+    val publet = WebContext().publet
+    val targetType = path.targetType.getOrElse(ContentType.unknown)
+    val html = publet.process(path, targetType, publet.getEngine(engineId).get)
+    html.fold(writeError(_, path, resp), writePage(_, path, req, resp))
   }
 }

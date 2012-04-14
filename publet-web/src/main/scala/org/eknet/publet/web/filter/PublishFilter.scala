@@ -2,6 +2,7 @@ package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.resource.ContentType
+import org.eknet.publet.web.WebContext
 
 /**
  *
@@ -12,8 +13,10 @@ import org.eknet.publet.resource.ContentType
 object PublishFilter extends Filter with PageWriter {
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
-    val html = publet(req).process(path(req), path(req).targetType.getOrElse(ContentType.html))
-    html.fold(writeError(_, path(req), resp), writePage(_, path(req), req, resp))
+    val publet = WebContext().publet
+    val path = WebContext().requestPath
+    val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
+    html.fold(writeError(_, path, resp), writePage(_, path, req, resp))
     true
   }
 

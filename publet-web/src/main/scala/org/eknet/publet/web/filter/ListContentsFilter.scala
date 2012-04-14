@@ -7,6 +7,7 @@ import org.eknet.publet.{Publet, Path}
 import org.eknet.publet.resource._
 import java.net.URLDecoder
 import collection.mutable
+import org.eknet.publet.web.WebContext
 
 /**
  *
@@ -14,7 +15,7 @@ import collection.mutable
  * @since 10.04.12 12:37
  */
 
-object ListContentsFilter extends Filter with FilterContext {
+object ListContentsFilter extends Filter {
   private val log = LoggerFactory.getLogger(getClass)
   private val resourceComparator = (r1: Resource, r2: Resource) => {
     if (r1.isContainer && !r2.isContainer) true
@@ -23,12 +24,12 @@ object ListContentsFilter extends Filter with FilterContext {
   }
 
   def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
-    action(req) match {
+    WebContext().action match {
       case Some("list") => {
-        val path = decodePath(req)
+        val path = WebContext().decodePath
         val p = if (path.directory) path else path.parent
         val contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
-        val json = createJsonMap(p, publet(req), contextPath)
+        val json = createJsonMap(p, WebContext().publet, contextPath)
         Content(json.toString, ContentType.json).copyTo(resp.getOutputStream)
         true
       }

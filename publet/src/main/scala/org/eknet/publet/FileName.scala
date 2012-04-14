@@ -1,6 +1,7 @@
 package org.eknet.publet
 
 import resource.ContentType
+import org.eknet.publet.impl.Conversions._
 
 /**
  *
@@ -36,7 +37,7 @@ class FileName(val path: Path) {
    * and `test.htm`.
    *
    */
-  lazy val pathsForTarget = pathsFor(targetType.getOrElse(error("Target type cannot be determined: " + path)))
+  lazy val pathsForTarget = pathsFor(targetType.getOrElse(throwException("Target type cannot be determined: " + path)))
 
 
   lazy val name = {

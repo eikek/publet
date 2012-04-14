@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
 import org.eknet.publet.Path
-import java.net.URL
+import org.eknet.publet.impl.Conversions._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -24,7 +24,7 @@ class ClasspathPartition(val id: Symbol, clazz: Class[_], root: Path) extends Pa
 
   def hasEntry(name: String) = clazz.getResource((root/name).asString) != null
 
-  def newContainer(path: Path) = error("Classpath partitions does not support containers.")
+  def newContainer(path: Path) = throwException("Classpath partitions does not support containers.")
 
   def newContent(path: Path) = new UrlResource(Option(clazz.getResource((root/path).asString)))
 

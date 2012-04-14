@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
 import java.io.File
-import org.eknet.publet.Path.apply
+import org.eknet.publet.impl.Conversions._
 import org.eknet.publet.Path
 
 /**
@@ -39,17 +39,17 @@ object ContentType {
 
   def apply(ext: String): ContentType = {
     all.find(_.extensions.contains(ext.toLowerCase))
-      .orElse(error("unknown type: " + ext)).get
+      .orElse(throwException("unknown type: " + ext)).get
   }
 
   def apply(name: Symbol): ContentType = {
     all.find(_.typeName == name)
-      .orElse(error("Unknown type: " + name)).get
+      .orElse(throwException("Unknown type: " + name)).get
   }
 
   def apply(mime: (String, String)): ContentType = {
     all.find(_.mime == mime)
-      .orElse(error("Unknown mime type: " + mime)).get
+      .orElse(throwException("Unknown mime type: " + mime)).get
   }
 
   def forMimeBase(t: ContentType): Seq[ContentType] = all.toSeq.filter(_.mime._1 == t.mime._1)

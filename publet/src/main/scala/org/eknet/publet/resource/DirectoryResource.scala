@@ -2,6 +2,7 @@ package org.eknet.publet.resource
 
 import org.eknet.publet.Path
 import java.io.File
+import org.eknet.publet.impl.Conversions._
 
 /**
  *
@@ -21,7 +22,7 @@ class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir
 
   def child(name: String) = {
     val f = new File(dir, name)
-    if (!f.exists) error("Child does not exist")
+    if (!f.exists) throwException("Child does not exist")
     else if (f.isDirectory) new DirectoryResource(f, root)
          else new FileResource(f, root)
   }

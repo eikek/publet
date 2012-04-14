@@ -2,6 +2,7 @@ package org.eknet.publet.resource
 
 import java.io.File
 import org.eknet.publet.Path
+import org.eknet.publet.impl.Conversions._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,7 +37,7 @@ class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true)
 
   def hasEntry(name: String) = new File(root, name).exists()
 
-  private def resourceFrom(f: File) = if (!f.exists()) error("File does not exist.")
+  private def resourceFrom(f: File) = if (!f.exists()) throwException("File does not exist.")
     else if (f.isDirectory)
       new DirectoryResource(f, root) else
       new FileResource(f, root)

@@ -24,7 +24,8 @@ object RootBuild extends Build {
     version := "1.0.0-SNAPSHOT",
     scalaVersion := scala,
     sbtPlugin := true,
-    resolvers := Seq(Resolvers.eknet)
+    resolvers := Seq(Resolvers.eknet),
+    scalacOptions ++= Seq("-unchecked", "-deprecation")
   )
 }
 

@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
 import org.eknet.publet.Path
-
+import org.eknet.publet.impl.Conversions._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -52,11 +52,11 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
   def exists = true
 
   def delete() {
-    error("Resource not available")
+    throwException("Resource not available")
   }
 
   def create() {
-    error("Resource not available")
+    throwException("Resource not available")
   }
 
   def children = rp.nextSegments(path).map(s => new PathResource(rp, path.child(s)))
@@ -70,11 +70,11 @@ private class PathResource(rp: RootPartition, val path: Path) extends ContainerR
       case Some(r) => r.asInstanceOf[T]
       case None => {
         rp.resolveMount(path / name) match {
-          case None => error("No mount point for: "+ path)
+          case None => throwException("No mount point for: "+ path)
           case Some(part) => createResource(part._2)
         }
       }
-      case _ => error("unreachable code path")
+      case _ => throwException("unreachable code path")
     }
   }
 

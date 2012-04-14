@@ -43,10 +43,14 @@ class PubletServlet extends HttpServlet {
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
+    WebContext.setup(req)
     filter.handle(req, resp)
+    WebContext.clear()
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) {
+    WebContext.setup(req)
     filter.handle(req, resp)
+    WebContext.clear()
   }
 }

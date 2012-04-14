@@ -37,11 +37,11 @@ class UrlResource(val url: Option[URL]) extends ContentResource {
   def exists = url.isDefined
 
   def delete() {
-    error("deleting url not supported")
+    throwException("deleting url not supported")
   }
 
   def create() {
-    error("Creating url not supported")
+    throwException("Creating url not supported")
   }
 
   def inputStream = url.get.openStream()
