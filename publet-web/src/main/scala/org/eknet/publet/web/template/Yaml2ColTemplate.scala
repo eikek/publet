@@ -1,8 +1,8 @@
 package org.eknet.publet.web.template
 
 import org.eknet.publet.Path
-import org.eknet.publet.resource.NodeContent
 import xml.NodeSeq
+import org.eknet.publet.resource.{Content, NodeContent}
 
 /**
  *
@@ -11,7 +11,7 @@ import xml.NodeSeq
  */
 
 trait Yaml2ColTemplate extends YamlTemplate {
-  override def yamlMain(path: Path, content: NodeContent) = {
+  override def yamlMain(path: Path, content: NodeContent, source: Seq[Content]) = {
     val body = removeHeadline(content)
     <div class="ym-wrapper">
       <div class="ym-wbox">
@@ -23,7 +23,7 @@ trait Yaml2ColTemplate extends YamlTemplate {
           </article>
           <aside class="ym-g33 ym-gr">
             <div class="ym-gbox-right ym-clearfix">
-              { yamlColumn(path, content) }
+              { yamlColumn(path, content, source) }
             </div>
           </aside>
         </section>
@@ -31,6 +31,6 @@ trait Yaml2ColTemplate extends YamlTemplate {
     </div>
   }
 
-  def yamlColumn(path: Path, content: NodeContent): NodeSeq
+  def yamlColumn(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq
 
 }

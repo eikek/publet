@@ -4,7 +4,7 @@ import org.eknet.publet.impl.InstallCallback
 import java.util.UUID
 import org.eknet.publet.resource.Partition._
 import org.eknet.publet.{Path, Publet}
-import org.eknet.publet.resource.NodeContent
+import org.eknet.publet.resource.{Content, NodeContent}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,9 +21,9 @@ trait PubletTemplate extends HtmlTemplate with InstallCallback {
     publ.mount(Path("/"+randomRoot+"/jquery"), jqueryPartition)
   }
 
-  override def headerHtml(path: Path, content: NodeContent) = {
+  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
     val base = path.relativeRoot + randomRoot + "/"
-    super.headerHtml(path, content) ++
+    super.headerHtml(path, content, source) ++
     {
       <script src={ base + "jquery/jquery-1.7.2.min.js" }></script>
       <script src={ base + "jquery/publet.js" }></script>

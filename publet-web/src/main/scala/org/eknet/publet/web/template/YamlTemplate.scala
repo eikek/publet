@@ -3,10 +3,10 @@ package org.eknet.publet.web.template
 import java.util.UUID
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.impl.InstallCallback
-import org.eknet.publet.resource.NodeContent
 import org.eknet.publet.resource.Partition._
-import xml.{NodeSeq, Node}
 import xml.transform.{RuleTransformer, RewriteRule}
+import org.eknet.publet.resource.{ContentType, Content, NodeContent}
+import xml.{Null, NodeSeq, Node}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -23,17 +23,25 @@ trait YamlTemplate extends InstallCallback with HtmlTemplate {
     publ.mount(Path("/"+randPath+"/yaml"), yamlPartition)
   }
 
-  override def headerHtml(path: Path, content: NodeContent) = {
+  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
     val base = path.relativeRoot + randPath + "/"
-    super.headerHtml(path, content) ++
+    super.headerHtml(path, content, source) ++
     {
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <link href={ base+"yaml/single-page.css" } rel="stylesheet" type="text/css"/>
     }
   }
 
-  def yamlHead(path: Path, content: NodeContent): NodeSeq = {
-    <a href="?a=edit" style="display:inline; float:right" class="ym-clearfix">Edit</a>
+  def yamlHead(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = {
+    val evalLink = if (source.find(_.contentType == ContentType.scal).isDefined)
+      { <span> :: </span><a href="?a=eval">Eval</a>}
+    else
+      NodeSeq.Empty
+
+
+    <span style="float:right" class="ym-clearfix">
+    <a href="?a=edit">Edit</a> { evalLink }
+    </span>
   }
 
   def removeHeadline(content:NodeContent): Option[NodeSeq] = {
@@ -48,7 +56,7 @@ trait YamlTemplate extends InstallCallback with HtmlTemplate {
     }
   }
 
-  def yamlMain(path: Path, content: NodeContent): NodeSeq = {
+  def yamlMain(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = {
     //remove page title from body if present
     val body = removeHeadline(content)
     
@@ -59,7 +67,7 @@ trait YamlTemplate extends InstallCallback with HtmlTemplate {
     </div>
   }
   
-  override final def bodyHtml(path: Path, content: NodeContent) = {
+  override final def bodyHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
     val base = path.relativeRoot + randPath + "/"
     <ul class="ym-skiplinks">
       <li><a class="ym-skip" href="#nav">Skip to navigation (Press Enter)</a></li>
@@ -68,13 +76,13 @@ trait YamlTemplate extends InstallCallback with HtmlTemplate {
     <header>
       <div class="ym-wrapper">
         <div class="ym-wbox">
-          <h1> { title(path, content) } </h1>
-          { yamlHead(path, content) }
+          <h1> { title(path, content, source) } </h1>
+          { yamlHead(path, content, source) }
         </div>
       </div>
     </header>
     <div id="main">
-      { yamlMain(path, content) }
+      { yamlMain(path, content, source) }
     </div>
     <footer>
       <div class="ym-wrapper">

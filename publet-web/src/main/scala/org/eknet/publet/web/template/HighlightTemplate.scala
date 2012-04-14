@@ -3,8 +3,8 @@ package org.eknet.publet.web.template
 import org.eknet.publet.impl.InstallCallback
 import java.util.UUID
 import org.eknet.publet.{Publet, Path}
-import org.eknet.publet.resource.NodeContent
 import org.eknet.publet.resource.Partition._
+import org.eknet.publet.resource.{Content, NodeContent}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,9 +21,9 @@ trait HighlightTemplate extends InstallCallback with HtmlTemplate {
     publ.mount(Path("/"+randomRoot+"/highlight"), highlightPartition)
   }
 
-  override def headerHtml(path: Path, content: NodeContent) = {
+  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
     val base = path.relativeRoot + randomRoot + "/"
-    super.headerHtml(path, content) ++
+    super.headerHtml(path, content, source) ++
     {
       <link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
       <script src={ base + "highlight/highlight.pack.js" }></script>

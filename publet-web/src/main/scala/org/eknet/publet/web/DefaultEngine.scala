@@ -35,7 +35,7 @@ class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngi
   defaultEngine.onInstall(publet)
 
   object SidebarEngine extends HtmlTemplateEngine('sidebar, convEngine) with Yaml2ColTemplate with HighlightTemplate {
-    def yamlColumn(path: Path, content: NodeContent) = {
+    def yamlColumn(path: Path, content: NodeContent, source: Seq[Content]) = {
       val sidebarPath = path.sibling("_sidebar.html").withExtension(path.targetType.get.extensions.head)
       publet.process(sidebarPath, path.targetType.get, convEngine) match {
         case Right(Some(c: NodeContent)) => c.node

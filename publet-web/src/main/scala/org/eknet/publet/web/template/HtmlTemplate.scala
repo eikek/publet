@@ -16,7 +16,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def title(path: Path, content: NodeContent): String = {
+  def title(path: Path, content: NodeContent, source: Seq[Content]): String = {
     findHead(content, 1, 4) match {
       case None => path.fileName.name
       case Some(n) => n.text
@@ -41,7 +41,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def headerHtml(path: Path, content: NodeContent): NodeSeq = NodeSeq.Empty
+  def headerHtml(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = NodeSeq.Empty
 
   /** Returns the html body part.
    * 
@@ -49,21 +49,21 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def bodyHtml(path: Path, content: NodeContent): NodeSeq = content.node
+  def bodyHtml(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = content.node
   
   def charset = "utf-8"
   
-  def apply(path: Path, content: NodeContent): Content = {
+  def apply(path: Path, content: NodeContent, source: Seq[Content]): Content = {
     val body = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
        "http://www.w3.org/TR/html4/loose.dtd">"""+ "\n"+
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset={ charset }/>
-      <title>{ title(path, content) }</title>
-      { headerHtml(path, content) }
+      <title>{ title(path, content, source) }</title>
+      { headerHtml(path, content, source) }
     </head>
     <body>
-      { bodyHtml(path, content) }
+      { bodyHtml(path, content, source) }
     </body>
   </html>.toString()
     Content(body, ContentType.html)

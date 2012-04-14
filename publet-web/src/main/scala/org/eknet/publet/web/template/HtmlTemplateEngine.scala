@@ -13,7 +13,7 @@ class HtmlTemplateEngine(val name: Symbol, engine: PubletEngine) extends PubletE
   
   def process(path: Path, data: Seq[Content], target: ContentType) = {
     engine.process(path, data, target) match {
-      case Right(nc:NodeContent) => Right[Exception, Content](apply(path, nc))
+      case Right(nc:NodeContent) => Right[Exception, Content](apply(path, nc, data))
       case l @ _  => l
     }
   }
