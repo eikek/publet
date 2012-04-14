@@ -17,7 +17,14 @@ object UploadContent {
       <div class="ym-fbox-button">
         <input type="submit" value="Save"></input>
       </div>
-    </form>
+    </form> ++ imageView(path)
+  }
+  
+  private def imageView(path: Path): NodeSeq = {
+    path.targetType match {
+      case Some(t) if (t.mime._1 == "image") => <p>Current image:</p><img src={path.segments.last}/>
+      case _ => NodeSeq.Empty
+    }
   }
 
   def uploadContent(path: Path) = NodeContent(uploadBody(path), ContentType.html)
