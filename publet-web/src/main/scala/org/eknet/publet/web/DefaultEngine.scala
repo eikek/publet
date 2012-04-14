@@ -20,9 +20,9 @@ class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngi
 
   val convEngine = new DefaultConverterEngine('include)
   convEngine.addConverter(markdown -> html, KnockoffConverter)
-  convEngine.addConverter(scal -> html, CodeHtmlConverter)
-  convEngine.addConverter(css -> html, CodeHtmlConverter)
-  convEngine.addConverter(javascript -> html, CodeHtmlConverter)
+  convEngine.addConverter(scal -> html, CodeHtmlConverter.scala)
+  convEngine.addConverter(css -> html, CodeHtmlConverter.css)
+  convEngine.addConverter(javascript -> html, CodeHtmlConverter.json)
 
   private val defaultEngine = new HtmlTemplateEngine('main, convEngine)
       with YamlTemplate

@@ -31,7 +31,7 @@ trait HighlightTemplate extends InstallCallback with HtmlTemplate {
     }
   }
   
-  def highlightStyle = HighlightTemplate.Styles.idea
+  def highlightStyle = HighlightTemplate.Styles.googlecode
 }
 
 object HighlightTemplate {
@@ -44,9 +44,11 @@ object HighlightTemplate {
     val default = Value("default")
     val far = Value("far")
     val github = Value("github")
+    val googlecode = Value("googlecode")
     val idea = Value("idea")
     val irblack = Value("ir_black")
     val magula = Value("magula")
+    val monokai = Value("monokai")
     val schoolbook = Value("school_book")
     val solarizedlight = Value("solarized_light")
     val solarizeddark = Value("solarized_dark")

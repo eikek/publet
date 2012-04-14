@@ -10,8 +10,22 @@ import org.eknet.publet.resource.{NodeContent, Content}
  * @since 12.04.12 14:13
  */
 
-object CodeHtmlConverter extends ConverterEngine#Converter {
+class CodeHtmlConverter(langClass: Option[String]) extends ConverterEngine#Converter {
   def apply(v1: Content) = {
-    NodeContent(<pre><code>{ v1.contentAsString }</code></pre>, html)
+    val code = langClass match {
+      case None => <code>{ v1.contentAsString }</code>
+      case Some(c) => <code class={c}>{ v1.contentAsString }</code>
+    }
+      
+    NodeContent(<pre>{code}</pre>, html)
   }
+}
+
+object CodeHtmlConverter {
+
+  def apply(): CodeHtmlConverter = new CodeHtmlConverter(None)
+
+  def scala: CodeHtmlConverter = new CodeHtmlConverter(Some("scala"))
+  def json: CodeHtmlConverter = new CodeHtmlConverter(Some("json"))
+  def css: CodeHtmlConverter = new CodeHtmlConverter(Some("css"))
 }
