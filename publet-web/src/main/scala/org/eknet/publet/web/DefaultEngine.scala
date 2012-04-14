@@ -28,10 +28,7 @@ class DefaultEngine(publet: Publet, val name: Symbol = 'main) extends PubletEngi
       with YamlTemplate
       with HighlightTemplate
       with PubletTemplate
-      with CustomCssTemplate {
-
-    def publet = self.publet
-  }
+      with IncludesTemplate
   defaultEngine.onInstall(publet)
 
   object SidebarEngine extends HtmlTemplateEngine('sidebar, convEngine) with Yaml2ColTemplate with HighlightTemplate {
