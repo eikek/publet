@@ -3,7 +3,7 @@ import Keys._
 
 object Resolvers {
   
-  val eknet = "eknet.org" at "http://maven.eknet.org"
+  val eknet = "eknet.org" at "http://maven.eknet.org/repo"
   
 }
 
@@ -40,7 +40,7 @@ object Dependencies {
   val commonsIo = "commons-io" % "commons-io" % "2.2"
   val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4"
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.scala
-//  val commonsLang = "org.apache.commons" % "commons-lang3" % "3.1"
+  val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
 }
 
 

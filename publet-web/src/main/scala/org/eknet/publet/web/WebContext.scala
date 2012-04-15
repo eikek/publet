@@ -1,6 +1,7 @@
 package org.eknet.publet.web
 
 import scala.collection.JavaConversions._
+import scala.collection._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
@@ -22,10 +23,42 @@ trait WebContext {
 
   def context: AttributeMap
 
-  def parameters: Map[String, Array[String]]
+  /** Returns all parameters of the
+   * request.
+   *
+   * @return
+   */
+  def parameters: Map[String, List[String]]
 
+  /**
+   * Gets the parameter value to the given name. If
+   * more than one value exists, the first is returned.
+   * 
+   * @param name
+   * @return
+   */
   def parameter(name: String): Option[String]
-  
+
+  /** Returns the value associated to the given key
+   * in `context` scope.
+   *
+   * If no value exists, the `init` function of the
+   * key is used to create a initial value. The `init`
+   * function is mandatory.
+   *
+   * The value is added to the servlet context
+   * attribute map to live across sessions and
+   * requests.
+   *
+   * @param key
+   * @tparam T
+   * @return
+   */
+  def service[T : Manifest](key: Key[T]): T = {
+    Predef.ensuring(key.init.isDefined, "no init defined")
+    context.get(key).get
+  }
+
   /** Returns the path to this request.
    *
    * Strips the context-path if present.
@@ -54,7 +87,7 @@ trait WebContext {
 }
 
 object WebContext {
-  val publetKey = new Key[Publet]("publet")
+  protected[web] val publetKey = new Key[Publet]("publet")
   
   private val params = new ThreadLocal[WebContext]()
   
@@ -69,7 +102,6 @@ object WebContext {
   }
 
   private class WebContextImpl(req: HttpServletRequest) extends WebContext {
-
     lazy val uploads: List[FileItem] = {
       val rct = req.getContentType
       if (rct != null && rct.startsWith("multipart")) {
@@ -86,7 +118,15 @@ object WebContext {
 
     lazy val context = new ContextMap(req.getSession.getServletContext)
 
-    lazy val parameters = req.getParameterMap.collect({ case p : (String, Array[String]) => p }).toMap
+    lazy val parameters = {
+      val buf = mutable.Map[String, List[String]]()
+      val pmap = req.getParameterMap
+      for (s <- pmap.keySet()) {
+        val v = pmap.get(s).asInstanceOf[Array[_]].toList.map(_.asInstanceOf[String])
+        buf.put(s.asInstanceOf[String], v)
+      }
+      buf.toMap
+    }
 
     def parameter(name: String) = Option(req.getParameter(name))
 

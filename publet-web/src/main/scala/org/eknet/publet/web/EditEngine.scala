@@ -24,7 +24,7 @@ object EditEngine extends PubletEngine with InstallCallback {
     <form action={ path.fileName.name+".html" } method="post" class="ym-form linearize-form ym-full">
       { typeSelect(path, content.contentType) }
       <div class="ym-fbox-text">
-        <textarea name="page">{ content.contentAsString }</textarea>
+        <textarea name="page" id="editPage">{ content.contentAsString }</textarea>
       </div>
       <div class="ym-fbox-button">
         <input type="submit" value="Save"></input>

@@ -61,6 +61,14 @@ object Content {
     val lastModification = Some(System.currentTimeMillis())
     val inputStream = in
   }
+  
+  def apply(in: Array[Byte], ct: ContentType): Content = new Content {
+    def contentType = ct
+
+    def inputStream = new ByteArrayInputStream(in)
+
+    def lastModification = Some(System.currentTimeMillis())
+  }
 
   def apply(url: URL): Content = {
     val ct = Path(url.getFile).targetType.get

@@ -29,6 +29,7 @@ object SuperFilter {
 
   def apply(): SuperFilter = {
     new SuperFilter(
+        ScriptRegistryFilter ::
         PushUploadFilter ::
         PushContentFilter ::
         ListContentsFilter ::

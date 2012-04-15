@@ -2,14 +2,9 @@ package org.eknet.publet.web
 
 import filter.SuperFilter
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
-import java.net.URLDecoder
 import org.slf4j.LoggerFactory
 import org.eknet.publet._
-import resource.{ContentType, Content, FilesystemPartition}
-import scala.collection.JavaConversions._
-import org.apache.commons.fileupload.FileItem
-import org.apache.commons.fileupload.servlet.ServletFileUpload
-import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import resource.FilesystemPartition
 import java.io.File
 
 /**
@@ -22,13 +17,16 @@ class PubletServlet extends HttpServlet {
   private val log = LoggerFactory.getLogger(getClass)
   private val filter = SuperFilter()
 
-  override def init() { createPublet }
-  def createPublet = {
+  override def init() {
+    val app = getServletContext
+    app.setAttribute(WebContext.publetKey.name, createPublet)
+  }
+
+  protected def createPublet = {
     val config = getServletConfig
     val publetRoot = Option(config.getInitParameter("publetRoot"))
       .getOrElse(sys.error("No publet root specified!"))
 
-    val app = getServletContext
     val publet = PubletFactory.createPublet()
     if (publetRoot.startsWith(File.separator)) {
       log.info("Initialize publet root to: "+ publetRoot)
@@ -38,19 +36,26 @@ class PubletServlet extends HttpServlet {
       log.info("Initialize publet root to: "+ np)
       publet.mount(Path.root, new FilesystemPartition(np, 'publetroot))
     }
-    app.setAttribute("publet", publet)
     publet
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
     WebContext.setup(req)
-    filter.handle(req, resp)
+    try {
+      filter.handle(req, resp)
+    } catch {
+      case t:Throwable => log.error("Error for "+ req.getRequestURI, t)
+    }
     WebContext.clear()
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) {
     WebContext.setup(req)
-    filter.handle(req, resp)
+    try {
+      filter.handle(req, resp)
+    } catch {
+      case t:Throwable => log.error("Error for "+ req.getRequestURI, t)
+    }
     WebContext.clear()
   }
 }

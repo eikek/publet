@@ -19,15 +19,18 @@
     }
 
     /* Layout Module Configuration */
-    #main .ym-wrapper2 {
-        max-width: 50em;
-        margin: 0 auto;
+    #main {
         font-size: 105%;
         font-family: "Warnock Pro", "Goudy Old Style", "Book Antiqua", Georgia, serif;
         color: #222;
     }
 
-    .ym-form textarea {
+    #main .ym-wrapper2 {
+        max-width: 50em;
+        margin: 0 auto;
+    }
+
+    .ym-form textarea#editPage {
         height: 400px;
         font-family: monospace;
         line-height: 1.2;
