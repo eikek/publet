@@ -12,7 +12,7 @@ object RootBuild extends Build {
   lazy val root = Project(id = "publet-root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (WebBuild.web, PubletBuild.publet)
+  ) aggregate (WebBuild.web, PubletBuild.publet, GitPartition.module)
 
   val scala = "2.9.1"
 
@@ -41,6 +41,7 @@ object Dependencies {
   val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4"
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.scala
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r"
 }
 
 
