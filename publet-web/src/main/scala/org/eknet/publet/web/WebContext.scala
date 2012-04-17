@@ -87,7 +87,7 @@ trait WebContext {
 }
 
 object WebContext {
-  protected[web] val publetKey = new Key[Publet]("publet")
+  protected[web] val publetKey = Key[Publet]("publet", () => PubletFactory.createPublet())
   
   private val params = new ThreadLocal[WebContext]()
   
@@ -130,10 +130,7 @@ object WebContext {
 
     def parameter(name: String) = Option(req.getParameter(name))
 
-    lazy val publet = context.get(WebContext.publetKey) match {
-      case None => throw new RuntimeException("Servlet not setup")
-      case Some(x) => x
-    }
+    lazy val publet = service(publetKey)
 
     lazy val action = parameter("a")
 

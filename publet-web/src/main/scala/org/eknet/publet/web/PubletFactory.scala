@@ -1,10 +1,11 @@
 package org.eknet.publet.web
 
-import org.eknet.publet.Publet
 import template._
 import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.web.PubletFactory.WebScalaScriptEngine
+import org.eknet.publet.{Path, Publet}
+import org.eknet.publet.resource.FilesystemPartition
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,6 +29,7 @@ object PubletFactory {
     val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.convEngine)
     publ.addEngine(scriptInclude)
 
+    publ.mount(Path.root, new FilesystemPartition(Config.contentRoot, 'publetroot))
     publ
   }
 

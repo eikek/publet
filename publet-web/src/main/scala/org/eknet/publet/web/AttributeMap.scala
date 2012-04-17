@@ -5,11 +5,10 @@ import javax.servlet.ServletContext
 import AttributeMap._
 
 
-case class Key[T](name: String, init: Option[() => T]) {
-  def this(name:String) = this(name, None)
-}
+case class Key[T](name: String, init: Option[() => T])
 object Key {
-  def apply[T](name:String) = new Key[T](name)
+  def apply[T](name:String):Key[T] = Key[T](name, None)
+  def apply[T](name: String, init:()=>T): Key[T] = Key(name, Some(init))
 }
 
 trait AttributeMap {

@@ -91,7 +91,7 @@ object CaptchaScript extends ScalaScript {
     import ctx._
     val captchaData = createCaptcha()
 
-    val captchaKey = new Key[String](parameter("captchaParam").getOrElse("captchaString"))
+    val captchaKey = Key[String](parameter("captchaParam").getOrElse("captchaString"))
     session.put(captchaKey, captchaData._1);
 
     makePng(captchaData._2)

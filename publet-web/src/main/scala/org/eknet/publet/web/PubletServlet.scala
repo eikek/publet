@@ -18,25 +18,27 @@ class PubletServlet extends HttpServlet {
   private val filter = SuperFilter()
 
   override def init() {
-    val app = getServletContext
-    app.setAttribute(WebContext.publetKey.name, createPublet)
+    publetRootParam match {
+      case Some(dir) => System.setProperty("publet.dir", dir)
+      case None =>
+    }
   }
 
-  protected def createPublet = {
+  protected def publetRootParam = {
     val config = getServletConfig
-    val publetRoot = Option(config.getInitParameter("publetRoot"))
-      .getOrElse(sys.error("No publet root specified!"))
-
-    val publet = PubletFactory.createPublet()
-    if (publetRoot.startsWith(File.separator)) {
-      log.info("Initialize publet root to: "+ publetRoot)
-      publet.mount(Path.root, new FilesystemPartition(publetRoot, 'publetroot))
-    } else {
-      val np = new java.io.File(".").getAbsolutePath+ File.separator+ publetRoot
-      log.info("Initialize publet root to: "+ np)
-      publet.mount(Path.root, new FilesystemPartition(np, 'publetroot))
+    Option(config.getInitParameter("publetRoot")) match {
+      case None => None
+      case Some(publetRoot) => {
+        if (publetRoot.startsWith(File.separator)) {
+          log.info("Initialize publet root to: "+ publetRoot)
+          Some(publetRoot)
+        } else {
+          val np = new java.io.File(".").getAbsolutePath+ File.separator+ publetRoot
+          log.info("Initialize publet root to: "+ np)
+          Some(np)
+        }
+      }
     }
-    publet
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {

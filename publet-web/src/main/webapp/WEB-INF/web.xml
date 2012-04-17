@@ -10,10 +10,10 @@
     <servlet>
         <servlet-name>publet</servlet-name>
         <servlet-class>org.eknet.publet.web.PubletServlet</servlet-class>
-        <init-param>
-            <param-name>publetRoot</param-name>
-            <param-value>/home/eike/temp/publet</param-value>
-        </init-param>
+        <!--<init-param>-->
+            <!--<param-name>publetRoot</param-name>-->
+            <!--<param-value>/home/eike/temp/publet</param-value>-->
+        <!--</init-param>-->
     </servlet>
 
     <servlet-mapping>
