@@ -2,18 +2,14 @@ package org.eknet.publet.web
 
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
 import org.eknet.publet.engine.PubletEngine
-import template.FilebrowserTemplate
 import xml._
-import org.eknet.publet.impl.InstallCallback
-import java.util.UUID
-import org.eknet.publet.resource.Partition._
-import org.eknet.publet.{Publet, Path}
+import org.eknet.publet.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.04.12 00:17
  */
-object EditEngine extends PubletEngine with InstallCallback {
+object EditEngine extends PubletEngine {
 
   def editBody(path: Path, content: Content): NodeSeq = {
     val cancelHandler = "window.location='"+path.fileName.name+".html'"

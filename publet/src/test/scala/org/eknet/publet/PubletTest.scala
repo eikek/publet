@@ -17,7 +17,7 @@ object PubletTest {
     val publ = Publet()
     publ.mount(Path("/"), new FilesystemPartition("/tmp/publet", 'localtest))
 
-    val conveng = ConverterEngine()
+    val conveng = ConverterEngine('include)
     val md2html = (p:Path, data:Content) => { println("md->html"); data }
     val html2text = (p:Path, data:Content) => { println("html->text"); data }
     val html2pdf = (p:Path, data:Content) => { println("html->pdf"); data }

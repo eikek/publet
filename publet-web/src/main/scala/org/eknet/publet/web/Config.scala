@@ -17,7 +17,7 @@ object Config {
 
   val directory = new File(Option(System.getProperty("publet.dir"))
     .getOrElse(Option(System.getenv().get("PUBLET_DIR"))
-    .getOrElse(System.getProperty("user.dir")+ File.separator +".publet")))
+    .getOrElse(System.getProperty("user.home")+ File.separator +".publet")))
 
   if (!directory.exists()) if (!directory.mkdirs()) throw new RuntimeException("unable to create config dir: "+ directory)
   if (!directory.isDirectory) throw new RuntimeException("Config dir is not a directory: "+directory)

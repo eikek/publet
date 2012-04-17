@@ -1,10 +1,8 @@
 package org.eknet.publet.web
 
-import filter.SuperFilter
+import filter.{PageWriter, SuperFilter}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import org.slf4j.LoggerFactory
-import org.eknet.publet._
-import resource.FilesystemPartition
 import java.io.File
 
 /**
@@ -12,7 +10,7 @@ import java.io.File
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 27.03.12 22:42
  */
-class PubletServlet extends HttpServlet {
+class PubletServlet extends HttpServlet with PageWriter {
 
   private val log = LoggerFactory.getLogger(getClass)
   private val filter = SuperFilter()
@@ -46,7 +44,10 @@ class PubletServlet extends HttpServlet {
     try {
       filter.handle(req, resp)
     } catch {
-      case t:Throwable => log.error("Error for "+ req.getRequestURI, t)
+      case t:Throwable => {
+        log.error("Error for "+ req.getRequestURI, t)
+        writeError(t, resp)
+      }
     }
     WebContext.clear()
   }
@@ -56,7 +57,10 @@ class PubletServlet extends HttpServlet {
     try {
       filter.handle(req, resp)
     } catch {
-      case t:Throwable => log.error("Error for "+ req.getRequestURI, t)
+      case t:Throwable => {
+        log.error("Error for "+ req.getRequestURI, t)
+        writeError(t, resp)
+      }
     }
     WebContext.clear()
   }

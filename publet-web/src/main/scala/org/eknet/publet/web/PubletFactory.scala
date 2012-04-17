@@ -1,9 +1,9 @@
 package org.eknet.publet.web
 
+import extensions.scripts.{Listing, CaptchaScript, MailContact}
+import org.eknet.publet.engine.scalascript.{ScriptPartition, ScalaScriptEvalEngine}
 import template._
-import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.web.PubletFactory.WebScalaScriptEngine
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.FilesystemPartition
 
@@ -18,7 +18,7 @@ object PubletFactory {
 
     val defaultEngine = new DefaultEngine(publ)
     publ.register("/*", defaultEngine)
-    publ.addEngine(defaultEngine.convEngine)
+    publ.addEngine(defaultEngine.includeEngine)
 
     val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
     publ.addEngine(editEngine)
@@ -26,10 +26,11 @@ object PubletFactory {
     val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine)
     publ.addEngine(scalaEngine)
 
-    val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.convEngine)
+    val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.includeEngine)
     publ.addEngine(scriptInclude)
 
     publ.mount(Path.root, new FilesystemPartition(Config.contentRoot, 'publetroot))
+    publ.mount(Path("/.publets/scripts"), new ScriptPartition('scripts, scripts))
     publ
   }
 
@@ -40,4 +41,10 @@ object PubletFactory {
     "org.eknet.publet.web.Key"
     )
   }
+
+  private val scripts = Map(
+    "mailcontact" -> MailContact,
+    "listing" -> Listing,
+    "captcha" -> CaptchaScript
+  )
 }

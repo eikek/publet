@@ -1,9 +1,8 @@
 package org.eknet.publet.web.extensions.scripts
 
 import org.eknet.publet.engine.scalascript.ScalaScript
-import org.eknet.publet.web.WebContext
-import org.eknet.publet.web.Key
 import ScalaScript._
+import org.eknet.publet.web.{Config, WebContext, Key}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,8 +40,11 @@ object MailContact extends ScalaScript {
     val ctx = WebContext()
     import ctx._
 
-    //TODO get this from config file
-    val sender = service(senderKey("smtp.server.com", -1, "username", "password"))
+    val sender = service(senderKey(Config.value("smtp.host").get,
+      Config.value("smtp.port").getOrElse("-1").toInt,
+      Config.value("smtp.username").getOrElse(""),
+      Config.value("smtp.password").getOrElse("").toCharArray))
+
     val mail = newMail(from);
     mail.setText(msg)
     mail.setSubject("Kontaktformular")
@@ -55,20 +57,24 @@ object MailContact extends ScalaScript {
     val ctx = WebContext()
     import ctx._
 
-    val from = parameter("from")
-    val msg = parameter("message")
-    val captcha = parameter("captcha")
-    val cstr = session.remove(Key[String]("contactCaptcha"))
-
-    if (from.isDefined && msg.isDefined && captcha.isDefined) {
-      if (cstr == captcha) {
-        sendMail(from.get, msg.get)
-        makeHtml(<p class="box success">Message sent! <a href="">Reload</a></p>)
-      } else {
-        makeHtml(<p class="box error">Captcha does not match! <a href="">Reload</a></p>)
-      }
+    if (Config.value("smtp.host").isEmpty) {
+      makeHtml(<p class="box error">No SMTP configuration provided.</p>)
     } else {
-      contactForm()
+      val from = parameter("from")
+      val msg = parameter("message")
+      val captcha = parameter("captcha")
+      val cstr = session.remove(Key[String]("contactCaptcha"))
+
+      if (from.isDefined && msg.isDefined && captcha.isDefined) {
+        if (cstr == captcha) {
+          sendMail(from.get, msg.get)
+          makeHtml(<p class="box success">Message sent! <a href="">Reload</a></p>)
+        } else {
+          makeHtml(<p class="box error">Captcha does not match! <a href="">Reload</a></p>)
+        }
+      } else {
+        contactForm()
+      }
     }
   }
 

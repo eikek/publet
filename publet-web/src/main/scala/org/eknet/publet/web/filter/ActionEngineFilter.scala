@@ -26,6 +26,6 @@ object ActionEngineFilter extends Filter with PageWriter {
     val publet = WebContext().publet
     val targetType = path.targetType.getOrElse(ContentType.unknown)
     val html = publet.process(path, targetType, publet.getEngine(engineId).get)
-    html.fold(writeError(_, path, resp), writePage(_, path, req, resp))
+    html.fold(writeError(_, resp), writePage(_, resp))
   }
 }

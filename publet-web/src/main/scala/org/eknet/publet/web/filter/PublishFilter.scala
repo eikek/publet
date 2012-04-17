@@ -16,7 +16,7 @@ object PublishFilter extends Filter with PageWriter {
     val publet = WebContext().publet
     val path = WebContext().requestPath
     val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
-    html.fold(writeError(_, path, resp), writePage(_, path, req, resp))
+    html.fold(writeError(_, resp), writePage(_, resp))
     true
   }
 

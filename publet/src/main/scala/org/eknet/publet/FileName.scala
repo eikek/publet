@@ -29,7 +29,7 @@ class FileName(val path: Path) {
    * The extension of the file of this uri, or $None if not available
    *
    */
-  lazy val extension = extRegex.findFirstIn(path.segments.last).map(_.substring(1))
+  lazy val extension = if (path.isRoot) None else extRegex.findFirstIn(path.segments.last).map(_.substring(1))
 
   /**
    * Returns a set of uris conforming to the target type of this uri. For example,
@@ -41,11 +41,14 @@ class FileName(val path: Path) {
 
 
   lazy val name = {
-    val ext = extRegex.findFirstIn(path.asString)
-    if (ext.isDefined) {
-      path.segments.last.substring(0, path.segments.last.length() - ext.get.length())
-    } else {
-      path.segments.last
+    if (path.isRoot) path.asString
+    else {
+      val ext = extRegex.findFirstIn(path.asString)
+      if (ext.isDefined) {
+        path.segments.last.substring(0, path.segments.last.length() - ext.get.length())
+      } else {
+        path.segments.last
+      }
     }
   }
 
@@ -66,4 +69,8 @@ class FileName(val path: Path) {
 
   def pathsFor(ct: ContentType): Set[Path] = ct.extensions.map(withExtension)
 
+  override def toString = name + (extension match {
+    case Some(e) => "."+e
+    case None => ""
+  })
 }
