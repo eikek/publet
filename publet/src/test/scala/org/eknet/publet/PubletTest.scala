@@ -18,10 +18,10 @@ object PubletTest {
     publ.mount(Path("/"), new FilesystemPartition("/tmp/publet", 'localtest))
 
     val conveng = ConverterEngine()
-    val md2html = (data:Content) => { println("md->html"); data }
-    val html2text = (data:Content) => { println("html->text"); data }
-    val html2pdf = (data:Content) => { println("html->pdf"); data }
-    val pdf2text = (data:Content) => { println("pdf->text"); data }
+    val md2html = (p:Path, data:Content) => { println("md->html"); data }
+    val html2text = (p:Path, data:Content) => { println("html->text"); data }
+    val html2pdf = (p:Path, data:Content) => { println("html->pdf"); data }
+    val pdf2text = (p:Path, data:Content) => { println("pdf->text"); data }
 
     conveng.addConverter((markdown -> html), KnockoffConverter)
     conveng.addConverter((html -> text), html2text)
