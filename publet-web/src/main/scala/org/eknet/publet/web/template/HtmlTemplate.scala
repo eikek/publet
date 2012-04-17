@@ -16,22 +16,19 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def title(path: Path, content: NodeContent, source: Seq[Content]): String = {
-    findHead(content, 1, 4) match {
-      case None => path.fileName.name
-      case Some(n) => n.text
+  def title(path: Path, content: Content, source: Seq[Content]): String = {
+    findHead(content) match {
+      case None => path.fileName.name.replaceAll("_", " ")
+      case Some(n) => n
     }
   }
-  
-  def findHead(content: NodeContent, c: Int, m: Int): Option[Node] = {
-    try {
-      val nodeseq = content.node \\ ("h" + c)
-      if (nodeseq == NodeSeq.Empty) {
-        if (c < m) findHead(content, c + 1, m) else None
-      } else Some(nodeseq.head)
-    }
-    catch {
-      case e => None
+
+  val findHeadRegex = "(<h[1234]>([^<]*)</h[1234]>)".r
+
+  def findHead(content: Content): Option[String] = {
+    findHeadRegex.findFirstMatchIn(content.contentAsString) match {
+      case Some(mx) => Some(mx.group(2))
+      case None => None
     }
   }
 
@@ -41,7 +38,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def headerHtml(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = NodeSeq.Empty
+  def headerHtml(path: Path, content: Content, source: Seq[Content]): String = ""
 
   /** Returns the html body part.
    * 
@@ -49,23 +46,29 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def bodyHtml(path: Path, content: NodeContent, source: Seq[Content]): NodeSeq = content.node
+  def bodyHtml(path: Path, content: Content, source: Seq[Content]): String = content.contentAsString
   
   def charset = "utf-8"
   
-  def apply(path: Path, content: NodeContent, source: Seq[Content]): Content = {
+  def apply(path: Path, content: Content, source: Seq[Content]): Content = {
+    Predef.ensuring(content.contentType == ContentType.html, "Only html content possible")
+
     val body = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
        "http://www.w3.org/TR/html4/loose.dtd">"""+ "\n"+
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset={ charset }/>
-      <title>{ title(path, content, source) }</title>
-      { headerHtml(path, content, source) }
+      <title>%s</title>
+      %s
     </head>
     <body>
-      { bodyHtml(path, content, source) }
+      %s
     </body>
   </html>.toString()
-    Content(body, ContentType.html)
+
+    Content(String.format(body,
+      title(path, content, source),
+      headerHtml(path, content, source),
+      bodyHtml(path, content, source)) , ContentType.html)
   }
 }

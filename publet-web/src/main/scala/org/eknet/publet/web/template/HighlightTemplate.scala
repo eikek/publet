@@ -4,7 +4,8 @@ import org.eknet.publet.impl.InstallCallback
 import java.util.UUID
 import org.eknet.publet.{Publet, Path}
 import org.eknet.publet.resource.Partition._
-import org.eknet.publet.resource.{Content, NodeContent}
+import org.eknet.publet.resource.{ContentType, Content, NodeContent}
+import xml.NodeSeq
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,14 +22,12 @@ trait HighlightTemplate extends InstallCallback with HtmlTemplate {
     publ.mount(Path("/"+randomRoot+"/highlight"), highlightPartition)
   }
 
-  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
+  override def headerHtml(path: Path, content: Content, source: Seq[Content]) = {
     val base = path.relativeRoot + randomRoot + "/"
-    super.headerHtml(path, content, source) ++
-    {
-      <link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
+    super.headerHtml(path, content, source) +
+    NodeSeq.fromSeq(<link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
       <script src={ base + "highlight/highlight.pack.js" }></script>
-      <script>hljs.initHighlightingOnLoad();</script>
-    }
+      <script>hljs.initHighlightingOnLoad();</script>).toString()
   }
   
   def highlightStyle = HighlightTemplate.Styles.googlecode

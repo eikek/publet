@@ -4,7 +4,8 @@ import java.util.UUID
 import org.eknet.publet.resource.Partition._
 import org.eknet.publet.impl.InstallCallback
 import org.eknet.publet.{Publet, Path}
-import org.eknet.publet.resource.{Content, NodeContent}
+import org.eknet.publet.resource.{ContentType, Content, NodeContent}
+import xml.NodeSeq
 
 /**
  *
@@ -24,19 +25,17 @@ trait FilebrowserTemplate extends Yaml2ColTemplate with InstallCallback {
     publ.mount(Path("/"+randPath+"/browser"), editPartition)
   }
 
-  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
+  override def headerHtml(path: Path, content: Content, source: Seq[Content]) = {
     val base = path.relativeRoot + randPath + "/"
-    super.headerHtml(path, content, source) ++
-    {
-      <link type="text/css" rel="stylesheet" href={ base + "browser/browser.css" }></link>
-      <script src={ base +"browser/jquery-1.7.2.min.js" } ></script>
-      <script src={ base +"browser/browser.js" } ></script>
-    }
+    super.headerHtml(path, content, source) +
+     NodeSeq.fromSeq(<link type="text/css" rel="stylesheet" href={ base + "browser/browser.css" }></link>
+     <script src={ base +"browser/jquery-1.7.2.min.js" } ></script>
+     <script src={ base +"browser/browser.js" } ></script>).toString()
   }
 
-  def yamlColumn(path: Path, content: NodeContent, source: Seq[Content]) = {
-    <h3>File browser</h3>
+  def yamlColumn(path: Path, content: Content, source: Seq[Content]) = {
+    NodeSeq.fromSeq(<h3>File browser</h3>
     <pre id="containerPath"></pre>
-    <div id="filesTree"></div>
+    <div id="filesTree"></div>).toString()
   }
 }

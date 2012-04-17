@@ -16,20 +16,23 @@ case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String,
 
 object ContentType {
 
-  val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
   val scal = ContentType('scala, Set("scala"), ("text", "scala"))
   val text = ContentType('text, Set("txt", "text"), ("text", "plain"))
   val html = ContentType('html, Set("html", "htm"), ("text", "html"))
-  val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))
   val markdown = ContentType('markdown, Set("md", "markdown"), ("text", "markdown"))
   val xml = ContentType('xml, Set("xml"), ("text", "xml"))
   val css = ContentType('css, Set("css"), ("text", "css"))
   val javascript = ContentType('javascript, Set("js"), ("text", "javascript"))
+  val json = ContentType('json, Set("json"), ("text", "plain"))
+
   val png = ContentType('png, Set("png"), ("image", "png"))
   val jpg = ContentType('jpg, Set("jpg", "jpeg"), ("image", "jpg"))
   val gif = ContentType('gif, Set("gif"), ("image", "gif"))
-  val json = ContentType('json, Set("json"), ("text", "plain"))
   val icon = ContentType('icon, Set("ico"), ("image", "x-icon"))
+
+  val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))
+  val zip = ContentType('zip, Set("zip", "gz", "bz2"), ("application", "zip"))
+  val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
 
   val all = Set(text, html, pdf, markdown, xml, css, javascript, json, png, jpg, gif, icon, scal)
 

@@ -2,6 +2,7 @@ package org.eknet.publet.engine.convert
 
 import com.tristanhunt.knockoff.DefaultDiscounter._
 import org.eknet.publet.resource.{NodeContent, ContentType, Content}
+import org.eknet.publet.Path
 
 /**
  * Uses the knockoff library to transform markdown markup to html.
@@ -11,7 +12,7 @@ import org.eknet.publet.resource.{NodeContent, ContentType, Content}
  */
 object KnockoffConverter extends ConverterEngine#Converter {
 
-  def apply(page: Content) = {
+  def apply(path: Path, page: Content) = {
     val xhtml = toXHTML(knockoff(page.contentAsString))
     NodeContent(xhtml, ContentType.html)
   }

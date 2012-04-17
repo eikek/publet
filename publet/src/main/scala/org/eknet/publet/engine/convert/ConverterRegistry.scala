@@ -3,6 +3,7 @@ package org.eknet.publet.engine.convert
 import org.eknet.publet.resource.{ContentType, Content}
 import collection._
 import mutable.ListBuffer
+import org.eknet.publet.Path
 
 /**
  *
@@ -25,7 +26,7 @@ trait ConverterRegistry {
 
     type Converter = ConverterEngine#Converter
 
-    val idconv: Converter = (x: Content) => x
+    val idconv: Converter = (p: Path, x: Content) => x
     private val converters = mutable.Map[(ContentType, ContentType), Converter]()
     private val nodes = mutable.Map[ContentType, List[ContentType]]()
 
@@ -70,8 +71,8 @@ trait ConverterRegistry {
       //create tuples that define the converter
       path zip path.tail match {
         case ListBuffer() => None
-        //create function by composing all converters
-        case tuples => Some(tuples.foldLeft(idconv)((c, t) => c.andThen(converters.get(t).get)))
+        //create function by composing all converters c1(p, c2(p,c))
+        case tuples => Some(tuples.foldLeft(idconv)((c, t) => ConverterEngine.compose(c, converters.get(t).get)))
       }
     }
   }

@@ -35,6 +35,8 @@ case class NodeContent(node: NodeSeq, contentType: ContentType) extends Content 
 
 object Content {
 
+  def empty(ct: ContentType) = Content("", ct)
+
   def apply(file: File, ct: ContentType): Content = new Content {
     def inputStream = new FileInputStream(file);
     def lastModification = Some(file.lastModified)
@@ -54,6 +56,7 @@ object Content {
     def inputStream = new ByteArrayInputStream(str.getBytes("UTF-8"))
     val lastModification = Some(System.currentTimeMillis())
     val contentType = ct
+    override val contentAsString = str
   }
 
   def apply(in: InputStream, ct: ContentType): Content = new Content {

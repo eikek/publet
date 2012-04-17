@@ -17,7 +17,7 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
     //if target type is available return it, otherwise try to process
     data.find(_.contentType == target) match {
       case Some(c) => Right(c)
-      case None => process(data.head, target).fold(Left(_), _ match {
+      case None => process(path,  data.head, target).fold(Left(_), _ match {
         case None => data.tail match {
           case Nil => Left(new RuntimeException("no converter found"))
           case tail => process(path, tail, target)
@@ -27,11 +27,11 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
     }
   }
 
-  private def process(data: Content, target: ContentType): Either[Exception, Option[Content]] = {
+  private def process(path: Path, data: Content, target: ContentType): Either[Exception, Option[Content]] = {
     try {
       converterFor(data.contentType, target) match {
         case None => Right(None)
-        case Some(c) => Right(Option(c(data)))
+        case Some(c) => Right(Option(c(path, data)))
       }
     } catch {
       case e: Exception => Left[Exception, Option[Content]](e)

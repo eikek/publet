@@ -4,6 +4,7 @@ import org.eknet.publet.Publet
 import template._
 import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 import org.eknet.publet.engine.PubletEngine
+import org.eknet.publet.web.PubletFactory.WebScalaScriptEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,9 +22,12 @@ object PubletFactory {
     val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
     publ.addEngine(editEngine)
 
-    val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine.convEngine)
+    val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine)
     publ.addEngine(scalaEngine)
-    
+
+    val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.convEngine)
+    publ.addEngine(scriptInclude)
+
     publ
   }
 

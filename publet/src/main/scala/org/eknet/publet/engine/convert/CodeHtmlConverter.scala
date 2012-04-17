@@ -1,8 +1,9 @@
-package org.eknet.publet.engine.scalascript
+package org.eknet.publet.engine.convert
 
-import org.eknet.publet.engine.convert.ConverterEngine
 import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.resource.{NodeContent, Content}
+import org.eknet.publet.Path
+import javax.swing.text.html.HTMLDocument
 
 /**
  *
@@ -11,13 +12,15 @@ import org.eknet.publet.resource.{NodeContent, Content}
  */
 
 class CodeHtmlConverter(langClass: Option[String]) extends ConverterEngine#Converter {
-  def apply(v1: Content) = {
+
+  def apply(path: Path, v1: Content) = {
+    val body = v1.contentAsString.replaceAll("&amp;", "&").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
     val code = langClass match {
-      case None => <code>{ v1.contentAsString }</code>
-      case Some(c) => <code class={c}>{ v1.contentAsString }</code>
+      case None => "<code>"+ body +"</code>"
+      case Some(c) => "<code class=\""+c+"\">"+ body +"</code>"
     }
-      
-    NodeContent(<pre>{code}</pre>, html)
+
+    Content("<pre>"+ code +"</pre>", html)
   }
 }
 
@@ -26,6 +29,8 @@ object CodeHtmlConverter {
   def apply(): CodeHtmlConverter = new CodeHtmlConverter(None)
 
   def scala: CodeHtmlConverter = new CodeHtmlConverter(Some("scala"))
+
   def json: CodeHtmlConverter = new CodeHtmlConverter(Some("json"))
+
   def css: CodeHtmlConverter = new CodeHtmlConverter(Some("css"))
 }

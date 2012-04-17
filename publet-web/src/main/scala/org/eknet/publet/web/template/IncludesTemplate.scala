@@ -13,12 +13,12 @@ import org.eknet.publet.resource._
  */
 trait IncludesTemplate extends HtmlTemplate {
   
-  override def headerHtml(path: Path, content: NodeContent, source: Seq[Content]) = {
+  override def headerHtml(path: Path, content: Content, source: Seq[Content]) = {
     val siblingPath = (cr: ContentResource) => ".includes/"+cr.path.segments.last
     val rootPath = (cr: ContentResource) => path.relativeRoot + ".allIncludes/"+cr.path.segments.last
 
-    super.headerHtml(path, content, source) ++
-      getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b) ++
+    super.headerHtml(path, content, source) +
+      getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b) +
       getSiblingResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
   }
   

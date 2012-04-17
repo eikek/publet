@@ -2,7 +2,7 @@ package org.eknet.publet.web.template
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.Path
-import org.eknet.publet.resource.{NodeContent, ContentType, Content}
+import org.eknet.publet.resource.{ContentType, Content}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -13,7 +13,7 @@ class HtmlTemplateEngine(val name: Symbol, engine: PubletEngine) extends PubletE
   
   def process(path: Path, data: Seq[Content], target: ContentType) = {
     engine.process(path, data, target) match {
-      case Right(nc:NodeContent) => Right[Exception, Content](apply(path, nc, data))
+      case Right(nc) if (nc.contentType == ContentType.html) => Right[Exception, Content](apply(path, nc, data))
       case l @ _  => l
     }
   }

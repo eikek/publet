@@ -23,7 +23,7 @@ object UploadContent {
   private def imageView(path: Path): NodeSeq = {
     path.targetType match {
       case Some(t) if (t.mime._1 == "image") => <p>Current image:</p><img src={path.segments.last}/>
-      case _ => NodeSeq.Empty
+      case _ => <p>Current File: <a href={path.segments.last}>{path.segments.last}</a></p>
     }
   }
 
