@@ -17,7 +17,7 @@ function getContentsAsUl(pathname, f) {
                 lis.push('<li class="page"><a href="'+ file.href +'?a=edit">'+ file.name+'</a></li>');
             }
         });
-        $("#containerPath").html(data.containerPath)
+        $("#containerPath").html(data.containerPath);
         var el = $('<ul/>', {
             html: lis.join('\n')
         });
