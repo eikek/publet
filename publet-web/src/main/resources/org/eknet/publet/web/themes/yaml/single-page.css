@@ -60,4 +60,8 @@
         vertical-align: inherit;
         display: inline;
     }
+
+    pre.stacktrace {
+        font-size: 75%;
+    }
 }

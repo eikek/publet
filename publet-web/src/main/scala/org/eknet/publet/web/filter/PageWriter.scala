@@ -4,7 +4,8 @@ import org.eknet.publet.Path
 import org.eknet.publet.resource.{ContentType, Content}
 import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletResponse
-import org.eknet.publet.web.{WebContext, UploadContent}
+import org.eknet.publet.web.{Config, WebContext, UploadContent}
+import java.io.{PrintWriter, StringWriter}
 
 /**
  *
@@ -17,7 +18,19 @@ trait PageWriter {
 
   def writeError(ex: Throwable, resp: HttpServletResponse) {
     log.error("Error!", ex)
-    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    if (Config.value("mode").getOrElse("development") == "development") {
+      //print the exception in development mode
+      val sw = new StringWriter()
+      ex.printStackTrace(new PrintWriter(sw))
+      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+sw.toString+ "</pre>", ContentType.html)
+
+      val result = WebContext().publet.getEngine('mainWiki).get
+        .process(WebContext().requestPath, Seq(content), ContentType.html)
+
+      result.fold(x=>resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), c=>writePage(Some(c), resp))
+    } else {
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+    }
   }
 
   def writePage(page: Option[Content], resp: HttpServletResponse) {
