@@ -4,6 +4,7 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.Path
 import org.eknet.publet.resource.{ContentType, Content}
 import com.twitter.util.Eval
+import scala.Some
 
 /**
  * Compiles scala classes that extend $ScalaScript and feeds the outcome
@@ -14,6 +15,17 @@ import com.twitter.util.Eval
  */
 class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends PubletEngine {
 
+//  val tmpdir = new File(System.getProperty("java.io.tmpdir"))
+//  val out = Some {
+//    val f = new File(tmpdir, "publetscriptout")
+//    if (f.exists() && !f.isDirectory) sys.error("Not a directory: "+ f)
+//    else if (!f.exists() && !f.mkdirs()) sys.error("Cannot create outputdir")
+//    f
+//  }
+
+  // with `None` class files are not written but cached in memory
+  val eval = new Eval(None)
+
   def process(path: Path, data: Seq[Content], target: ContentType) = {
     data find (_.contentType == ContentType.scal) match {
       case Some(c) => engine.process(path, Seq(eval(c)), target)
@@ -21,28 +33,13 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
     }
   }
 
-  def eval(content: Content): Content = {
-    new Eval(None).apply(boxedScript(content.contentAsString))
-  }
+  def eval(content: Content): Content = eval(boxedScript(content.contentAsString), false)
 
   def boxedScript(script: String): String = {
-    val body = """
-
-    class ScriptEval extends ScalaScript {
-       def serve() = {
-         %s
-       }
-    }
-
-    new ScriptEval().serve()
-    """
-
-    val templ = importPackages.map("import " + _).mkString("\n") + body
-    String.format(templ, script)
+    importPackages.map("import " + _).mkString("\n") + "\n\n"+ script
   }
 
   def importPackages: List[String] = List(
-    "org.eknet.publet.engine.scalascript.ScalaScript",
     "org.eknet.publet.engine.scalascript.ScalaScript._",
     "org.eknet.publet.resource.ContentType._",
     "org.eknet.publet.resource.Content",
