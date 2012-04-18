@@ -46,19 +46,4 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
     "org.eknet.publet.resource.NodeContent"
   )
 
-  lazy val testScriptStr = """
-  class TestScript extends ScalaScript {
-    def serve() = Content("<h1>Yeah!</h1>", html)
-  }
-  """
-
-  lazy val testScript2 = """
-  ScalaScript {
-    def serve() = Content("<h2>Yes</h2>", html)
-  }
-  """
-
-  lazy val testScript3 = """
-  Content("<h2>And again!</h2>", html)
-  """
 }
