@@ -12,19 +12,19 @@ import org.eknet.publet.impl.Conversions._
 class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir, root) with ContainerResource {
 
   def children = dir.listFiles().map(f => {
-    if (f.isDirectory) new DirectoryResource(f, root)
-    else new FileResource(f, root)
+    if (f.isDirectory) newDirectory(f, root)
+    else newFile(f, root)
   })
 
-  def content(name: String) = new FileResource(new File(dir, name), root)
+  def content(name: String) = newFile(new File(dir, name), root)
 
-  def container(name: String) = new DirectoryResource(new File(dir, name), root)
+  def container(name: String) = newDirectory(new File(dir, name), root)
 
   def child(name: String) = {
     val f = new File(dir, name)
     if (!f.exists) throwException("Child does not exist")
-    else if (f.isDirectory) new DirectoryResource(f, root)
-         else new FileResource(f, root)
+    else if (f.isDirectory) newDirectory(f, root)
+         else newFile(f, root)
   }
 
   def create() {

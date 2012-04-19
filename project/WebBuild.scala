@@ -8,7 +8,7 @@ object WebBuild extends Build {
   lazy val web = Project(id = "publet-web", 
     base = file("publet-web"),
     settings = buildProperties
-  ) dependsOn PubletBuild.publet
+  ) dependsOn (PubletBuild.publet, GitPartition.module)
 
   val buildProperties = Project.defaultSettings ++ Seq(
     name := "publet-web",

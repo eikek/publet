@@ -10,10 +10,10 @@ import org.eknet.publet.impl.Conversions._
  */
 class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true) extends Partition {
   
-  if (!root.exists()) root.mkdirs()
+  if (!root.exists() && create) root.mkdirs()
 
-  Predef.ensuring(root.exists(), "root directory must exist")
-  Predef.ensuring(root.isDirectory, "root must be a directory")
+  if (create) Predef.ensuring(root.exists(), "root directory must exist")
+  Predef.ensuring(root.isDirectory || !root.exists(), "root must be a directory")
   
   def this(root: String, id: Symbol) = this(new File(root), id)
 
@@ -29,9 +29,9 @@ class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true)
 
   def newContent(path: Path) = fileFrom(path)
 
-  def content(name: String) = new FileResource(new File(root, name), root)
+  def content(name: String) = newFile(new File(root, name), root)
 
-  def container(name: String) = new DirectoryResource(new File(root, name), root)
+  def container(name: String) = newDirectory(new File(root, name), root)
 
   def child(name: String) = resourceFrom(new File(root, name))
 
@@ -39,12 +39,15 @@ class FilesystemPartition(val root: File, val id: Symbol, create:Boolean = true)
 
   private def resourceFrom(f: File) = if (!f.exists()) throwException("File does not exist.")
     else if (f.isDirectory)
-      new DirectoryResource(f, root) else
-      new FileResource(f, root)
-  
-  private def fileFrom(p: Path) = new FileResource(
+      newDirectory(f, root) else
+      newFile(f, root)
+
+  protected def newDirectory(f: File, root: Path):ContainerResource = new DirectoryResource(f, root)
+  protected def newFile(f: File, root: Path): ContentResource = new FileResource(f, root)
+
+  private def fileFrom(p: Path) = newFile(
     new File(root, p.segments.mkString(File.separator)), root)
 
-  private def directoryFrom(p: Path) = new DirectoryResource(
+  private def directoryFrom(p: Path) = newDirectory(
     new File(root, p.segments.mkString(File.separator)), root)
 }

@@ -1,7 +1,7 @@
 package org.eknet.publet.resource
 
-import java.io.{FileOutputStream, FileInputStream, File}
 import org.eknet.publet.Path
+import java.io.{OutputStream, FileOutputStream, FileInputStream, File}
 
 /**
  *
@@ -12,7 +12,7 @@ class FileResource(f: File, root: Path) extends AbstractLocalResource(f, root) w
 
   def inputStream = new FileInputStream(file)
 
-  def outputStream = Some(new FileOutputStream(file))
+  def outputStream:Option[OutputStream] = Some(new FileOutputStream(file))
 
   def create() {
     file.createNewFile()

@@ -5,8 +5,9 @@ import org.eknet.publet.engine.scalascript.{ScriptPartition, ScalaScriptEvalEngi
 import template._
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.{Path, Publet}
-import org.eknet.publet.resource.FilesystemPartition
 import org.eknet.publet.resource.ContentType._
+import org.eknet.publet.partition.git.GitPartition
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.04.12 23:15
@@ -29,7 +30,7 @@ object PubletFactory {
     val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.includeEngine)
     publ.addEngine(scriptInclude)
 
-    publ.mount(Path.root, new FilesystemPartition(Config.contentRoot, 'publetroot))
+    publ.mount(Path.root, new GitPartition('publetroot, Config.contentRoot, "publetrepo"))
     publ.mount(Path("/.publets/scripts"), new ScriptPartition('scripts, scripts))
     publ
   }

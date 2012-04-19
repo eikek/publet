@@ -11,7 +11,7 @@ abstract class AbstractLocalResource(val file: File, root: Path) extends Resourc
 
   def path = Path(file).strip(root)
 
-  def parent = if (isRoot) None else Some(new DirectoryResource(file.getParentFile, root))
+  def parent = if (isRoot) None else Some(newDirectory(file.getParentFile, root))
 
   def lastModification = Some(file.lastModified())
 
@@ -26,5 +26,8 @@ abstract class AbstractLocalResource(val file: File, root: Path) extends Resourc
   def delete() {
     file.delete()
   }
+
+  protected def newDirectory(f: File, root: Path):ContainerResource = new DirectoryResource(f, root)
+  protected def newFile(f: File, root: Path): ContentResource = new FileResource(f, root)
 
 }
