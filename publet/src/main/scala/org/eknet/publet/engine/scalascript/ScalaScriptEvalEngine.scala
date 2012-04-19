@@ -33,7 +33,12 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
     }
   }
 
-  def eval(content: Content): Content = eval(boxedScript(content.contentAsString), false)
+  def eval(content: Content): Content = {
+    val r = eval.apply[Any](boxedScript(content.contentAsString), false)
+
+    if (r.isInstanceOf[Content]) r.asInstanceOf[Content]
+    else Content(r.toString, ContentType.html)
+  }
 
   def boxedScript(script: String): String = {
     importPackages.map("import " + _).mkString("\n") + "\n\n"+ script
