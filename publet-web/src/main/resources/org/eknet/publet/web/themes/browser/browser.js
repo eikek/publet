@@ -1,4 +1,7 @@
-$(document).ready(renderFileBrowser());
+$(document).ready(function() {
+    addRegisterEngineHandler();
+    renderFileBrowser();
+});
 
 function getContentsAsUl(pathname, f) {
     var loc = window.location;
@@ -39,4 +42,16 @@ function renderFileBrowser() {
     getContentsAsUl(window.location.pathname, function(el) {
         el.appendTo("#filesTree");
     });
+}
+
+function addRegisterEngineHandler() {
+    $("select.publetRegisterEngine").unbind("change")
+    $("select.publetRegisterEngine").change(function(eo) {
+        var engine = $("select.publetRegisterEngine").val();
+        $.getJSON("/.publets/scripts/setengine.json", {
+            path: window.location.pathname,
+            publetEngine: engine
+        });
+    });
+    return false;
 }

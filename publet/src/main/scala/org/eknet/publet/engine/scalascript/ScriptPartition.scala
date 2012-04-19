@@ -3,12 +3,14 @@ package org.eknet.publet.engine.scalascript
 import org.eknet.publet.Path
 import java.io.OutputStream
 import org.eknet.publet.resource._
+import org.slf4j.LoggerFactory
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.04.12 20:56
  */
-class ScriptPartition(val id: Symbol, scripts: Map[String, ScalaScript]) extends AbstractResource(Path.root) with Partition with ContainerResource {
+class ScriptPartition(val id: Symbol, scripts: Map[String, (ScalaScript, ContentType)]) extends AbstractResource(Path.root) with Partition with ContainerResource {
+  private val log = LoggerFactory.getLogger(getClass)
 
   def lookup(path: Path) = {
     val script = new Script(path)
@@ -43,7 +45,10 @@ class ScriptPartition(val id: Symbol, scripts: Map[String, ScalaScript]) extends
 
   private class Script(path: Path) extends AbstractResource(path) with ContentResource {
 
-    private lazy val evaluated = scripts.get(path.fileName.name).get.serve()
+    private lazy val evaluated = scripts.get(path.fileName.name).get._1.serve()
+      .ensuring(_.contentType == contentType, "content type mismatch")
+
+    lazy val contentType = scripts.get(path.fileName.name).get._2
 
     def outputStream = throw new RuntimeException("Cannot write to this resource.")
 
@@ -51,11 +56,12 @@ class ScriptPartition(val id: Symbol, scripts: Map[String, ScalaScript]) extends
 
     def length = None
 
-    def contentType = evaluated.contentType
-
     def inputStream = evaluated.inputStream
 
-    def exists = path.segments.size == 1 && scripts.get(path.fileName.name).isDefined && path.targetType.isDefined && path.targetType.get == contentType
+    val exists = path.segments.size == 1 &&
+      scripts.get(path.fileName.name).isDefined &&
+      path.targetType.isDefined &&
+      path.targetType.get == contentType
 
     override def copyTo(out: OutputStream) {
       evaluated.copyTo(out)
@@ -64,6 +70,8 @@ class ScriptPartition(val id: Symbol, scripts: Map[String, ScalaScript]) extends
     override def contentAsString = evaluated.contentAsString
 
     def parent = Some(ScriptPartition.this)
+
+    override def toString = "Script:"+path
   }
 
 }

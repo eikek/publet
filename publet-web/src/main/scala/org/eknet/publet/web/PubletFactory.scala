@@ -1,12 +1,12 @@
 package org.eknet.publet.web
 
-import extensions.scripts.{Listing, CaptchaScript, MailContact}
+import extensions.scripts.{SetEngine, Listing, CaptchaScript, MailContact}
 import org.eknet.publet.engine.scalascript.{ScriptPartition, ScalaScriptEvalEngine}
 import template._
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.FilesystemPartition
-
+import org.eknet.publet.resource.ContentType._
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.04.12 23:15
@@ -43,8 +43,9 @@ object PubletFactory {
   }
 
   private val scripts = Map(
-    "mailcontact" -> MailContact,
-    "listing" -> Listing,
-    "captcha" -> CaptchaScript
+    "mailcontact" -> (MailContact, html),
+    "listing" -> (Listing, html),
+    "captcha" -> (CaptchaScript, png),
+    "setengine" -> (SetEngine, json)
   )
 }

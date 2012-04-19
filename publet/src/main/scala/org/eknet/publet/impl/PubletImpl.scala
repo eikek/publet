@@ -63,11 +63,12 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
 
     // create a list of uris of all known extensions
     val ft = new FileName(path.strip(sourcePath))
-    val urilist = ft.pathsForTarget ++
-      ContentType.all.filter(_ != ft.targetType).flatMap( _.extensions.map(ft.withExtension(_)) )
+    val urilist = ft.pathsForTarget.toSeq ++
+      ContentType.all.filter(_ != ft.targetType).flatMap(_.extensions.map(ft.withExtension(_)))
+
     //lookup all uris and returns list of results
     urilist.map(source.lookup).filter(o => o.isDefined && o.get.isInstanceOf[ContentResource])
-      .map(or => or.get.asInstanceOf[ContentResource]).toSeq
+      .map(or => or.get.asInstanceOf[ContentResource])
   }
 
   def create(path: Path, contentType: ContentType) {

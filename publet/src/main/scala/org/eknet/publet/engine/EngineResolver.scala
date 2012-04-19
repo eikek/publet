@@ -45,8 +45,11 @@ trait EngineResolver {
    */
   def register(urlPattern: String, engine: PubletEngine) {
     val glob = Glob(urlPattern)
-    addEngine(engine)
-    mountMap.put(glob, engine)
+    val e = getEngine(engine.name).getOrElse({
+      addEngine(engine)
+      engine
+    })
+    mountMap.put(glob, e)
   }
 
   def resolveEngine(path: Path): Option[PubletEngine] = {
