@@ -63,27 +63,6 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
 
   private val git = new Git(workspaceRepo)
 
-
-  def test(fn: String) {
-    val f = new File(workspaceRepo.getWorkTree, fn)
-    if (!f.exists()) {
-      f.createNewFile()
-      git.add()
-        .addFilepattern(f.getName)
-        .setUpdate(false)
-        .call()
-
-      git.commit()
-        .setMessage("My first jgit commit")
-        .setAuthor("Eike", "ek@eknet.org")
-        .setAll(true)
-        .call()
-
-      push()
-    }
-
-  }
-
   private def push() {
     git.push()
       .setRemote("origin")
@@ -91,30 +70,33 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
       .call()
   }
 
-  private def commit() {
+  private def commit(c: ContentResource, action:String) {
     git.commit()
-      .setMessage("Update")
+      .setMessage(action +" on "+ c.path.asString)
       .setAuthor("Publet Git", "no@none.com")
       .setAll(true)
       .call()
   }
 
   def commitWrite(c: ContentResource) {
-    log.info("commit: "+ c.path.toRelative.asString)
     git.add()
       .addFilepattern(c.path.toRelative.asString)
       .setUpdate(false)
       .call()
 
-    commit()
-    push()
+    if (!git.status().call().isClean) {
+      log.info("commit: "+ c.path.toRelative.asString)
+
+      commit(c, "Update")
+      push()
+    }
   }
 
   def commitDelete(c: ContentResource) {
     git.rm().addFilepattern(c.path.toRelative.asString)
       .call()
 
-    commit()
+    commit(c, "Delete")
     push()
   }
 
@@ -133,6 +115,8 @@ object GitPartition {
 class GitDirectory(dir:File, root:Path, gp: GitPartition) extends DirectoryResource(dir, root) {
   override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, gp)
   override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
+
+  override def children:Iterable[_ <: Resource] = super.children.filterNot(_.path.asString.startsWith("/.git"))
 }
 
 class GitFile(f: File, root: Path, gp: GitPartition) extends FileResource(f, root) {
@@ -167,7 +151,7 @@ class GitFile(f: File, root: Path, gp: GitPartition) extends FileResource(f, roo
       }
 
       override def flush() {
-        super.flush()
+        out.flush()
       }
     })
   }
