@@ -7,14 +7,27 @@
 <web-app>
     <display-name>publet</display-name>
     <listener>
-        <listener-class>org.eknet.publet.web.GitPartitionClose</listener-class>
+        <listener-class>org.eknet.publet.web.GitPartitionStarter</listener-class>
     </listener>
+
     <servlet>
         <servlet-name>publet</servlet-name>
         <servlet-class>org.eknet.publet.web.PubletServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>GitHttpServlet</servlet-name>
+        <servlet-class>org.eknet.publet.web.GitHttpServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>publet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GitHttpServlet</servlet-name>
+        <url-pattern>/git/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>

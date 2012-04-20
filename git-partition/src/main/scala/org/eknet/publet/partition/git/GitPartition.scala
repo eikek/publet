@@ -4,25 +4,35 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.RefSpec
 import org.eknet.publet.Path
-import java.io.{OutputStream, InputStream, File}
+import java.io.File
 import org.eknet.publet.resource._
 import scala.Option
 import org.slf4j.LoggerFactory
 import actors.Actor
+import Actor._
 
 /**
  *
+ * @param id
  * @param base
  * @param reponame
+ * @param pollInterval the bare repository is polled frequently to integrate the
+ *                     latest changes into the workspace
  */
-class GitPartition(id: Symbol, val base: File, reponame: String) extends FilesystemPartition(new File(base, reponame+"_wc"), id, false) {
+class GitPartition (
+      id: Symbol,
+      val base: File,
+      reponame: String,
+      pollInterval: Int = 1000
+) extends FilesystemPartition(new File(base, reponame+"_wc"), id, false) {
+
   private val log = LoggerFactory.getLogger(getClass)
 
   def this(id: Symbol, base: String, reponame: String) = this(id, new File(base), reponame)
 
   // the working copy is checked out to $base/$reponame_wc while the bare repo is at $base/$reponame.git
 
-  val bareRepo = {
+  private val bareRepo = {
     val d = new File(base, reponame +".git")
     if (!d.exists()) {
       val r = Git.init().setBare(true).setDirectory(d).call().getRepository
@@ -39,30 +49,38 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
     }
   }
 
-  private val pushpoll = Actor.actor {
-    import Actor._
-    try {
-      var head = bareRepo.getRef("HEAD")
-      var running = true
-      while (running) {
-        receive({
-          case "stop" => {
-            log.info("Stopping pushpoll thread.")
-            running = false
+  private def bareHead(): Option[String] = Option(bareRepo.getRef("HEAD"))
+      .flatMap(ref => Option(ref.getObjectId)).flatMap(id => Option(id.getName))
+
+  private val pushpoll = actor {
+
+    var currentHead = bareHead()
+    log.info("Starting pushpoll thread.")
+    while (true) {
+      try receive {
+        case "stop" => {
+          log.info("Stopping pushpoll thread.")
+          exit()
+        }
+        case "poll" => {
+          val nh = bareHead()
+          if (currentHead != nh) {
+            log.info(currentHead +" != " + nh +" => updating workspace")
+            currentHead = nh
+            git.pull().call()
           }
-        })
-        Thread.sleep(100)
-        val nh = bareRepo.getRef("HEAD")
-        if (head.getObjectId.getName != nh.getObjectId.getName) {
-          log.info(head +" != " + nh +" => updating workspace")
-          head = nh
-          git.pull().call()
+          Thread.sleep(pollInterval)
+          self ! "poll"
+        }
+      } catch {
+        case e => {
+          log.error("Error in update actor", e)
+          if (!e.isInstanceOf[Error]) self ! "poll"
         }
       }
-    } catch {
-      case e:Throwable => log.error("Error in update actor", e)
     }
   }
+  pushpoll ! "poll"
 
   Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
     def run() {
@@ -70,14 +88,7 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
     }
   }))
 
-  def close() {
-    log.info("Close git partition at: "+ workspaceRepo.getWorkTree)
-    pushpoll ! "stop"
-    workspaceRepo.close()
-    bareRepo.close()
-  }
-
-  val workspaceRepo = {
+  private val workspaceRepo = {
     if (!root.exists()) {
       val r = Git.cloneRepository()
         .setBare(false)
@@ -85,6 +96,11 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
         .setURI(bareRepo.getDirectory.toURI.toString)
         .setDirectory(root)
         .call().getRepository
+
+      val cfg = r.getConfig
+      cfg.setString("branch", "master", "remote", "origin")
+      cfg.setString("branch", "master", "merge", "refs/heads/master")
+      cfg.save()
 
       log.info("Created workspace at: "+ r.getWorkTree)
       r
@@ -116,7 +132,7 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
       .call()
   }
 
-  def commitWrite(c: ContentResource) {
+  protected[git] def commitWrite(c: ContentResource) {
     git.add()
       .addFilepattern(c.path.toRelative.asString)
       .setUpdate(false)
@@ -130,13 +146,23 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
     }
   }
 
-  def commitDelete(c: ContentResource) {
-    git.rm().addFilepattern(c.path.toRelative.asString)
+  protected[git] def commitDelete(c: ContentResource) {
+    git.rm()
+      .addFilepattern(c.path.toRelative.asString)
       .call()
-
     commit(c, "Delete")
     push()
   }
+
+
+  def close() {
+    log.info("Close git partition at: "+ workspaceRepo.getWorkTree)
+    pushpoll ! "stop"
+    workspaceRepo.close()
+    bareRepo.close()
+  }
+
+  lazy val repository = bareRepo.getDirectory
 
   override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, this)
   override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, this)

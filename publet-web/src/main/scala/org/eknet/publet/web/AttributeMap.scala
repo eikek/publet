@@ -18,6 +18,8 @@ trait AttributeMap {
     v
   }
 
+  def apply[T: Manifest](key: Key[T]) = get(key)
+
   def get[T : Manifest](key: Key[T]) = {
     Option(getAttr(key.name)) match {
       case None => key.init match {

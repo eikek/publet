@@ -42,6 +42,7 @@ object Dependencies {
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.scala
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r"
+  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r"
 }
 
 

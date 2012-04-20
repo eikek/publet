@@ -1,6 +1,6 @@
 package org.eknet.publet.web
 
-import extensions.scripts.{SetEngine, Listing, CaptchaScript, MailContact}
+import extensions.scripts._
 import org.eknet.publet.engine.scalascript.{ScriptPartition, ScalaScriptEvalEngine}
 import template._
 import org.eknet.publet.engine.PubletEngine
@@ -54,6 +54,7 @@ object PubletFactory {
     "mailcontact" -> (MailContact, html),
     "listing" -> (Listing, html),
     "captcha" -> (CaptchaScript, png),
-    "setengine" -> (SetEngine, json)
+    "setengine" -> (SetEngine, json),
+    "toggleRepo" -> (ToggleGitExport, html)
   )
 }

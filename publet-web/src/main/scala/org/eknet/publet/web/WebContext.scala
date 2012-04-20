@@ -87,12 +87,17 @@ trait WebContext {
 }
 
 object WebContext {
+  val contextUrl = Key[String]("contextUrl")
+
   protected[web] val publetKey = Key[Publet]("publet", () => PubletFactory.createPublet())
-  
+
   private val params = new ThreadLocal[WebContext]()
-  
+
   protected[web] def setup(req: HttpServletRequest) {
     params.set(new WebContextImpl(req))
+
+    val uriRegex = "https?://[^:]+(:\\d+)?" + req.getContextPath
+    params.get().request.setAttr(contextUrl.name, uriRegex.r.findFirstIn(req.getRequestURL.toString).get)
   }
 
   def apply(): WebContext = params.get()
