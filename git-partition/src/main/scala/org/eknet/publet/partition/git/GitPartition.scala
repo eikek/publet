@@ -8,6 +8,7 @@ import java.io.{OutputStream, InputStream, File}
 import org.eknet.publet.resource._
 import scala.Option
 import org.slf4j.LoggerFactory
+import actors.Actor
 
 /**
  *
@@ -38,6 +39,43 @@ class GitPartition(id: Symbol, val base: File, reponame: String) extends Filesys
     }
   }
 
+  private val pushpoll = Actor.actor {
+    import Actor._
+    try {
+      var head = bareRepo.getRef("HEAD")
+      var running = true
+      while (running) {
+        receive({
+          case "stop" => {
+            log.info("Stopping pushpoll thread.")
+            running = false
+          }
+        })
+        Thread.sleep(100)
+        val nh = bareRepo.getRef("HEAD")
+        if (head.getObjectId.getName != nh.getObjectId.getName) {
+          log.info(head +" != " + nh +" => updating workspace")
+          head = nh
+          git.pull().call()
+        }
+      }
+    } catch {
+      case e:Throwable => log.error("Error in update actor", e)
+    }
+  }
+
+  Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
+    def run() {
+      close()
+    }
+  }))
+
+  def close() {
+    log.info("Close git partition at: "+ workspaceRepo.getWorkTree)
+    pushpoll ! "stop"
+    workspaceRepo.close()
+    bareRepo.close()
+  }
 
   val workspaceRepo = {
     if (!root.exists()) {
@@ -109,54 +147,5 @@ object GitPartition {
 
   def newDirectory(f: File, root: Path, gp: GitPartition): ContainerResource = new GitDirectory(f, root, gp)
   def newFile(f: File, root: Path, gp: GitPartition): ContentResource = new GitFile(f, root, gp)
-
-}
-
-class GitDirectory(dir:File, root:Path, gp: GitPartition) extends DirectoryResource(dir, root) {
-  override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, gp)
-  override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
-
-  override def children:Iterable[_ <: Resource] = super.children.filterNot(_.path.asString.startsWith("/.git"))
-}
-
-class GitFile(f: File, root: Path, gp: GitPartition) extends FileResource(f, root) {
-  override def delete() {
-    super.delete()
-    gp.commitDelete(this)
-  }
-
-  override def writeFrom(in: InputStream) {
-    super.writeFrom(in)
-  }
-
-  override def outputStream:Option[OutputStream] = {
-    val out = super.outputStream.get
-    Some(new OutputStream {
-
-      def write(b: Int) {
-        out.write(b)
-      }
-
-      override def write(b: Array[Byte]) {
-        out.write(b)
-      }
-
-      override def write(b: Array[Byte], off: Int, len: Int) {
-        out.write(b, off, len)
-      }
-
-      override def close() {
-        out.close()
-        gp.commitWrite(GitFile.this)
-      }
-
-      override def flush() {
-        out.flush()
-      }
-    })
-  }
-
-  override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, gp)
-  override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
 
 }

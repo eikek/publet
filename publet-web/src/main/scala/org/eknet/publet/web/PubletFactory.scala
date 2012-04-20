@@ -7,6 +7,7 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.partition.git.GitPartition
+import javax.servlet.ServletContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -30,10 +31,16 @@ object PubletFactory {
     val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.includeEngine)
     publ.addEngine(scriptInclude)
 
-    publ.mount(Path.root, new GitPartition('publetroot, Config.contentRoot, "publetrepo"))
+
+    publ.mount(Path.root, WebContext().service(gitpartitionKey))
     publ.mount(Path("/.publets/scripts"), new ScriptPartition('scripts, scripts))
+
     publ
   }
+
+  val gitpartitionKey = Key("gitPartition", () => {
+    new GitPartition('publetroot, Config.contentRoot, "publetrepo")
+  })
 
   private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {
     override def importPackages = super.importPackages ++ List(

@@ -15,29 +15,6 @@ class PubletServlet extends HttpServlet with PageWriter {
   private val log = LoggerFactory.getLogger(getClass)
   private val filter = SuperFilter()
 
-  override def init() {
-    publetRootParam match {
-      case Some(dir) => System.setProperty("publet.dir", dir)
-      case None =>
-    }
-  }
-
-  protected def publetRootParam = {
-    val config = getServletConfig
-    Option(config.getInitParameter("publetRoot")) match {
-      case None => None
-      case Some(publetRoot) => {
-        if (publetRoot.startsWith(File.separator)) {
-          log.info("Initialize publet root to: "+ publetRoot)
-          Some(publetRoot)
-        } else {
-          val np = new java.io.File(".").getAbsolutePath+ File.separator+ publetRoot
-          log.info("Initialize publet root to: "+ np)
-          Some(np)
-        }
-      }
-    }
-  }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
     WebContext.setup(req)
