@@ -15,7 +15,7 @@ object MailContact extends ScalaScript {
   def contactForm() = makeHtml {
     <h2>Kontakt</h2>
     <div class="formSubmitResponse"></div>
-    <form class="ym-form linearize-form" action="testscript.html">
+    <form class="ym-form linearize-form" action="">
       <input type="hidden" name="a" value="eval"/>
       <div class="ym-fbox-text">
         <label for="from">Von (Email)<sup class="ym-required">*</sup></label>
@@ -34,31 +34,15 @@ object MailContact extends ScalaScript {
       </div>
       <button class="ym-button ym-email publetAjaxSubmit">Senden</button>
     </form>
-  }
-
-  def sendMail(from: String, msg: String) {
-    val ctx = WebContext()
-    import ctx._
-
-    val sender = service(senderKey(Config("smtp.host").get,
-      Config("smtp.port").getOrElse("-1").toInt,
-      Config("smtp.username").getOrElse(""),
-      Config("smtp.password").getOrElse("").toCharArray))
-
-    val mail = newMail(from);
-    mail.setText(msg)
-    mail.setSubject("Kontaktformular")
-    mail.addTo("eike@eknet.org")
-    sender.send(mail)
-  }
-
+  }//TODO the path to the captcha servlet must be universal!
+   //TODO supply i18n possiblity
 
   def serve() = {
     val ctx = WebContext()
     import ctx._
 
-    if (Config("smtp.host").isEmpty) {
-      makeHtml(<p class="box error">No SMTP configuration provided.</p>)
+    if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
+      makeHtml(<p class="box error">No SMTP configuration and/or defaultReceiver provided.</p>)
     } else {
       val from = parameter("from")
       val msg = parameter("message")
@@ -67,7 +51,11 @@ object MailContact extends ScalaScript {
 
       if (from.isDefined && msg.isDefined && captcha.isDefined) {
         if (cstr == captcha) {
-          sendMail(from.get, msg.get)
+          newMail(from.get)
+            .to(Config("defaultReceiver").get)
+            .subject("Kontaktformular")
+            .text(msg.get)
+            .send()
           makeHtml(<p class="box success">Message sent! <a href="">Reload</a></p>)
         } else {
           makeHtml(<p class="box error">Captcha does not match! <a href="">Reload</a></p>)
