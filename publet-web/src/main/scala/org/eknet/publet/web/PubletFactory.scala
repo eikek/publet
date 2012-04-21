@@ -7,7 +7,6 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.ContentType._
 import org.eknet.publet.partition.git.GitPartition
-import javax.servlet.ServletContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -38,8 +37,8 @@ object PubletFactory {
     publ
   }
 
-  val gitpartitionKey = Key("gitPartition", () => {
-    new GitPartition('publetroot, Config.contentRoot, "publetrepo")
+  val gitpartitionKey = Key("gitPartition", {
+    case Context => new GitPartition('publetroot, Config.contentRoot, "publetrepo", Config("git.pollInterval").getOrElse("1500").toInt)
   })
 
   private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {

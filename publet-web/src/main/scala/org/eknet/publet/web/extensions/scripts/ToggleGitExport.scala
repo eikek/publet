@@ -26,7 +26,7 @@ object ToggleGitExport extends ScalaScript {
     } else {
       exportok.createNewFile()
       makeHtml("<p class=\"box success\">Content repository now " +
-        "available under <code>"+ request(contextUrl).get +"/git/publetrepo.git</code>.</p>")
+        "available under <code>"+ ctx(contextUrl).get +"/git/publetrepo.git</code>.</p>")
     }
   }
 

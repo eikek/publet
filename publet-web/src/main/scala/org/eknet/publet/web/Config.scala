@@ -31,7 +31,7 @@ object Config {
   private val file = new File(directory, "publet.properties")
   private val props = new Properties(); reload();
 
-  def value(key: String) = Option(props.getProperty(key))
+  def apply(key: String) = Option(props.getProperty(key))
 
   def keySet = props.stringPropertyNames().toSet
 

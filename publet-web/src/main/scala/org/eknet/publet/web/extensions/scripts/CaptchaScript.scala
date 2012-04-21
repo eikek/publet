@@ -4,10 +4,10 @@ import org.eknet.publet.engine.scalascript.ScalaScript
 import java.awt.image.BufferedImage
 import java.awt.{Color, GradientPaint, RenderingHints, Font}
 import util.Random
-import org.eknet.publet.web.{Key, WebContext}
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import ScalaScript._
+import org.eknet.publet.web.{Session, Key, WebContext}
 
 /** Script generates a png image containing a random string. The
  * same string is set into the session.
@@ -91,8 +91,10 @@ object CaptchaScript extends ScalaScript {
     import ctx._
     val captchaData = createCaptcha()
 
-    val captchaKey = Key[String](parameter("captchaParam").getOrElse("captchaString"))
-    session.put(captchaKey, captchaData._1);
+    val captchaKey = Key(parameter("captchaParam").getOrElse("captchaString"), {
+      case Session => captchaData._1
+    })
+    ctx(captchaKey);
 
     makePng(captchaData._2)
   }

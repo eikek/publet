@@ -18,7 +18,7 @@ trait PageWriter {
 
   def writeError(ex: Throwable, resp: HttpServletResponse) {
     log.error("Error!", ex)
-    if (Config.value("mode").getOrElse("development") == "development") {
+    if (Config("mode").getOrElse("development") == "development") {
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))

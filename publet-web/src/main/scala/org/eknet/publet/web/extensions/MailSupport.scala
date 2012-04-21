@@ -2,7 +2,7 @@ package org.eknet.publet.web.extensions
 
 import javax.mail.internet.InternetAddress
 import org.eknet.squaremail.{MailSender, DefaultSessionFactory, DefaultMailSender, DefaulMailMessage}
-import org.eknet.publet.web.{Key, WebContext}
+import org.eknet.publet.web.{Context, Key}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -23,9 +23,8 @@ object MailSupport {
   def sender(host: String, port: Int = -1, user: String, password: Array[Char]): MailSender =
     new DefaultMailSender(sessionFactory(host, port, user, password))
   
-  def senderKey(host: String, port: Int = -1, user: String, password: Array[Char]) = Key[MailSender](
-    host+port+user,
-    Some(() => sender(host, port, user, password))
-  ) 
+  def senderKey(host: String, port: Int = -1, user: String, password: Array[Char]) = Key(host+port+user, {
+    case Context => sender(host, port, user, password)
+  })
 
 }

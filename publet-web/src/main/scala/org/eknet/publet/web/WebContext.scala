@@ -23,6 +23,8 @@ trait WebContext {
 
   def context: AttributeMap
 
+  def apply[T:Manifest](key:Key[T]): Option[T]
+
   /** Returns all parameters of the
    * request.
    *
@@ -43,8 +45,7 @@ trait WebContext {
    * in `context` scope.
    *
    * If no value exists, the `init` function of the
-   * key is used to create a initial value. The `init`
-   * function is mandatory.
+   * key is used to create a initial value.
    *
    * The value is added to the servlet context
    * attribute map to live across sessions and
@@ -55,7 +56,6 @@ trait WebContext {
    * @return
    */
   def service[T : Manifest](key: Key[T]): T = {
-    Predef.ensuring(key.init.isDefined, "no init defined")
     context.get(key).get
   }
 
@@ -87,26 +87,33 @@ trait WebContext {
 }
 
 object WebContext {
-  val contextUrl = Key[String]("contextUrl")
+  val contextUrl = Key("contextUrl", {
+    case Session => {
+      val req = WebContext().asInstanceOf[WebContextImpl].req
+      val uriRegex = "https?://[^:]+(:\\d+)?" + req.getContextPath
+      uriRegex.r.findFirstIn(req.getRequestURL.toString).get
+    }
+  })
 
-  protected[web] val publetKey = Key[Publet]("publet", () => PubletFactory.createPublet())
+  val publetKey = Key("publet", {
+    case Context => PubletFactory.createPublet()
+  })
 
   private val params = new ThreadLocal[WebContext]()
 
   protected[web] def setup(req: HttpServletRequest) {
     params.set(new WebContextImpl(req))
-
-    val uriRegex = "https?://[^:]+(:\\d+)?" + req.getContextPath
-    params.get().request.setAttr(contextUrl.name, uriRegex.r.findFirstIn(req.getRequestURL.toString).get)
   }
 
   def apply(): WebContext = params.get()
+
+  def apply[T:Manifest](key:Key[T]): Option[T] = WebContext()(key)
 
   def clear() {
     params.remove()
   }
 
-  private class WebContextImpl(req: HttpServletRequest) extends WebContext {
+  private class WebContextImpl(val req: HttpServletRequest) extends WebContext {
     lazy val uploads: List[FileItem] = {
       val rct = req.getContentType
       if (rct != null && rct.startsWith("multipart")) {
@@ -122,6 +129,14 @@ object WebContext {
     lazy val request = new RequestMap(req)
 
     lazy val context = new ContextMap(req.getSession.getServletContext)
+
+    def apply[T: Manifest](key: Key[T]) = {
+      request.get(key).orElse {
+        session.get(key).orElse {
+          context.get(key)
+        }
+      }
+    }
 
     lazy val parameters = {
       val buf = mutable.Map[String, List[String]]()

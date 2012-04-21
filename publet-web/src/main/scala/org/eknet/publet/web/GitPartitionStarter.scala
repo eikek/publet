@@ -1,6 +1,6 @@
 package org.eknet.publet.web
 
-import javax.servlet.{ServletContext, ServletContextEvent, ServletContextListener}
+import javax.servlet.{ServletContextEvent, ServletContextListener}
 import org.eknet.publet.partition.git.GitPartition
 import PubletFactory.gitpartitionKey
 
@@ -14,7 +14,7 @@ import PubletFactory.gitpartitionKey
 class GitPartitionStarter extends ServletContextListener {
   def contextInitialized(sce: ServletContextEvent) {
     sce.getServletContext
-      .setAttribute(gitpartitionKey.name, gitpartitionKey.init.get())
+      .setAttribute(gitpartitionKey.name, gitpartitionKey.init(Context))
   }
 
   def contextDestroyed(sce: ServletContextEvent) {

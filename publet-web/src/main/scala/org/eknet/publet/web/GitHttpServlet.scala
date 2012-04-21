@@ -1,7 +1,7 @@
 package org.eknet.publet.web
 
 import org.eclipse.jgit.http.server.glue.MetaServlet
-import org.eclipse.jgit.http.server.{GitFilter, GitServlet}
+import org.eclipse.jgit.http.server.GitFilter
 import javax.servlet.{ServletConfig, FilterConfig}
 import java.util.Enumeration
 import javax.servlet.http.HttpServletRequest
@@ -29,7 +29,7 @@ class GitHttpServlet extends MetaServlet(new GitFilter()) {
 
       def getServletContext = config.getServletContext
 
-      def getInitParameter(name: String) = Config.value("git."+ name).getOrElse(null)
+      def getInitParameter(name: String) = Config("git."+ name).getOrElse(null)
     })
   }
 }

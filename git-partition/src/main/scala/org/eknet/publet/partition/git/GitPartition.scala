@@ -23,12 +23,12 @@ class GitPartition (
       id: Symbol,
       val base: File,
       reponame: String,
-      pollInterval: Int = 1000
+      pollInterval: Int
 ) extends FilesystemPartition(new File(base, reponame+"_wc"), id, false) {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  def this(id: Symbol, base: String, reponame: String) = this(id, new File(base), reponame)
+  def this(id: Symbol, base: String, reponame: String, pollInterval: Int) = this(id, new File(base), reponame, pollInterval)
 
   // the working copy is checked out to $base/$reponame_wc while the bare repo is at $base/$reponame.git
 

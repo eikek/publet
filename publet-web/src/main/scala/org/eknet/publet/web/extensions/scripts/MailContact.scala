@@ -40,10 +40,10 @@ object MailContact extends ScalaScript {
     val ctx = WebContext()
     import ctx._
 
-    val sender = service(senderKey(Config.value("smtp.host").get,
-      Config.value("smtp.port").getOrElse("-1").toInt,
-      Config.value("smtp.username").getOrElse(""),
-      Config.value("smtp.password").getOrElse("").toCharArray))
+    val sender = service(senderKey(Config("smtp.host").get,
+      Config("smtp.port").getOrElse("-1").toInt,
+      Config("smtp.username").getOrElse(""),
+      Config("smtp.password").getOrElse("").toCharArray))
 
     val mail = newMail(from);
     mail.setText(msg)
@@ -57,13 +57,13 @@ object MailContact extends ScalaScript {
     val ctx = WebContext()
     import ctx._
 
-    if (Config.value("smtp.host").isEmpty) {
+    if (Config("smtp.host").isEmpty) {
       makeHtml(<p class="box error">No SMTP configuration provided.</p>)
     } else {
       val from = parameter("from")
       val msg = parameter("message")
       val captcha = parameter("captcha")
-      val cstr = session.remove(Key[String]("contactCaptcha"))
+      val cstr = ctx(Key[String]("contactCaptcha"))
 
       if (from.isDefined && msg.isDefined && captcha.isDefined) {
         if (cstr == captcha) {
