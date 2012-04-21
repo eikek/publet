@@ -1,20 +1,22 @@
 package org.eknet.publet.web
 
-import collection.JavaConversions._
-import java.util.Properties
 import java.io.{FileInputStream, File}
 import org.slf4j.LoggerFactory
 import System._
+import util.PropertiesMap
 
 /** Configuration file, is picked up from the configured publet directory. This is
  * either given as system property `publet.dir`, as environment variable `PUBLET_DIR`
  * or as servlet config parameter `publet.dir` (which is added to the system properties).
  *
+ * This map is read only once on startup. You can reload its contents manually using
+ * `#reload()`.
+ *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 17.04.12 09:30
  *
  */
-object Config {
+object Config extends PropertiesMap {
   private val log = LoggerFactory.getLogger(getClass)
 
   val directory = new File(Option(getProperty("publet.dir"))
@@ -28,19 +30,8 @@ object Config {
 
   val contentRoot = subdir("contents")
 
-  private val file = new File(directory, "publet.properties")
-  private val props = new Properties(); reload();
-
-  def apply(key: String) = Option(props.getProperty(key))
-
-  def keySet = props.stringPropertyNames().toSet
-
-  def reload() {
-    synchronized {
-      props.clear()
-      if (file.exists()) props.load(new FileInputStream(file))
-    }
-  }
+  private val configfile = new File(directory, "publet.properties")
+  def file = if (configfile.exists()) Some(new FileInputStream(configfile)) else None
 
   private def subdir(name: String) = {
     val d = new File(directory, name)

@@ -8,6 +8,10 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.{Path, Publet}
 import java.net.URLDecoder
+import org.eknet.publet.web.WebContext.WebContextImpl._
+import util.PropertiesMap
+import org.eknet.publet.partition.git.GitPartition
+import org.eknet.publet.resource.ContentResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -87,6 +91,12 @@ trait WebContext {
 }
 
 object WebContext {
+  private val params = new ThreadLocal[WebContext]()
+
+  val gitpartitionKey = Key("gitPartition", {
+    case Context => new GitPartition('publetroot, Config.contentRoot, "publetrepo", Config("git.pollInterval").getOrElse("1500").toInt)
+  })
+
   val contextUrl = Key("contextUrl", {
     case Session => {
       val req = WebContext().asInstanceOf[WebContextImpl].req
@@ -99,7 +109,17 @@ object WebContext {
     case Context => PubletFactory.createPublet()
   })
 
-  private val params = new ThreadLocal[WebContext]()
+  val settings = Key("settings", {
+    case Context => new PropertiesMap {
+      def file = {
+        val gp = WebContext().service(gitpartitionKey)
+        gp.lookup(Path("/.allIncludes/settings.properties")) match {
+          case Some(r:ContentResource) => if (r.exists) Some(r.inputStream) else None
+          case _ => None
+        }
+      }
+    }
+  })
 
   protected[web] def setup(req: HttpServletRequest) {
     params.set(new WebContextImpl(req))
