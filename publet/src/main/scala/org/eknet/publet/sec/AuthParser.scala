@@ -53,5 +53,5 @@ class AuthParser extends JavaTokenParsers {
     .map(rule(_)).toList
 }
 
-case class User(username: String, roles: Set[String], password: Array[Char])
+case class User(username: String, roles: Set[String], password: Array[Char], enabled: Boolean = true)
 case class Rule(resource: String, roles: Set[String], permissions:Set[String])
