@@ -42,7 +42,8 @@ object PubletFactory {
     "org.eknet.publet.web.WebContext",
     "org.eknet.publet.web.util.AttributeMap",
     "org.eknet.publet.web.util.Key",
-    "org.eknet.publet.web.extensions.WebDsl"
+    "org.eknet.publet.web.extensions.WebDsl",
+    "org.apache.shiro.SecurityUtils"
     )
   }
 

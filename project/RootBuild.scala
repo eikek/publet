@@ -43,6 +43,9 @@ object Dependencies {
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r"
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r"
+  val shiro = "org.apache.shiro" % "shiro-core" % "1.2.0"
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % "1.2.0"
+
 }
 
 

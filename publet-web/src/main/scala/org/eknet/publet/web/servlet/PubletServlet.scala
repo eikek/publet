@@ -31,32 +31,12 @@ class PubletServlet extends MetaServlet(new PubletFilter) {
 
       def getInitParameter(name: String) = config.getInitParameter(name)
     })
-    publetInit()
   }
 
 
-  def publetInit() {
-    synchronized {
-      val gp = new GitPartition('publetroot,
-        Config.contentRoot,
-        "publetrepo",
-        Config("git.pollInterval").getOrElse("1500").toInt)
-      val publ = PubletFactory.createPublet(gp)
 
-      servletConfig.getServletContext
-        .setAttribute(gitpartitionKey.name, gp)
-      servletConfig.getServletContext
-        .setAttribute(publetKey.name, publ)
-
-    }
-  }
 
   override def destroy() {
-    try {
-      servletConfig.getServletContext.getAttribute(gitpartitionKey.name)
-        .asInstanceOf[GitPartition].close()
-    } catch {
-      case e:Throwable => log.error("Error on destroy.", e)
-    }
+
   }
 }

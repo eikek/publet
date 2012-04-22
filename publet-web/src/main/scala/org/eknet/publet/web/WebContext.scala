@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.{Path, Publet}
 import java.net.URLDecoder
 import org.eknet.publet.partition.git.GitPartition
+import shiro.PubletAuthManager
 import util._
 
 /**
@@ -94,7 +95,7 @@ object WebContext {
   private def request: HttpServletRequest = WebContext().asInstanceOf[WebContextImpl].req
 
   val gitpartitionKey = Key[GitPartition]("gitPartition")
-
+  val publetAuthManagerKey = Key[PubletAuthManager]("publetAuthManager")
   val publetKey = Key[Publet]("publet")
 
   /**The url up to the path that starts the resource path.

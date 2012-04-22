@@ -5,7 +5,6 @@ import org.apache.shiro.realm.AuthorizingRealm
 import org.apache.shiro.authz.AuthorizationInfo
 import org.eknet.publet.sec.{User, AuthManager}
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
-import org.eknet.publet.web.shiro.UsersRealm.UserAuthInfo
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
 
 /**
@@ -36,8 +35,8 @@ class UsersRealm(db: AuthManager) extends AuthorizingRealm {
     def getRoles = user.roles
 
     def getStringPermissions = db.policyFor(user.username) match {
-      case None => Set()
-      case Some(p) => p.permissions
+      case None => Set[String]()
+      case Some(p) => p.permissions.flatMap(_.permissions)
     }
 
     def getObjectPermissions = List()

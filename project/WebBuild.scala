@@ -15,5 +15,5 @@ object WebBuild extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
-  val deps = Seq(servletApi, slf4jApi, logbackClassic, commonsFileUpload, commonsIo, squareMail, jgitHttpServer)
+  val deps = Seq(servletApi, slf4jApi, logbackClassic, commonsFileUpload, commonsIo, squareMail, jgitHttpServer, shiro, shiroWeb)
 }

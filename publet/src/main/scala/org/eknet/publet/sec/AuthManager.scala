@@ -18,5 +18,5 @@ trait Policy {
 
   def hasPerm(resource: Path, perm: Set[String]): Boolean
 
-  def permissions: Set[String]
+  def permissions: Set[Rule]
 }

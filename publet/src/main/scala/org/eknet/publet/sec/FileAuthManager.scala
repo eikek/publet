@@ -2,21 +2,22 @@ package org.eknet.publet.sec
 
 import java.io.{BufferedInputStream, InputStream, FileInputStream, File}
 import org.eknet.publet.Path
+import org.eknet.publet.resource.ContentResource
 
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.04.12 00:00
  */
-class FileAuthManager(userFile: File, ruleFile: File) extends AuthManager {
+class FileAuthManager(userFile: ContentResource, ruleFile: ContentResource) extends AuthManager {
 
-  userFile.ensuring(f => f.canRead && f.isFile, "File not readable")
-  ruleFile.ensuring(f => f.canRead && f.isFile, "File not readable")
+  userFile.ensuring(f => f.exists, "File not readable")
+  ruleFile.ensuring(f => f.exists, "File not readable")
 
   private val parse = new AuthParser
 
-  private def rules:InputStream = new BufferedInputStream(new FileInputStream(ruleFile))
-  private def users:InputStream = new BufferedInputStream(new FileInputStream(userFile))
+  private def rules:InputStream = ruleFile.inputStream
+  private def users:InputStream = userFile.inputStream
 
   private def loadRules = parse.rules(rules)
   private def loadUsers = parse.principals(users)
@@ -42,6 +43,8 @@ class FileAuthManager(userFile: File, ruleFile: File) extends AuthManager {
       }
       r.isEmpty
     }
+
+    def permissions = rules.toSet
   }
 
 }
