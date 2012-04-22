@@ -6,18 +6,15 @@
 
 <web-app>
     <display-name>publet</display-name>
-    <listener>
-        <listener-class>org.eknet.publet.web.GitPartitionStarter</listener-class>
-    </listener>
 
     <servlet>
         <servlet-name>publet</servlet-name>
-        <servlet-class>org.eknet.publet.web.PubletServlet</servlet-class>
+        <servlet-class>org.eknet.publet.web.servlet.PubletServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>GitHttpServlet</servlet-name>
-        <servlet-class>org.eknet.publet.web.GitHttpServlet</servlet-class>
+        <servlet-class>org.eknet.publet.web.servlet.GitHttpServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

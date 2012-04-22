@@ -13,7 +13,6 @@ abstract class PropertiesMap extends StringMap {
   def file: Option[InputStream]
 
   private val props = new Properties();
-  reload();
 
   def apply(key: String) = Option(props.getProperty(key))
 

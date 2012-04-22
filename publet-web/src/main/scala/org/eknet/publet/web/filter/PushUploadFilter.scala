@@ -4,6 +4,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.slf4j.LoggerFactory
 import org.eknet.publet.resource.Content
 import org.eknet.publet.web.WebContext
+import javax.servlet.{FilterChain, Filter}
 
 /**
  *
@@ -11,15 +12,17 @@ import org.eknet.publet.web.WebContext
  * @since 05.04.12 15:08
  *
  */
-object PushUploadFilter extends Filter {
+class PushUploadFilter extends Filter with SimpleFilter {
   private val log = LoggerFactory.getLogger(getClass)
 
-  def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
+
+  def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val ctx = WebContext()
     ctx.uploads.foreach(fi => {
       log.debug("Create {} file", ctx.requestPath.targetType.get)
       ctx.publet.push(ctx.requestPath, Content(fi.getInputStream, ctx.requestPath.targetType.get))
     })
-    false
+    chain.doFilter(req, resp)
   }
+
 }

@@ -7,7 +7,8 @@ import util.Random
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import ScalaScript._
-import org.eknet.publet.web.{Session, Key, WebContext}
+import org.eknet.publet.web.WebContext
+import org.eknet.publet.web.util.{Session, Key}
 
 /** Script generates a png image containing a random string. The
  * same string is set into the session.

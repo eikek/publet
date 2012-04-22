@@ -1,20 +1,20 @@
 package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import org.eknet.publet.resource.Content._
-import org.eknet.publet.resource.ContentType._
 import org.slf4j.LoggerFactory
 import org.eknet.publet.resource.{ContentType, Content}
 import org.eknet.publet.web.WebContext
+import javax.servlet.{FilterChain, Filter}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.04.12 00:34
  */
-object PushContentFilter extends Filter {
+class PushContentFilter extends Filter with SimpleFilter {
   private val log = LoggerFactory.getLogger(getClass)
 
-  def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
+
+  def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val publet = WebContext().publet
     val path = WebContext().requestPath
     Option(req.getParameter("page")) match {
@@ -25,6 +25,10 @@ object PushContentFilter extends Filter {
         publet.push(path, Content(body, ContentType(Symbol(target))))
       }
     }
-    false
+    chain.doFilter(req, resp)
+  }
+
+  def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
+
   }
 }

@@ -8,10 +8,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.{Path, Publet}
 import java.net.URLDecoder
-import org.eknet.publet.web.WebContext.WebContextImpl._
-import util.PropertiesMap
 import org.eknet.publet.partition.git.GitPartition
-import org.eknet.publet.resource.ContentResource
+import util._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -93,39 +91,53 @@ trait WebContext {
 object WebContext {
   private val params = new ThreadLocal[WebContext]()
 
-  val gitpartitionKey = Key("gitPartition", {
-    case Context => new GitPartition('publetroot, Config.contentRoot, "publetrepo", Config("git.pollInterval").getOrElse("1500").toInt)
-  })
+  private def request: HttpServletRequest = WebContext().asInstanceOf[WebContextImpl].req
 
+  val gitpartitionKey = Key[GitPartition]("gitPartition")
+
+  val publetKey = Key[Publet]("publet")
+
+  /**The url up to the path that starts the resource path.
+   *
+   * This is the host, port and the mountpoint.
+   */
   val contextUrl = Key("contextUrl", {
-    case Session => {
-      val req = WebContext().asInstanceOf[WebContextImpl].req
-      val uriRegex = "https?://[^:]+(:\\d+)?" + req.getContextPath
-      uriRegex.r.findFirstIn(req.getRequestURL.toString).get
-    }
-  })
-
-  val publetKey = Key("publet", {
-    case Context => PubletFactory.createPublet()
-  })
-
-  val settings = Key("settings", {
-    case Context => new PropertiesMap {
-      def file = {
-        val gp = WebContext().service(gitpartitionKey)
-        gp.lookup(Path("/.allIncludes/settings.properties")) match {
-          case Some(r:ContentResource) => if (r.exists) Some(r.inputStream) else None
-          case _ => None
+    case Session => synchronized {
+      // Config has preference
+      Config("publet.contextUrl").getOrElse {
+        Settings("publet.contextUrl").getOrElse {
+          val uriRegex = "https?://[^:]+(:\\d+)?" + request.getContextPath
+          uriRegex.r.findFirstIn(request.getRequestURL.toString).get
         }
       }
     }
   })
 
+  /**The url to the current request without parameters.
+   *
+   */
+  val requestUrl = Key("requestUrl", {
+    case Request => {
+      val url = Option(request.getPathInfo)
+      WebContext()(contextUrl).get + url
+    }
+  })
+
+  /**The mount path for the wiki.
+   *
+   */
+  val mainMount = Key("publet.mainMount", {
+    case Request => {
+      Config("publet.mainMount").getOrElse("main")
+    }
+  })
+
+
   protected[web] def setup(req: HttpServletRequest) {
     params.set(new WebContextImpl(req))
   }
 
-  def apply(): WebContext = params.get()
+  def apply(): WebContext = Option(params.get).getOrElse(sys.error("No webcontext installed."))
 
   def apply[T:Manifest](key:Key[T]): Option[T] = WebContext()(key)
 
@@ -144,11 +156,11 @@ object WebContext {
       }
     }
 
-    lazy val session = new SessionMap(req.getSession)
+    lazy val session = AttributeMap(req.getSession)
 
-    lazy val request = new RequestMap(req)
+    lazy val request = AttributeMap(req)
 
-    lazy val context = new ContextMap(req.getSession.getServletContext)
+    lazy val context = AttributeMap(req.getSession.getServletContext)
 
     def apply[T: Manifest](key: Key[T]) = {
       request.get(key).orElse {

@@ -2,6 +2,8 @@ package org.eknet.publet.web.extensions
 
 import org.eknet.publet.resource.{ContentType, Content}
 import xml.{NodeBuffer, Elem, NodeSeq}
+import org.eknet.publet.web.WebContext
+import org.eknet.publet.web.util.Key
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,6 +14,13 @@ object WebDsl {
   abstract class WebElem {
     def render: String
     def ~ (elem: WebElem): WebElem = new PairElem(this, elem)
+    def action(onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }): WebElem = {
+      form(this, onSubmit, validate)
+    }
+    def when(cond: => Boolean) = new ConditionElem(this, cond)
+  }
+  class ConditionElem(el: WebElem, cond: => Boolean) extends WebElem {
+    def render = if (cond) el.render else ""
   }
   class PairElem(e1: WebElem, e2: WebElem) extends WebElem {
     def render = e1.render + e2.render
@@ -19,39 +28,30 @@ object WebDsl {
   class StringElem(str: String) extends WebElem {
     def render = str
   }
-  case class Head(str:String, level: Int = 1) extends WebElem {
-    lazy val render = "<h"+ level+ ">"+str+"</h"+ level +">"
-  }
 
   implicit def stringToWebElem(str: String): WebElem = new StringElem(str)
 
+  def when(cond: => Boolean)(elem: WebElem) = new ConditionElem(elem, cond)
 
   // forms
-  class FormElem(nodes: => NodeSeq, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }) extends WebElem {
-    nodes.head.label.ensuring(_ == "form", "only applicable to form elements")
+  class FormElem(elm: WebElem, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }) extends WebElem {
 
     //TODO
-    // FormElem must check the nodes and search for any input tag with "name" attribute
-    // if the request does not contain at least one of these parameter, then render the nodes. make
-    // sure to replace the "action=" attribute with the current request url (or better with $this, which is replaced by javascript
-    // to make it also work when included.
     //
     // if parameters from the form are present, then feed them in the validate() partial function
-    // any results must be rendered next to the form (think about how.. maybe add additional labels with error css class)
-    // if validate does not fail, call onSubmit (which can return "this" or another page)
+    // any results must be put into the request's attribute map. the render method must react on
+    // those information accordingly. if validate does not fail, call onSubmit (which can return
+    // "this" or another page)
 
     def render = null
   }
   case class Param(name:String, value:String)
 
-  def form(render: => NodeSeq, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }): WebElem = {
-    new FormElem(render, onSubmit, validate)
+  def form(elm: WebElem, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }): WebElem = {
+    new FormElem(elm, onSubmit, validate)
   }
 
   class NodeSeqElem(ns: NodeSeq) extends WebElem {
-    def action(onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = { case _ => None }): WebElem = {
-      form(ns, onSubmit, validate)
-    }
 
     def render = ns.toString()
   }
@@ -69,14 +69,36 @@ object WebDsl {
   import org.eknet.publet.engine.scalascript.ScalaScript._
   import MailSupport._
 
+  val successKey = Key[Boolean]("success")
+  val ctx = WebContext()
+
   page {
     <h1>This is my headline</h1> ~
     form(
       // gives the xhtml content.
-      render = <form>
-          <input type="text" name="username"></input>
-          <input type="button" value="Send"></input>
-        </form>,
+      elm = <h2>Kontakt</h2> ~
+        <p class="box success"></p>.when(ctx(successKey).exists(_ == true)) ~
+        when(ctx(successKey).isEmpty) {
+          """<form class="ym-form linearize-form" action={ctx(WebContext.requestUrl)}>
+            <input type="hidden" name="a" value="eval"/>
+            <div class="ym-fbox-text">
+              <label for="from">Von (Email)<sup class="ym-required">*</sup></label>
+                <input type="text" name="from" id="from" size="20" required="required"/>
+            </div>
+            <div class="ym-fbox-text">
+              <label for="message">Nachricht<sup class="ym-required">*</sup></label>
+              <textarea name="message" rows="10" required="required"></textarea>
+            </div>
+            <div class="ym-fbox-text">
+              <label for="captcha">Captcha<sup class="ym-required">*</sup></label>
+                <input type="text" name="captcha" id="captcha" size="20" required="required"/>
+            </div>
+            <div class="ym-fbox-select">
+              <img alt="captcha" src="/.publets/scripts/captcha.png" />
+            </div>
+            <button class="ym-button ym-email publetAjaxSubmit">Senden</button>
+          </form>"""
+        },
 
       //is called after form submit, that is a request to the current url with parameters
       onSubmit = {
@@ -109,8 +131,7 @@ object WebDsl {
       validate = {
         case Param("username", un)  => if (un.isEmpty) Some("empty username") else None
       }
-    ) ~
-    <p>Pleas fill the form</p>
+    )
   }
 }
 

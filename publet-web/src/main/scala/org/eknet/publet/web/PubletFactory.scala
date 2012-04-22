@@ -6,6 +6,7 @@ import template._
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.{Path, Publet}
 import org.eknet.publet.resource.ContentType._
+import org.eknet.publet.resource.Partition
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -13,7 +14,7 @@ import org.eknet.publet.resource.ContentType._
  */
 object PubletFactory {
 
-  def createPublet(): Publet = {
+  def createPublet(rootPartition: Partition): Publet = {
     val publ = Publet()
 
     val defaultEngine = new DefaultEngine(publ)
@@ -30,7 +31,7 @@ object PubletFactory {
     publ.addEngine(scriptInclude)
 
 
-    publ.mount(Path.root, WebContext().service(gitpartitionKey))
+    publ.mount(Path("/"+ Config.mainMount), rootPartition)
     publ.mount(Path("/.publets/scripts"), new ScriptPartition('scripts, scripts))
 
     publ
@@ -39,8 +40,9 @@ object PubletFactory {
   private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {
     override def importPackages = super.importPackages ++ List(
     "org.eknet.publet.web.WebContext",
-    "org.eknet.publet.web.AttributeMap",
-    "org.eknet.publet.web.Key"
+    "org.eknet.publet.web.util.AttributeMap",
+    "org.eknet.publet.web.util.Key",
+    "org.eknet.publet.web.extensions.WebDsl"
     )
   }
 

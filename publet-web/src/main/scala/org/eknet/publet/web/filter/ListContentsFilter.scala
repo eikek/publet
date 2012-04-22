@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory
 import org.eknet.publet.engine.scalascript.com.twitter.json.Json
 import org.eknet.publet.{Publet, Path}
 import org.eknet.publet.resource._
-import java.net.URLDecoder
 import collection.mutable
-import org.eknet.publet.web.WebContext
+import javax.servlet.{FilterChain, Filter}
+import org.eknet.publet.web.{Config, WebContext}
 
 /**
  *
@@ -15,25 +15,27 @@ import org.eknet.publet.web.WebContext
  * @since 10.04.12 12:37
  */
 
-object ListContentsFilter extends Filter {
+class ListContentsFilter extends Filter with SimpleFilter {
+
   private val log = LoggerFactory.getLogger(getClass)
+
   private val resourceComparator = (r1: Resource, r2: Resource) => {
     if (r1.isContainer && !r2.isContainer) true
     else if (r2.isContainer && !r1.isContainer) false
     else r1.name.compareTo(r2.name) < 0
   }
 
-  def handle(req: HttpServletRequest, resp: HttpServletResponse) = {
+
+  def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     WebContext().action match {
       case Some("list") => {
         val path = WebContext().decodePath
         val p = if (path.directory) path else path.parent
-        val contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
-        val json = createJsonMap(p, WebContext().publet, contextPath)
+        val prefixPath = "/" + Config.mainMount // URLDecoder.decode(req.getContextPath, "UTF-8")
+        val json = createJsonMap(p, WebContext().publet, prefixPath)
         Content(json.toString, ContentType.json).copyTo(resp.getOutputStream)
-        true
       }
-      case _ => false
+      case _ => chain.doFilter(req, resp)
     }
   }
 

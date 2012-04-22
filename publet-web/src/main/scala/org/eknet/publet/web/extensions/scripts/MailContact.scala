@@ -2,7 +2,8 @@ package org.eknet.publet.web.extensions.scripts
 
 import org.eknet.publet.engine.scalascript.ScalaScript
 import ScalaScript._
-import org.eknet.publet.web.{Config, WebContext, Key}
+import org.eknet.publet.web.{Config, WebContext}
+import org.eknet.publet.web.util.Key
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

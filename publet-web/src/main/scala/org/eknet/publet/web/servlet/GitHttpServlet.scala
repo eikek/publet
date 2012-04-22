@@ -1,11 +1,11 @@
-package org.eknet.publet.web
+package org.eknet.publet.web.servlet
 
 import org.eclipse.jgit.http.server.glue.MetaServlet
 import org.eclipse.jgit.http.server.GitFilter
 import javax.servlet.{ServletConfig, FilterConfig}
-import java.util.Enumeration
 import javax.servlet.http.HttpServletRequest
 import org.eclipse.jgit.transport.resolver.FileResolver
+import org.eknet.publet.web.Config
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -19,17 +19,13 @@ class GitHttpServlet extends MetaServlet(new GitFilter()) {
   override def init(config: ServletConfig) {
     gitFilter.init(new FilterConfig {
 
-      def getInitParameterNames = new Enumeration[String] {
-        val set = Config.keySet.filter(_.startsWith("git.")).toIterator
-        def nextElement() = set.next()
-        def hasMoreElements = set.hasNext
-      }
+      def getInitParameterNames = config.getInitParameterNames
 
       def getFilterName = gitFilter.getClass.getName
 
       def getServletContext = config.getServletContext
 
-      def getInitParameter(name: String) = Config("git."+ name).getOrElse(null)
+      def getInitParameter(name: String) = config.getInitParameter(name)
     })
   }
 }

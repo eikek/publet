@@ -29,8 +29,14 @@ object Config extends PropertiesMap {
   log.info("Setup publet dir to: "+ directory)
 
   val contentRoot = subdir("contents")
-
   private val configfile = new File(directory, "publet.properties")
+
+
+  lazy val mainMount = apply("publet.mainMount").getOrElse("main")
+
+
+  reload()
+
   def file = if (configfile.exists()) Some(new FileInputStream(configfile)) else None
 
   private def subdir(name: String) = {
