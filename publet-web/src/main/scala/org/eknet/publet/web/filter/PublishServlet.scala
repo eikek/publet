@@ -14,7 +14,7 @@ import javax.servlet.http.{HttpServlet, HttpServletResponse, HttpServletRequest}
  */
 class PublishServlet extends HttpServlet with PageWriter {
 
-  override def service(req: HttpServletRequest, resp: HttpServletResponse) = {
+  override def service(req: HttpServletRequest, resp: HttpServletResponse) {
     WebContext().action match {
       case Some(engine) => processEngine(req, resp, engine); true
       case _ => processDefault(req, resp)

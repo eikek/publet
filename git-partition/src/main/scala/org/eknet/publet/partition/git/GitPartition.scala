@@ -100,6 +100,7 @@ class GitPartition (
       val cfg = r.getConfig
       cfg.setString("branch", "master", "remote", "origin")
       cfg.setString("branch", "master", "merge", "refs/heads/master")
+      cfg.setBoolean("http", null, "receivepack", true)
       cfg.save()
 
       log.info("Created workspace at: "+ r.getWorkTree)

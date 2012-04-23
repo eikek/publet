@@ -14,9 +14,14 @@ import org.slf4j.LoggerFactory
 class RedirectFilter extends SimpleFilter {
   private val log = LoggerFactory.getLogger(getClass)
   private lazy val mount = WebContext(mainMount).get
-  private val forwards = Set("/", "robots.txt", "/index.html", "/index.htm", "/favicon.ico").map(Path(_))
+  private val forwards = Set("/",
+    "/robots.txt",
+    "/index.html",
+    "/index.htm",
+    "/favicon.ico").map(Path(_))
 
-  // TODO add additional fowards from settings
+  // TODO add regex style. redirect /.allIncludes/*
+  // TODO add additional redirects from settings
 
   def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val path = WebContext().requestPath

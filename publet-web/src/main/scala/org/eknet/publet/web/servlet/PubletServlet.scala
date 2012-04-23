@@ -1,11 +1,8 @@
 package org.eknet.publet.web.servlet
 
 import org.eclipse.jgit.http.server.glue.MetaServlet
-import org.eknet.publet.partition.git.GitPartition
-import org.eknet.publet.web.WebContext._
 import org.slf4j.LoggerFactory
 import javax.servlet._
-import org.eknet.publet.web.{PubletFactory, Config}
 
 /** Building with the infrastructure provided by jgit.
  *
@@ -31,12 +28,5 @@ class PubletServlet extends MetaServlet(new PubletFilter) {
 
       def getInitParameter(name: String) = config.getInitParameter(name)
     })
-  }
-
-
-
-
-  override def destroy() {
-
   }
 }
