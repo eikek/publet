@@ -1,32 +1,14 @@
+
 import sbt._
 import Keys._
+import BundlePlugin._
+import Dependencies._
+import sbt.Build
 
 object Resolvers {
   
   val eknet = "eknet.org" at "http://maven.eknet.org/repo"
   
-}
-
-object RootBuild extends Build {
-
-  lazy val root = Project(id = "publet-root",
-    base = file("."),
-    settings = buildSettings
-  ) aggregate (WebBuild.web, PubletBuild.publet, GitPartition.module)
-
-  val scala = "2.9.1"
-
-  val buildSettings = Project.defaultSettings ++ Seq(
-    name := "publet-root"
-  )
-
-  override lazy val settings = super.settings ++ Seq(
-    version := "1.0.0-SNAPSHOT",
-    scalaVersion := scala,
-    sbtPlugin := true,
-    resolvers := Seq(Resolvers.eknet),
-    scalacOptions ++= Seq("-unchecked", "-deprecation")
-  )
 }
 
 object Dependencies {
@@ -39,7 +21,7 @@ object Dependencies {
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2"
   val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4"
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.scala
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r"
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r"
@@ -48,4 +30,84 @@ object Dependencies {
 
 }
 
+// Root Module 
 
+object RootBuild extends Build {
+
+  lazy val root = Project(
+    id = "root",
+    base = file("."),
+    settings = buildSettings
+  ) aggregate (Web.module, Publet.module, GitPartition.module)
+
+  val globalScalaVersion = "2.9.1"
+
+  val buildSettings = Project.defaultSettings ++ Seq(
+    name := "publet-parent"
+  )
+
+  override lazy val settings = super.settings ++ Seq(
+    version := "1.0.0-SNAPSHOT",
+    scalaVersion := globalScalaVersion,
+    sbtPlugin := true,
+    resolvers := Seq(Resolvers.eknet),
+    scalacOptions ++= Seq("-unchecked", "-deprecation")
+  )
+}
+
+
+// Sub Modules
+
+object Publet extends Build {
+
+  lazy val module = Project(
+    id = "publet", 
+    base = file("publet"),  
+    settings = buildSettings
+  )
+  
+  lazy val buildSettings = Project.defaultSettings ++ Seq(name := "publet",
+    libraryDependencies ++= deps
+  ) ++ bundleSettings 
+  
+  lazy val deps = Seq(knockoff, slf4jApi, scalaCompiler )
+}
+
+object GitPartition extends Build {
+
+  lazy val module = Project(
+    id = "git-partition", 
+    base = file("git-partition"),
+    settings = buildProperties
+  ) dependsOn Publet.module
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "git-partition",
+    libraryDependencies ++= deps
+  ) ++ bundleSettings
+
+  val deps = Seq(slf4jApi, jgit)
+}
+
+object Web extends Build {
+
+  lazy val module = Project(
+    id = "web", 
+    base = file("web"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, GitPartition.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "publet-web",
+    libraryDependencies ++= deps
+  ) ++ bundleSettings
+
+  val deps = Seq(servletApi, 
+       slf4jApi, 
+       logbackClassic, 
+       commonsFileUpload, 
+       commonsIo, 
+       squareMail, 
+       jgitHttpServer, 
+       shiro, shiroWeb)
+}
