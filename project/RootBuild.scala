@@ -38,7 +38,7 @@ object RootBuild extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (Web.module, Publet.module, GitPartition.module)
+  ) aggregate (Web.module, Publet.module, GitPartition.module, Auth.module, War.module, WebEditor.module, Ext.module)
 
   val globalScalaVersion = "2.9.1"
 
@@ -110,4 +110,68 @@ object Web extends Build {
        squareMail, 
        jgitHttpServer, 
        shiro, shiroWeb)
+}
+
+object War extends Build {
+
+  lazy val module = Project(
+    id = "war",
+    base = file("war"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, GitPartition.module, Web.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "publet-war",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(servletApi, logbackClassic)
+}
+
+object Auth extends Build {
+
+  lazy val module = Project(
+    id = "auth",
+    base = file("auth"),
+    settings = buildProperties
+  ) dependsOn (Publet.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "publet-auth",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(slf4jApi)
+}
+
+object WebEditor extends Build {
+
+  lazy val module = Project(
+    id = "webeditor",
+    base = file("webeditor"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, Web.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "publet-webeditor",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq()
+}
+
+object Ext extends Build {
+  
+  lazy val module = Project(
+    id = "ext",
+    base = file("ext"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, Web.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "publet-ext",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(squareMail)
 }
