@@ -70,6 +70,14 @@ trait WebContext {
    */
   def decodePath: Path
 
+  /**
+   * Returns the context path to this application. This is
+   * either fetched from the config file, or from the request
+   *
+   * @return
+   */
+  def getContextPath: Option[String]
+
   /** Returns the path to this request.
    *
    * If the path ends in a directory, the default file `index.html`
@@ -143,6 +151,13 @@ object WebContext {
     }
   })
 
+  def calcPath(path: Path): Path = {
+    WebContext().getContextPath match {
+      case Some(cp) => path.strip(Path(cp))
+      case None => path
+    }
+  }
+
 
   protected[web] def setup(req: HttpServletRequest, resp: HttpServletResponse) {
     params.set(new WebContextImpl(req, resp))
@@ -199,11 +214,16 @@ object WebContext {
 
     def decodePath: Path = {
       val p = Path(URLDecoder.decode(req.getRequestURI, "UTF-8"))
-      if (Option(req.getContextPath).map(!_.isEmpty).getOrElse(false)) {
-        p.strip(Path(req.getContextPath))
-      } else {
-        p
+      getContextPath match {
+        case Some(cp) => p.strip(Path(cp))
+        case None => p
       }
+    }
+
+    def getContextPath: Option[String] = {
+      val contextPath = Config("publet.contextPath").getOrElse(req.getContextPath)
+      if (contextPath == null || contextPath.isEmpty) None
+      else Some(contextPath)
     }
 
     def requestPath = {

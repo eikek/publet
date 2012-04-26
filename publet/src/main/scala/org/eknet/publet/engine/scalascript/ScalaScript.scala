@@ -25,6 +25,8 @@ object ScalaScript {
 
   def makeJson(any: Any): Content = Content(Json.build(any).toString, ContentType.json)
 
+  def makeJs(str: String): Content = Content(str, ContentType.javascript)
+
   def makePng(data: Array[Byte]): Content = Content(data, ContentType.png)
   def makePng(data: InputStream): Content = Content(data, ContentType.png)
 

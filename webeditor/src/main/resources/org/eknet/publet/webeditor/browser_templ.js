@@ -4,7 +4,6 @@ $(document).ready(function() {
 });
 
 function getContentsAsUl(pathname, f) {
-    var loc = window.location;
     $.getJSON("/publet/webeditor/scripts/toc.json", { path: pathname }, function(data) {
         var lis = [];
         if (data.parent) {

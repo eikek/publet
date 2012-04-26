@@ -1,6 +1,6 @@
 package org.eknet.publet.webeditor
 
-import actions.{PushContents, ListContents, SetEngine}
+import actions.{BrowserJs, PushContents, ListContents, SetEngine}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.virtual.{ClasspathContainer, MutableContainer}
 import xml.NodeSeq
@@ -40,6 +40,7 @@ object EditorWebExtension {
     muc.addResource(new WebScriptResource(scriptPath / "setengine.json", SetEngine, ContentType.json))
     muc.addResource(new WebScriptResource(scriptPath / "toc.json", ListContents, ContentType.json))
     muc.addResource(new WebScriptResource(scriptPath / "push.json", PushContents, ContentType.json))
+    muc.addResource(new WebScriptResource(scriptPath / "browser.js", BrowserJs, ContentType.javascript))
     publet.mountManager.mount(editorPath/"scripts", muc)
 
     val se = new EditStandardEngine(publet)
@@ -51,6 +52,6 @@ object EditorWebExtension {
     val base = (Path(path.relativeRoot) / editorPath).asString
     //super.headerHtml(path, content, source) +
     NodeSeq.fromSeq(<link type="text/css" rel="stylesheet" href={base + "browser.css"}></link>
-      <script src={base + "browser.js"}></script>).toString()
+      <script src={base + "scripts/browser.js"}></script>).toString()
   }
 }

@@ -4,6 +4,7 @@ import org.eknet.publet.engine.scalascript.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.WebContext
 import org.slf4j.LoggerFactory
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -20,8 +21,9 @@ object SetEngine extends ScalaScript {
         publet.engineManager.getEngine(Symbol(t._2)) match {
           case None => error("Engine '" + t._2 + "' not found.")
           case Some(pe) => {
-            log.info("Registering engine " + pe.name + " with url: " + t._1)
-            publet.engineManager.register(t._1, pe)
+            val path = WebContext.calcPath(Path(t._1))
+            log.info("Registering engine " + pe.name + " with url: " + path.asString)
+            publet.engineManager.register(path.asString, pe)
             success()
           }
         }

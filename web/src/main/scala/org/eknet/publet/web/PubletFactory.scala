@@ -28,10 +28,12 @@ object PubletFactory {
       Path.root,
       Some(publ.rootContainer))
 
+    val scriptRoot = Path("/publet/scripts/")
+
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
-    val cont = new MutableContainer(Path("/publet/scripts/"))
-    cont.addResource(new ScriptResource(Path("/scripts/toggleRepo"), ToggleGitExport, html))
-    publ.mountManager.mount(Path("/publet/scripts"), cont)
+    val cont = new MutableContainer(scriptRoot)
+    cont.addResource(new ScriptResource(scriptRoot/"toggleRepo.html", ToggleGitExport, html))
+    publ.mountManager.mount(scriptRoot, cont)
 
 
 

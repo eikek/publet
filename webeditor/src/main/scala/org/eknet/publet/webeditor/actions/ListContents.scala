@@ -27,8 +27,12 @@ object ListContents extends ScalaScript {
     val ctx = WebContext()
 
     val path = ctx.parameter("path").map(Path(_)).getOrElse(ctx.decodePath)
-    val p = if (path.directory) path else path.parent
-    val prefixPath = "/" + Config.mainMount // URLDecoder.decode(req.getContextPath, "UTF-8")
+
+    val prefixPath = WebContext().getContextPath match {
+      case Some(cp) => cp + "/" + Config.mainMount
+      case None => "/" + Config.mainMount
+    }
+    val p = WebContext.calcPath(if (path.directory) path else path.parent)
     val json = createJsonMap(p, WebContext().webPublet.publet, prefixPath)
 
     makeJson(json)
