@@ -1,20 +1,21 @@
 package org.eknet.publet.impl
 
+import scala.collection.mutable
 import org.eknet.publet.impl.Conversions._
 import org.eknet.publet._
-import engine.{PubletEngine, EngineResolver}
-import resource._
+import engine.{PubletEngine, EngineMangager}
+import vfs._
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-class PubletImpl extends RootPartition with Publet with EngineResolver {
+class PubletImpl extends MountManager[Container] with Publet with EngineMangager with RootContainer[Container] {
 
-  def process(path: Path): Either[Exception, Option[Content]] = {
+  def process(path: Path): Option[Content] = {
     Predef.ensuring(path != null, "null is illegal")
-    process(path, path.targetType.get)
+    process(path, path.name.targetType)
   }
 
   def process(path: Path, target: ContentType) = {
@@ -25,67 +26,68 @@ class PubletImpl extends RootPartition with Publet with EngineResolver {
     process(path, target, engine)
   }
 
-  def process(path: Path, target: ContentType, engine: PubletEngine): Either[Exception, Option[Content]] = {
+  def process(path: Path, target: ContentType, engine: PubletEngine): Option[Content] = {
     // lookup the source
     findSources(path) match {
-      case Nil => Right(None)
+      case Nil => None
       //lookup the engine according to the uri scheme and process data
-      case data => engine.process(path, data, target)
+      case data => Some(engine.process(path, data.toSeq, target))
     }
   }
 
-  def push(path: Path, content: Content): Either[Exception, Boolean] = {
+  def push(path: Path, content: Content) {
     findSources(path) match {
       case Nil => create(path, content.contentType); push(path, content)
-      case c => {
-        if (c.head.isWriteable) {
-          c.head.writeFrom(content.inputStream)
-          Right(true)
-        }
-        else Left(new RuntimeException("Resource not writeable"))
-      } 
+      case c => c.head.writeFrom(content.inputStream)
     }
   }
 
-  override def addEngine(engine: PubletEngine) {
-    engine match {
-      case e: InstallCallback => e.onInstall(this)
-      case _ => ()
-    }
-    super.addEngine(engine)
-  }
-
-  def findSources(path: Path): Seq[ContentResource] = {
+  def findSources(path: Path): Iterable[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
-    val part = resolveMount(path).getOrElse(throwException("No partition mounted for path: "+ path))
-    val source = part._2
-    val sourcePath = part._1
 
-    // create a list of uris of all known extensions
-    val ft = new FileName(path.strip(sourcePath))
-    val urilist = ft.pathsForTarget.toSeq ++
-      ContentType.all.filter(_ != ft.targetType).flatMap(_.extensions.map(ft.withExtension(_)))
+    def matchType(r:Resource):Boolean = {
+      r match {
+        case cc: ContentResource if (cc.contentType == path.name.targetType) => true
+        case _ => false
+      }
+    }
+    if (path.name.targetType==ContentType.unknown) Seq()
+    else {
+      // all extensions but the one requested
+      val allexts = ContentType.all.filter(_ != path.name.targetType).flatMap(_.extensions)
 
-    //lookup all uris and returns list of results
-    urilist.map(source.lookup).filter(o => o.isDefined && o.get.isInstanceOf[ContentResource])
-      .map(or => or.get.asInstanceOf[ContentResource])
+      // requested extensions
+      val reqexts = path.name.targetType.extensions
+
+      //lookup first sources with requested extensions
+      val rsources = reqexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc}).toSeq
+      val others = mutable.ListBuffer[ContentResource]()
+      if (rsources.isEmpty) {
+        others ++= allexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc})
+      }
+      rsources ++ others.toSeq
+    }
   }
 
   def create(path: Path, contentType: ContentType) {
     val t = resolveMount(path).getOrElse(throwException("No partition mounted for path: "+ path))
     val p = path.strip(t._1)
-    t._2.newContent(p.withExtension(contentType.extensions.head)).createWithParents()
-  }
-
-  def children(path: Path) = {
-    lookup(path) match {
-      case None => List()
-      case Some(r) => r match {
-        case cr: ContainerResource => cr.children
-        case _ => List()
-      }
+    t._2 match {
+      case mc: ModifyableContainer => mc.createContent(p.withExt(contentType.extensions.head))
+      case _ => sys.error("Unmodifyable resource")
     }
   }
+
+  def mountManager = this
+
+  def engineManager = this
+
+  def rootContainer = this
+
+  def path = Path.root
+
+  def parent = None
+
 }
 
 

@@ -1,9 +1,7 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.resource.ContentType._
-import org.eknet.publet.resource.{NodeContent, Content}
-import org.eknet.publet.Path
-import javax.swing.text.html.HTMLDocument
+import org.eknet.publet.vfs.ContentType._
+import org.eknet.publet.vfs.{Path, Content}
 
 /**
  *

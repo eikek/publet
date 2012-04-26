@@ -3,9 +3,9 @@ package org.eknet.publet.web.shiro
 import collection.JavaConversions._
 import org.apache.shiro.realm.AuthorizingRealm
 import org.apache.shiro.authz.AuthorizationInfo
-import org.eknet.publet.sec.{User, AuthManager}
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
+import org.eknet.publet.auth.{User, AuthManager}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

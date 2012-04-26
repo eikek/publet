@@ -1,9 +1,9 @@
 package org.eknet.publet.web.shiro
 
-import org.eknet.publet.{Path, Publet}
-import org.eknet.publet.sec.{FileAuthManager, AuthManager}
-import org.eknet.publet.resource.ContentResource
+import org.eknet.publet.vfs.{Path, ContentResource}
 import org.eknet.publet.web.Config
+import org.eknet.publet.auth.{FileAuthManager, AuthManager}
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -11,8 +11,8 @@ import org.eknet.publet.web.Config
  */
 class PubletAuthManager(publet: Publet) extends AuthManager {
 
-  private def usersResource = publet.lookup(Path("/"+mount+"/.allIncludes/users.txt"))
-  private def rulesResource = publet.lookup(Path("/"+mount+"/.allIncludes/rules.txt"))
+  private def usersResource = publet.rootContainer.lookup(Path("/"+mount+"/.allIncludes/users.txt"))
+  private def rulesResource = publet.rootContainer.lookup(Path("/"+mount+"/.allIncludes/rules.txt"))
 
   private def mount = Config("publet.mainMount").getOrElse("main")
 

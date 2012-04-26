@@ -66,7 +66,8 @@ object Publet extends Build {
     settings = buildSettings
   )
   
-  lazy val buildSettings = Project.defaultSettings ++ Seq(name := "publet",
+  lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet",
     libraryDependencies ++= deps
   ) ++ bundleSettings 
   
@@ -81,8 +82,9 @@ object GitPartition extends Build {
     settings = buildProperties
   ) dependsOn Publet.module
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "git-partition",
+    description := "Provides a partition for publet around jgit.",
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
@@ -95,20 +97,18 @@ object Web extends Build {
     id = "web", 
     base = file("web"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPartition.module)
+  ) dependsOn (Publet.module, GitPartition.module, Auth.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
   val deps = Seq(servletApi, 
        slf4jApi, 
-       logbackClassic, 
-       commonsFileUpload, 
+       commonsFileUpload,
        commonsIo, 
-       squareMail, 
-       jgitHttpServer, 
+       jgitHttpServer,
        shiro, shiroWeb)
 }
 
@@ -118,9 +118,9 @@ object War extends Build {
     id = "war",
     base = file("war"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPartition.module, Web.module)
+  ) dependsOn (Publet.module, GitPartition.module, Web.module, WebEditor.module, Ext.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
     libraryDependencies ++= deps
   )
@@ -136,8 +136,9 @@ object Auth extends Build {
     settings = buildProperties
   ) dependsOn (Publet.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-auth",
+    description := "Authentication module for publet, exposing a AuthManager and default impls.",
     libraryDependencies ++= deps
   )
 
@@ -152,12 +153,12 @@ object WebEditor extends Build {
     settings = buildProperties
   ) dependsOn (Publet.module, Web.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webeditor",
     libraryDependencies ++= deps
   )
 
-  val deps = Seq()
+  val deps = Seq(servletApi)
 }
 
 object Ext extends Build {
@@ -168,10 +169,10 @@ object Ext extends Build {
     settings = buildProperties
   ) dependsOn (Publet.module, Web.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq(
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(squareMail)
+  val deps = Seq(squareMail, servletApi)
 }

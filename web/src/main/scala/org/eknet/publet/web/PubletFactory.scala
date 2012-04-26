@@ -1,12 +1,16 @@
 package org.eknet.publet.web
 
-import extensions.scripts._
-import org.eknet.publet.engine.scalascript.{ScriptPartition, ScalaScriptEvalEngine}
-import template._
+import scripts._
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.{Path, Publet}
-import org.eknet.publet.resource.ContentType._
-import org.eknet.publet.resource.Partition
+import org.eknet.publet.vfs.ContentType._
+import org.eknet.publet.engine.scalascript.{ScriptResource, ScalaScriptEvalEngine}
+import org.eknet.publet.Publet
+import org.eknet.publet.partition.git.GitPartition
+import org.eknet.publet.vfs.Path
+import javax.servlet.ServletContext
+import org.eknet.publet.web.WebContext._
+import org.eknet.publet.vfs.virtual.MutableContainer
+import template.{HighlightJs, StandardEngine}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -14,27 +18,35 @@ import org.eknet.publet.resource.Partition
  */
 object PubletFactory {
 
-  def createPublet(rootPartition: Partition): Publet = {
+  def createPublet() = {
     val publ = Publet()
 
-    val defaultEngine = new DefaultEngine(publ)
-    publ.register("/*", defaultEngine)
-    publ.addEngine(defaultEngine.includeEngine)
+    val gp = new GitPartition(
+      Config.contentRoot,
+      "publetrepo",
+      Config("git.pollInterval").getOrElse("1500").toInt,
+      Path.root,
+      Some(publ.rootContainer))
 
-    val editEngine = new HtmlTemplateEngine('edit, EditEngine) with FilebrowserTemplate
-    publ.addEngine(editEngine)
+    publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
+    val cont = new MutableContainer(Path("/publet/scripts/"))
+    cont.addResource(new ScriptResource(Path("/scripts/toggleRepo"), ToggleGitExport, html))
+    publ.mountManager.mount(Path("/publet/scripts"), cont)
+
+
+
+    val defaultEngine = new StandardEngine(publ).init()
+    HighlightJs.install(publ, defaultEngine)
+    publ.engineManager.register("/*", defaultEngine)
+    publ.engineManager.addEngine(defaultEngine.includeEngine)
 
     val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine)
-    publ.addEngine(scalaEngine)
+    publ.engineManager.addEngine(scalaEngine)
 
     val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.includeEngine)
-    publ.addEngine(scriptInclude)
+    publ.engineManager.addEngine(scriptInclude)
 
-
-    publ.mount(Path("/"+ Config.mainMount), rootPartition)
-    publ.mount(Path("/.publets/scripts"), new ScriptPartition('scripts, scripts))
-
-    publ
+    (publ, gp, defaultEngine)
   }
 
   private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {
@@ -42,16 +54,8 @@ object PubletFactory {
     "org.eknet.publet.web.WebContext",
     "org.eknet.publet.web.util.AttributeMap",
     "org.eknet.publet.web.util.Key",
-    "org.eknet.publet.web.extensions.WebDsl",
-    "org.apache.shiro.SecurityUtils"
+    "org.apache.shiro.{SecurityUtils => Security}"
     )
   }
 
-  private val scripts = Map(
-    "mailcontact" -> (MailContact, html),
-    "listing" -> (Listing, html),
-    "captcha" -> (CaptchaScript, png),
-    "setengine" -> (SetEngine, json),
-    "toggleRepo" -> (ToggleGitExport, html)
-  )
 }

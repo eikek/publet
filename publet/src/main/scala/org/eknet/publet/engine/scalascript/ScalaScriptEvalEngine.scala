@@ -1,8 +1,7 @@
 package org.eknet.publet.engine.scalascript
 
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.Path
-import org.eknet.publet.resource.{ContentType, Content}
+import org.eknet.publet.vfs.{Path, ContentType, Content}
 import com.twitter.util.Eval
 import scala.Some
 
@@ -29,7 +28,7 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
   def process(path: Path, data: Seq[Content], target: ContentType) = {
     data find (_.contentType == ContentType.scal) match {
       case Some(c) => engine.process(path, Seq(eval(c)), target)
-      case None => Left(new RuntimeException("no scala script content found"))
+      case None => throw new RuntimeException("no scala script content found")
     }
   }
 

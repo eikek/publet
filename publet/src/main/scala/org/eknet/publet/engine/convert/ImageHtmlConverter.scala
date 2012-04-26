@@ -1,7 +1,6 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.Path
-import org.eknet.publet.resource.{ContentType, NodeContent, Content}
+import org.eknet.publet.vfs.{Path, ContentType, NodeContent, Content}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -10,7 +9,7 @@ import org.eknet.publet.resource.{ContentType, NodeContent, Content}
 object ImageHtmlConverter extends ConverterEngine#Converter {
 
   def apply(path: Path, cn: Content) = {
-    val imgpath = path.withExtension(cn.contentType.extensions.head).segments.last
+    val imgpath = path.withExt(cn.contentType.extensions.head).segments.last
     NodeContent(<img src={ imgpath } alt=""/>, ContentType.html)
   }
 }

@@ -1,7 +1,7 @@
 package org.eknet.publet.engine.scalascript
 
 import com.twitter.json.Json
-import org.eknet.publet.resource.{ContentType, NodeContent, Content}
+import org.eknet.publet.vfs.{ContentType, NodeContent, Content}
 import xml.{NodeBuffer, NodeSeq}
 import java.io.InputStream
 

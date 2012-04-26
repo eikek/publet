@@ -14,7 +14,7 @@ class WebContextFilter extends SimpleFilter with PageWriter {
   private val log = LoggerFactory.getLogger(getClass)
 
   def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
-    WebContext.setup(req)
+    WebContext.setup(req, resp)
     try {
       chain.doFilter(req, resp)
     } catch {

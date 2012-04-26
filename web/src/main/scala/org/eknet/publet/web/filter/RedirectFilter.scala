@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.FilterChain
 import org.eknet.publet.web.WebContext
 import org.eknet.publet.web.WebContext._
-import org.eknet.publet.Path
+import org.eknet.publet.vfs.Path
 import org.slf4j.LoggerFactory
 
 /**

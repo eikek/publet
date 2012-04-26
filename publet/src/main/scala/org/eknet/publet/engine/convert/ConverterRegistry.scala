@@ -1,9 +1,8 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.resource.{ContentType, Content}
 import collection._
 import mutable.ListBuffer
-import org.eknet.publet.Path
+import org.eknet.publet.vfs.{Path, ContentType, Content}
 
 /**
  *

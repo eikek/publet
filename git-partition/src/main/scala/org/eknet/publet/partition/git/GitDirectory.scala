@@ -1,8 +1,8 @@
 package org.eknet.publet.partition.git
 
 import java.io.File
-import org.eknet.publet.Path
-import org.eknet.publet.resource.{Resource, DirectoryResource}
+import org.eknet.publet.vfs.{Path, Resource}
+import org.eknet.publet.vfs.fs.DirectoryResource
 
 class GitDirectory(dir: File, root: Path, gp: GitPartition) extends DirectoryResource(dir, root) {
 

@@ -1,16 +1,16 @@
 package org.eknet.publet.web
 
+import filter.NotFoundHandler
 import scala.collection.JavaConversions._
 import scala.collection._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
-import javax.servlet.http.HttpServletRequest
-import org.eknet.publet.{Path, Publet}
+import org.eknet.publet.vfs.Path
 import java.net.URLDecoder
-import org.eknet.publet.partition.git.GitPartition
 import shiro.PubletAuthManager
 import util._
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -79,7 +79,7 @@ trait WebContext {
    */
   def requestPath: Path
 
-  def publet: Publet
+  def webPublet: WebPublet
 
   /** Returns the value of the `action`
    * request parameter.
@@ -87,6 +87,9 @@ trait WebContext {
    * @return
    */
   def action: Option[String]
+
+  def redirect(uri: String)
+
 }
 
 object WebContext {
@@ -94,9 +97,16 @@ object WebContext {
 
   private def request: HttpServletRequest = WebContext().asInstanceOf[WebContextImpl].req
 
-  val gitpartitionKey = Key[GitPartition]("gitPartition")
   val publetAuthManagerKey = Key[PubletAuthManager]("publetAuthManager")
-  val publetKey = Key[Publet]("publet")
+  val webPubletKey = Key[WebPublet]("org.eknet.web.publet")
+
+  val notFoundHandlerKey = Key("notFoundHandler", {
+    case Session => new NotFoundHandler {
+      def resourceNotFound(path: Path, resp: HttpServletResponse) {
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND)
+      }
+    }
+  })
 
   /**The url up to the path that starts the resource path.
    *
@@ -134,8 +144,8 @@ object WebContext {
   })
 
 
-  protected[web] def setup(req: HttpServletRequest) {
-    params.set(new WebContextImpl(req))
+  protected[web] def setup(req: HttpServletRequest, resp: HttpServletResponse) {
+    params.set(new WebContextImpl(req, resp))
   }
 
   def apply(): WebContext = Option(params.get).getOrElse(sys.error("No webcontext installed."))
@@ -146,7 +156,7 @@ object WebContext {
     params.remove()
   }
 
-  private class WebContextImpl(val req: HttpServletRequest) extends WebContext {
+  private class WebContextImpl(val req: HttpServletRequest, val resp: HttpServletResponse) extends WebContext {
     lazy val uploads: List[FileItem] = {
       val rct = req.getContentType
       if (rct != null && rct.startsWith("multipart")) {
@@ -183,7 +193,7 @@ object WebContext {
 
     def parameter(name: String) = Option(req.getParameter(name))
 
-    lazy val publet = service(publetKey)
+    lazy val webPublet = service(webPubletKey)
 
     lazy val action = parameter("a")
 
@@ -199,6 +209,10 @@ object WebContext {
     def requestPath = {
       val p = decodePath
       if (p.directory) p / "index.html" else p
+    }
+
+    def redirect(uri: String) {
+      resp.sendRedirect(uri)
     }
   }
 }

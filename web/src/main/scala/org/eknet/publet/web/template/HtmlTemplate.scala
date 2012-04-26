@@ -1,8 +1,6 @@
 package org.eknet.publet.web.template
 
-import org.eknet.publet.Path
-import xml.{NodeSeq, Node}
-import org.eknet.publet.resource.{Content, ContentType, NodeContent}
+import org.eknet.publet.vfs.{Path, Content, ContentType}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -18,7 +16,7 @@ trait HtmlTemplate {
    */
   def title(path: Path, content: Content, source: Seq[Content]): String = {
     findHead(content) match {
-      case None => path.fileName.name.replaceAll("_", " ")
+      case None => path.name.name.replaceAll("[_-]", " ")
       case Some(n) => n
     }
   }
@@ -38,7 +36,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def headerHtml(path: Path, content: Content, source: Seq[Content]): String = ""
+  def htmlHead(path: Path, content: Content, source: Seq[Content]): String = ""
 
   /** Returns the html body part.
    * 
@@ -46,7 +44,7 @@ trait HtmlTemplate {
    * @param content
    * @return
    */
-  def bodyHtml(path: Path, content: Content, source: Seq[Content]): String = content.contentAsString
+  def htmlBody(path: Path, content: Content, source: Seq[Content]): String = content.contentAsString
   
   def charset = "utf-8"
   
@@ -68,7 +66,7 @@ trait HtmlTemplate {
 
     Content(String.format(body,
       title(path, content, source),
-      headerHtml(path, content, source),
-      bodyHtml(path, content, source)) , ContentType.html)
+      htmlHead(path, content, source),
+      htmlBody(path, content, source)) , ContentType.html)
   }
 }

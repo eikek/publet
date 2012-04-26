@@ -1,7 +1,7 @@
 package org.eknet.publet
 
 import engine._
-import resource._
+import vfs._
 import convert.PassThrough
 import impl.PubletImpl
 
@@ -10,7 +10,7 @@ import impl.PubletImpl
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:06
  */
-trait Publet extends MountManager[Partition] with EngineResolver {
+trait Publet {
 
   /** Processes the source at the given URI and returns
    * the transformed result. If the source is not available
@@ -19,7 +19,7 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    * @param path
    * @return
    */
-  def process(path: Path): Either[Exception, Option[Content]]
+  def process(path: Path): Option[Content]
 
   /** Processes the source at the given URI and retursn
    * the transformed result according to the specified
@@ -34,9 +34,9 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    * @param targetType
    * @return
    */
-  def process(path: Path, targetType: ContentType): Either[Exception, Option[Content]]
+  def process(path: Path, targetType: ContentType): Option[Content]
 
-  def process(path: Path, targetType: ContentType, engine: PubletEngine): Either[Exception, Option[Content]]
+  def process(path: Path, targetType: ContentType, engine: PubletEngine): Option[Content]
 
   /** Copies the given content to the content at the specified path.
    *
@@ -47,19 +47,7 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    * @param content
    * @return
    */
-  def push(path: Path, content: Content): Either[Exception, Boolean]
-
-  /** Returns the children of the container at the specified
-   * path. It returns an empty list, if this resource is not
-   * available or if it is not a container.
-   *
-   * @param path
-   * @return
-   */
-  def children(path: Path): Iterable[_ <: Resource]
-
-  def lookup(path: Path): Option[Resource]
-
+  def push(path: Path, content: Content)
 
   /**
    * Finds resources that matches the name of the specified uri
@@ -72,15 +60,25 @@ trait Publet extends MountManager[Partition] with EngineResolver {
    * @param path
    * @return
    */
-  def findSources(path: Path): Seq[ContentResource]
+  def findSources(path: Path): Iterable[ContentResource]
+
+
+  /// MountManager
+  def mountManager: MountManager[Container]
+
+  //EngineResolver
+  def engineManager: EngineMangager
+
+  //Container
+  def rootContainer: RootContainer[Container]
 
 }
 
 object Publet {
 
-  def apply() = {
+  def apply(): Publet = {
     val p = new PubletImpl
-    p.addEngine(PassThrough)
+    p.engineManager.addEngine(PassThrough)
     p
   }
   

@@ -14,9 +14,6 @@ class PubletFilter extends MetaFilter {
     serveRegex("^/.*")
       .through(new WebContextFilter)
       .through(new RedirectFilter)
-      .through(new PushContentFilter)
-      .through(new PushUploadFilter)
-      .through(new ListContentsFilter)
       .`with`(new PublishServlet)
   }
 

@@ -1,11 +1,10 @@
 package org.eknet.publet.web.filter
 
-import org.eknet.publet.Path
-import org.eknet.publet.resource.{ContentType, Content}
+import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletResponse
-import org.eknet.publet.web.{Config, WebContext, UploadContent}
 import java.io.{PrintWriter, StringWriter}
+import org.eknet.publet.web.{WebContext, Config}
 
 /**
  *
@@ -24,10 +23,10 @@ trait PageWriter {
       ex.printStackTrace(new PrintWriter(sw))
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+sw.toString+ "</pre>", ContentType.html)
 
-      val result = WebContext().publet.getEngine('mainWiki).get
+      val result = WebContext().webPublet.publet.engineManager.getEngine('mainWiki).get
         .process(WebContext().requestPath, Seq(content), ContentType.html)
 
-      result.fold(x=>resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), c=>writePage(Some(c), resp))
+      writePage(Some(result), resp)
     } else {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     }
@@ -43,19 +42,7 @@ trait PageWriter {
   }
 
   def createNew(path: Path, resp: HttpServletResponse) {
-    val out = resp.getOutputStream
-    val targetType = path.targetType.get
-    val publet = WebContext().publet
-    if (targetType.mime._1 == "text") {
-      publet.getEngine('edit).get.process(path, Seq(Content("", ContentType.markdown)), ContentType.markdown) match {
-        case Left(x) => writeError(x, resp)
-        case Right(x) => x.copyTo(out)
-      }
-    } else {
-      val uploadContent = UploadContent.uploadContent(path)
-      publet.resolveEngine(path).get.process(path, Seq(uploadContent), ContentType.html)
-      .fold(writeError(_, resp), c => writePage(Some(c), resp))
-    }
+    WebContext().service(WebContext.notFoundHandlerKey).resourceNotFound(path, resp)
   }
 
 }

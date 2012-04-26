@@ -1,7 +1,7 @@
 package org.eknet.publet.partition.git
 
-import org.eknet.publet.Path
-import org.eknet.publet.resource.FileResource
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.fs.FileResource
 import java.io.{OutputStream, InputStream, File}
 
 class GitFile(f: File, root: Path, gp: GitPartition) extends FileResource(f, root) {

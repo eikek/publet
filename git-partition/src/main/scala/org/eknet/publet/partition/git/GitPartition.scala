@@ -3,9 +3,9 @@ package org.eknet.publet.partition.git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.RefSpec
-import org.eknet.publet.Path
+import org.eknet.publet.vfs._
 import java.io.File
-import org.eknet.publet.resource._
+import fs.FilesystemPartition
 import scala.Option
 import org.slf4j.LoggerFactory
 import actors.Actor
@@ -13,22 +13,20 @@ import Actor._
 
 /**
  *
- * @param id
  * @param base
  * @param reponame
  * @param pollInterval the bare repository is polled frequently to integrate the
  *                     latest changes into the workspace
  */
 class GitPartition (
-      id: Symbol,
       val base: File,
       reponame: String,
-      pollInterval: Int
-) extends FilesystemPartition(new File(base, reponame+"_wc"), id, false) {
+      pollInterval: Int,
+      path: Path,
+      parent: Option[Container]
+) extends FilesystemPartition(path, parent, new File(base, reponame+"_wc"), false) {
 
   private val log = LoggerFactory.getLogger(getClass)
-
-  def this(id: Symbol, base: String, reponame: String, pollInterval: Int) = this(id, new File(base), reponame, pollInterval)
 
   // the working copy is checked out to $base/$reponame_wc while the bare repo is at $base/$reponame.git
 

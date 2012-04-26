@@ -1,7 +1,6 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.resource.{ContentType, Content}
-import org.eknet.publet.Path
+import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.eknet.publet.engine.PubletEngine
 
 /**
@@ -13,28 +12,24 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
 
   def this() = this('convert)
 
-  def process(path: Path, data: Seq[Content], target: ContentType): Either[Exception, Content] = {
+  def process(path: Path, data: Seq[Content], target: ContentType): Content = {
     //if target type is available return it, otherwise try to process
     data.find(_.contentType == target) match {
-      case Some(c) => Right(c)
-      case None => process(path,  data.head, target).fold(Left(_), _ match {
+      case Some(c) => c
+      case None => process(path,  data.head, target) match {
         case None => data.tail match {
-          case Nil => Left(new RuntimeException("no converter found"))
+          case Nil => sys.error("no converter found: "+ data.head.contentType+" -> "+ target)
           case tail => process(path, tail, target)
         }
-        case Some(x) => Right(x)
-      })
+        case Some(x) => x
+      }
     }
   }
 
-  private def process(path: Path, data: Content, target: ContentType): Either[Exception, Option[Content]] = {
-    try {
-      converterFor(data.contentType, target) match {
-        case None => Right(None)
-        case Some(c) => Right(Option(c(path, data)))
-      }
-    } catch {
-      case e: Exception => Left[Exception, Option[Content]](e)
+  private def process(path: Path, data: Content, target: ContentType): Option[Content] = {
+    converterFor(data.contentType, target) match {
+      case None => None
+      case Some(c) => Option(c(path, data))
     }
   }
 }

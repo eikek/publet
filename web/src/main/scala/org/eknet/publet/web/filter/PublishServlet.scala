@@ -1,6 +1,6 @@
 package org.eknet.publet.web.filter
 
-import org.eknet.publet.resource.ContentType
+import org.eknet.publet.vfs.ContentType
 import org.eknet.publet.web.WebContext
 import javax.servlet.http.{HttpServlet, HttpServletResponse, HttpServletRequest}
 
@@ -24,16 +24,17 @@ class PublishServlet extends HttpServlet with PageWriter {
   def processEngine(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
     val path = WebContext().requestPath
-    val publet = WebContext().publet
-    val targetType = path.targetType.getOrElse(ContentType.unknown)
-    val html = publet.process(path, targetType, publet.getEngine(engineId).get)
-    html.fold(writeError(_, resp), writePage(_, resp))
+    val publet = WebContext().webPublet.publet
+    val targetType = path.name.targetType
+    val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).get)
+    writePage(html, resp)
   }
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
-    val publet = WebContext().publet
+    val publet = WebContext().webPublet.publet
     val path = WebContext().requestPath
-    val html = publet.process(path, path.targetType.getOrElse(ContentType.html))
-    html.fold(writeError(_, resp), writePage(_, resp))
+    val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
+    val html = publet.process(path, tt)
+    writePage(html, resp)
   }
 }
