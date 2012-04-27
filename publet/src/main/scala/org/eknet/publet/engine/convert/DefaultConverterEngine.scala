@@ -1,7 +1,7 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.eknet.publet.engine.PubletEngine
+import org.eknet.publet.vfs.{ContentResource, ContentType, Content}
 
 /**
  *
@@ -12,24 +12,24 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
 
   def this() = this('convert)
 
-  def process(path: Path, data: Seq[Content], target: ContentType): Content = {
+  def process(data: Seq[ContentResource], target: ContentType): Option[Content] = {
     //if target type is available return it, otherwise try to process
     data.find(_.contentType == target) match {
-      case Some(c) => c
-      case None => process(path,  data.head, target) match {
+      case a@Some(c) => a
+      case None => process(data.head, target) match {
         case None => data.tail match {
           case Nil => sys.error("no converter found: "+ data.head.contentType+" -> "+ target)
-          case tail => process(path, tail, target)
+          case tail => process(tail, target)
         }
-        case Some(x) => x
+        case a@Some(x) => a
       }
     }
   }
 
-  private def process(path: Path, data: Content, target: ContentType): Option[Content] = {
+  private def process(data: ContentResource, target: ContentType): Option[Content] = {
     converterFor(data.contentType, target) match {
       case None => None
-      case Some(c) => Option(c(path, data))
+      case Some(c) => Option(c(data.path, data))
     }
   }
 }

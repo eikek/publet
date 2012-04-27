@@ -1,9 +1,9 @@
-package org.eknet.publet.engine.scalascript
+package org.eknet.publet.engine.scala
 
 import org.eknet.publet.vfs.{Path, ContentResource}
 import java.io.OutputStream
 
-/** A resource that executes the given script on each access.
+/**A resource that executes the given script on each access.
  *
  * Note, that the script is executed by almost all methods (for
  * example to get the content type). You need to implement the
@@ -15,7 +15,7 @@ import java.io.OutputStream
  */
 abstract class ScriptResource(val path: Path, val script: ScalaScript) extends ContentResource {
 
-  protected def evaluate = script.serve()
+  protected def evaluate = script.serve().get
 
   override def lastModification = evaluate.lastModification
 
@@ -33,6 +33,6 @@ abstract class ScriptResource(val path: Path, val script: ScalaScript) extends C
 
   def parent = None
 
-  override def toString = "Script:"+path
+  override def toString = "Script:" + path
 }
 

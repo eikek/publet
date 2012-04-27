@@ -1,7 +1,7 @@
 package org.eknet.publet.webeditor.actions
 
-import org.eknet.publet.engine.scalascript.ScalaScript
-import org.eknet.publet.engine.scalascript.ScalaScript._
+import org.eknet.publet.engine.scala.ScalaScript
+import ScalaScript._
 import io.Source
 import org.eknet.publet.webeditor.EditorWebExtension
 import org.eknet.publet.web.WebContext

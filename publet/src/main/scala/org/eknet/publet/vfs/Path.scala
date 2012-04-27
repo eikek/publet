@@ -114,4 +114,8 @@ object Path {
 
   implicit def fileToPath(f: File): Path = Path(f)
 
+  class StringPath(str: String) {
+    def p = Path(str)
+  }
+  implicit def stringToPath(str: String) = new StringPath(str)
 }

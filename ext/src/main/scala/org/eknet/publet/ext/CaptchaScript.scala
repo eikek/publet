@@ -1,6 +1,6 @@
 package org.eknet.publet.ext
 
-import org.eknet.publet.engine.scalascript.ScalaScript
+import org.eknet.publet.engine.scala.ScalaScript
 import java.awt.image.BufferedImage
 import java.awt.{Color, GradientPaint, RenderingHints, Font}
 import util.Random
@@ -9,7 +9,6 @@ import javax.imageio.ImageIO
 import ScalaScript._
 import org.eknet.publet.web.WebContext
 import org.eknet.publet.web.util.{Session, Key}
-import org.eknet.publet.vfs.Path
 
 /**Script generates a png image containing a random string. The
  * same string is set into the session.

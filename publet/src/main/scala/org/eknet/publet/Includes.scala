@@ -1,21 +1,19 @@
-package org.eknet.publet.web.template
+package org.eknet.publet
 
-import org.eknet.publet.Publet
-import org.eknet.publet.vfs._
-import xml.NodeSeq
+import engine.PubletEngine
+import vfs._
 import org.slf4j.LoggerFactory
-import org.eknet.publet.web.{Config, WebContext}
-import org.eknet.publet.engine.PubletEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 26.04.12 12:32
+ * @since 27.04.12 19:05
  */
 trait Includes {
-  private val log = LoggerFactory.getLogger(classOf[Includes])
+  private val log = LoggerFactory.getLogger(getClass)
 
-  val allIncludesPath = Path(Config.mainMount+"/.allIncludes").toAbsolute
-  val includesString = ".includes"
+  def allIncludesPath = Path(pathPrefix+ "/"+ Includes.allIncludes).toAbsolute
+
+  def pathPrefix = ""
 
   /**
    * Returns a relative path to the specified resource name at `/.allIncludes` location.
@@ -35,56 +33,29 @@ trait Includes {
    * @param path
    * @return
    */
-  def includes(path: Path) = path.sibling(includesString) / path.name
+  def includes(path: Path) = path.sibling(Includes.includes) / path.name
 
   def publet: Publet
 
   def includeEngine: PubletEngine
 
   /**
-   * Gets the content for the path by first looking at `.includes`
+   * Processes the path by first looking at `.includes`
    * and then at `/.allIncludes`.
    *
-   * The path `/a/b/c/d.html` is translated to `/a/b/.includes/d.htlm`
+   * The path `/a/b/c/d.html` is translated to `/a/b/.includes/d.html`
    * and after that to `/.allIncludes/d.html`.
    *
    * @param path
    * @return
    */
-  def getInclude(path: Path): Option[Content] = {
+  def processInclude(path: Path): Option[Content] = {
     log.trace("get include: {} and {}", includes(path).asString, (allIncludesPath / path.name).asString)
     publet.process(includes(path), ContentType.html, includeEngine).orElse {
       publet.process(allIncludesPath/path.name, ContentType.html, includeEngine)
     }
   }
 
-  /**
-   * Returns a string for all html header includes.
-   *
-   * It scans the directory `/.allIncludes` and the `./.includes` (relative
-   * to the specified path) for css and js files and creates html script
-   * and link tags.
-   *
-   * @param path
-   * @return
-   */
-  def headerIncludes(path: Path) = {
-    val siblingPath = (cr: ContentResource) => includes(cr.path).asString
-    val rootPath = (cr: ContentResource) => allIncludes(cr.path)
-
-    val h = getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
-    getSiblingResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
-    h.toString()
-  }
-
-  private def include(cr: ContentResource, f:ContentResource=>String): NodeSeq = {
-    val crp = f(cr)
-    cr.contentType match {
-      case ContentType.javascript => <script src={ crp }></script>
-      case ContentType.css => <link rel="stylesheet" href={ crp } ></link>
-      case _ => NodeSeq.Empty
-    }
-  }
 
   /**
    * Returns a list of all resources at `/.allIncludes`
@@ -112,4 +83,12 @@ trait Includes {
       case _ => List()
     }
   }
+}
+
+object Includes {
+  val allIncludes = ".allIncludes/"
+  val allIncludesPath = Path(allIncludes)
+
+  val includes = ".includes/"
+  val includesPath = Path(includes)
 }

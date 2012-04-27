@@ -31,7 +31,7 @@ class PubletImpl extends MountManager[Container] with Publet with EngineMangager
     findSources(path) match {
       case Nil => None
       //lookup the engine according to the uri scheme and process data
-      case data => Some(engine.process(path, data.toSeq, target))
+      case data => engine.process(data.toSeq, target)
     }
   }
 

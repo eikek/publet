@@ -19,23 +19,23 @@ import util.PropertiesMap
 object Config extends PropertiesMap {
   private val log = LoggerFactory.getLogger(getClass)
 
-  val directory = new File(Option(getProperty("publet.dir"))
-    .getOrElse(Option(getenv().get("PUBLET_DIR"))
-    .getOrElse(getProperty("user.home")+ File.separator +".publet")))
+  val directory = {
+    val d = new File(Option(getProperty("publet.dir"))
+      .getOrElse(Option(getenv().get("PUBLET_DIR"))
+      .getOrElse(getProperty("user.home")+ File.separator +".publet")))
 
-  if (!directory.exists()) if (!directory.mkdirs()) throw new RuntimeException("unable to create config dir: "+ directory)
-  if (!directory.isDirectory) throw new RuntimeException("Config dir is not a directory: "+directory)
-
-  log.info("Setup publet dir to: "+ directory)
+    if (!d.exists()) if (!d.mkdirs()) throw new RuntimeException("unable to create config dir: "+ d)
+    if (!d.isDirectory) throw new RuntimeException("Config dir is not a directory: "+d)
+    d
+  }
 
   val contentRoot = subdir("contents")
-  private val configfile = new File(directory, "publet.properties")
-
-
-  lazy val mainMount = apply("publet.mainMount").getOrElse("main")
-
-
+  val configfile = new File(directory, "publet.properties")
+  log.info("Setup publet dir to: "+ directory)
   reload()
+
+
+  def mainMount = apply("publet.mainMount").getOrElse("main")
 
   def file = if (configfile.exists()) Some(new FileInputStream(configfile)) else None
 

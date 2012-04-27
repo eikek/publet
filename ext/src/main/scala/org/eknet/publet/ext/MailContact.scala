@@ -1,6 +1,6 @@
 package org.eknet.publet.ext
 
-import org.eknet.publet.engine.scalascript.ScalaScript
+import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.web.util.Key

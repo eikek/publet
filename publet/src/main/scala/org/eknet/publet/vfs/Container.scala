@@ -56,7 +56,7 @@ trait Container {
   def lookup(path: Path): Option[Resource] = {
     path.segments match {
       case a :: Nil => child(a)
-      case a :: _ => container(a).exists(_.lookup(path.strip))
+      case a :: _ => container(a).map(_.lookup(path.strip))
       case Nil => None
     }
   }

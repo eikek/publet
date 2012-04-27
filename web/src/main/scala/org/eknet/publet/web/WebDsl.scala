@@ -15,7 +15,7 @@ object WebDsl {
 
     def ~(elem: WebElem): WebElem = new PairElem(this, elem)
 
-    def action(onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = {
+    def action(onSubmit: => Option[Content], validate: PartialFunction[Param, Option[String]] = {
       case _ => None
     }): WebElem = {
       form(this, onSubmit, validate)
@@ -41,7 +41,7 @@ object WebDsl {
   def when(cond: => Boolean)(elem: WebElem) = new ConditionElem(elem, cond)
 
   // forms
-  class FormElem(elm: WebElem, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = {
+  class FormElem(elm: WebElem, onSubmit: => Option[Content], validate: PartialFunction[Param, Option[String]] = {
     case _ => None
   }) extends WebElem {
 
@@ -57,10 +57,10 @@ object WebDsl {
 
   case class Param(name: String, value: String)
 
-  def form(elm: WebElem, onSubmit: => Content, validate: PartialFunction[Param, Option[String]] = {
+  def form(markup: WebElem, onSubmit: => Option[Content], validate: PartialFunction[Param, Option[String]] = {
     case _ => None
   }): WebElem = {
-    new FormElem(elm, onSubmit, validate)
+    new FormElem(markup, onSubmit, validate)
   }
 
   class NodeSeqElem(ns: NodeSeq) extends WebElem {
@@ -80,7 +80,7 @@ object WebDsl {
 
   // want to build pages like this
 
-  import org.eknet.publet.engine.scalascript.ScalaScript._
+  import org.eknet.publet.engine.scala.ScalaScript._
 
   val successKey = Key[Boolean]("success")
   val ctx = WebContext()
@@ -89,7 +89,7 @@ object WebDsl {
     <h1>This is my headline</h1> ~
       form(
         // gives the xhtml content.
-        elm = <h2>Kontakt</h2> ~
+        markup = <h2>Kontakt</h2> ~
           <p class="box success"></p>.when(ctx(successKey).exists(_ == true)) ~
           when(ctx(successKey).isEmpty) {
             """<form class="ym-form linearize-form" action={ctx(WebContext.requestUrl)}>

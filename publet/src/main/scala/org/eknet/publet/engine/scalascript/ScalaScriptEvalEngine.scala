@@ -1,9 +1,9 @@
 package org.eknet.publet.engine.scalascript
 
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.vfs.{Path, ContentType, Content}
 import com.twitter.util.Eval
 import scala.Some
+import org.eknet.publet.vfs._
 
 /**
  * Compiles scala classes that extend `ScalaScript` and feeds the outcome
@@ -12,6 +12,7 @@ import scala.Some
  * @author eike.kettner@gmail.com
  * @since 10.04.12 17:06
  */
+@deprecated("use the one from scala-script module", "always")
 class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends PubletEngine {
 
 //  val tmpdir = new File(System.getProperty("java.io.tmpdir"))
@@ -25,18 +26,18 @@ class ScalaScriptEvalEngine(val name: Symbol, engine: PubletEngine) extends Publ
   // with `None` class files are not written but cached in memory
   val eval = new Eval(None)
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = {
+  def process(data: Seq[ContentResource], target: ContentType) = {
     data find (_.contentType == ContentType.scal) match {
-      case Some(c) => engine.process(path, Seq(eval(c)), target)
+      case Some(c) => engine.process(Seq(eval(c)), target)
       case None => throw new RuntimeException("no scala script content found")
     }
   }
 
-  def eval(content: Content): Content = {
+  def eval(content: ContentResource): ContentResource = {
     val r = eval.apply[Any](boxedScript(content.contentAsString), false)
 
-    if (r.isInstanceOf[Content]) r.asInstanceOf[Content]
-    else Content(r.toString, ContentType.html)
+    if (r.isInstanceOf[Content]) new CompositeContentResource(content, r.asInstanceOf[Content])
+    else new CompositeContentResource(content, Content(r.toString, ContentType.html))
   }
 
   def boxedScript(script: String): String = {

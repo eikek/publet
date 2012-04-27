@@ -2,8 +2,8 @@ package org.eknet.publet.webeditor
 
 import javax.servlet.http.HttpServletResponse
 import org.eknet.publet.web.WebContext
-import org.eknet.publet.vfs.{ContentType, Content, Path}
 import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
+import org.eknet.publet.vfs.{PathContentResource, ContentType, Content, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,12 +15,16 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
     val targetType = path.name.targetType
     val publet = WebContext().webPublet.publet
     if (targetType.mime._1 == "text") {
-      val c = publet.engineManager.getEngine('edit).get.process(path, Seq(Content("", ContentType.markdown)), ContentType.markdown);
-      c.copyTo(out)
+      val res = new PathContentResource(path, Content.empty(ContentType.markdown))
+      val c = publet.engineManager.getEngine('edit).get
+        .process(Seq(res), ContentType.markdown);
+      c.get.copyTo(out)
     } else {
       val uploadContent = UploadContent.uploadContent(path)
-      val c = publet.engineManager.resolveEngine(path).get.process(path, Seq(uploadContent), ContentType.html)
-      writePage(Some(c), resp)
+      val res = new PathContentResource(path, uploadContent)
+      val c = publet.engineManager.resolveEngine(path).get
+        .process(Seq(res), ContentType.html)
+      writePage(Some(c.get), resp)
     }
   }
 }

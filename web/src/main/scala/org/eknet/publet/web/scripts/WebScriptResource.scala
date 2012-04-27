@@ -1,9 +1,9 @@
 package org.eknet.publet.web.scripts
 
-import org.eknet.publet.engine.scalascript.{ScriptResource, ScalaScript}
 import org.eknet.publet.web.WebContext
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.util.{Request, Key}
+import org.eknet.publet.engine.scala.{ScriptResource, ScalaScript}
 
 /** A resource that executes the given script on access. The result
  * is cached as attribute inside the request.

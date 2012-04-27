@@ -52,30 +52,9 @@ trait Resource {
    */
   def exists: Boolean
 
-  def exists[A](f:this.type => Option[A]): Option[A] = {
+  def map[A](f:Resource.this.type=>Option[A]):Option[A] = {
     if (exists) f(this)
     else None
-  }
-
-  def ifContent[A](f:ContentResource=>A) = {
-    exists(r => r match {
-      case cr:ContentResource => Some(f(cr))
-      case _ => None
-    })
-  }
-
-  def ifContainer[A](f:ContainerResource=>A) = {
-    exists(r => r match {
-      case cc:ContainerResource => Some(f(cc))
-      case _ => None
-    })
-  }
-
-  def ifModifyable[A](y:Modifyable=>A) = {
-    exists(r => r match {
-      case mr: Modifyable => Some(y(mr))
-      case _ => None
-    })
   }
 }
 

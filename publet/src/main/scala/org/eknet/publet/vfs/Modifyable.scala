@@ -37,7 +37,10 @@ trait ModifyableContainer {
    */
   def createContent(path: Path): ContentResource = {
     val c = createContainer(path.parent).content(path.name.fullName)
-    c.ifModifyable(_.create()).getOrElse(sys.error("resource not mofifieable"))
+    c match {
+      case mc: Modifyable => mc.create()
+      case _ => sys.error("resource not mofifieable")
+    }
     c
   }
 

@@ -1,7 +1,7 @@
 package org.eknet.publet.engine.convert
 
-import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.eknet.publet.engine.PubletEngine
+import org.eknet.publet.vfs.{ContentResource, ContentType}
 
 /**
  *
@@ -12,6 +12,6 @@ object PassThrough extends PubletEngine {
 
   def name = 'source
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = data.head
+  def process(data: Seq[ContentResource], target: ContentType) = Some(data.head)
 
 }

@@ -1,7 +1,7 @@
 package org.eknet.publet.engine
 
-import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.eknet.publet.Named
+import org.eknet.publet.vfs._
 
 
 /**
@@ -21,6 +21,11 @@ trait PubletEngine extends Named {
    * @param data
    * @return
    */
-  def process(path: Path, data: Seq[Content], target: ContentType): Content
+  def process(data: Seq[ContentResource], target: ContentType): Option[Content]
 
+  def processToResource(data: Seq[ContentResource], target: ContentType): Option[ContentResource] = {
+    process(data, target) map { content =>
+      new PathContentResource(data.head.path.withExt(target.extensions.head), data.head.parent, content)
+    }
+  }
 }

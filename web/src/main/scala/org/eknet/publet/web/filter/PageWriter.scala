@@ -1,10 +1,10 @@
 package org.eknet.publet.web.filter
 
-import org.eknet.publet.vfs.{Path, ContentType, Content}
 import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletResponse
 import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.web.{WebContext, Config}
+import org.eknet.publet.vfs._
 
 /**
  *
@@ -22,11 +22,11 @@ trait PageWriter {
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+sw.toString+ "</pre>", ContentType.html)
-
+      val resource = new PathContentResource(WebContext().requestPath, content)
       val result = WebContext().webPublet.publet.engineManager.getEngine('mainWiki).get
-        .process(WebContext().requestPath, Seq(content), ContentType.html)
+        .process(Seq(resource), ContentType.html)
 
-      writePage(Some(result), resp)
+      writePage(result, resp)
     } else {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     }

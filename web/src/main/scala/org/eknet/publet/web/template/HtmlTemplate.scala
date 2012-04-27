@@ -1,6 +1,7 @@
 package org.eknet.publet.web.template
 
-import org.eknet.publet.vfs.{Path, Content, ContentType}
+import org.eknet.publet.vfs.{ContentResource, Content, ContentType}
+
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -10,11 +11,11 @@ trait HtmlTemplate {
 
   /** By default extracts the first {{{h*}}} value
    * 
-   * @param path
    * @param content
    * @return
    */
-  def title(path: Path, content: Content, source: Seq[Content]): String = {
+  def title(content: ContentResource, source: Seq[ContentResource]): String = {
+    val path = content.path
     findHead(content) match {
       case None => path.name.name.replaceAll("[_-]", " ")
       case Some(n) => n
@@ -23,7 +24,7 @@ trait HtmlTemplate {
 
   val findHeadRegex = "(<h[1234]>([^<]*)</h[1234]>)".r
 
-  def findHead(content: Content): Option[String] = {
+  def findHead(content: ContentResource): Option[String] = {
     findHeadRegex.findFirstMatchIn(content.contentAsString) match {
       case Some(mx) => Some(mx.group(2))
       case None => None
@@ -32,23 +33,21 @@ trait HtmlTemplate {
 
   /**Returns the html header part
    *
-   * @param path
    * @param content
    * @return
    */
-  def htmlHead(path: Path, content: Content, source: Seq[Content]): String = ""
+  def htmlHead(content: ContentResource, source: Seq[ContentResource]): String = ""
 
   /** Returns the html body part.
    * 
-   * @param path
    * @param content
    * @return
    */
-  def htmlBody(path: Path, content: Content, source: Seq[Content]): String = content.contentAsString
+  def htmlBody(content: ContentResource, source: Seq[ContentResource]): String = content.contentAsString
   
   def charset = "utf-8"
   
-  def apply(path: Path, content: Content, source: Seq[Content]): Content = {
+  def apply(content: ContentResource, source: Seq[ContentResource]): Option[Content] = {
     Predef.ensuring(content.contentType == ContentType.html, "Only html content possible")
 
     val body = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -64,9 +63,9 @@ trait HtmlTemplate {
     </body>
   </html>.toString()
 
-    Content(String.format(body,
-      title(path, content, source),
-      htmlHead(path, content, source),
-      htmlBody(path, content, source)) , ContentType.html)
+    Some(Content(String.format(body,
+      title(content, source),
+      htmlHead(content, source),
+      htmlBody(content, source)) , ContentType.html))
   }
 }

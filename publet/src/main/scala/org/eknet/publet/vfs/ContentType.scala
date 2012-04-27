@@ -31,6 +31,7 @@ object ContentType {
 
   val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))
   val zip = ContentType('zip, Set("zip", "gz", "bz2"), ("application", "zip"))
+  val jar = ContentType('jar, Set("jar"), ("application", "java-archive"))
   val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
 
   val all = Set(text, html, pdf, markdown, xml, css, javascript, json, png, jpg, gif, icon, scal)

@@ -1,9 +1,8 @@
 package org.eknet.publet.webeditor.actions
 
-import org.eknet.publet.engine.scalascript.ScalaScript
+import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.WebContext
-import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.Path
 
 /**
@@ -11,7 +10,6 @@ import org.eknet.publet.vfs.Path
  * @since 19.04.12 19:17
  */
 object SetEngine extends ScalaScript {
-  private val log = LoggerFactory.getLogger(getClass)
 
   def serve() = {
     params("path", "publetEngine") match {

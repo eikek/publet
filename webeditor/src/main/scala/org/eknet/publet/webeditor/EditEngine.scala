@@ -1,8 +1,9 @@
 package org.eknet.publet.webeditor
 
 import org.eknet.publet.engine.PubletEngine
+import org.eknet.publet.vfs._
 import xml._
-import org.eknet.publet.vfs.{Path, NodeContent, ContentType, Content}
+import org.eknet.publet.web.WebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -10,7 +11,8 @@ import org.eknet.publet.vfs.{Path, NodeContent, ContentType, Content}
  */
 class EditEngine(del: PubletEngine) extends PubletEngine {
 
-  def editBody(path: Path, content: Content): NodeSeq = {
+  def editBody(content: ContentResource): NodeSeq = {
+    val path = WebContext().requestPath
     val cancelHandler = "window.location='" + path.name.withExtension("html") +"'"
     val pushPath = Path(path.relativeRoot) / EditorWebExtension.scriptPath / "push.json"
     <h3>Edit Page</h3>
@@ -31,7 +33,10 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
       </form>
   }
 
-  def editContent(path: Path, content: Content): NodeContent = NodeContent(editBody(path, content), ContentType.html)
+  def editContent(content: ContentResource): ContentResource = {
+    val c = NodeContent(editBody(content), ContentType.html)
+    new CompositeContentResource(content, c)
+  }
 
   private def typeSelect(path: Path, ct: ContentType): NodeSeq = {
 
@@ -71,10 +76,11 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
 
   def name = 'edit
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = {
+  def process(data: Seq[ContentResource], target: ContentType) = {
+    val path = WebContext().requestPath
     if (target.mime._1 == "text")
-      del.process(path, Seq(editContent(path, data.head)), ContentType.html)
+      del.process(Seq(editContent(data.head)), ContentType.html)
     else
-      del.process(path, Seq(UploadContent.uploadContent(path)), ContentType.html)
+      del.process(Seq(UploadContent.uploadContent(path)), ContentType.html)
   }
 }

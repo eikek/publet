@@ -1,13 +1,12 @@
 package org.eknet.publet.web
 
 import scripts._
-import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 import org.eknet.publet.Publet
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.virtual.MutableContainer
 import template.{HighlightJs, StandardEngine}
+import org.eknet.publet.engine.scala.{DefaultPubletCompiler, ScalaScriptEngine}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,22 +38,20 @@ object PubletFactory {
     publ.engineManager.register("/*", defaultEngine)
     publ.engineManager.addEngine(defaultEngine.includeEngine)
 
-    val scalaEngine = new WebScalaScriptEngine('eval, defaultEngine)
+    val compiler = new DefaultPubletCompiler(publ, Config.mainMount, webImports)
+    val scalaEngine = new ScalaScriptEngine('eval, compiler, defaultEngine)
     publ.engineManager.addEngine(scalaEngine)
 
-    val scriptInclude = new WebScalaScriptEngine('evalinclude, defaultEngine.includeEngine)
+    val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, defaultEngine.includeEngine)
     publ.engineManager.addEngine(scriptInclude)
 
     (publ, gp, defaultEngine)
   }
 
-  private class WebScalaScriptEngine(name: Symbol, e: PubletEngine) extends ScalaScriptEvalEngine(name, e) {
-    override def importPackages = super.importPackages ++ List(
+  def webImports = List(
     "org.eknet.publet.web.WebContext",
     "org.eknet.publet.web.util.AttributeMap",
     "org.eknet.publet.web.util.Key",
     "org.apache.shiro.{SecurityUtils => Security}"
-    )
-  }
-
+  )
 }

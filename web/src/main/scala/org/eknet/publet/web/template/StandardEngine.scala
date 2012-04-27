@@ -2,12 +2,12 @@ package org.eknet.publet.web.template
 
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.vfs.{ContentType, Content, Path}
 import org.eknet.publet.vfs.virtual.{UrlResource, MutableContainer, ClasspathContainer}
 import org.eknet.publet.engine.convert.ConverterEngine
-import org.eknet.publet.web.WebDsl.WebElem
 import collection.mutable
 import xml.NodeSeq
+import org.eknet.publet.vfs._
+import org.eknet.publet.web.WebContext
 
 /** Uses yaml to create a html page layout.
  *
@@ -25,7 +25,7 @@ import xml.NodeSeq
  * @since 26.04.12 12:15
  */
 class StandardEngine(val publet:Publet) extends PubletEngine
-    with Includes with HtmlTemplate {
+    with WebIncludes with HtmlTemplate {
 
   val yamlPath = Path("/publet/yaml/")
   val jsPath = Path("/publet/std/js/")
@@ -62,9 +62,12 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   def name = 'mainWiki
 
 
-  def process(path: Path, data: Seq[Content], target: ContentType) = {
-    includeEngine.process(path, data, target) match {
-      case nc if (nc.contentType == ContentType.html) => apply(path, nc, data)
+  def process(data: Seq[ContentResource], target: ContentType) = {
+    includeEngine.process(data, target) match {
+      case Some(nc) if (nc.contentType == ContentType.html) => {
+        val resource = new CompositeContentResource(data.head, nc)
+        apply(resource, data)
+      }
       case l @ _  => l
     }
   }
@@ -82,13 +85,15 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     ).toString()
   }
 
-  override def htmlHead(path: Path, content: Content, source: Seq[Content]) = {
+  override def htmlHead(content: ContentResource, source: Seq[ContentResource]) = {
+    val path = WebContext().requestPath
     standardHtmlHead(path) +
-    getInclude(path.parent/"head.html").getOrElse(Content.empty(ContentType.html)).contentAsString +
+    processInclude(path.parent/"head.html").getOrElse(Content.empty(ContentType.html)).contentAsString +
     htmlHeadContribs.toList.map(_.apply(path, content)).mkString("\n")
   }
 
-  override def htmlBody(path: Path, content: Content, source: Seq[Content]) = {
+  override def htmlBody(content: ContentResource, source: Seq[ContentResource]) = {
+    val path = WebContext().requestPath
     val header = yamlHeader(path, content)
     val footer = yamlFooter(path)
     val main = stripTitle(content.contentAsString).getOrElse(content.contentAsString)
@@ -101,7 +106,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
 
   def getSidebar(path: Path): Option[Content] = {
     val sidebar = path.parent / "sidebar.html"
-    getInclude(sidebar)
+    processInclude(sidebar)
   }
 
   def stripTitle(cnt: String) = {
@@ -166,16 +171,16 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     String.format(str, body, yamlColumn)
   }
 
-  def yamlHeader(path: Path, content: Content) = {
-    val custom = getInclude(path.parent/"header.html") match {
+  def yamlHeader(path: Path, content: ContentResource) = {
+    val custom = processInclude(path.parent/"header.html") match {
       case Some(c) => c.contentAsString
       case None => ""
     }
-    <h1>{title(path, content, Seq[Content]())}</h1>.toString() +"\n"+ custom
+    <h1>{title(content, Seq[ContentResource]())}</h1>.toString() +"\n"+ custom
   }
 
   def yamlFooter(path: Path) = {
-    val custom = getInclude(path.parent/"footer.html") match {
+    val custom = processInclude(path.parent/"footer.html") match {
       case Some(c) => c.contentAsString + "\n"
       case None => ""
     }
