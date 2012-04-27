@@ -5,6 +5,7 @@ import ScalaScript._
 import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.web.util.Key
 import org.eknet.publet.ext.MailSupport._
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,10 +13,13 @@ import org.eknet.publet.ext.MailSupport._
  */
 object MailContact extends ScalaScript {
 
+  def actionUrl = WebContext.rebasePath(Path("/publet/ext/scripts/mailcontact.html"))
+  def captchaUrl = WebContext.rebasePath(Path("/publet/ext/scripts/captcha.png"))
+
   def contactForm() = makeHtml {
     <h2>Kontakt</h2>
       <div class="formSubmitResponse"></div>
-      <form class="ym-form linearize-form" action="/publet/ext/scripts/mailcontact.html">
+      <form class="ym-form linearize-form" action={ actionUrl.asString }>
         <input type="hidden" name="a" value="include"/>
         <div class="ym-fbox-text">
           <label for="from">Von (Email)
@@ -36,7 +40,7 @@ object MailContact extends ScalaScript {
             <input type="text" name="captcha" id="captcha" size="20" required="required"/>
         </div>
         <div class="ym-fbox-select">
-          <img alt="captcha" src="/publet/ext/scripts/captcha.png?col1=ffffff&amp;col2=ffffff&amp;fgcol=000000&amp;captchaParam=contactCaptcha"/>
+          <img alt="captcha" src={ captchaUrl.asString+ "?col1=ffffff&amp;col2=ffffff&amp;fgcol=000000&amp;captchaParam=contactCaptcha"} />
     </div>
     <button class="ym-button ym-email publetAjaxSubmit">Senden</button>
     </form>

@@ -151,10 +151,44 @@ object WebContext {
     }
   })
 
-  def calcPath(path: Path): Path = {
+  /**
+   * Strips the current context path from the given path.
+   * If no context path is defined, the given path is returned.
+   *
+   * @param path
+   * @return
+   */
+  def stripPath(path: Path): Path = {
     WebContext().getContextPath match {
       case Some(cp) => path.strip(Path(cp))
       case None => path
+    }
+  }
+
+  /**
+   * Rebases the given path against the current context path.
+   *
+   * @param path
+   * @return
+   */
+  def rebasePath(path: Path): Path = {
+    WebContext().getContextPath match {
+      case Some(cp) => Path(cp) / path
+      case None => path
+    }
+  }
+
+  /**
+   * Rebases the given path against the current main wiki
+   * path (with current context path if defined)
+   *
+   * @param path
+   * @return
+   */
+  def rebaseMainPath(path: Path): Path = {
+    WebContext().getContextPath match {
+      case Some(cp) => Path(cp) / Path(WebContext(mainMount).get) / path
+      case None => Path(WebContext(mainMount).get) / path
     }
   }
 

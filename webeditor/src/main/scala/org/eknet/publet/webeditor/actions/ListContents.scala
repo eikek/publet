@@ -1,6 +1,7 @@
 package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scalascript.ScalaScript
+import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.Resource._
 import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.Publet
@@ -14,6 +15,7 @@ import ScalaScript._
  * @since 26.04.12 19:47
  */
 object ListContents extends ScalaScript {
+  private val log = LoggerFactory.getLogger(getClass)
 
   private val resourceComparator = (r1: Resource, r2: Resource) => {
     if (isContainer(r1) && !isContainer(r2)) true
@@ -30,7 +32,7 @@ object ListContents extends ScalaScript {
       case Some(cp) => cp + "/" + Config.mainMount
       case None => "/" + Config.mainMount
     }
-    val p = WebContext.calcPath(if (path.directory) path else path.parent)
+    val p = WebContext.stripPath(if (path.directory) path else path.parent)
     val json = createJsonMap(p, WebContext().webPublet.publet, prefixPath)
 
     makeJson(json)

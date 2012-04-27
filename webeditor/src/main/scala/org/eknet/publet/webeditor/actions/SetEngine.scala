@@ -3,6 +3,7 @@ package org.eknet.publet.webeditor.actions
 import org.eknet.publet.engine.scalascript.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.WebContext
+import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.Path
 
 /**
@@ -10,6 +11,7 @@ import org.eknet.publet.vfs.Path
  * @since 19.04.12 19:17
  */
 object SetEngine extends ScalaScript {
+  private val log = LoggerFactory.getLogger(getClass)
 
   def serve() = {
     params("path", "publetEngine") match {
@@ -19,7 +21,7 @@ object SetEngine extends ScalaScript {
         publet.engineManager.getEngine(Symbol(t._2)) match {
           case None => error("Engine '" + t._2 + "' not found.")
           case Some(pe) => {
-            val path = WebContext.calcPath(Path(t._1))
+            val path = WebContext.stripPath(Path(t._1))
             log.info("Registering engine " + pe.name + " with url: " + path.asString)
             publet.engineManager.register(path.asString, pe)
             success()
