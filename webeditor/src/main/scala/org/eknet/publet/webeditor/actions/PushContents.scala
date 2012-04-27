@@ -2,7 +2,6 @@ package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scalascript.ScalaScript
 import org.eknet.publet.engine.scalascript.ScalaScript._
-import org.slf4j.LoggerFactory
 import org.eknet.publet.web.WebContext
 import org.eknet.publet.vfs.{Path, Content, ContentType}
 
@@ -11,7 +10,6 @@ import org.eknet.publet.vfs.{Path, Content, ContentType}
  * @since 26.04.12 19:46
  */
 object PushContents extends ScalaScript {
-  private val log = LoggerFactory.getLogger(getClass)
 
   def serve() = {
     WebContext().parameter("path") match {

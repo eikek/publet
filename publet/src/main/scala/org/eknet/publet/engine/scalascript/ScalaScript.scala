@@ -4,6 +4,7 @@ import com.twitter.json.Json
 import org.eknet.publet.vfs.{ContentType, NodeContent, Content}
 import xml.{NodeBuffer, NodeSeq}
 import java.io.InputStream
+import org.slf4j.LoggerFactory
 
 /**
  *
@@ -12,6 +13,7 @@ import java.io.InputStream
  */
 
 trait ScalaScript {
+  protected val log = LoggerFactory.getLogger(getClass)
 
   def serve(): Content
 

@@ -6,7 +6,7 @@ import com.twitter.util.Eval
 import scala.Some
 
 /**
- * Compiles scala classes that extend $ScalaScript and feeds the outcome
+ * Compiles scala classes that extend `ScalaScript` and feeds the outcome
  * into the given engine.
  *
  * @author eike.kettner@gmail.com

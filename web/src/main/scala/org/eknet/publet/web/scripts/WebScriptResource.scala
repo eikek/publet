@@ -2,7 +2,7 @@ package org.eknet.publet.web.scripts
 
 import org.eknet.publet.engine.scalascript.{ScriptResource, ScalaScript}
 import org.eknet.publet.web.WebContext
-import org.eknet.publet.vfs.{ContentType, Path}
+import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.util.{Request, Key}
 
 /** A resource that executes the given script on access. The result
@@ -11,8 +11,8 @@ import org.eknet.publet.web.util.{Request, Key}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:28
  */
-class WebScriptResource(path: Path, script: ScalaScript, contentType: ContentType)
-    extends ScriptResource(path, script, contentType) {
+class WebScriptResource(path: Path, script: ScalaScript)
+    extends ScriptResource(path, script) {
 
   override def evaluate = {
     val ctx = WebContext()

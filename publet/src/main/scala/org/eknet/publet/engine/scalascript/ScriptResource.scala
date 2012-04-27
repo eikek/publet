@@ -1,26 +1,27 @@
 package org.eknet.publet.engine.scalascript
 
-import org.eknet.publet.vfs.{Path, ContentType, ContentResource}
+import org.eknet.publet.vfs.{Path, ContentResource}
 import java.io.OutputStream
 
 /** A resource that executes the given script on each access.
  *
- * Note, that the script is executed by several methods. In web environments
- * you'd cache the result once per request.
+ * Note, that the script is executed by almost all methods (for
+ * example to get the content type). You need to implement the
+ * desired caching strategy. In web environments you'd cache
+ * the result per request.
  *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.04.12 23:09
  */
-class ScriptResource(val path: Path, val script: ScalaScript, val contentType: ContentType) extends ContentResource {
+abstract class ScriptResource(val path: Path, val script: ScalaScript) extends ContentResource {
 
-  protected def evaluate = {
-    script.serve()
-      .ensuring(_.contentType == contentType, "content type mismatch")
-  }
+  protected def evaluate = script.serve()
 
   override def lastModification = evaluate.lastModification
 
   def inputStream = evaluate.inputStream
+
+  def contentType = evaluate.contentType
 
   val exists = true
 

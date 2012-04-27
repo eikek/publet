@@ -2,13 +2,10 @@ package org.eknet.publet.web
 
 import scripts._
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.vfs.ContentType._
-import org.eknet.publet.engine.scalascript.{ScriptResource, ScalaScriptEvalEngine}
+import org.eknet.publet.engine.scalascript.ScalaScriptEvalEngine
 import org.eknet.publet.Publet
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.vfs.Path
-import javax.servlet.ServletContext
-import org.eknet.publet.web.WebContext._
 import org.eknet.publet.vfs.virtual.MutableContainer
 import template.{HighlightJs, StandardEngine}
 
@@ -32,7 +29,7 @@ object PubletFactory {
 
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
     val cont = new MutableContainer(scriptRoot)
-    cont.addResource(new ScriptResource(scriptRoot/"toggleRepo.html", ToggleGitExport, html))
+    cont.addResource(new WebScriptResource(scriptRoot/"toggleRepo.html", ToggleGitExport))
     publ.mountManager.mount(scriptRoot, cont)
 
 

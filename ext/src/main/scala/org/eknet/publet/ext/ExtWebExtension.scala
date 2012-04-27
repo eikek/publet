@@ -3,10 +3,10 @@ package org.eknet.publet.ext
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.virtual.MutableContainer
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.vfs.{ContentType, Path}
+import org.eknet.publet.vfs.Path
 import org.slf4j.LoggerFactory
-import org.eknet.publet.web.{WebPublet, WebExtension, WebContext}
-import javax.servlet.{ServletContext, ServletContextEvent, ServletContextListener}
+import org.eknet.publet.web.{WebPublet, WebExtension}
+import javax.servlet.ServletContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -31,8 +31,8 @@ object ExtWebExtension {
 
   def install(publet: Publet) {
     val muc = new MutableContainer(extScriptPath)
-    muc.addResource(new WebScriptResource(extScriptPath / "captcha.png", CaptchaScript, ContentType.png))
-    muc.addResource(new WebScriptResource(extScriptPath / "mailcontact.html", MailContact, ContentType.html))
+    muc.addResource(new WebScriptResource(extScriptPath / "captcha.png", CaptchaScript))
+    muc.addResource(new WebScriptResource(extScriptPath / "mailcontact.html", MailContact))
     publet.mountManager.mount(extScriptPath, muc)
   }
 }

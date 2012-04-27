@@ -5,7 +5,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.vfs.virtual.{ClasspathContainer, MutableContainer}
 import xml.NodeSeq
 import org.slf4j.LoggerFactory
-import org.eknet.publet.vfs.{ContentType, Content, Path}
+import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.scripts.WebScriptResource
 import javax.servlet.ServletContext
 import org.eknet.publet.web.{WebContext, WebPublet, WebExtension}
@@ -37,10 +37,10 @@ object EditorWebExtension {
     publet.mountManager.mount(editorPath, cp)
 
     val muc = new MutableContainer(editorPath/"scripts")
-    muc.addResource(new WebScriptResource(scriptPath / "setengine.json", SetEngine, ContentType.json))
-    muc.addResource(new WebScriptResource(scriptPath / "toc.json", ListContents, ContentType.json))
-    muc.addResource(new WebScriptResource(scriptPath / "push.json", PushContents, ContentType.json))
-    muc.addResource(new WebScriptResource(scriptPath / "browser.js", BrowserJs, ContentType.javascript))
+    muc.addResource(new WebScriptResource(scriptPath / "setengine.json", SetEngine))
+    muc.addResource(new WebScriptResource(scriptPath / "toc.json", ListContents))
+    muc.addResource(new WebScriptResource(scriptPath / "push.json", PushContents))
+    muc.addResource(new WebScriptResource(scriptPath / "browser.js", BrowserJs))
     publet.mountManager.mount(editorPath/"scripts", muc)
 
     val se = new EditStandardEngine(publet)
