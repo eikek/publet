@@ -1,4 +1,4 @@
-package org.eknet.publet.engine.scalascript.com.twitter.json
+package org.eknet.publet.com.twitter.json
 
 /*
  * Copyright 2009 Robey Pointer <robeypointer@gmail.com>

@@ -22,6 +22,6 @@ trait PubletCompiler {
    * @param resource
    * @return
    */
-  def evaluate(resource: ContentResource): Option[Content]
+  def evaluate(resource: ContentResource): Option[ScalaScript]
 
 }

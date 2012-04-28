@@ -33,6 +33,7 @@ object ExtWebExtension {
     val muc = new MutableContainer(extScriptPath)
     muc.addResource(new WebScriptResource(extScriptPath / "captcha.png", CaptchaScript))
     muc.addResource(new WebScriptResource(extScriptPath / "mailcontact.html", MailContact))
+    muc.addResource(new WebScriptResource(extScriptPath / "listing.html", Listing))
     publet.mountManager.mount(extScriptPath, muc)
   }
 }

@@ -11,19 +11,16 @@ class DefaultPubletCompiler(val publet: Publet,
                             val pathPrefix: String,
                             imports: List[String]) extends PubletCompiler {
 
+
   def evaluate(resource: ContentResource) = {
     val  comp = findCompiler(resource)
     val script = comp.loadScalaScriptClass(resource)
-    script.serve()
+    Some(script)
   }
-
-  private val compiler = ScriptCompiler(None, None, None, imports)
 
   def findCompiler(resource: ContentResource): ScriptCompiler = {
     val miniProject = MiniProject.find(resource.path, publet, pathPrefix)
-    val rootProject = MiniProject.rootProject(pathPrefix, publet)
 
-//    ScriptCompiler(None, miniProject, rootProject, imports)
-    compiler
+    ScriptCompiler(None, miniProject, imports)
   }
 }

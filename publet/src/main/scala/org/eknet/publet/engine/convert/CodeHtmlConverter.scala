@@ -12,7 +12,7 @@ import org.eknet.publet.vfs.{Path, Content}
 class CodeHtmlConverter(langClass: Option[String]) extends ConverterEngine#Converter {
 
   def apply(path: Path, v1: Content) = {
-    val body = v1.contentAsString.replaceAll("&amp;", "&").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+    val body = CodeHtmlConverter.replaceChars(v1.contentAsString)
     val code = langClass match {
       case None => "<code>"+ body +"</code>"
       case Some(c) => "<code class=\""+c+"\">"+ body +"</code>"
@@ -23,6 +23,10 @@ class CodeHtmlConverter(langClass: Option[String]) extends ConverterEngine#Conve
 }
 
 object CodeHtmlConverter {
+
+  def replaceChars(s: String): String = {
+    s.replaceAll("&amp;", "&").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+  }
 
   def apply(): CodeHtmlConverter = new CodeHtmlConverter(None)
 

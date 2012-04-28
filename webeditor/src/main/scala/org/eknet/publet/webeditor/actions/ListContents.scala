@@ -5,7 +5,7 @@ import org.eknet.publet.vfs.Resource._
 import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.Publet
 import collection.mutable
-import org.eknet.publet.engine.scalascript.com.twitter.json.Json
+import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs._
 import ScalaScript._
 

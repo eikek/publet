@@ -1,4 +1,4 @@
-package org.eknet.publet.engine.scalascript.com.twitter.io
+package org.eknet.publet.com.twitter.io
 
 import scala.annotation.tailrec
 import java.io.{InputStream, OutputStream, ByteArrayOutputStream}

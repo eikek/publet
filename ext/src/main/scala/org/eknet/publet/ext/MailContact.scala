@@ -40,7 +40,7 @@ object MailContact extends ScalaScript {
             <input type="text" name="captcha" id="captcha" size="20" required="required"/>
         </div>
         <div class="ym-fbox-select">
-          <img alt="captcha" src={ captchaUrl.asString+ "?col1=ffffff&amp;col2=ffffff&amp;fgcol=000000&amp;captchaParam=contactCaptcha"} />
+          <img alt="captcha" src={ captchaUrl.asString+ "?col1=ffffff&col2=ffffff&fgcol=000000&captchaParam=contactCaptcha"} />
     </div>
     <button class="ym-button ym-email publetAjaxSubmit">Senden</button>
     </form>

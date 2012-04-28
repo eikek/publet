@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse
 import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.web.{WebContext, Config}
 import org.eknet.publet.vfs._
+import org.eknet.publet.engine.convert.CodeHtmlConverter
 
 /**
  *
@@ -21,7 +22,7 @@ trait PageWriter {
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
-      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+sw.toString+ "</pre>", ContentType.html)
+      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+CodeHtmlConverter.replaceChars(sw.toString)+ "</pre>", ContentType.html)
       val resource = new PathContentResource(WebContext().requestPath, content)
       val result = WebContext().webPublet.publet.engineManager.getEngine('mainWiki).get
         .process(Seq(resource), ContentType.html)

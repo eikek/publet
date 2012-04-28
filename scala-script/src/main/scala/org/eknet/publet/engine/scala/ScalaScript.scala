@@ -3,7 +3,7 @@ package org.eknet.publet.engine.scala
 import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.{ContentType, NodeContent, Content}
 import xml.{NodeBuffer, NodeSeq}
-import org.eknet.publet.engine.scalascript.com.twitter.json.Json
+import org.eknet.publet.com.twitter.json.Json
 import java.io.InputStream
 
 /**

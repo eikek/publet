@@ -71,7 +71,7 @@ object Publet extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings 
   
-  lazy val deps = Seq(knockoff, slf4jApi, scalaCompiler )
+  lazy val deps = Seq(knockoff, slf4jApi)
 }
 
 object GitPartition extends Build {
@@ -91,13 +91,30 @@ object GitPartition extends Build {
   val deps = Seq(slf4jApi, jgit)
 }
 
+object ScalaScriptEngine extends Build {
+
+  lazy val module = Project(
+    id = "scala-script",
+    base = file("scala-script"),
+    settings = buildProperties
+  ) dependsOn (Publet.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-scala-scriptengine",
+    description := "Provides a engine that compiles and executes scala " +
+      "scripts, converting from *.scala source files to some dynamic content.",
+    libraryDependencies ++= deps
+  )
+  val deps = Seq(slf4jApi, scalaCompiler)
+}
+
 object Web extends Build {
 
   lazy val module = Project(
     id = "web", 
     base = file("web"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPartition.module, Auth.module)
+  ) dependsOn (Publet.module, ScalaScriptEngine.module, GitPartition.module, Auth.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",

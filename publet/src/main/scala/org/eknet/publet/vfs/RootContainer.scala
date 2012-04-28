@@ -1,5 +1,9 @@
 package org.eknet.publet.vfs
 
+import java.lang.reflect.{Method, InvocationHandler}
+import scala.Array
+
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 25.04.12 19:35
@@ -34,7 +38,7 @@ trait RootContainer[T<:Container] extends ContainerResource {
   override def lookup(path: Path): Option[Resource] = {
     resolveMount(path) match {
       case Some(t) => t._2.lookup(path.strip(t._1))
-      case None => super.lookup(path)
+      case None => if (path == Path.root) Some(this) else super.lookup(path)
     }
   }
 
@@ -47,17 +51,51 @@ trait RootContainer[T<:Container] extends ContainerResource {
 
   class Inner(val path: Path, val parent: Option[Container], node: SegTree) extends ContainerResource {
 
-    def children = node.children.map(toContainer)
+    def children = resolveMount(path).map(_._2.children).getOrElse(node.children.map(toContainer))
 
-    def content(name: String) = Resource.emptyContent(path/name, Some(this))
+    def content(name: String) = {
+      val empty = Resource.emptyContent(path/name, Some(this))
+      if (!isLeaf) empty else {
+        resolveMount(path).map(_._2.content(name)).getOrElse(empty)
+      }
+    }
 
-    def container(name: String) = node.children.find(_.seg == name).map(toContainer)
-      .getOrElse(Resource.emptyContainer(path/name, Some(this)))
+    def container(name: String) = {
+      val empty = Resource.emptyContainer(path/name, Some(this))
+      (if (!isLeaf) node.children.find(_.seg == name).map(toContainer)
+       else resolveMount(path).map(_._2.container(name)))
+        .getOrElse(empty)
+    }
 
-    def child(name: String) = node.children.find(_.seg == name).map(toContainer)
+    def child(name: String) = if (!isLeaf) {
+      node.children.find(_.seg == name).map(toContainer)
+    } else {
+      resolveMount(path).flatMap(_._2.child(name))
+    }
 
+    def isLeaf = node.children.isEmpty
 
-    def lastModification = None
+    def lastModification = if (!isLeaf) None else {
+      resolveMount(path) match {
+        case Some(x) if (x._2.isInstanceOf[Resource]) => x._2.asInstanceOf[Resource].lastModification
+        case _ => None
+      }
+    }
+
+    //TODO use resource name only and build path on demand
+//    private def proxy[A<:Resource:Manifest](r: A):A = {
+//      if (r.isInstanceOf[ContainerResource]) {
+//        new ForwardingContainerResource {
+//          def delegate = r.asInstanceOf[ContainerResource]
+//          override def parent = Inner.this.parent
+//        }.asInstanceOf[A]
+//      } else {
+//        new ForwardingContentResource {
+//          def delegate = r.asInstanceOf[ContentResource]
+//          override def parent = Inner.this.parent
+//        }.asInstanceOf[A]
+//      }
+//    }
 
     val exists = true
   }

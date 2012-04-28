@@ -9,9 +9,13 @@ import tools.nsc.io.{VirtualDirectory, AbstractFile}
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 import org.eknet.publet.engine.convert.CodeHtmlConverter
-import org.eknet.publet.vfs.{ContentType, Content, ContentResource}
 import collection.mutable
 import util.{Position, BatchSourceFile}
+import org.eknet.publet.vfs._
+import org.eknet.publet.engine.scalascript.com.twitter.util.Eval
+import org.slf4j.LoggerFactory
+import java.math.BigInteger
+import java.security.MessageDigest
 
 /**
  * Compiles scala snippets to ScalaScript classes.
@@ -20,69 +24,41 @@ import util.{Position, BatchSourceFile}
  * @since 27.04.12 21:31
  */
 class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[String]) {
+  private val log = LoggerFactory.getLogger(getClass)
 
   val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, this.getClass.getClassLoader)
 
-  val reporter = new AbstractReporter {
-    val settings = ScriptCompiler.this.settings
-    val messages = new mutable.ListBuffer[List[String]]
-
-    def display(pos: Position, message: String, severity: Severity) {
-      severity.count += 1
-      val severityName = severity match {
-        case ERROR => "error: "
-        case WARNING => "warning: "
-        case _ => ""
-      }
-      messages += (severityName + "line " + (pos.line) + ": " + message) ::
-        (if (pos.isDefined) {
-          pos.inUltimateSource(pos.source).lineContent.stripLineEnd ::
-            (" " * (pos.column - 1) + "^") ::
-            Nil
-        } else {
-          Nil
-        })
-    }
-
-    def displayPrompt {
-      // no.
-    }
-
-    override def reset {
-      super.reset
-      messages.clear()
-    }
-  }
-
+  val reporter = new ErrorReporter(settings, 6+imports.size)
   private val global = new Global(settings, reporter)
-  private val run = new global.Run
-
 
   def compile(script: ContentResource): Class[_] = {
+    val start = System.currentTimeMillis()
+    def throwOnError() {
+      if (global.reporter.hasErrors) {
+        val ex = new CompileException(script, reporter.messages.toList)
+        reporter.reset()
+        throw ex
+      }
+      log.info("Compilation successful in "+ (System.currentTimeMillis()-start)+"ms")
+    }
+
+    val filename = script.name.fullName
     val cn = className(script)
-    findClass(cn).getOrElse {
-      compileSource(cn, script)
-      findClass(cn).get
+    synchronized {
+      findClass(cn).getOrElse {
+        compileSource(cn, wrapScript(cn, script), filename)
+        throwOnError()
+        findClass(cn).get
+      }
     }
   }
 
-  private def compileSource(cn: String, script:ContentResource) = {
-    val wrapped = wrapScript(cn, script)
-    println(wrapped)
-    val sfiles = List(new BatchSourceFile(script.name.fullName, wrapped))
-    try {
-      run.compileSources(sfiles)
-    } catch {
-      case e:Throwable => throw new RuntimeException("Compiler errors in script: "+
-        script.path.asString+"\n"+ CodeHtmlConverter.scala.apply(script.path, Content(wrapped, ContentType.scal)).contentAsString, e)
-    }
-    if (global.reporter.hasErrors) {
-      val ex = new RuntimeException("Errors in script: "+ script.path.asString+"\n"+ reporter.messages.map(_.mkString("\n")).mkString("\n"))
-      global.reporter.reset()
-      target.asInstanceOf[VirtualDirectory].clear()
-
-      throw ex
-    }
+  private def compileSource(className: String, script: String, fileName: String) {
+    log.info("Creating compiler run...")
+    val run = new global.Run
+    log.info("Compiling script: "+ fileName)
+    val sfiles = List(new BatchSourceFile(fileName, script))
+    run.compileSources(sfiles)
   }
 
   def loadScalaScriptClass(resource: ContentResource): ScalaScript = {
@@ -91,22 +67,26 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
   }
 
   def findClass(className: String): Option[Class[_]] = {
-    try {
+    synchronized(try {
       val cls = targetClassLoader.loadClass(className)
       Some(cls)
     } catch {
       case e: ClassNotFoundException => None
-    }
+    })
   }
 
   private def className(script: ContentResource): String = {
-    script.path.parent.segments.mkString("", "_", "_") + script.path.name.name
+    val digest = MessageDigest.getInstance("SHA-1").digest(script.contentAsString.getBytes)
+    "sha"+new BigInteger(1, digest).toString(16) +"_"+ script.path.name.name
+//    script.path.parent.segments.mkString("", "_", "_") + script.path.name.name
   }
 
   private def wrapScript(className: String, script: ContentResource): String = {
     "import org.eknet.publet.engine.scala.ScalaScript\n" +
-    "import org.eknet.publet.engine.scala.ScalaScript._\n\n"+
-    (if (!imports.isEmpty) imports.mkString("import ", "\nimport ", "\n") else "") +
+    "import org.eknet.publet.engine.scala.ScalaScript._\n\n" +
+    (if (!imports.isEmpty)
+      imports.mkString("import ", "\nimport ", "\n\n")
+    else "") +
     "class "+ className+ " extends ScalaScript { \n\n" +
     " def serve() = { \n" +
     script.contentAsString + "\n" +
@@ -117,24 +97,31 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
 
 object ScriptCompiler {
 
-  def apply(targetDir: Option[File], mp: Option[MiniProject], rp: Option[MiniProject], imports: List[String]): ScriptCompiler = {
+  def apply(targetDir: Option[File], mp: Option[MiniProject], imports: List[String]): ScriptCompiler = {
     val settings = new Settings()
 
     val target = targetDir match {
       case Some(dir) => AbstractFile.getDirectory(dir)
       case None => new VirtualDirectory("(memory)", None)
     }
-    settings.usejavacp.value = true
+
+    // got weird exception when setting `usejavacp` to true:
+    // scala.tools.nsc.FatalError: object List does not have a member apply
+    //   at scala.tools.nsc.symtab.Definitions$definitions$.getMember(Definitions.scala:623)
+    //   at scala.tools.nsc.symtab.Definitions$definitions$.List_apply(Definitions.scala:320)
+    // the problem is a wrong classpath setup. the scala-lib and scala-compiler jar must be
+    // the first ones in the class path! see this thread:
+    // http://groups.google.com/group/scalate/browse_thread/thread/b17acb9a345badbc/3a9cbc742edf6cda?#3a9cbc742edf6cda
+    settings.usejavacp.value = false
+
     settings.deprecation.value= true
     settings.unchecked.value = true
-    settings.bootclasspath.value = (compilerPath :: libPath).mkString(File.pathSeparator)
+    settings.bootclasspath.value = (compilerPath ::: libPath).mkString(File.pathSeparator)
     settings.outputDirs.setSingleOutput(target)
 
-    val cp = (compilerPath :: libPath) ++ impliedClassPath ++ rp.map(_.libraryClassPath).getOrElse(List()) ++
-      mp.map(_.libraryClassPath).getOrElse(List())
-    settings.classpath.value = cp.mkString(File.separator)
-
-
+    val cp = (libPath::: compilerPath ) ++ impliedClassPath ++ mp.map(_.libraryClassPath).getOrElse(List())
+    settings.classpath.value = cp.mkString(File.pathSeparator)
+    println(settings.classpath.value)
     new ScriptCompiler(target, settings, imports)
   }
 

@@ -8,7 +8,7 @@ import java.io.{InputStream, OutputStream}
  */
 class CompositeContentResource(resource: Resource, content: Content) extends ContentResource {
 
-  def path = resource.path
+  def path = resource.path.withExt(contentType.extensions.head)
 
   /**
    * Returns the parent container. For the

@@ -1,4 +1,4 @@
-package org.eknet.publet.engine.scalascript.com.twitter.conversions
+package org.eknet.publet.com.twitter.conversions
 
 /*
  * Copyright 2010 Twitter, Inc.

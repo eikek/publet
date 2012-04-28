@@ -16,8 +16,8 @@ package org.eknet.publet.engine.scalascript.com.twitter.util
  * limitations under the License.
  */
 
-import org.eknet.publet.engine.scalascript.com.twitter.io.StreamIO
-import org.eknet.publet.engine.scalascript.com.twitter.conversions.string._
+import org.eknet.publet.com.twitter.io.StreamIO
+import org.eknet.publet.com.twitter.conversions.string._
 import java.io._
 import java.math.BigInteger
 import java.net.URLClassLoader

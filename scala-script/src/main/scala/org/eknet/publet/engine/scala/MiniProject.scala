@@ -3,12 +3,18 @@ package org.eknet.publet.engine.scala
 import org.eknet.publet.vfs.{ContainerResource, Path}
 import org.eknet.publet.vfs.fs.FileResource
 import org.eknet.publet.{Includes, Publet}
+import javax.management.remote.rmi._RMIConnection_Stub
 
 /**
+ *
+ * @param projectDir
+ * @param dependsOn
+ * @param publet
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:39
  */
-class MiniProject(val projectDir: ContainerResource, publet: Publet) {
+class MiniProject(val projectDir: ContainerResource, dependsOn: List[MiniProject], publet: Publet) {
+  //TODO check using sbt for all of this!
 
   projectDir.ensuring(_.exists, "Project path must exist!")
 
@@ -21,11 +27,13 @@ class MiniProject(val projectDir: ContainerResource, publet: Publet) {
    * Creates a string containing all files from `$project/lib` using
    * the separator `:`.
    *
+   * It recursively includes all jars from the dependent projects.
+   *
    * @return
    */
-  def libraryClassPath = libraryDir.get.children
+  def libraryClassPath:List[String] = dependsOn.flatMap(_.libraryClassPath) ++ libraryDir.map(_.children
     .collect({case r:FileResource if (r.exists) => r})
-    .map(fr=>fr.file.getAbsolutePath)
+    .map(fr=>fr.file.getAbsolutePath)).getOrElse(List())
 
 }
 
@@ -35,19 +43,20 @@ object MiniProject {
 
   def find(path: Path, publet: Publet, pathPrefix: String): Option[MiniProject] = {
     val max = Path(pathPrefix).size +2
+    val root = rootProject(pathPrefix, publet)
     def findProjectDir(p: Path): Option[MiniProject] = {
-      publet.rootContainer.lookup(path /Includes.includesPath /projectDir) match {
-        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(cr, publet))
-        case None => if (p.size>max) findProjectDir(p.tail) else None
+      publet.rootContainer.lookup(Path(pathPrefix)/ p /Includes.includesPath /projectDir) match {
+        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(cr, root, publet))
+        case None => if (p.size>max) findProjectDir(p.tail) else root.headOption
       }
     }
     findProjectDir(if (path.directory) path else path.parent)
   }
 
-  def rootProject(pathPrefix: String, publet: Publet): Option[MiniProject] =  {
+  def rootProject(pathPrefix: String, publet: Publet): List[MiniProject] =  {
     val path = Path(pathPrefix) / Includes.allIncludesPath / projectDir
     publet.rootContainer.lookup(path)
       .collect({case cr:ContainerResource if (cr.exists)=> cr})
-      .map(cont => new MiniProject(cont, publet))
+      .map(cont => List(new MiniProject(cont, List(), publet))).getOrElse(List())
   }
 }
