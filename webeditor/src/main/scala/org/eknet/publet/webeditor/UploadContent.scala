@@ -1,7 +1,8 @@
 package org.eknet.publet.webeditor
 
 import xml.NodeSeq
-import org.eknet.publet.vfs.{PathContentResource, Path, ContentType, NodeContent}
+import org.eknet.publet.vfs.util.SimpleContentResource
+import org.eknet.publet.vfs.{Path, ContentType, NodeContent}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -30,5 +31,5 @@ object UploadContent {
       </p>
   }
 
-  def uploadContent(path: Path) = new PathContentResource(path, NodeContent(uploadBody(path), ContentType.html))
+  def uploadContent(path: Path) = new SimpleContentResource(path.name, NodeContent(uploadBody(path), ContentType.html))
 }

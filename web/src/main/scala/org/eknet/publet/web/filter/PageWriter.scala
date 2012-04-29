@@ -6,6 +6,7 @@ import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.web.{WebContext, Config}
 import org.eknet.publet.vfs._
 import org.eknet.publet.engine.convert.CodeHtmlConverter
+import util.SimpleContentResource
 
 /**
  *
@@ -23,9 +24,9 @@ trait PageWriter {
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+CodeHtmlConverter.replaceChars(sw.toString)+ "</pre>", ContentType.html)
-      val resource = new PathContentResource(WebContext().requestPath, content)
+      val resource = new SimpleContentResource(WebContext().requestPath.name, content)
       val result = WebContext().webPublet.publet.engineManager.getEngine('mainWiki).get
-        .process(Seq(resource), ContentType.html)
+        .process(WebContext().requestPath, Seq(resource), ContentType.html)
 
       writePage(result, resp)
     } else {

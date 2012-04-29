@@ -39,7 +39,7 @@ object ListContents extends ScalaScript {
   private def createJsonMap(path: Path, publet: Publet, contextPath: String) = {
     val jsonMap = mutable.Map[String, Any]()
     jsonMap.put("containerPath", path.asString)
-    jsonMap.put("files", container(path, publet).map(resourceEntry(_, contextPath)))
+    jsonMap.put("files", container(path, publet).map(resourceEntry(path, _, contextPath)))
     if (!path.isRoot) {
       jsonMap.put("parent", path.parent.asString)
     }
@@ -49,17 +49,14 @@ object ListContents extends ScalaScript {
   private def container(path: Path, publet: Publet): List[_ <: Resource] = {
     def children(path: Path) = {
       publet.rootContainer.lookup(path) match {
-        case None => List()
-        case Some(r) => r match {
-          case cr: ContainerResource => cr.children
-          case _ => List()
-        }
+        case Some(r: ContainerResource) => r.children
+        case _ => List()
       }
     }
     children(path).toList.sortWith(resourceComparator)
   }
 
-  private def resourceEntry(r: Resource, contextPath: String) = {
+  private def resourceEntry(path: Path, r: Resource, contextPath: String) = {
     val contentType = r match {
       case cr: ContentResource => cr.contentType.typeName.name
       case cr: ContainerResource => "unknown"
@@ -68,7 +65,7 @@ object ListContents extends ScalaScript {
       "name" -> r.name,
       "container" -> isContainer(r),
       "type" -> contentType,
-      "href" -> Path(contextPath + r.path.asString).asString
+      "href" -> (path / r.name).asString
     )
   }
 }

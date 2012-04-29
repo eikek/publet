@@ -1,6 +1,6 @@
-package org.eknet.publet.vfs
+package org.eknet.publet.vfs.util
 
-import java.io.{InputStream, OutputStream}
+import org.eknet.publet.vfs.ContentResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -11,6 +11,8 @@ trait ForwardingContentResource extends ForwadingResource with ContentResource {
   protected def delegate: ContentResource
 
   def contentType = delegate.contentType
+
   def inputStream = delegate.inputStream
+
   override def lastModification = delegate.lastModification
 }

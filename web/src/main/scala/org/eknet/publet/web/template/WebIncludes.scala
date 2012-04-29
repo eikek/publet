@@ -24,17 +24,17 @@ trait WebIncludes extends Includes {
    * @return
    */
   def headerIncludes(path: Path) = {
-    val siblingPath = (cr: ContentResource) => includes(cr.path).asString
-    val rootPath = (cr: ContentResource) => allIncludes(cr.path)
+    val siblingPath = (p:Path, cr: ContentResource) => includes(path).asString
+    val rootPath = (p:Path, cr: ContentResource) => allIncludes(path)
 
     val h = getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
     getSiblingResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
     h.toString()
   }
 
-  private def include(cr: ContentResource, f:ContentResource=>String): NodeSeq = {
-    val crp = f(cr)
-    cr.contentType match {
+  private def include(in:(Path, ContentResource), f:(Path, ContentResource)=>String): NodeSeq = {
+    val crp = f(in._1, in._2)
+    in._2.contentType match {
       case ContentType.javascript => <script src={ crp }></script>
       case ContentType.css => <link rel="stylesheet" href={ crp } ></link>
       case _ => NodeSeq.Empty

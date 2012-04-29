@@ -1,7 +1,7 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.Publet
-import org.eknet.publet.vfs.virtual.MutableContainer
+import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
 import org.slf4j.LoggerFactory
@@ -16,24 +16,22 @@ class ExtWebExtension extends WebExtension {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-
   def onStartup(publet: WebPublet, sc: ServletContext) {
     log.info("Installing publet extensions...")
     ExtWebExtension.install(publet.publet)
   }
-
 }
 
 object ExtWebExtension {
 
-  val extPath = Path("/publet/ext/")
-  val extScriptPath = extPath / "scripts/"
+  val extScriptPath = Path("/publet/ext/scripts/")
 
   def install(publet: Publet) {
-    val muc = new MutableContainer(extScriptPath)
-    muc.addResource(new WebScriptResource(extScriptPath / "captcha.png", CaptchaScript))
-    muc.addResource(new WebScriptResource(extScriptPath / "mailcontact.html", MailContact))
-    muc.addResource(new WebScriptResource(extScriptPath / "listing.html", Listing))
+    import org.eknet.publet.vfs.ResourceName._
+    val muc = new MapContainer()
+    muc.addResource(new WebScriptResource("captcha.png".rn, CaptchaScript))
+    muc.addResource(new WebScriptResource("mailcontact.html".rn, MailContact))
+    muc.addResource(new WebScriptResource("listing.html".rn, Listing))
     publet.mountManager.mount(extScriptPath, muc)
   }
 }

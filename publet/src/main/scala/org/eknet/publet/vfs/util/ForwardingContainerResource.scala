@@ -1,4 +1,6 @@
-package org.eknet.publet.vfs
+package org.eknet.publet.vfs.util
+
+import org.eknet.publet.vfs.ContainerResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -6,10 +8,13 @@ package org.eknet.publet.vfs
  */
 trait ForwardingContainerResource extends ForwadingResource with ContainerResource {
 
-  protected def delegate:ContainerResource
+  protected def delegate: ContainerResource
 
   def children = delegate.children
+
   def content(name: String) = delegate.content(name)
+
   def container(name: String) = delegate.container(name)
+
   def child(name: String) = delegate.child(name)
 }

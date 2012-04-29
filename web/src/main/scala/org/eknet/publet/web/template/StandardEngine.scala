@@ -2,12 +2,12 @@ package org.eknet.publet.web.template
 
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
-import org.eknet.publet.vfs.virtual.{UrlResource, MutableContainer, ClasspathContainer}
 import org.eknet.publet.engine.convert.ConverterEngine
 import collection.mutable
 import xml.NodeSeq
 import org.eknet.publet.vfs._
 import org.eknet.publet.web.WebContext
+import util.{CompositeContentResource, MapContainer, ClasspathContainer, UrlResource}
 
 /** Uses yaml to create a html page layout.
  *
@@ -43,16 +43,18 @@ class StandardEngine(val publet:Publet) extends PubletEngine
    * @return
    */
   def init(): this.type  = {
-    val cp = new ClasspathContainer(yamlPath, classOf[StandardEngine], Some(Path("../themes")))
+    import ResourceName._
+
+    val cp = new ClasspathContainer(classOf[StandardEngine], Some(Path("../themes")))
     publet.mountManager.mount(yamlPath, cp)
 
     def urlOf(name: String) = Option(classOf[StandardEngine].getResource("../themes/"+ name))
 
-    val jsCont = new MutableContainer(jsPath)
+    val jsCont = new MapContainer()
     val jquery = "jquery-1.7.2.min.js"
-    jsCont.addResource(new UrlResource(urlOf(jquery), Some(jsCont), jsPath/jquery))
+    jsCont.addResource(new UrlResource(urlOf(jquery), jquery.rn))
     val publJs = "publet.js"
-    jsCont.addResource(new UrlResource(urlOf(publJs), Some(jsCont), jsPath/publJs))
+    jsCont.addResource(new UrlResource(urlOf(publJs), publJs.rn))
     publet.mountManager.mount(jsPath, jsCont)
 
     publet.engineManager.addEngine(includeEngine)
@@ -62,8 +64,8 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   def name = 'mainWiki
 
 
-  def process(data: Seq[ContentResource], target: ContentType) = {
-    includeEngine.process(data, target) match {
+  def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
+    includeEngine.process(path, data, target) match {
       case Some(nc) if (nc.contentType == ContentType.html) => {
         val resource = new CompositeContentResource(data.head, nc)
         apply(resource, data)

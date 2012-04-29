@@ -1,14 +1,15 @@
 package org.eknet.publet.vfs.fs
 
-import org.eknet.publet.vfs.{Modifyable, Path, ContentType, ContentResource}
 import java.io._
+import org.eknet.publet.vfs._
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.04.12 14:06
  */
-class FileResource(f: File, root: Path) extends AbstractLocalResource(f, root) with ContentResource with Modifyable {
+class FileResource(f: File, root: Path)
+  extends AbstractLocalResource(f, root) with ContentResource with Modifyable {
 
   def inputStream = new BufferedInputStream(new FileInputStream(file))
 

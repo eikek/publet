@@ -11,7 +11,7 @@ import vfs._
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-class PubletImpl extends MountManager[Container] with Publet with EngineMangager with RootContainer[Container] {
+class PubletImpl extends MountManager with Publet with EngineMangager with RootContainer {
 
   def process(path: Path): Option[Content] = {
     Predef.ensuring(path != null, "null is illegal")
@@ -31,7 +31,7 @@ class PubletImpl extends MountManager[Container] with Publet with EngineMangager
     findSources(path) match {
       case Nil => None
       //lookup the engine according to the uri scheme and process data
-      case data => engine.process(data.toSeq, target)
+      case data => engine.process(path, data.toSeq, target)
     }
   }
 
@@ -83,10 +83,6 @@ class PubletImpl extends MountManager[Container] with Publet with EngineMangager
   def engineManager = this
 
   def rootContainer = this
-
-  def path = Path.root
-
-  def parent = None
 
 }
 

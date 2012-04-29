@@ -3,16 +3,12 @@ package org.eknet.publet.engine.scala
 import tools.nsc.interpreter.AbstractFileClassLoader
 import java.io.File
 import scala.tools.nsc._
-import reporters.AbstractReporter
 import tools.nsc.Settings
 import tools.nsc.io.{VirtualDirectory, AbstractFile}
 import java.net.URLClassLoader
 import java.util.jar.JarFile
-import org.eknet.publet.engine.convert.CodeHtmlConverter
-import collection.mutable
-import util.{Position, BatchSourceFile}
+import util.BatchSourceFile
 import org.eknet.publet.vfs._
-import org.eknet.publet.engine.scalascript.com.twitter.util.Eval
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -31,11 +27,11 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
   val reporter = new ErrorReporter(settings, 6+imports.size)
   private val global = new Global(settings, reporter)
 
-  def compile(script: ContentResource): Class[_] = {
+  def compile(path: Path, script: ContentResource): Class[_] = {
     val start = System.currentTimeMillis()
     def throwOnError() {
       if (global.reporter.hasErrors) {
-        val ex = new CompileException(script, reporter.messages.toList)
+        val ex = new CompileException(path, reporter.messages.toList)
         reporter.reset()
         throw ex
       }
@@ -61,8 +57,8 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
     run.compileSources(sfiles)
   }
 
-  def loadScalaScriptClass(resource: ContentResource): ScalaScript = {
-    val cls = compile(resource)
+  def loadScalaScriptClass(path: Path, resource: ContentResource): ScalaScript = {
+    val cls = compile(path, resource)
     cls.getConstructor().newInstance().asInstanceOf[ScalaScript]
   }
 
@@ -77,7 +73,7 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
 
   private def className(script: ContentResource): String = {
     val digest = MessageDigest.getInstance("SHA-1").digest(script.contentAsString.getBytes)
-    "sha"+new BigInteger(1, digest).toString(16) +"_"+ script.path.name.name
+    "sha"+new BigInteger(1, digest).toString(16) +"_"+ script.name.name
 //    script.path.parent.segments.mkString("", "_", "_") + script.path.name.name
   }
 

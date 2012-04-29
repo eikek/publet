@@ -60,4 +60,28 @@ trait Container {
       case Nil => None
     }
   }
+
+  def foreach(path: Path, f:(Path, Resource)=>Unit, maxDepth:Int = -1) {
+    def eachChild(path: Path, cr: ContainerResource, curDepth: Int) {
+      if (maxDepth < 0 || curDepth < maxDepth) {
+        cr.children.foreach(c => {
+          val p = path / c.name
+          c match {
+            case cont: ContainerResource => f(p, cont); eachChild(p, cont, curDepth+1)
+            case a => f(p, a)
+          }
+        })
+      }
+    }
+    lookup(path) match {
+      case Some(r) => {
+        f(path, r) //depth 0
+        r match {
+          case cr: ContainerResource => eachChild(path, cr, 0)
+          case _ =>
+        }
+      }
+      case None =>
+    }
+  }
 }

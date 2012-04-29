@@ -1,10 +1,9 @@
 package org.eknet.publet.web.template
 
 import xml.NodeSeq
-import org.eknet.publet.vfs.{Content, Path}
-import org.eknet.publet.vfs.virtual.ClasspathContainer
+import org.eknet.publet.vfs.util.ClasspathContainer
 import org.eknet.publet.Publet
-import org.eknet.publet.web.WebDsl._
+import org.eknet.publet.vfs.{Content, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,7 +14,7 @@ object HighlightJs {
   val root = "/publet/highlightjs"
 
   def install(publet: Publet, e: StandardEngine) {
-    val cp = new ClasspathContainer(Path(root), classOf[HtmlTemplate], Some(Path("../themes/")))
+    val cp = new ClasspathContainer(classOf[HtmlTemplate], Some(Path("../themes/")))
     publet.mountManager.mount(Path(root), cp)
 
     e.htmlHeadContribs.append(htmlHeadSnippet)

@@ -3,10 +3,10 @@ package org.eknet.publet.web
 import scripts._
 import org.eknet.publet.Publet
 import org.eknet.publet.partition.git.GitPartition
-import org.eknet.publet.vfs.Path
-import org.eknet.publet.vfs.virtual.MutableContainer
+import org.eknet.publet.vfs.util.MapContainer
 import template.{HighlightJs, StandardEngine}
 import org.eknet.publet.engine.scala.{DefaultPubletCompiler, ScalaScriptEngine}
+import org.eknet.publet.vfs.{ResourceName, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -20,18 +20,14 @@ object PubletFactory {
     val gp = new GitPartition(
       Config.contentRoot,
       "publetrepo",
-      Config("git.pollInterval").getOrElse("1500").toInt,
-      Path.root,
-      Some(publ.rootContainer))
+      Config("git.pollInterval").getOrElse("1500").toInt)
 
     val scriptRoot = Path("/publet/scripts/")
 
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
-    val cont = new MutableContainer(scriptRoot)
-    cont.addResource(new WebScriptResource(scriptRoot/"toggleRepo.html", ToggleGitExport))
+    val cont = new MapContainer()
+    cont.addResource(new WebScriptResource(ResourceName("toggleRepo.html"), ToggleGitExport))
     publ.mountManager.mount(scriptRoot, cont)
-
-
 
     val defaultEngine = new StandardEngine(publ).init()
     HighlightJs.install(publ, defaultEngine)

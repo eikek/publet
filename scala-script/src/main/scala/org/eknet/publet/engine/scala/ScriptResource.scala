@@ -1,7 +1,7 @@
 package org.eknet.publet.engine.scala
 
-import org.eknet.publet.vfs.{Path, ContentResource}
 import java.io.OutputStream
+import org.eknet.publet.vfs.{ResourceName, ContentResource}
 
 /**A resource that executes the given script on each access.
  *
@@ -13,7 +13,7 @@ import java.io.OutputStream
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.04.12 23:09
  */
-abstract class ScriptResource(val path: Path, val script: ScalaScript) extends ContentResource {
+abstract class ScriptResource(val name: ResourceName, val script: ScalaScript) extends ContentResource {
 
   protected def evaluate = script.serve().get
 
@@ -31,8 +31,6 @@ abstract class ScriptResource(val path: Path, val script: ScalaScript) extends C
 
   override def contentAsString = evaluate.contentAsString
 
-  def parent = None
-
-  override def toString = "Script:" + path
+  override def toString = "Script:" + name
 }
 

@@ -15,9 +15,8 @@ trait HtmlTemplate {
    * @return
    */
   def title(content: ContentResource, source: Seq[ContentResource]): String = {
-    val path = content.path
     findHead(content) match {
-      case None => path.name.name.replaceAll("[_-]", " ")
+      case None => content.name.name.replaceAll("[_-]", " ")
       case Some(n) => n
     }
   }

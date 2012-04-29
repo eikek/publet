@@ -1,6 +1,6 @@
 package org.eknet.publet.engine.scala
 
-import org.eknet.publet.vfs.{ContentResource, Content}
+import org.eknet.publet.vfs.{Path, ContentResource}
 
 
 /**
@@ -22,6 +22,6 @@ trait PubletCompiler {
    * @param resource
    * @return
    */
-  def evaluate(resource: ContentResource): Option[ScalaScript]
+  def evaluate(path: Path, resource: ContentResource): Option[ScalaScript]
 
 }

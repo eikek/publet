@@ -2,6 +2,7 @@ package org.eknet.publet.webeditor
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs._
+import util.CompositeContentResource
 import xml._
 import org.eknet.publet.web.WebContext
 
@@ -76,11 +77,11 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
 
   def name = 'edit
 
-  def process(data: Seq[ContentResource], target: ContentType) = {
+  def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
     val path = WebContext().requestPath
     if (target.mime._1 == "text")
-      del.process(Seq(editContent(data.head)), ContentType.html)
+      del.process(path, Seq(editContent(data.head)), ContentType.html)
     else
-      del.process(Seq(UploadContent.uploadContent(path)), ContentType.html)
+      del.process(path, Seq(UploadContent.uploadContent(path)), ContentType.html)
   }
 }

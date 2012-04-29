@@ -8,12 +8,10 @@ import org.slf4j.LoggerFactory
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 22:53
  */
-class FilesystemPartition(val path: Path, val parent: Option[Container], val root: File, createDir: Boolean = true)
-  extends Container with Modifyable {
+class FilesystemPartition(val root: File, createDir: Boolean = true)
+  extends AbstractLocalResource(root, Path(root)) with Container with Modifyable {
 
   private val log = LoggerFactory.getLogger(classOf[FilesystemPartition])
-
-  def this(root: File, createDir: Boolean = true) = this(Path.root, None, root, createDir)
 
   if (!root.exists() && createDir) root.mkdirs()
 
@@ -26,7 +24,7 @@ class FilesystemPartition(val path: Path, val parent: Option[Container], val roo
     if (f.exists()) resourceFrom(f) else None
   }
 
-  def delete() { sys.error("Cannot delete root directory.") }
+  override def delete() { sys.error("Cannot delete root directory.") }
 
   def create() {}
 
@@ -44,13 +42,4 @@ class FilesystemPartition(val path: Path, val parent: Option[Container], val roo
   else
     Some(newFile(f, root))
 
-  protected def newDirectory(f: File, root: Path): ContainerResource = new DirectoryResource(f, root)
-
-  protected def newFile(f: File, root: Path): ContentResource = new FileResource(f, root)
-
-//  private def fileFrom(p: Path) = newFile(
-//    new File(root, p.segments.mkString(File.separator)), root)
-//
-//  private def directoryFrom(p: Path) = newDirectory(
-//    new File(root, p.segments.mkString(File.separator)), root)
 }

@@ -1,9 +1,9 @@
-package org.eknet.publet.vfs.virtual
+package org.eknet.publet.vfs.util
 
 import java.net.URL
-import org.eknet.publet.vfs.{Resource, Container, ContainerResource, Path}
+import org.eknet.publet.vfs._
 
-/** Serves resources relative to the the given class. Traversing
+/**Serves resources relative to the the given class. Traversing
  * is not supported, only lookups.
  *
  * If path is not specified, the uri of the class resource is used.
@@ -16,7 +16,8 @@ import org.eknet.publet.vfs.{Resource, Container, ContainerResource, Path}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.04.12 23:52
  */
-class ClasspathContainer(val path: Path, scope: Class[_], relative: Option[Path]) extends Container {
+class ClasspathContainer(scope: Class[_],
+                         relative: Option[Path]) extends Container {
 
   def children = List() //not working
 
@@ -33,15 +34,19 @@ class ClasspathContainer(val path: Path, scope: Class[_], relative: Option[Path]
     Option(scope.getResource(uri.asString))
   }
 
-  def content(name: String) = child(name).getOrElse(Resource.emptyContent(path/name, Some(this)))
+  import ResourceName._
 
-  def container(name: String) = Resource.emptyContainer(path / name, Some(this))
+  def content(name: String) = child(name).getOrElse(Resource.emptyContent(name.rn))
+
+  def container(name: String) = Resource.emptyContainer(name.rn)
 
   def child(name: String) = getUrl(name).map(toUrlResource(_, name))
 
   override def lookup(path: Path) = getUrl(path.asString).map(toUrlResource(_, path.name.fullName))
 
-  private def toUrlResource(url: URL, name: String) = new UrlResource(Some(url), Some(this), path/name)
+  private def toUrlResource(url: URL, name: String) = new UrlResource(Some(url), name.rn)
+
+  def exists = true
 
   lazy val lastModification = None
 }

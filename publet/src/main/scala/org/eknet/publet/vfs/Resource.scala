@@ -6,25 +6,13 @@ package org.eknet.publet.vfs
  * local or remote file system. It may also be a directory or
  * any other container like resource.
  *
- * It is uniquely identified within a root container by its `path`
- * attribute.
- *
- * A resource may not exist.
+ * This resource abstraction may point to an non-existing
+ * resource.
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.04.12 13:59
  */
 trait Resource {
-
-  def path: Path
-
-  /**
-   * Returns the parent container. For the
-   * root this is invalid and returns `None`
-   *
-   * @return
-   */
-  def parent: Option[Container]
 
   /**
    * If available, returns the alst modification timestamp
@@ -34,16 +22,12 @@ trait Resource {
    */
   def lastModification: Option[Long]
 
-  def name = path.name
-
   /**
-   * Returns whether this is the root of the
-   * resource tree.
+   * The name of this resource.
    *
    * @return
    */
-  lazy val isRoot: Boolean = parent.isDefined
-
+  def name: ResourceName
 
   /**
    * Tells, whether this resource exists.
@@ -52,14 +36,30 @@ trait Resource {
    */
   def exists: Boolean
 
+  /**
+   * Applies the specified function to this resource, if `exists`
+   * returns `true`. Otherwise returns `None`
+   *
+   * @param f
+   * @tparam A
+   * @return
+   */
   def map[A](f:Resource.this.type=>Option[A]):Option[A] = {
     if (exists) f(this)
     else None
   }
+
+  def foreach(f:Resource => Unit) { f(this) }
 }
 
 trait ContentResource extends Resource with Content
-trait ContainerResource extends Resource with Container
+
+trait ContainerResource extends Resource with Container {
+  override def foreach(f:Resource=>Unit) {
+    f(this)
+    children.foreach(_.foreach(f))
+  }
+}
 
 object Resource {
 
@@ -73,34 +73,25 @@ object Resource {
     case _ => false
   }
 
-  def emptyContainer(path: Path, parent:Option[Container]):ContainerResource = new EmptyContainer(path, parent)
-  def emptyContent(path: Path, parent: Option[Container]): ContentResource = new EmptyContent(path, parent)
+  def emptyContainer(name: ResourceName):ContainerResource = new EmptyContainer(name)
+  def emptyContent(name: ResourceName): ContentResource = new EmptyContent(name)
 
-  private class EmptyContainer(val path: Path, val parent:Option[Container]) extends ContainerResource {
+  private class EmptyContainer(val name: ResourceName) extends ContainerResource {
+    import ResourceName._
 
     def exists = false
-
     def children = List()
-
-    def content(name: String) = emptyContent(path/name, Some(this))
-
-    def container(name: String) = emptyContainer(path/name, Some(this))
-
-    def child(name: String) = sys.error("Child '"+name+"' does not exist")
-
-    def hasEntry(name: String) = false
-
+    def content(name: String) = emptyContent(name.rn)
+    def container(name: String) = emptyContainer(name.rn)
+    def child(name: String) = None
     def lastModification = None
   }
 
-  private class EmptyContent(val path: Path, val parent: Option[Container]) extends ContentResource {
+  private class EmptyContent(val name: ResourceName) extends ContentResource {
 
     def exists = false
-
     def contentType = ContentType.unknown
-
     def inputStream = throw new RuntimeException("no input available")
-
   }
 
 }

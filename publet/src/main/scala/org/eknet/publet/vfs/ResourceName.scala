@@ -1,6 +1,5 @@
 package org.eknet.publet.vfs
 
-import org.eknet.publet.vfs.ContentType
 import scala.Some
 
 /**
@@ -46,4 +45,9 @@ object ResourceName {
     }
     ResourceName(baseName, extension.getOrElse(""))
   }
+
+  class ResourceNameString(val self: String) extends Proxy {
+    def rn = ResourceName(self)
+  }
+  implicit def string2ResourceName(str: String) = new ResourceNameString(str)
 }

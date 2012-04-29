@@ -1,7 +1,7 @@
 package org.eknet.publet.engine.scala
 
 import org.eknet.publet.Publet
-import org.eknet.publet.vfs.ContentResource
+import org.eknet.publet.vfs.{Path, ContentResource}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,14 +12,14 @@ class DefaultPubletCompiler(val publet: Publet,
                             imports: List[String]) extends PubletCompiler {
 
 
-  def evaluate(resource: ContentResource) = {
-    val  comp = findCompiler(resource)
-    val script = comp.loadScalaScriptClass(resource)
+  def evaluate(path: Path, resource: ContentResource) = {
+    val  comp = findCompiler(path, resource)
+    val script = comp.loadScalaScriptClass(path, resource)
     Some(script)
   }
 
-  def findCompiler(resource: ContentResource): ScriptCompiler = {
-    val miniProject = MiniProject.find(resource.path, publet, pathPrefix)
+  def findCompiler(path: Path, resource: ContentResource): ScriptCompiler = {
+    val miniProject = MiniProject.find(path, publet, pathPrefix)
 
     ScriptCompiler(None, miniProject, imports)
   }

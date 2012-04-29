@@ -2,13 +2,13 @@ package org.eknet.publet.webeditor
 
 import actions.{BrowserJs, PushContents, ListContents, SetEngine}
 import org.eknet.publet.Publet
-import org.eknet.publet.vfs.virtual.{ClasspathContainer, MutableContainer}
 import xml.NodeSeq
 import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.scripts.WebScriptResource
 import javax.servlet.ServletContext
 import org.eknet.publet.web.{WebContext, WebPublet, WebExtension}
+import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,15 +33,17 @@ object EditorWebExtension {
   val scriptPath = editorPath / "scripts"
 
   def setup(publet: Publet) {
-    val cp = new ClasspathContainer(editorPath, classOf[CreateNewHandler], None)
+    import org.eknet.publet.vfs.ResourceName._
+
+    val cp = new ClasspathContainer(classOf[CreateNewHandler], None)
     publet.mountManager.mount(editorPath, cp)
 
-    val muc = new MutableContainer(editorPath/"scripts")
-    muc.addResource(new WebScriptResource(scriptPath / "setengine.json", SetEngine))
-    muc.addResource(new WebScriptResource(scriptPath / "toc.json", ListContents))
-    muc.addResource(new WebScriptResource(scriptPath / "push.json", PushContents))
-    muc.addResource(new WebScriptResource(scriptPath / "browser.js", BrowserJs))
-    publet.mountManager.mount(editorPath/"scripts", muc)
+    val muc = new MapContainer()
+    muc.addResource(new WebScriptResource("setengine.json".rn, SetEngine))
+    muc.addResource(new WebScriptResource("toc.json".rn, ListContents))
+    muc.addResource(new WebScriptResource("push.json".rn, PushContents))
+    muc.addResource(new WebScriptResource("browser.js".rn, BrowserJs))
+    publet.mountManager.mount(scriptPath, muc)
 
     val se = new EditStandardEngine(publet)
     se.htmlHeadContribs.append(headerHtml)

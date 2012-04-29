@@ -1,4 +1,6 @@
-package org.eknet.publet.vfs
+package org.eknet.publet.vfs.util
+
+import org.eknet.publet.vfs.Resource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -8,9 +10,10 @@ trait ForwadingResource extends Resource {
 
   protected def delegate: Resource
 
-  def path = delegate.path
-  def parent = delegate.parent
+  def name = delegate.name
+
   def lastModification = delegate.lastModification
+
   def exists = delegate.exists
 
 }

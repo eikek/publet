@@ -21,10 +21,8 @@ import Actor._
 class GitPartition (
       val base: File,
       reponame: String,
-      pollInterval: Int,
-      path: Path,
-      parent: Option[Container]
-) extends FilesystemPartition(path, parent, new File(base, reponame+"_wc"), false) {
+      pollInterval: Int
+) extends FilesystemPartition(new File(base, reponame+"_wc"), false) {
 
   private val log = LoggerFactory.getLogger(getClass)
 
@@ -123,31 +121,33 @@ class GitPartition (
       .call()
   }
 
-  private def commit(c: ContentResource, action:String) {
+  private def commit(c: GitFile, action:String) {
     git.commit()
-      .setMessage(action +" on "+ c.path.asString)
+      .setMessage(action +" on "+ c.name.fullName)
       .setAuthor("Publet Git", "no@none.com")
       .setAll(true)
       .call()
   }
 
-  protected[git] def commitWrite(c: ContentResource) {
+  protected[git] def commitWrite(c: GitFile) {
+    val path = Path(c.file).strip(c.rootPath)
     git.add()
-      .addFilepattern(c.path.toRelative.asString)
+      .addFilepattern(path.toRelative.asString)
       .setUpdate(false)
       .call()
 
     if (!git.status().call().isClean) {
-      log.info("commit: "+ c.path.toRelative.asString)
+      log.info("commit: "+ path.toRelative.asString)
 
       commit(c, "Update")
       push()
     }
   }
 
-  protected[git] def commitDelete(c: ContentResource) {
+  protected[git] def commitDelete(c: GitFile) {
+    val path = Path(c.file).strip(c.rootPath)
     git.rm()
-      .addFilepattern(c.path.toRelative.asString)
+      .addFilepattern(path.toRelative.asString)
       .call()
     commit(c, "Delete")
     push()

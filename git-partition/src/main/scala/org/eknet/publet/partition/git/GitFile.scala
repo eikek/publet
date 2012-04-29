@@ -1,10 +1,12 @@
 package org.eknet.publet.partition.git
 
-import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FileResource
 import java.io.{OutputStream, InputStream, File}
+import org.eknet.publet.vfs.Path
 
-class GitFile(f: File, root: Path, gp: GitPartition) extends FileResource(f, root) {
+class GitFile(f: File,
+              root: Path,
+              gp: GitPartition) extends FileResource(f, root) {
   override def delete() {
     super.delete()
     gp.commitDelete(this)

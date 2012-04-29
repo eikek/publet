@@ -1,6 +1,7 @@
-package org.eknet.publet.vfs
+package org.eknet.publet.vfs.util
 
 import java.io.{InputStream, OutputStream}
+import org.eknet.publet.vfs.{ContentResource, Content, Resource}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -8,41 +9,17 @@ import java.io.{InputStream, OutputStream}
  */
 class CompositeContentResource(resource: Resource, content: Content) extends ContentResource {
 
-  def path = resource.path.withExt(contentType.extensions.head)
-
-  /**
-   * Returns the parent container. For the
-   * root this is invalid and returns `None`
-   *
-   * @return
-   */
-  def parent = resource.parent
-
-  /**
-   * Tells, whether this resource exists.
-   *
-   * @return
-   */
   def exists = resource.exists
 
   override def name = resource.name
 
-  override lazy val isRoot = resource.isRoot
-
 
   // Content interface
-
-
   def contentType = content.contentType
-
   def inputStream = content.inputStream
-
   override def lastModification = content.lastModification
-
   override def outputStream = content.outputStream
-
   override def length = content.length
-
   override def writeFrom(in: InputStream) {
     content.writeFrom(in)
   }

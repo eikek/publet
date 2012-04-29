@@ -64,13 +64,13 @@ trait Publet {
 
 
   /// MountManager
-  def mountManager: MountManager[Container]
+  def mountManager: MountManager
 
   //EngineResolver
   def engineManager: EngineMangager
 
   //Container
-  def rootContainer: RootContainer[Container]
+  def rootContainer: RootContainer
 
 }
 

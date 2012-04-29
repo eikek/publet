@@ -62,9 +62,9 @@ trait Includes {
    *
    * @return
    */
-  def getRootResources: List[ContentResource] = {
+  def getRootResources: List[(Path, ContentResource)] = {
     publet.rootContainer.lookup(allIncludesPath) match {
-      case Some(c: ContainerResource) => c.children.collect({ case p: ContentResource => p }).toList
+      case Some(c: ContainerResource) => c.children.collect({ case p: ContentResource => p }).map(c=>(allIncludesPath/c.name, c)).toList
       case _ => List()
     }
   }
@@ -76,10 +76,10 @@ trait Includes {
    * @param path
    * @return
    */
-  def getSiblingResources(path: Path): List[ContentResource] = {
+  def getSiblingResources(path: Path): List[(Path, ContentResource)] = {
     val incl = path.sibling(includes(path).asString)
     publet.rootContainer.lookup(incl) match {
-      case Some(c: ContainerResource) => c.children.collect({ case p:ContentResource => p}).toList
+      case Some(c: ContainerResource) => c.children.collect({ case p:ContentResource => p}).map(c=>(incl/c.name, c)).toList
       case _ => List()
     }
   }

@@ -1,20 +1,21 @@
 package org.eknet.publet.vfs.fs
 
 import java.io.File
-import org.eknet.publet.vfs.{ModifyableContainer, Modifyable, Path, ContainerResource}
+import org.eknet.publet.vfs._
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.04.12 14:07
  */
-class DirectoryResource(dir: File, root: Path) extends AbstractLocalResource(dir, root)
+class DirectoryResource(dir: File, root: Path)
+    extends AbstractLocalResource(dir, root)
     with ContainerResource with Modifyable with ModifyableContainer {
 
-  def children = dir.listFiles().map(f => {
+  def children = Option(dir.listFiles()).map(_.map(f => {
     if (f.isDirectory) newDirectory(f, root)
     else newFile(f, root)
-  })
+  })).getOrElse(Array[Resource]()).toIterable
 
   def content(name: String) = newFile(new File(dir, name), root)
 
