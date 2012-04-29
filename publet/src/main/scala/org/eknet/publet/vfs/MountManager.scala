@@ -15,12 +15,12 @@ trait MountManager {
   def mount(path: Path, part: Container) {
     Predef.ensuring(path != null, "null")
     Predef.ensuring(part != null, "null")
-    if (isMounted(path)) throwException("Path already mounted")
+    if (mountNode(path).isDefined) throwException("Path already mounted")
 
     if (!path.isRoot) tree.add(path, part)
   }
 
-  def isMounted(path: Path): Boolean = tree.get(path).isDefined
+  def mountNode(path: Path) = tree.get(path)
 
   def resolveMount(path: Path): Option[(Path, Container)] = {
     val seg = tree.findSeg(path)
@@ -48,7 +48,8 @@ trait MountManager {
     /** Returns the node at the given path*/
     def get(path:Path): Option[SegTree] = {
       path.segments match {
-        case a :: _ => children.find(_.seg == a).flatMap(_.get(path.tail))
+        case a :: as ::at => children.find(_.seg == a).flatMap(_.get(path.tail))
+        case a :: Nil => children.find(_.seg == a)
         case Nil => None
       }
     }

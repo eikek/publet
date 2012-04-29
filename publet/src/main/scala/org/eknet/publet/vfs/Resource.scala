@@ -49,17 +49,10 @@ trait Resource {
     else None
   }
 
-  def foreach(f:Resource => Unit) { f(this) }
 }
 
 trait ContentResource extends Resource with Content
-
-trait ContainerResource extends Resource with Container {
-  override def foreach(f:Resource=>Unit) {
-    f(this)
-    children.foreach(_.foreach(f))
-  }
-}
+trait ContainerResource extends Resource with Container
 
 object Resource {
 

@@ -47,7 +47,7 @@ object Listing extends ScalaScript {
     val startpath = Path(parameter("start").getOrElse("/"+ Config.mainMount))
     makeHtml {
       "<h3><pre>" + startpath.asString + "</pre></h3>\n" +
-        list(startpath, webPublet.publet.rootContainer.lookup(startpath).get, 0, maxdepth)
+        list(startpath.parent, webPublet.publet.rootContainer.lookup(startpath).get, 0, maxdepth)
     }
   }
 }

@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 22:53
  */
-class FilesystemPartition(val root: File, createDir: Boolean = true)
-  extends AbstractLocalResource(root, Path(root)) with Container with Modifyable {
+class FilesystemPartition(val root: File, createDir: Boolean = true) extends Container with FileResourceFactory {
 
   private val log = LoggerFactory.getLogger(classOf[FilesystemPartition])
 
@@ -19,14 +18,11 @@ class FilesystemPartition(val root: File, createDir: Boolean = true)
   Predef.ensuring(root.isDirectory || !root.exists(), "root must be a directory")
 
   override def lookup(path: Path) = {
+    path.ensuring(!_.isRoot, "empty path given to lookup")
     val f = new File(root, path.segments.mkString(File.separator))
     log.trace("Lookup file: "+ f)
     if (f.exists()) resourceFrom(f) else None
   }
-
-  override def delete() { sys.error("Cannot delete root directory.") }
-
-  def create() {}
 
   def children = root.listFiles().map(resourceFrom(_).get)
 

@@ -38,7 +38,8 @@ trait RootContainer extends Container {
 
   override def lookup(path: Path): Option[Resource] = {
     resolveMount(path) match {
-      case Some(t) => t._2.lookup(path.strip(t._1))
+      case Some(t) => mountNode(path).map(node=>Some(toContainer(node)))
+        .getOrElse(t._2.lookup(path.strip(t._1)))
       case None => if (path == Path.root) Some(toContainer(tree)) else super.lookup(path)
     }
   }
