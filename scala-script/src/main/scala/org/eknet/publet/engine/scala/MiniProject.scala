@@ -3,7 +3,6 @@ package org.eknet.publet.engine.scala
 import org.eknet.publet.vfs.{ContainerResource, Path}
 import org.eknet.publet.vfs.fs.FileResource
 import org.eknet.publet.{Includes, Publet}
-import javax.management.remote.rmi._RMIConnection_Stub
 
 /**
  *
@@ -24,8 +23,7 @@ class MiniProject(val projectDir: ContainerResource, dependsOn: List[MiniProject
   // src/main/scala and target/classes to come...
 
   /**
-   * Creates a string containing all files from `$project/lib` using
-   * the separator `:`.
+   * Creates a string containing all files from `$project/lib`
    *
    * It recursively includes all jars from the dependent projects.
    *
@@ -45,7 +43,7 @@ object MiniProject {
     val max = Path(pathPrefix).size +2
     val root = rootProject(pathPrefix, publet)
     def findProjectDir(p: Path): Option[MiniProject] = {
-      publet.rootContainer.lookup(Path(pathPrefix)/ p /Includes.includesPath /projectDir) match {
+      publet.rootContainer.lookup(p /Includes.includesPath /projectDir) match {
         case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(cr, root, publet))
         case None => if (p.size>max) findProjectDir(p.tail) else root.headOption
       }

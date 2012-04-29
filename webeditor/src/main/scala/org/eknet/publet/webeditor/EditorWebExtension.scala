@@ -20,7 +20,7 @@ class EditorWebExtension extends WebExtension {
 
 
   def onStartup(publet: WebPublet, sc: ServletContext) {
-    log.info("Registering webeditor ...")
+    log.info("Installing webeditor ...")
     EditorWebExtension.setup(publet.publet)
     sc.setAttribute(WebContext.notFoundHandlerKey.name, new CreateNewHandler())
   }
