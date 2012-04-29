@@ -47,7 +47,7 @@ class AuthParser extends JavaTokenParsers {
   def principals(in: InputStream) = Source.fromInputStream(in)
     .getLines()
     .filter(validLine)
-    .map(principal(_))
+    .map(principal(_)).toSet
 
   def rules(in: InputStream): List[Rule] = Source.fromInputStream(in)
     .getLines()

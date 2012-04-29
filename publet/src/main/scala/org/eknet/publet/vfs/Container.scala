@@ -84,4 +84,27 @@ trait Container {
       case None =>
     }
   }
+
+  /**
+   * Travels down the path segments in this container
+   * creating any missing container item until the
+   * end of the path.
+   *
+   * @param path
+   */
+  def createResource(path: Path): Resource = {
+    def newResource(name:String, dir: Boolean): Resource = {
+      val d = if (dir) container(name) else content(name)
+      if (!d.exists) d match {
+        case md:Modifyable => md.create()
+        case _ => sys.error("Container '"+name+"' not modifyable. Cannot create resource at: "+ path.asString)
+      }
+      d
+    }
+    path.segments match {
+      case a :: Nil => newResource(a, path.directory)
+      case a :: as => newResource(a, true).asInstanceOf[ContainerResource].createResource(path.tail)
+      case Nil => sys.error("Cannot create new resource at root!")
+    }
+  }
 }

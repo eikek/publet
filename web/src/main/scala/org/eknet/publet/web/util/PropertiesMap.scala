@@ -10,7 +10,7 @@ import java.io.InputStream
  */
 abstract class PropertiesMap extends StringMap {
 
-  def file: Option[InputStream]
+  protected def file: Option[InputStream]
 
   private val props = new Properties();
 
@@ -18,6 +18,10 @@ abstract class PropertiesMap extends StringMap {
 
   def keySet = props.stringPropertyNames().toSet
 
+  /**
+   * Reloads all properties from the underlying file.
+   *
+   */
   def reload() {
     synchronized {
       props.clear()

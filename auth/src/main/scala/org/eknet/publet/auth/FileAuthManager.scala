@@ -1,6 +1,5 @@
 package org.eknet.publet.auth
 
-import java.io.InputStream
 import org.eknet.publet.vfs.{Path, ContentResource}
 
 
@@ -8,20 +7,16 @@ import org.eknet.publet.vfs.{Path, ContentResource}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.04.12 00:00
  */
-class FileAuthManager(userFile: ContentResource, ruleFile: ContentResource) extends AuthManager {
-
-  userFile.ensuring(f => f.exists, "File not readable")
-  ruleFile.ensuring(f => f.exists, "File not readable")
+class FileAuthManager(userFile: Iterable[ContentResource], ruleFile: Iterable[ContentResource]) extends AuthManager {
+  def this(userFile: ContentResource, ruleFile: ContentResource) = this(Seq(userFile), Seq(ruleFile))
 
   private val parse = new AuthParser
 
-  private def rules: InputStream = ruleFile.inputStream
+  private def rules = ruleFile.map(_.inputStream)
+  private def users = userFile.map(_.inputStream)
 
-  private def users: InputStream = userFile.inputStream
-
-  private def loadRules = parse.rules(rules)
-
-  private def loadUsers = parse.principals(users)
+  private def loadRules = rules.flatMap(f => parse.rules(f))
+  private def loadUsers = users.flatMap(f => parse.principals(f))
 
   def getUser(name: String) = loadUsers.find(_.username == name)
 

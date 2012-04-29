@@ -86,6 +86,10 @@ trait Includes {
 }
 
 object Includes {
+  /**
+   * The string `.allIncludes/` constant
+   *
+   */
   val allIncludes = ".allIncludes/"
   val allIncludesPath = Path(allIncludes)
 

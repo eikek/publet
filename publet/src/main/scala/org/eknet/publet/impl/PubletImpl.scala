@@ -37,7 +37,7 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
 
   def push(path: Path, content: Content) {
     findSources(path) match {
-      case Nil => create(path, content.contentType); push(path, content)
+      case Nil => createResource(path, content.contentType); push(path, content)
       case c => c.head.writeFrom(content.inputStream)
     }
   }
@@ -69,13 +69,8 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     }
   }
 
-  def create(path: Path, contentType: ContentType) {
-    val t = resolveMount(path).getOrElse(throwException("No partition mounted for path: "+ path))
-    val p = path.strip(t._1)
-    t._2 match {
-      case mc: ModifyableContainer => mc.createContent(p.withExt(contentType.extensions.head))
-      case _ => sys.error("Unmodifyable resource")
-    }
+  def createResource(path: Path, contentType: ContentType): Resource = {
+    createResource(path.withExt(contentType.extensions.head))
   }
 
   def mountManager = this
