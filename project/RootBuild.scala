@@ -16,7 +16,7 @@ object Dependencies {
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1"
   val servletApi = "javax.servlet" % "servlet-api" % "2.5" % "provided"
-  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16"
+  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16" //scala 2.9.1 only
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2"
@@ -27,7 +27,8 @@ object Dependencies {
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r"
   val shiro = "org.apache.shiro" % "shiro-core" % "1.2.0"
   val shiroWeb = "org.apache.shiro" % "shiro-web" % "1.2.0"
-
+  val scalaTest = "org.scalatest" %% "scalatest" % "1.8.RC1" % "test"
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "0.6.8" //scala 2.9.1 only
 }
 
 // Root Module 
@@ -71,7 +72,7 @@ object Publet extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings 
   
-  lazy val deps = Seq(knockoff, slf4jApi)
+  lazy val deps = Seq(knockoff, slf4jApi, grizzledSlf4j, scalaTest)
 }
 
 object GitPartition extends Build {
@@ -88,7 +89,7 @@ object GitPartition extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
-  val deps = Seq(slf4jApi, jgit)
+  val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
 }
 
 object ScalaScriptEngine extends Build {
@@ -105,7 +106,7 @@ object ScalaScriptEngine extends Build {
       "scripts, converting from *.scala source files to some dynamic content.",
     libraryDependencies ++= deps
   )
-  val deps = Seq(slf4jApi, scalaCompiler)
+  val deps = Seq(slf4jApi, scalaCompiler, scalaTest, grizzledSlf4j)
 }
 
 object Web extends Build {
@@ -122,11 +123,12 @@ object Web extends Build {
   ) ++ bundleSettings
 
   val deps = Seq(servletApi, 
-       slf4jApi, 
+       slf4jApi, grizzledSlf4j,
        commonsFileUpload,
        commonsIo, 
        jgitHttpServer,
-       shiro, shiroWeb)
+       shiro, shiroWeb,
+       scalaTest)
 }
 
 object War extends Build {
@@ -159,7 +161,7 @@ object Auth extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(slf4jApi)
+  val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
 }
 
 object WebEditor extends Build {
@@ -175,7 +177,7 @@ object WebEditor extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(servletApi)
+  val deps = Seq(servletApi, grizzledSlf4j, scalaTest)
 }
 
 object Ext extends Build {
@@ -191,5 +193,5 @@ object Ext extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(squareMail, servletApi)
+  val deps = Seq(squareMail, servletApi, grizzledSlf4j, scalaTest)
 }
