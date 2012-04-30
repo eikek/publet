@@ -9,8 +9,7 @@ import org.eknet.publet.vfs._
  * @since 01.04.12 14:07
  */
 class DirectoryResource(dir: File, root: Path)
-    extends AbstractLocalResource(dir, root)
-    with ContainerResource with Modifyable with ModifyableContainer {
+    extends AbstractLocalResource(dir, root) with ContainerResource with Modifyable {
 
   def children = Option(dir.listFiles()).map(_.map(f => {
     if (f.isDirectory) newDirectory(f, root)
