@@ -178,7 +178,8 @@ class StandardEngine(val publet:Publet) extends PubletEngine
       case Some(c) => c.contentAsString
       case None => ""
     }
-    <h1>{title(content, Seq[ContentResource]())}</h1>.toString() +"\n"+ custom
+    val t = title(content, Seq[ContentResource]())
+    custom.replace("${autohead}", t)
   }
 
   def yamlFooter(path: Path) = {
