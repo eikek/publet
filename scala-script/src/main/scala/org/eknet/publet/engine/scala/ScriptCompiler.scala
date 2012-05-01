@@ -19,10 +19,10 @@ import java.security.MessageDigest
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:31
  */
-class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[String]) {
+class ScriptCompiler(target: AbstractFile, settings: Settings, parentCl: ClassLoader, imports: List[String]) {
   private val log = LoggerFactory.getLogger(getClass)
 
-  val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, this.getClass.getClassLoader)
+  val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, parentCl)
 
   val reporter = new ErrorReporter(settings, 6+imports.size)
   private val global = new Global(settings, reporter)
@@ -94,8 +94,15 @@ class ScriptCompiler(target: AbstractFile, settings: Settings, imports: List[Str
 object ScriptCompiler {
 
   def apply(targetDir: Option[File], mp: Option[MiniProject], imports: List[String]): ScriptCompiler = {
-    val settings = new Settings()
+    val settings = compilerSettings(targetDir, mp)
 
+    println(settings.classpath.value)
+    val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
+    new ScriptCompiler(settings.outputDirs.getSingleOutput.get, settings, cl, imports)
+  }
+
+  def compilerSettings(targetDir: Option[File], mp: Option[MiniProject]): Settings = {
+    val settings = new Settings()
     val target = targetDir match {
       case Some(dir) => AbstractFile.getDirectory(dir)
       case None => new VirtualDirectory("(memory)", None)
@@ -117,8 +124,7 @@ object ScriptCompiler {
 
     val cp = (libPath::: compilerPath ) ++ impliedClassPath ++ mp.map(_.libraryClassPath).getOrElse(List())
     settings.classpath.value = cp.mkString(File.pathSeparator)
-    println(settings.classpath.value)
-    new ScriptCompiler(target, settings, imports)
+    settings
   }
 
   private lazy val compilerPath = try {

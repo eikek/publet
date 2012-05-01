@@ -20,7 +20,6 @@ class DefaultPubletCompiler(val publet: Publet,
 
   def findCompiler(path: Path, resource: ContentResource): ScriptCompiler = {
     val miniProject = MiniProject.find(path, publet, pathPrefix)
-
     ScriptCompiler(None, miniProject, imports)
   }
 }

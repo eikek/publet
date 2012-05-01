@@ -1,8 +1,17 @@
 package org.eknet.publet.engine.scala
 
-import org.eknet.publet.vfs.{ContainerResource, Path}
+import scala.collection.mutable
 import org.eknet.publet.vfs.fs.FileResource
 import org.eknet.publet.{Includes, Publet}
+import org.eknet.publet.vfs.{Resource, ContainerResource, Path}
+import io.Source
+import java.io._
+import grizzled.slf4j.Logging
+import tools.nsc.util.ScalaClassLoader.URLClassLoader
+import java.net.URL
+import tools.nsc.Global
+import tools.nsc.interpreter.AbstractFileClassLoader
+import tools.nsc.io.AbstractFile
 
 /**
  *
@@ -12,15 +21,20 @@ import org.eknet.publet.{Includes, Publet}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:39
  */
-class MiniProject(val projectDir: ContainerResource, dependsOn: List[MiniProject], publet: Publet) {
-  //TODO check using sbt for all of this!
+class MiniProject(val path: Path,
+                  val projectDir: ContainerResource,
+                  val dependsOn: List[MiniProject],
+                  publet: Publet) extends Logging {
+
+  import Path._
 
   projectDir.ensuring(_.exists, "Project path must exist!")
 
+  private val targetDir = new File(MiniProject.tempDir.getAbsolutePath + "/"+ path.segments.mkString(File.separator))
+  if (!targetDir.exists()) targetDir.mkdirs()
+
   def libraryDir:Option[ContainerResource] = projectDir.child("lib")
     .collect({case r:ContainerResource if (r.exists) => r})
-
-  // src/main/scala and target/classes to come...
 
   /**
    * Creates a string containing all files from `$project/lib`
@@ -31,11 +45,69 @@ class MiniProject(val projectDir: ContainerResource, dependsOn: List[MiniProject
    */
   def libraryClassPath:List[String] = dependsOn.flatMap(_.libraryClassPath) ++ libraryDir.map(_.children
     .collect({case r:FileResource if (r.exists) => r})
-    .map(fr=>fr.file.getAbsolutePath)).getOrElse(List())
+    .map(fr=>fr.file.getAbsolutePath)).getOrElse(List()) ++ List(targetDir.getAbsolutePath)
+
+  def classLoader(): ClassLoader = {
+    //compile source files if necessary and return the classloader
+    compile()
+    val urls = libraryClassPath.map(s=>new URL("file://"+ s))
+    val parent = new AbstractFileClassLoader(AbstractFile.getDirectory(targetDir), getClass.getClassLoader)
+    new URLClassLoader(urls, parent)
+  }
+
+  def compile() {
+    synchronized {
+      val sourceDir = projectDir.lookup("/src/main/scala".p).collect({case cc:ContainerResource=>cc})
+      if (sourceDir.isDefined && needRecompile()) {
+        val start = System.currentTimeMillis()
+        val settings = ScriptCompiler.compilerSettings(Some(targetDir), Some(this))
+        settings.sourcepath.value = (path / "src/main/scala").toAbsolute.segments.mkString(File.separator)
+        val reporter = new ErrorReporter(settings)
+        val global = new Global(settings, reporter)
+        val run = new global.Run
+        val sourceFiles = new mutable.ListBuffer[String]()
+        projectDir.foreach("src/main/scala".p, (p, r)=> {
+          if (r.name.ext=="scala" && r.isInstanceOf[FileResource]) {
+            sourceFiles.append(r.asInstanceOf[FileResource].file.getAbsolutePath)
+          }
+        })
+        info("Compiling project with "+ sourceFiles.size+ " files.")
+        run.compile(sourceFiles.toList)
+        timestamp()
+        info("Done in "+ (System.currentTimeMillis()-start) +"ms")
+      }
+    }
+  }
+
+  private def needRecompile(): Boolean = {
+    var lastm = -1L
+    def findLastm(path: Path, res: Resource) {
+      if (path.name.ext=="scala" && res.lastModification.isDefined) {
+        if (lastm < res.lastModification.get) {
+          lastm = res.lastModification.get
+        }
+      }
+    }
+    projectDir.foreach("src/main/scala".p, findLastm)
+    val last = new File(targetDir, "last")
+    if (last.exists()) {
+      Source.fromFile(last).getLines().mkString.toLong < lastm
+    } else {
+      true
+    }
+  }
+  private def timestamp() {
+    val f = new File(targetDir, "last")
+    val out = new BufferedWriter(new FileWriter(f))
+    out.write(System.currentTimeMillis() +"")
+    out.flush()
+    out.close()
+  }
 
 }
 
 object MiniProject {
+  private val tempDir = new File(System.getProperty("java.io.tmpdir"), "publettmp")
 
   val projectDir = "project/"
 
@@ -43,8 +115,9 @@ object MiniProject {
     val max = Path(pathPrefix).size +2
     val root = rootProject(pathPrefix, publet)
     def findProjectDir(p: Path): Option[MiniProject] = {
-      publet.rootContainer.lookup(p /Includes.includesPath /projectDir) match {
-        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(cr, root, publet))
+      val projectPath = p / Includes.includesPath / projectDir
+      publet.rootContainer.lookup(projectPath) match {
+        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(projectPath, cr, root, publet))
         case None => if (p.size>max) findProjectDir(p.tail) else root.headOption
       }
     }
@@ -55,6 +128,6 @@ object MiniProject {
     val path = Path(pathPrefix) / Includes.allIncludesPath / projectDir
     publet.rootContainer.lookup(path)
       .collect({case cr:ContainerResource if (cr.exists)=> cr})
-      .map(cont => List(new MiniProject(cont, List(), publet))).getOrElse(List())
+      .map(cont => List(new MiniProject(path, cont, List(), publet))).getOrElse(List())
   }
 }
