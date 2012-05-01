@@ -66,6 +66,13 @@ object Resource {
     case _ => false
   }
 
+  def toModifyable(r: Resource): Option[Modifyable] = {
+    r match {
+      case m:Modifyable=> Some(m)
+      case _ => None
+    }
+  }
+
   def emptyContainer(name: ResourceName):ContainerResource = new EmptyContainer(name)
   def emptyContent(name: ResourceName): ContentResource = new EmptyContent(name)
 

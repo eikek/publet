@@ -179,7 +179,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
       case None => ""
     }
     val t = title(content, Seq[ContentResource]())
-    custom.replace("${autohead}", t)
+    custom.replace("${pageTitle}", t)
   }
 
   def yamlFooter(path: Path) = {

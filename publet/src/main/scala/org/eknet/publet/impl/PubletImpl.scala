@@ -36,9 +36,22 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
   }
 
   def push(path: Path, content: Content) {
-    findSources(path) match {
-      case Nil => createResource(path, content.contentType); push(path, content)
-      case c => c.head.writeFrom(content.inputStream)
+    def copy() {
+      createResource(path, content.contentType) match {
+        case cr: ContentResource => cr.writeFrom(content.inputStream)
+        case r@_ => sys.error("Cannot create content for resource: "+ r)
+      }
+    }
+    findSources(path).toList match {
+      case Nil => copy()
+      case c::cs => {
+        if (c.contentType == path.name.targetType) {
+          copy()
+        } else {
+          Resource.toModifyable(c).map(_.delete()).getOrElse(sys.error("Resource not modifyable"))
+          copy()
+        }
+      }
     }
   }
 
