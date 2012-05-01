@@ -7,19 +7,20 @@ import collection.mutable
 import xml.NodeSeq
 import org.eknet.publet.vfs._
 import org.eknet.publet.web.WebContext
-import util.{CompositeContentResource, MapContainer, ClasspathContainer, UrlResource}
+import util._
 
 /** Uses yaml to create a html page layout.
  *
- * There are two modes: one column and two column layout. The two column
- * layout is chosen, if a `sidebar.html` is found either in `.includes/`
- * of the current requested path or in `/.allIncludes`. If there is no
- * such file, the one column layout is used.
+ * The page is divided into header, nav and footer part. Each is searched
+ * for in `.includes/` or `/.allIncludes` by looking at `header.html`,
+ * `nav.html` and  `footer.html`. For the `main` part exist two modes:
+ * one column and two column layout. The two column layout is chosen, if
+ * a `sidebar.html` is found either in `.includes/` of the current
+ * requested path or in `/.allIncludes`. If there is no such file, the
+ * one column layout is used.
  *
- * Besides the columns, the page is divided into header and footer part.
- * Each is again searched for in `.includes/` or `/.allIncludes` by looking
- * at `header.html` and `footer.html`. The yaml copyright notice will
- * always be visible.
+ * The yaml copyright notice will be visible
+ * if no custom footer is defined.
  *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 12:15
@@ -98,11 +99,12 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     val path = WebContext().requestPath
     val header = yamlHeader(path, content)
     val footer = yamlFooter(path)
+    val nav = yamlNav(path)
     val main = stripTitle(content.contentAsString).getOrElse(content.contentAsString)
     val base = Path(path.relativeRoot) / yamlPath
     getSidebar(path) match {
-      case Some(sb) => yamlHeaderMainFooter(header, yamlTwoColMain(sb.contentAsString, main), footer, base.asString)
-      case None => yamlHeaderMainFooter(header, yamlOneColMain(main), footer, base.asString)
+      case Some(sb) => yamlHeaderMainFooter(header, nav, yamlTwoColMain(sb.contentAsString, main), footer, base.asString)
+      case None => yamlHeaderMainFooter(header, nav, yamlOneColMain(main), footer, base.asString)
     }
   }
 
@@ -118,7 +120,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     }
   }
 
-  def yamlHeaderMainFooter(header: String, main: String, footer: String, base:String) = {
+  def yamlHeaderMainFooter(header: String, nav: String, main: String, footer: String, base:String) = {
     """<ul class="ym-skiplinks">
       <li><a class="ym-skip" href="#nav">Skip to navigation (Press Enter)</a></li>
       <li><a class="ym-skip" href="#main">Skip to main content (Press Enter)</a></li>
@@ -130,6 +132,13 @@ class StandardEngine(val publet:Publet) extends PubletEngine
         </div>
       </div>
     </header>
+    <nav id="nav">
+      <div class="ym-wrapper">
+        <div class="ym-hlist">
+          """+ nav + """
+        </div>
+      </div>
+    </nav>
     <div id="main">
       """+ main + """
     </div>
@@ -183,10 +192,16 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   }
 
   def yamlFooter(path: Path) = {
-    val custom = processInclude(path.parent/"footer.html") match {
+    processInclude(path.parent/"footer.html") match {
       case Some(c) => c.contentAsString + "\n"
+      case None => """<p>© 2012 - Layout based on <a href="http://www.yaml.de">YAML</a></p>"""
+    }
+  }
+
+  def yamlNav(path: Path) = {
+    processInclude(path.parent/"nav.html") match {
+      case Some(c) => c.contentAsString+"\n"
       case None => ""
     }
-    custom + """<p>© 2012 - Layout based on <a href="http://www.yaml.de">YAML</a></p>"""
   }
 }
