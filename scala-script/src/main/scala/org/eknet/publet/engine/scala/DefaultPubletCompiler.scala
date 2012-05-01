@@ -2,6 +2,7 @@ package org.eknet.publet.engine.scala
 
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Path, ContentResource}
+import tools.nsc.io.VirtualDirectory
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,14 +13,12 @@ class DefaultPubletCompiler(val publet: Publet,
                             imports: List[String]) extends PubletCompiler {
 
 
+  val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), imports)
+
   def evaluate(path: Path, resource: ContentResource) = {
-    val  comp = findCompiler(path, resource)
-    val script = comp.loadScalaScriptClass(path, resource)
+    val miniProject = MiniProject.find(path, publet, pathPrefix)
+    val script = compiler.scriptLoader(miniProject, path, resource)
     Some(script)
   }
 
-  def findCompiler(path: Path, resource: ContentResource): ScriptCompiler = {
-    val miniProject = MiniProject.find(path, publet, pathPrefix)
-    ScriptCompiler(None, miniProject, imports)
-  }
 }

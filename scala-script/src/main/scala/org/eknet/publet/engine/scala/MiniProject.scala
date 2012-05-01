@@ -30,7 +30,7 @@ class MiniProject(val path: Path,
 
   projectDir.ensuring(_.exists, "Project path must exist!")
 
-  private val targetDir = new File(MiniProject.tempDir.getAbsolutePath + "/"+ path.segments.mkString(File.separator))
+  private val targetDir = new File(MiniProject.tempDir.getAbsolutePath, path.segments.mkString(File.separator))
   if (!targetDir.exists()) targetDir.mkdirs()
 
   def libraryDir:Option[ContainerResource] = projectDir.child("lib")
@@ -60,7 +60,7 @@ class MiniProject(val path: Path,
       val sourceDir = projectDir.lookup("/src/main/scala".p).collect({case cc:ContainerResource=>cc})
       if (sourceDir.isDefined && needRecompile()) {
         val start = System.currentTimeMillis()
-        val settings = ScriptCompiler.compilerSettings(Some(targetDir), Some(this))
+        val settings = ScriptCompiler.compilerSettings(AbstractFile.getDirectory(targetDir), Some(this))
         settings.sourcepath.value = (path / "src/main/scala").toAbsolute.segments.mkString(File.separator)
         val reporter = new ErrorReporter(settings)
         val global = new Global(settings, reporter)
@@ -88,14 +88,15 @@ class MiniProject(val path: Path,
         }
       }
     }
-    projectDir.foreach("src/main/scala".p, findLastm)
     val last = new File(targetDir, "last")
-    if (last.exists()) {
-      Source.fromFile(last).getLines().mkString.toLong < lastm
-    } else {
+    if (!last.exists()) {
       true
+    } else {
+      projectDir.foreach("src/main/scala".p, findLastm)
+      Source.fromFile(last).getLines().mkString.toLong < lastm
     }
   }
+
   private def timestamp() {
     val f = new File(targetDir, "last")
     val out = new BufferedWriter(new FileWriter(f))
@@ -107,7 +108,7 @@ class MiniProject(val path: Path,
 }
 
 object MiniProject {
-  private val tempDir = new File(System.getProperty("java.io.tmpdir"), "publettmp")
+  private val tempDir = new File(System.getProperty("java.io.tmpdir"), "publetprojectout")
 
   val projectDir = "project/"
 

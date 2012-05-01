@@ -1,17 +1,16 @@
 package org.eknet.publet.engine.scala
 
+import scala.collection.mutable
 import tools.nsc.interpreter.AbstractFileClassLoader
 import java.io.File
 import scala.tools.nsc._
 import tools.nsc.Settings
-import tools.nsc.io.{VirtualDirectory, AbstractFile}
+import tools.nsc.io.AbstractFile
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 import util.BatchSourceFile
 import org.eknet.publet.vfs._
-import org.slf4j.LoggerFactory
-import java.math.BigInteger
-import java.security.MessageDigest
+import grizzled.slf4j.Logging
 
 /**
  * Compiles scala snippets to ScalaScript classes.
@@ -19,94 +18,104 @@ import java.security.MessageDigest
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:31
  */
-class ScriptCompiler(target: AbstractFile, settings: Settings, parentCl: ClassLoader, imports: List[String]) {
-  private val log = LoggerFactory.getLogger(getClass)
+class ScriptCompiler(target: AbstractFile,
+                     imports: List[String]) extends Logging {
 
-  val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, parentCl)
 
-  val reporter = new ErrorReporter(settings, 6+imports.size)
-  private val global = new Global(settings, reporter)
+  private val lastCompileCache = mutable.Map[Path, Long]()
 
-  def compile(path: Path, script: ContentResource): Class[_] = {
-    val start = System.currentTimeMillis()
-    def throwOnError() {
-      if (global.reporter.hasErrors) {
-        val ex = new CompileException(path, reporter.messages.toList)
-        reporter.reset()
-        throw ex
-      }
-      log.info("Compilation successful in "+ (System.currentTimeMillis()-start)+"ms")
+
+  def scriptLoader(mp: Option[MiniProject], path: Path, resource: ContentResource): ScalaScript = {
+    val settings = ScriptCompiler.compilerSettings(target, mp)
+    val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
+    val compiler = new Compiler(settings, cl)
+    compiler.loadScalaScriptClass(path, resource)
+  }
+
+  private def hasChanged(path: Path, script: ContentResource):Boolean = {
+    lastCompileCache.get(path).map(_ < script.lastModification.get).getOrElse(true)
+  }
+
+
+  private def className(script: ContentResource) = script.name.name
+
+  private class Compiler(settings: Settings, parentCl: ClassLoader) {
+    val reporter = new ErrorReporter(settings, 8+imports.size)
+    private val global = new Global(settings, reporter)
+
+    val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, parentCl)
+
+    def loadScalaScriptClass(path: Path, resource: ContentResource): ScalaScript = {
+      val cls = compile(path, resource)
+      cls.getConstructor().newInstance().asInstanceOf[ScalaScript]
     }
 
-    val filename = script.name.fullName
-    val cn = className(script)
-    synchronized {
-      findClass(cn).getOrElse {
-        compileSource(cn, wrapScript(cn, script), filename)
-        throwOnError()
+    def findClass(className: String): Option[Class[_]] = {
+      synchronized {
+        try {
+          val cls = targetClassLoader.loadClass(className)
+          Some(cls)
+        } catch {
+          case e: ClassNotFoundException => None
+        }
+      }
+    }
+
+    private def wrapScript(path: Path, cn: String, script: ContentResource): String = {
+      "package " + path.parent.segments.mkString(".") +"\n\n"
+      "import org.eknet.publet.engine.scala.ScalaScript\n" +
+        "import org.eknet.publet.engine.scala.ScalaScript._\n\n" +
+        (if (!imports.isEmpty)
+          imports.mkString("import ", "\nimport ", "\n\n")
+        else "") +
+        "class "+ cn+ " extends ScalaScript { \n\n" +
+        " def serve() = { \n" +
+        script.contentAsString + "\n" +
+        " }\n" +
+        "}"
+    }
+
+
+    def compile(path: Path, script: ContentResource): Class[_] = {
+      val start = System.currentTimeMillis()
+      def throwOnError() {
+        if (global.reporter.hasErrors) {
+          val ex = new CompileException(path, reporter.messages.toList)
+          reporter.reset()
+          throw ex
+        }
+        info("Compilation successful in "+ (System.currentTimeMillis()-start)+"ms")
+      }
+
+      val filename = script.name.fullName
+      val cn = className(script)
+      synchronized {
+        if (hasChanged(path, script)) {
+          info("Script '"+path.asString+"' has changed sinced last compile.")
+          compileSource(cn, wrapScript(path, cn, script), filename)
+          throwOnError()
+          lastCompileCache.put(path, System.currentTimeMillis())
+        }
+
         findClass(cn).get
       }
     }
-  }
 
-  private def compileSource(className: String, script: String, fileName: String) {
-    log.info("Creating compiler run...")
-    val run = new global.Run
-    log.info("Compiling script: "+ fileName)
-    val sfiles = List(new BatchSourceFile(fileName, script))
-    run.compileSources(sfiles)
-  }
+    private def compileSource(className: String, script: String, fileName: String) {
+      info("Creating compiler run...")
+      val run = new global.Run
+      info("Compiling script: "+ fileName)
+      val sfiles = List(new BatchSourceFile(fileName, script))
+      run.compileSources(sfiles)
+    }
 
-  def loadScalaScriptClass(path: Path, resource: ContentResource): ScalaScript = {
-    val cls = compile(path, resource)
-    cls.getConstructor().newInstance().asInstanceOf[ScalaScript]
-  }
-
-  def findClass(className: String): Option[Class[_]] = {
-    synchronized(try {
-      val cls = targetClassLoader.loadClass(className)
-      Some(cls)
-    } catch {
-      case e: ClassNotFoundException => None
-    })
-  }
-
-  private def className(script: ContentResource): String = {
-    val digest = MessageDigest.getInstance("SHA-1").digest(script.contentAsString.getBytes)
-    "sha"+new BigInteger(1, digest).toString(16) +"_"+ script.name.name
-//    script.path.parent.segments.mkString("", "_", "_") + script.path.name.name
-  }
-
-  private def wrapScript(className: String, script: ContentResource): String = {
-    "import org.eknet.publet.engine.scala.ScalaScript\n" +
-    "import org.eknet.publet.engine.scala.ScalaScript._\n\n" +
-    (if (!imports.isEmpty)
-      imports.mkString("import ", "\nimport ", "\n\n")
-    else "") +
-    "class "+ className+ " extends ScalaScript { \n\n" +
-    " def serve() = { \n" +
-    script.contentAsString + "\n" +
-    " }\n" +
-    "}"
   }
 }
 
 object ScriptCompiler {
 
-  def apply(targetDir: Option[File], mp: Option[MiniProject], imports: List[String]): ScriptCompiler = {
-    val settings = compilerSettings(targetDir, mp)
-
-    println(settings.classpath.value)
-    val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
-    new ScriptCompiler(settings.outputDirs.getSingleOutput.get, settings, cl, imports)
-  }
-
-  def compilerSettings(targetDir: Option[File], mp: Option[MiniProject]): Settings = {
+  def compilerSettings(target: AbstractFile, mp: Option[MiniProject]): Settings = {
     val settings = new Settings()
-    val target = targetDir match {
-      case Some(dir) => AbstractFile.getDirectory(dir)
-      case None => new VirtualDirectory("(memory)", None)
-    }
 
     // got weird exception when setting `usejavacp` to true:
     // scala.tools.nsc.FatalError: object List does not have a member apply
