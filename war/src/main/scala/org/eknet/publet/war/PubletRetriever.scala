@@ -9,6 +9,5 @@ import javax.servlet.ServletContextEvent
  */
 trait PubletRetriever {
 
-  def webPublet(sce: ServletContextEvent) =
-    sce.getServletContext.getAttribute(WebContext.webPubletKey.name).asInstanceOf[WebPublet]
+  def webPublet(sce: ServletContextEvent) = WebPublet(sce.getServletContext)
 }

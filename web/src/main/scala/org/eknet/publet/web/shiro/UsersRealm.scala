@@ -36,7 +36,7 @@ class UsersRealm(db: AuthManager) extends AuthorizingRealm {
     def getRoles = user.roles
 
     private def policy = {
-      val op = Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
+      val op = Option(Security.session.getAttribute("policy")).map(_.asInstanceOf[Policy])
       op.getOrElse {
         val policy = db.policyFor(user)
         SecurityUtils.getSubject.getSession.setAttribute("policy", policy)

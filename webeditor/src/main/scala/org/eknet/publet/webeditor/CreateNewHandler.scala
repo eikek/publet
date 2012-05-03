@@ -1,10 +1,10 @@
 package org.eknet.publet.webeditor
 
 import javax.servlet.http.HttpServletResponse
-import org.eknet.publet.web.WebContext
 import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
 import org.eknet.publet.vfs._
 import util.SimpleContentResource
+import org.eknet.publet.web.{WebPublet, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -14,7 +14,7 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
   def resourceNotFound(path: Path, resp: HttpServletResponse) {
     val out = resp.getOutputStream
     val targetType = path.name.targetType
-    val publet = WebContext().webPublet.publet
+    val publet = WebPublet().publet
     if (targetType.mime._1 == "text") {
       val res = new SimpleContentResource(ResourceName("edit"), Content.empty(ContentType.markdown))
       val c = publet.engineManager.getEngine('edit).get

@@ -89,8 +89,6 @@ trait WebContext {
    */
   def requestPath: Path
 
-  def webPublet: WebPublet
-
   /** Returns the value of the `action`
    * request parameter.
    *
@@ -110,7 +108,6 @@ object WebContext {
   private def request: HttpServletRequest = WebContext().asInstanceOf[WebContextImpl].req
 
   val publetAuthManagerKey = Key[PubletAuthManager]("publetAuthManager")
-  val webPubletKey = Key[WebPublet]("org.eknet.web.publet")
 
   val notFoundHandlerKey = Key("notFoundHandler", {
     case Session => new NotFoundHandler {
@@ -245,8 +242,6 @@ object WebContext {
     }
 
     def parameter(name: String) = Option(req.getParameter(name))
-
-    lazy val webPublet = service(webPubletKey)
 
     lazy val action = parameter("a")
 

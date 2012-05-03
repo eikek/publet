@@ -1,9 +1,9 @@
 package org.eknet.publet.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.WebContext
 import java.io.File
 import ScalaScript._
+import org.eknet.publet.web.{WebContext, WebPublet}
 import WebContext._
 import org.eknet.publet.vfs.ContentType
 
@@ -26,7 +26,7 @@ object ToggleGitExport extends ScalaScript {
     val ctx = WebContext()
     import ctx._
 
-    val exportok = new File(service(webPubletKey).gitPartition.repository, file)
+    val exportok = new File(WebPublet().gitPartition.repository, file)
     if (exportok.exists()) {
       exportok.delete()
       if (targetType == ContentType.json) {

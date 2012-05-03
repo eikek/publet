@@ -3,7 +3,7 @@ package org.eknet.publet.ext
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.vfs._
 import ScalaScript._
-import org.eknet.publet.web.{Config, WebContext}
+import org.eknet.publet.web.{WebPublet, Config, WebContext}
 
 /**TODO replace with javascript browser...
  *
@@ -47,7 +47,7 @@ object Listing extends ScalaScript {
     val startpath = Path(parameter("start").getOrElse("/"+ Config.mainMount))
     makeHtml {
       "<h3><pre>" + startpath.asString + "</pre></h3>\n" +
-        list(startpath.parent, webPublet.publet.rootContainer.lookup(startpath).get, 0, maxdepth)
+        list(startpath.parent, WebPublet().publet.rootContainer.lookup(startpath).get, 0, maxdepth)
     }
   }
 }

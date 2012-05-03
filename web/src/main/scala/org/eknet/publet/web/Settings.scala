@@ -13,7 +13,7 @@ object Settings extends PropertiesMap {
   reload()
 
   def file = {
-    val publet = WebContext().service(webPubletKey).publet
+    val publet = WebPublet().publet
     publet.rootContainer.lookup(Path("/.allIncludes/settings.properties")) match {
       case cr: ContentResource if (cr.exists) => Some(cr.inputStream)
       case _ => None

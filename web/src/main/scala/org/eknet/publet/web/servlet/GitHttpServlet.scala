@@ -54,7 +54,7 @@ class GitHttpServlet extends MetaServlet(new GitFilter()) with Logging {
       }
       super.service(req, res)
       if (GitSmartHttpTools.isReceivePack(req)) {
-        val publ = getServletContext.getAttribute(WebContext.webPubletKey.name).asInstanceOf[WebPublet]
+        val publ = WebPublet()
         info("Updating git workspace...")
         publ.gitPartition.updateWorkspace()
       }

@@ -2,8 +2,8 @@ package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.engine.scala.ScalaScript._
-import org.eknet.publet.web.WebContext
 import org.eknet.publet.vfs.{Path, Content, ContentType}
+import org.eknet.publet.web.{WebContext, WebPublet}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,20 +28,20 @@ object PushContents extends ScalaScript {
     val ctx = WebContext()
     ctx.uploads.foreach(fi => {
       log.debug("Create {} file", ctx.requestPath.name.targetType)
-      ctx.webPublet.publet.push(path, Content(fi.getInputStream, ctx.requestPath.name.targetType))
+      WebPublet().publet.push(path, Content(fi.getInputStream, ctx.requestPath.name.targetType))
     })
   }
 
 
   def pushText(path: Path) {
     val ctx = WebContext()
-    val publet = ctx.webPublet
+    val publet = WebPublet().publet
     ctx.parameter("page") match {
       case None =>
       case Some(body) => {
         val target = ctx.parameter("type").getOrElse("markdown")
         log.debug("Write {} file", target)
-        publet.publet.push(path, Content(body, ContentType(Symbol(target))))
+        publet.push(path, Content(body, ContentType(Symbol(target))))
       }
     }
   }

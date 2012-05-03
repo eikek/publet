@@ -2,12 +2,12 @@ package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.vfs.Resource._
-import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.Publet
 import collection.mutable
 import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs._
 import ScalaScript._
+import org.eknet.publet.web.{WebPublet, Config, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -31,7 +31,7 @@ object ListContents extends ScalaScript {
       case None => "/" + Config.mainMount
     }
     val p = WebContext.stripPath(if (path.directory) path else path.parent)
-    val json = createJsonMap(p, WebContext().webPublet.publet, prefixPath)
+    val json = createJsonMap(p, WebPublet().publet, prefixPath)
 
     makeJson(json)
   }

@@ -33,12 +33,8 @@ class PubletInitListener extends ServletContextListener {
   def publetInit(sc: ServletContext) {
     synchronized {
       try {
-        val publ = new DefaultWebPublet(sc, List[WebExtension]().asJava)
-        sc.setAttribute(webPubletKey.name, publ)
-
-        shiroInit(sc, publ.publet)
-      }
-      catch {
+        WebPublet.setup(sc, List[WebExtension]())
+      } catch {
         case e: Throwable => log.error("Error initializing publet!", e); throw e
       }
     }
@@ -46,58 +42,11 @@ class PubletInitListener extends ServletContextListener {
 
   def publetDestroy(sc: ServletContext) {
     try {
-      Option(sc.getAttribute(webPubletKey.name)).map(_.asInstanceOf[WebPublet].gitPartition.close())
+      WebPublet.close(sc)
     } catch {
       case e: Throwable => log.error("Error on destroy.", e)
     }
   }
 
-  def shiroInit(sc: ServletContext, publ: Publet) {
-    try {
-      val environment = createEnvironment(sc, publ);
-      sc.setAttribute(EnvironmentLoader.ENVIRONMENT_ATTRIBUTE_KEY, environment);
 
-      log.debug("Published WebEnvironment as ServletContext attribute with name [{}]",
-        EnvironmentLoader.ENVIRONMENT_ATTRIBUTE_KEY);
-
-      if (log.isInfoEnabled()) {
-        log.info("Shiro environment initialized.");
-      }
-    } catch {
-      case e: Throwable => log.error("Error initializing shiro", e)
-    }
-  }
-
-  def createEnvironment(sc: ServletContext, publ: Publet) = {
-    val webenv = new DefaultWebEnvironment()
-    webenv.setServletContext(sc)
-
-    val pam = new PubletAuthManager(publ)
-    sc.setAttribute(publetAuthManagerKey.name, pam)
-
-    val realm = new UsersRealm(pam)
-    webenv.setWebSecurityManager(createWebSecurityManager(publ, realm))
-    webenv.setFilterChainResolver(createFilterChainResolver(pam))
-    webenv
-  }
-
-  def createWebSecurityManager(publ: Publet, realm: AuthorizingRealm): WebSecurityManager = {
-    val wsm = new DefaultWebSecurityManager()
-    wsm.setRealm(realm)
-    wsm
-  }
-
-  def createFilterChainResolver(pam: PubletAuthManager): FilterChainResolver = {
-    val resolver = new PathMatchingFilterChainResolver()
-    resolver.getFilterChainManager.addFilter("authc", new FormAuthenticationFilter)
-    resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
-    resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
-
-    def filter(str: String) = if (str == "anon") str else "authcBasic"
-
-    val mappings = pam.urlMappings
-    if (mappings.isEmpty) resolver.getFilterChainManager.createChain("/**", "anon")
-    else mappings.foreach(t => resolver.getFilterChainManager.createChain(t._1, filter(t._2)))
-    resolver
-  }
 }

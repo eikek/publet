@@ -41,6 +41,14 @@ object Security {
    */
   def username = user.map(_.login).getOrElse("anonymous")
 
+  /**
+   * Returns shiros session associated to the
+   * current subject
+   *
+   * @return
+   */
+  def session = subject.getSession
+
   def isAnonymousRequest: Boolean = {
     val path = WebContext().requestPath
     val webenv = WebContext().shiroWebEnvironment

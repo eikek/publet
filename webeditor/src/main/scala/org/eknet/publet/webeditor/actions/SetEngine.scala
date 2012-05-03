@@ -2,8 +2,8 @@ package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
-import org.eknet.publet.web.WebContext
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.{WebPublet, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,7 +15,7 @@ object SetEngine extends ScalaScript {
     params("path", "publetEngine") match {
       case None => error("Arguments missing")
       case Some(t) => {
-        val publet = WebContext().webPublet.publet
+        val publet = WebPublet().publet
         publet.engineManager.getEngine(Symbol(t._2)) match {
           case None => error("Engine '" + t._2 + "' not found.")
           case Some(pe) => {
