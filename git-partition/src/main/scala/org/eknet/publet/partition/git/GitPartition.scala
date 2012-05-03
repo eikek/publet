@@ -45,12 +45,6 @@ class GitPartition (
     }
   }
 
-  Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
-    def run() {
-      close()
-    }
-  }))
-
   private val workspaceRepo = {
     if (!root.exists()) {
       val r = Git.cloneRepository()

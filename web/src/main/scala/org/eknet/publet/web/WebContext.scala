@@ -6,13 +6,13 @@ import scala.collection._
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
-import org.eknet.publet.vfs.Path
 import java.net.URLDecoder
 import shiro.PubletAuthManager
 import util._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.apache.shiro.web.env.WebEnvironment
 import org.apache.shiro.web.util.WebUtils
+import org.eknet.publet.vfs.{Content, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -97,6 +97,8 @@ trait WebContext {
   def action: Option[String]
 
   def redirect(uri: String)
+  def forward(uri: String)
+  def include(uri: String)
 
   def shiroWebEnvironment: WebEnvironment
 
@@ -193,7 +195,6 @@ object WebContext {
     }
   }
 
-
   protected[web] def setup(req: HttpServletRequest, resp: HttpServletResponse) {
     params.set(new WebContextImpl(req, resp))
   }
@@ -266,6 +267,14 @@ object WebContext {
 
     def redirect(uri: String) {
       resp.sendRedirect(uri)
+    }
+
+    def forward(uri: String) {
+      req.getRequestDispatcher(uri).forward(req, resp)
+    }
+
+    def include(uri: String) {
+      req.getRequestDispatcher(uri).include(req, resp)
     }
 
     def shiroWebEnvironment = WebUtils.getRequiredWebEnvironment(req.getSession.getServletContext)

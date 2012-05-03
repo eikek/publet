@@ -5,43 +5,47 @@ import javax.servlet.FilterChain
 import org.eknet.publet.web.WebContext._
 import org.eknet.publet.vfs.Path
 import org.slf4j.LoggerFactory
-import org.eknet.publet.web.{Config, WebContext}
+import grizzled.slf4j.Logging
+import org.eknet.publet.Includes
+import org.eknet.publet.web.{Settings, Config, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 06:50
  */
-class RedirectFilter extends SimpleFilter {
-  private val log = LoggerFactory.getLogger(getClass)
-  private lazy val mount = WebContext(mainMount).get
-  private val forwards = Set("/",
-    "/robots.txt",
-    "/index.html",
-    "/index.htm",
-    "/favicon.ico").map(Path(_))
+class RedirectFilter extends SimpleFilter with Logging {
 
-  // TODO add regex style. redirect /.allIncludes/*
-  // TODO add additional redirects from settings
+  private lazy val mount = WebContext(mainMount).get
+
+  private lazy val defaultRedirects = Map(
+    "/" -> (mount + "/"),
+    "/index.html" -> (mount +"/index.html"),
+    "/index.htm" -> (mount +"/index.html"),
+    "/robots.txt" -> (mount +"/robots.txt"),
+    "/favicon.ico" -> (mount +"/favicon.ico"),
+    "/favicon.png" -> (mount +"/favicon.png")
+  )
+
+  /**
+   * Returns a list of property keys from `settings.properties`
+   * for those that start with `redirect.`
+   *
+   * @return
+   */
+  private lazy val redirects = Settings.keySet.filter(_.startsWith("redirect."))
+
+  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), Settings(key).get)).toMap
 
   def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val path = WebContext().requestPath
     val contextPath = WebContext().getContextPath.getOrElse("")
-    if (forwards.contains(path)) {
-      val newUri = contextPath + "/"+ mount + path.asString
-      log.debug("Forward "+ path +" to "+ newUri)
+    if (allRedirects.keySet.contains(path.asString)) {
+      val newUri = contextPath + allRedirects.get(path.asString).get
+      debug("Forward "+ path +" to "+ newUri)
       resp.sendRedirect(newUri)
-    }
-    else
+    } else {
       chain.doFilter(req, resp)
+    }
   }
 
-  private def printthings(req: HttpServletRequest) {
-    log.info("servletPath: "+ req.getServletPath)
-    log.info("contextPath: "+ req.getContextPath)
-    log.info("pathInfo: "+ req.getPathInfo)
-    log.info("pathTranslated: "+ req.getPathTranslated)
-    log.info("remoteAddr: "+ req.getRemoteAddr)
-    log.info("remoteHost: "+ req.getRemoteHost)
-    log.info("remotePort: "+ req.getRemotePort)
-  }
 }

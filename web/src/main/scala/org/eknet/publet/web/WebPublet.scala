@@ -45,6 +45,7 @@ object WebPublet extends Logging {
   def close(sc:ServletContext) {
     val wp = WebPublet(sc)
     wp.gitPartition.close()
+    sc.removeAttribute(publetAuthManagerKey.name)
     wp.servletContext.removeAttribute(webPubletKey.name)
   }
 
