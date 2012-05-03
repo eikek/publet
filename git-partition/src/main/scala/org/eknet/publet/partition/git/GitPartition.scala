@@ -45,39 +45,6 @@ class GitPartition (
     }
   }
 
-  private def bareHead(): Option[String] = Option(bareRepo.getRef("HEAD"))
-      .flatMap(ref => Option(ref.getObjectId)).flatMap(id => Option(id.getName))
-
-  private val pushpoll = actor {
-
-    var currentHead = bareHead()
-    log.info("Starting pushpoll thread.")
-    while (true) {
-      try receive {
-        case "stop" => {
-          log.info("Stopping pushpoll thread.")
-          exit()
-        }
-        case "poll" => {
-          val nh = bareHead()
-          if (currentHead != nh) {
-            log.info(currentHead +" != " + nh +" => updating workspace")
-            currentHead = nh
-            git.pull().call()
-          }
-          Thread.sleep(pollInterval)
-          self ! "poll"
-        }
-      } catch {
-        case e => {
-          log.error("Error in update actor", e)
-          if (!e.isInstanceOf[Error]) self ! "poll"
-        }
-      }
-    }
-  }
-//  pushpoll ! "poll"
-
   Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
     def run() {
       close()
@@ -161,7 +128,6 @@ class GitPartition (
 
   def close() {
     log.info("Close git partition at: "+ workspaceRepo.getWorkTree)
-    pushpoll ! "stop"
     workspaceRepo.close()
     bareRepo.close()
   }
