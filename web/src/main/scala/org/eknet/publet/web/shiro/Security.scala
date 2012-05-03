@@ -4,7 +4,6 @@ import scala.collection.JavaConversions._
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.auth.User
-import org.eknet.publet.web.{WebPublet, WebContext}
 import org.eknet.publet.web.WebContext._
 import org.eknet.publet.Publet
 import org.apache.shiro.realm.AuthorizingRealm
@@ -13,6 +12,10 @@ import org.apache.shiro.web.filter.mgt.{FilterChainResolver, PathMatchingFilterC
 import org.apache.shiro.web.filter.authc.{BasicHttpAuthenticationFilter, FormAuthenticationFilter, AnonymousFilter}
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import grizzled.slf4j.Logging
+import org.eknet.publet.web.{Settings, WebPublet, WebContext}
+import org.apache.shiro.web.util.WebUtils
+import javax.servlet.ServletContext
+import javax.management.remote.rmi._RMIConnection_Stub
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -95,6 +98,19 @@ object Security extends Logging {
     hasPerm(pathPermission(engine, path))
   }
 
+  def loginUrl(sc: Option[ServletContext] = None):String = {
+    val cp = WebContext.getContextPath(sc)
+    val defaultLoginUrl = "/publet/scripts/login.html"
+    val loginUrl = cp.map(_ + defaultLoginUrl).getOrElse(defaultLoginUrl)
+    Settings("publet.loginUrl").getOrElse(loginUrl)
+  }
+
+  def redirectToLoginPage() {
+    val redirect = WebContext().requestPath.asString
+    val params = WebContext().parameters.map(t=>t._1+"="+t._2.mkString(",")).mkString("?", "&", "")
+    WebContext().redirect(loginUrl()+"?redirect="+redirect+params)
+  }
+
   private[publet] def init(publ: WebPublet) {
 
     def createEnvironment(publ: WebPublet) = {
@@ -122,15 +138,19 @@ object Security extends Logging {
 
     def createFilterChainResolver(pam: PubletAuthManager): FilterChainResolver = {
       val resolver = new PathMatchingFilterChainResolver()
-      resolver.getFilterChainManager.addFilter("authc", new FormAuthenticationFilter)
+      val formauth = new FormAuthenticationFilter()
+      formauth.setLoginUrl(loginUrl(Some(publ.servletContext)))
+      resolver.getFilterChainManager.addFilter("authc", formauth)
       resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
       resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
 
-      def filter(str: String) = if (str == "anon") str else "authcBasic"
+      def filter(str: String) = if (str == "anon") str else "authc"
 
       val mappings = pam.urlMappings
+      resolver.getFilterChainManager.createChain("/git/**", "authcBasic")
       if (mappings.isEmpty) resolver.getFilterChainManager.createChain("/**", "anon")
       else mappings.foreach(t => resolver.getFilterChainManager.createChain(t._1, filter(t._2)))
+
       resolver
     }
 

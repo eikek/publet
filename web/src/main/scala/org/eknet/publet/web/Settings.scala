@@ -4,6 +4,7 @@ import util.PropertiesMap
 import WebContext._
 import org.eknet.publet.vfs.{Path, ContentResource}
 import org.eknet.publet.{Publet, Includes}
+import java.io.{FileInputStream, File}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -13,14 +14,9 @@ object Settings extends PropertiesMap {
 
   reload()
 
-  private def allIncludesFile(publet: Publet, filename: String) = publet.rootContainer
-    .lookup((Path(Config.mainMount)/ Includes.allIncludesPath /filename).toAbsolute)
-
   def file = {
-    val publet = WebPublet().publet
-    allIncludesFile(publet, "settings.properties") match {
-      case Some(cr: ContentResource) if (cr.exists) => Some(cr.inputStream)
-      case _ => None
-    }
+    val settingsFile = new File(Config.contentRoot, Includes.allIncludes + "settings.properties")
+    if (settingsFile.exists()) Some(new FileInputStream(settingsFile))
+    else None
   }
 }

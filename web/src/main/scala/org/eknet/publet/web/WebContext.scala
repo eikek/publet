@@ -13,6 +13,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.apache.shiro.web.env.WebEnvironment
 import org.apache.shiro.web.util.WebUtils
 import org.eknet.publet.vfs.{Content, Path}
+import javax.servlet.ServletContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -71,14 +72,6 @@ trait WebContext {
    * @return
    */
   def decodePath: Path
-
-  /**
-   * Returns the context path to this application. This is
-   * either fetched from the config file, or from the request
-   *
-   * @return
-   */
-  def getContextPath: Option[String]
 
   /** Returns the path to this request.
    *
@@ -155,6 +148,18 @@ object WebContext {
   })
 
   /**
+   * Returns the context path to this application. This is
+   * either fetched from the config file, or from the request
+   *
+   * @return
+   */
+  def getContextPath(sc: Option[ServletContext]=None): Option[String] = {
+    val contextPath = Config("publet.contextPath").getOrElse(sc.getOrElse(WebPublet().servletContext).getContextPath)
+    if (contextPath == null || contextPath.isEmpty) None
+    else Some(contextPath)
+  }
+
+  /**
    * Strips the current context path from the given path.
    * If no context path is defined, the given path is returned.
    *
@@ -162,7 +167,7 @@ object WebContext {
    * @return
    */
   def stripPath(path: Path): Path = {
-    WebContext().getContextPath match {
+    getContextPath() match {
       case Some(cp) => path.strip(Path(cp))
       case None => path
     }
@@ -175,7 +180,7 @@ object WebContext {
    * @return
    */
   def rebasePath(path: Path): Path = {
-    WebContext().getContextPath match {
+    getContextPath() match {
       case Some(cp) => Path(cp) / path
       case None => path
     }
@@ -189,7 +194,7 @@ object WebContext {
    * @return
    */
   def rebaseMainPath(path: Path): Path = {
-    WebContext().getContextPath match {
+    getContextPath() match {
       case Some(cp) => Path(cp) / Path(WebContext(mainMount).get) / path
       case None => Path(WebContext(mainMount).get) / path
     }
@@ -248,16 +253,10 @@ object WebContext {
 
     def decodePath: Path = {
       val p = Path(URLDecoder.decode(req.getRequestURI, "UTF-8"))
-      getContextPath match {
+      getContextPath() match {
         case Some(cp) => p.strip(Path(cp))
         case None => p
       }
-    }
-
-    def getContextPath: Option[String] = {
-      val contextPath = Config("publet.contextPath").getOrElse(req.getContextPath)
-      if (contextPath == null || contextPath.isEmpty) None
-      else Some(contextPath)
     }
 
     def requestPath = {

@@ -38,7 +38,7 @@ class RedirectFilter extends SimpleFilter with Logging {
 
   def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val path = WebContext().requestPath
-    val contextPath = WebContext().getContextPath.getOrElse("")
+    val contextPath = WebContext.getContextPath().getOrElse("")
     if (allRedirects.keySet.contains(path.asString)) {
       val newUri = contextPath + allRedirects.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)

@@ -25,9 +25,9 @@ class PubletAuthManager(publet: Publet) extends AuthManager {
     else None
   }
 
-  private def usersResource = allIncludesFile("users.cfg").map(_.asInstanceOf[ContentResource])
-  private def rulesResource = allIncludesFile("permissions.cfg").map(_.asInstanceOf[ContentResource])
-  private def mappingsResource = allIncludesFile("url_authz.cfg").map(_.asInstanceOf[ContentResource])
+  private def usersResource = allIncludesFile("auth/users.cfg").map(_.asInstanceOf[ContentResource])
+  private def rulesResource = allIncludesFile("auth/permissions.cfg").map(_.asInstanceOf[ContentResource])
+  private def mappingsResource = allIncludesFile("auth/url_authz.cfg").map(_.asInstanceOf[ContentResource])
 
   private def configUsers = configFile("users.cfg")
   private def configRules = configFile("permissions.cfg")

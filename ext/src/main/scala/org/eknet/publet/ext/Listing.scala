@@ -14,7 +14,7 @@ object Listing extends ScalaScript {
 
   def anchor(path: Path, res: Resource): String = {
     val container = Resource.isContainer(res)
-    val ref =  WebContext().getContextPath.getOrElse("") +
+    val ref =  WebContext.getContextPath().getOrElse("") +
       (if (container) path.asString else path.withExt("html").asString)
 
     "<a href=\"" + ref + "\">" + path.name.fullName + (if (container) "/" else "") + "</a>"

@@ -21,7 +21,7 @@ object ListContents extends ScalaScript {
 
     val path = ctx.parameter("path").map(Path(_)).getOrElse(ctx.decodePath)
 
-    val prefixPath = WebContext().getContextPath match {
+    val prefixPath = WebContext.getContextPath() match {
       case Some(cp) => cp + "/" + Config.mainMount
       case None => "/" + Config.mainMount
     }

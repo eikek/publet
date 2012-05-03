@@ -9,12 +9,17 @@ import org.eknet.publet.web.WebContext
 import org.eknet.publet.web.util.{Session, Request, Key}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.auth.{Policy, User, AuthManager}
+import org.apache.shiro.crypto.hash._
+import javax.security.auth.login.CredentialException
+import org.apache.shiro.authc.credential.{HashedCredentialsMatcher, SimpleCredentialsMatcher, CredentialsMatcher}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
 class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
+
+  setCredentialsMatcher(new DynamicHashCredentialsMatcher())
 
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val user = token.getPrincipal.toString
@@ -51,5 +56,23 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
   class UserAuthInfo(user: User) extends AuthenticationInfo {
     def getPrincipals = new SimplePrincipalCollection(user, "Publet Protected")
     def getCredentials = user.algorithmPassword._2
+    def algorithm = user.algorithmPassword._1
   }
+
+  override def getCredentialsMatcher = super.getCredentialsMatcher
+
+  class DynamicHashCredentialsMatcher extends CredentialsMatcher {
+    private val fallback = new SimpleCredentialsMatcher()
+
+    def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
+      info match {
+        case ui: UserAuthInfo => {
+          val matcher = ui.algorithm.map(new HashedCredentialsMatcher(_)).getOrElse(fallback)
+          matcher.doCredentialsMatch(token, info)
+        }
+        case _ => fallback.doCredentialsMatch(token, info)
+      }
+    }
+  }
+
 }

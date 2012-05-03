@@ -27,6 +27,8 @@ object PubletFactory {
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
     val cont = new MapContainer()
     cont.addResource(new WebScriptResource(ResourceName("toggleRepo.html"), ToggleGitExport))
+    cont.addResource(new WebScriptResource(ResourceName("login.html"), Login))
+    cont.addResource(new WebScriptResource(ResourceName("logout.html"), Logout))
     publ.mountManager.mount(scriptRoot, cont)
 
     val defaultEngine = new StandardEngine(publ).init()

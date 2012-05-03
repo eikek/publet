@@ -6,9 +6,10 @@ import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.vfs._
 import org.eknet.publet.engine.convert.CodeHtmlConverter
 import util.SimpleContentResource
-import org.eknet.publet.web.{WebPublet, WebContext, Config}
-import org.apache.shiro.authz.AuthorizationException
 import org.eknet.publet.web.shiro.Security
+import org.apache.shiro.authz.{UnauthenticatedException, AuthorizationException}
+import org.eknet.publet.web.{WebPublet, WebContext, Config}
+import scala.Some
 
 /**
  *
@@ -19,19 +20,28 @@ import org.eknet.publet.web.shiro.Security
 trait PageWriter {
   private val log = LoggerFactory.getLogger(getClass)
 
+  def writeUnauthorizedError(resp:HttpServletResponse) {
+    val publet = WebPublet().publet
+    val r401 = publet.process(Path(Config.mainMount+"/.allIncludes/401.html").toAbsolute)
+    if (r401.isDefined) {
+      val resource = new SimpleContentResource(WebContext().requestPath.name, r401.get)
+      val result = publet.engineManager.getEngine('include).get
+        .process(WebContext().requestPath, Seq(resource), ContentType.html)
+      writePage(result, resp)
+
+    } else {
+      resp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+    }
+  }
+
   def writeError(ex: Throwable, resp: HttpServletResponse) {
     log.error("Error!", ex)
     val publet = WebPublet().publet
     if (ex.getCause.isInstanceOf[AuthorizationException]) {
-      val r401 = publet.process(Path(Config.mainMount+"/.allIncludes/401.html").toAbsolute)
-      if (r401.isDefined) {
-        val resource = new SimpleContentResource(WebContext().requestPath.name, r401.get)
-        val result = publet.engineManager.getEngine('include).get
-          .process(WebContext().requestPath, Seq(resource), ContentType.html)
-        writePage(result, resp)
-
+      if (ex.getCause.isInstanceOf[UnauthenticatedException]) {
+        Security.redirectToLoginPage()
       } else {
-        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+        writeUnauthorizedError(resp)
       }
     }
     else if (Config("mode").getOrElse("development") == "development") {

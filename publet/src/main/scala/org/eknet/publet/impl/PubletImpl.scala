@@ -45,11 +45,11 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     findSources(path).toList match {
       case Nil => copy(None)
       case c::cs => {
-        if (c.contentType == path.name.targetType) {
-          copy(None)
+        if (c.contentType == content.contentType) {
+          copy(Some(c.name.ext))
         } else {
           Resource.toModifyable(c).map(_.delete()).getOrElse(sys.error("Resource not modifyable"))
-          copy(None)
+          copy(Some(content.contentType.extensions.head))
         }
       }
     }
