@@ -16,7 +16,7 @@ case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String,
 object ContentType {
 
   val scal = ContentType('scala, Set("scala"), ("text", "scala"))
-  val text = ContentType('text, Set("txt", "text"), ("text", "plain"))
+  val text = ContentType('text, Set("txt", "text", "cfg"), ("text", "plain"))
   val html = ContentType('html, Set("html", "htm"), ("text", "html"))
   val markdown = ContentType('markdown, Set("md", "markdown"), ("text", "markdown"))
   val xml = ContentType('xml, Set("xml"), ("text", "xml"))

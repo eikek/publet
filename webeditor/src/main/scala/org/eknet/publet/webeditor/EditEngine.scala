@@ -5,6 +5,7 @@ import org.eknet.publet.vfs._
 import util.CompositeContentResource
 import xml._
 import org.eknet.publet.web.WebContext
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -78,7 +79,7 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
   def name = 'edit
 
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    val path = WebContext().requestPath
+    Security.checkPerm(name, path)
     if (target.mime._1 == "text")
       del.process(path, Seq(editContent(data.head)), ContentType.html)
     else

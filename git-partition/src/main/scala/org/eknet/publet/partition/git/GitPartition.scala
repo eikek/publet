@@ -8,8 +8,8 @@ import java.io.File
 import fs.FilesystemPartition
 import scala.Option
 import org.slf4j.LoggerFactory
-import actors.Actor
-import Actor._
+import org.eknet.publet.auth.User
+import org.apache.shiro.{ShiroException, SecurityUtils}
 
 /**
  *
@@ -87,10 +87,24 @@ class GitPartition (
       .call()
   }
 
+  private def getCurrentUser = {
+    try {
+      Option(SecurityUtils.getSubject.getPrincipal) flatMap { p =>
+        if (p.isInstanceOf[User]) Some(p.asInstanceOf[User])
+        else None
+      }
+    } catch {
+      case e: ShiroException => None
+    }
+  }
+
   private def commit(c: GitFile, action:String) {
+    val user = getCurrentUser
+    val name = user.map(_.fullname).getOrElse("Publet Git")
+    val email = user.map(_.email).getOrElse("no@none.com")
     git.commit()
       .setMessage(action +" on "+ c.name.fullName)
-      .setAuthor("Publet Git", "no@none.com")
+      .setAuthor(name, email)
       .setAll(true)
       .call()
   }

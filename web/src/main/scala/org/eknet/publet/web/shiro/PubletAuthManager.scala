@@ -33,33 +33,25 @@ class PubletAuthManager(publet: Publet) extends AuthManager {
   private def configRules = configFile("permissions.cfg")
   private def configMappings = configFile("url_authz.cfg")
 
-  def delegate:Option[AuthManager] = {
-    if (active) {
-      val users = configUsers.map(List(_)).getOrElse(List()) :::
-        (if (repositoryUsersAllowed) usersResource.map(List(_)).getOrElse(List()) else List())
+  lazy val delegate: AuthManager = {
+    val users = configUsers.map(List(_)).getOrElse(List()) :::
+      (if (repositoryUsersAllowed) usersResource.map(List(_)).getOrElse(List()) else List())
 
-      val rules = configRules.map(List(_)).getOrElse(List()) :::
-        (if (repositoryUsersAllowed) rulesResource.map(List(_)).getOrElse(List()) else List())
+    val rules = configRules.map(List(_)).getOrElse(List()) :::
+      (if (repositoryUsersAllowed) rulesResource.map(List(_)).getOrElse(List()) else List())
 
-      val mappings = configMappings.map(List(_)).getOrElse(List()) :::
-        (if (repositoryUsersAllowed) mappingsResource.map(List(_)).getOrElse(List()) else List())
+    val mappings = configMappings.map(List(_)).getOrElse(List()) :::
+      (if (repositoryUsersAllowed) mappingsResource.map(List(_)).getOrElse(List()) else List())
 
-      Some(new FileAuthManager(users, rules, mappings))
-    } else {
-      None
-    }
+    new FileAuthManager(users, rules, mappings)
   }
 
-  def active = configRules.isDefined || configUsers.isDefined ||
-    repositoryUsersAllowed && (usersResource.isDefined || rulesResource.isDefined)
+  lazy val isActive = configRules.isDefined || configUsers.isDefined ||
+    (repositoryUsersAllowed && (usersResource.isDefined || rulesResource.isDefined))
 
-  def getUser(name: String) = {
-    delegate flatMap {
-      am => am.getUser(name)
-    }
-  }
+  def getUser(name: String) = delegate.getUser(name)
 
-  def policyFor(username: String) = delegate.map(_.policyFor(username)).getOrElse(Policy.empty)
-  def policyFor(user: User) = delegate.map(_.policyFor(user)).getOrElse(Policy.empty)
-  def urlMappings = delegate.map(_.urlMappings).getOrElse(List())
+  def policyFor(username: String) = delegate.policyFor(username)
+  def policyFor(user: User) = delegate.policyFor(user)
+  def urlMappings = delegate.urlMappings
 }

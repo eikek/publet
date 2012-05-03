@@ -7,6 +7,8 @@ import org.eknet.publet.vfs._
 import org.eknet.publet.engine.convert.CodeHtmlConverter
 import util.SimpleContentResource
 import org.eknet.publet.web.{WebPublet, WebContext, Config}
+import org.apache.shiro.authz.AuthorizationException
+import org.eknet.publet.web.shiro.Security
 
 /**
  *
@@ -19,13 +21,26 @@ trait PageWriter {
 
   def writeError(ex: Throwable, resp: HttpServletResponse) {
     log.error("Error!", ex)
-    if (Config("mode").getOrElse("development") == "development") {
+    val publet = WebPublet().publet
+    if (ex.getCause.isInstanceOf[AuthorizationException]) {
+      val r401 = publet.process(Path(Config.mainMount+"/.allIncludes/401.html").toAbsolute)
+      if (r401.isDefined) {
+        val resource = new SimpleContentResource(WebContext().requestPath.name, r401.get)
+        val result = publet.engineManager.getEngine('include).get
+          .process(WebContext().requestPath, Seq(resource), ContentType.html)
+        writePage(result, resp)
+
+      } else {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+      }
+    }
+    else if (Config("mode").getOrElse("development") == "development") {
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+CodeHtmlConverter.replaceChars(sw.toString)+ "</pre>", ContentType.html)
       val resource = new SimpleContentResource(WebContext().requestPath.name, content)
-      val result = WebPublet().publet.engineManager.getEngine('mainWiki).get
+      val result = publet.engineManager.getEngine('mainWiki).get
         .process(WebContext().requestPath, Seq(resource), ContentType.html)
 
       writePage(result, resp)

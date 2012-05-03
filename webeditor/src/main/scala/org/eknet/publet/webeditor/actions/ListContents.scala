@@ -8,18 +8,13 @@ import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs._
 import ScalaScript._
 import org.eknet.publet.web.{WebPublet, Config, WebContext}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:47
  */
 object ListContents extends ScalaScript {
-
-  private val resourceComparator = (r1: Resource, r2: Resource) => {
-    if (isContainer(r1) && !isContainer(r2)) true
-    else if (isContainer(r2) && !isContainer(r1)) false
-    else r1.name.compareTo(r2.name) < 0
-  }
 
   def serve() = {
     val ctx = WebContext()

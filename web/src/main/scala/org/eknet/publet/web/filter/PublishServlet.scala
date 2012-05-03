@@ -27,7 +27,9 @@ class PublishServlet extends HttpServlet with PageWriter {
     val path = WebContext().requestPath
     val publet = WebPublet().publet
     val targetType = path.name.targetType
-    Security.checkPerm(engineId, path)
+    if (!Security.isAnonymousRequest) {
+      Security.checkPerm(engineId, path)
+    }
     val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).get)
     writePage(html, resp)
   }
@@ -35,7 +37,9 @@ class PublishServlet extends HttpServlet with PageWriter {
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
     val publet = WebPublet().publet
     val path = WebContext().requestPath
-    Security.checkPerm(path)
+    if (!Security.isAnonymousRequest) {
+      Security.checkPerm(Security.get, path)
+    }
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
     val html = publet.process(path, tt)
     writePage(html, resp)

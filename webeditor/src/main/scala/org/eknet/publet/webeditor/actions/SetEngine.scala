@@ -4,6 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{WebPublet, WebContext}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -20,6 +21,7 @@ object SetEngine extends ScalaScript {
           case None => error("Engine '" + t._2 + "' not found.")
           case Some(pe) => {
             val path = WebContext.stripPath(Path(t._1))
+            Security.checkPerm("edit", path)
             log.info("Registering engine " + pe.name + " with url: " + path.asString)
             publet.engineManager.register(path.asString, pe)
             success()

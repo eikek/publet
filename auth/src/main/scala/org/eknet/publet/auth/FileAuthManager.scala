@@ -35,4 +35,6 @@ class FileAuthManager(userFile: Iterable[ContentResource],
   }
 
   def urlMappings = loadMappings
+
+  def isActive = true
 }

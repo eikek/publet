@@ -14,7 +14,7 @@ import org.eknet.publet.auth.{Policy, User, AuthManager}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
-class UsersRealm(db: AuthManager) extends AuthorizingRealm {
+class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
 
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val user = token.getPrincipal.toString

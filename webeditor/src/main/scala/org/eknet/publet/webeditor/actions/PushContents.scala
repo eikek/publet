@@ -4,6 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.engine.scala.ScalaScript._
 import org.eknet.publet.vfs.{Path, Content, ContentType}
 import org.eknet.publet.web.{WebContext, WebPublet}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -27,6 +28,7 @@ object PushContents extends ScalaScript {
   def pushBinary(path: Path) {
     val ctx = WebContext()
     ctx.uploads.foreach(fi => {
+      Security.checkPerm(Security.put, path)
       log.debug("Create {} file", ctx.requestPath.name.targetType)
       WebPublet().publet.push(path, Content(fi.getInputStream, ctx.requestPath.name.targetType))
     })
@@ -39,6 +41,7 @@ object PushContents extends ScalaScript {
     ctx.parameter("page") match {
       case None =>
       case Some(body) => {
+        Security.checkPerm(Security.put, path)
         val target = ctx.parameter("type").getOrElse("markdown")
         log.debug("Write {} file", target)
         publet.push(path, Content(body, ContentType(Symbol(target))))

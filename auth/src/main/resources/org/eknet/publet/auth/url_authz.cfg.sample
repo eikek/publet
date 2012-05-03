@@ -2,9 +2,10 @@
 #
 # This is a simple mapping url path expressions to
 # one of two possible values: `anon` and `auth`. The
-# first means, that permission checks and authentication
-# are disabled for all paths matching the pattern, while
-# the other will trigger a permission checks before access.
+# first means, that permission checks that are performed
+# when processing resources and authentication are disabled
+# for all paths matching the pattern, while the other will
+# trigger permission checks before access.
 #
 # The permission used to check is the url path converted
 # into a permission string.

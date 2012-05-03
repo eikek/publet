@@ -36,20 +36,20 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
   }
 
   def push(path: Path, content: Content) {
-    def copy() {
-      createResource(path, content.contentType) match {
+    def copy(ext: Option[String]) {
+      createResource(path, ext) match {
         case cr: ContentResource => cr.writeFrom(content.inputStream)
         case r@_ => sys.error("Cannot create content for resource: "+ r)
       }
     }
     findSources(path).toList match {
-      case Nil => copy()
+      case Nil => copy(None)
       case c::cs => {
         if (c.contentType == path.name.targetType) {
-          copy()
+          copy(None)
         } else {
           Resource.toModifyable(c).map(_.delete()).getOrElse(sys.error("Resource not modifyable"))
-          copy()
+          copy(None)
         }
       }
     }
@@ -82,8 +82,9 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     }
   }
 
-  def createResource(path: Path, contentType: ContentType): Resource = {
-    createResource(path.withExt(contentType.extensions.head))
+  def createResource(path: Path, ext: Option[String]): Resource = {
+    val p = if (ext.isDefined) path.withExt(ext.get) else path
+    createResource(p)
   }
 
   def mountManager = this

@@ -81,7 +81,7 @@ object GitPartition extends Build {
     id = "git-partition", 
     base = file("git-partition"),
     settings = buildProperties
-  ) dependsOn Publet.module
+  ) dependsOn (Publet.module, Auth.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "git-partition",
@@ -89,7 +89,7 @@ object GitPartition extends Build {
     libraryDependencies ++= deps
   ) ++ bundleSettings
 
-  val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
+  val deps = Seq(slf4jApi, jgit, shiro, grizzledSlf4j, scalaTest)
 }
 
 object ScalaScriptEngine extends Build {

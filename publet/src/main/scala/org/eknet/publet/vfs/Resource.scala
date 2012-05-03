@@ -56,6 +56,12 @@ trait ContainerResource extends Resource with Container
 
 object Resource {
 
+  val resourceComparator = (r1: Resource, r2: Resource) => {
+    if (isContainer(r1) && !isContainer(r2)) true
+    else if (isContainer(r2) && !isContainer(r1)) false
+    else r1.name.compareTo(r2.name) < 0
+  }
+
   def isContainer(r:Resource):Boolean = r match {
     case r:Container => true
     case _ => false
