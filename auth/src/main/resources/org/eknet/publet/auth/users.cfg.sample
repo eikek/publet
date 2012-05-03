@@ -1,0 +1,18 @@
+# The user database file
+#
+# Each line represents one user entry with its different
+# parts separated by a colon. The format is
+#
+#   username:full name:email:role1,role2,role3,...:{[MD5|SHA1|SHA256]}password
+#
+# The username must be unique and is (like the password) mandatory.
+# The password may be encoded using md5 or sha which then must be
+# specified accordingly with the constants "MD5" and "SHA", respectively.
+# Without those identifiers, the password is treated as plain text.
+#
+# Comments must start a line with a `#`
+#
+# Example
+jdoe:John Doe:jdoe@email.com:editor:{}secret
+jdoe2:John Second Doe:jdoe2@email.com:editor:{MD5}5ebe2294ecd0e0f08eab7690d2a6ee69
+jdoe3:John Third Doe:jdoe3@email.com:editor:{SHA256}2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b

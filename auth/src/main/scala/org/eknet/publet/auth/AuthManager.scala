@@ -6,7 +6,10 @@ trait AuthManager {
 
   def getUser(name: String): Option[User]
 
-  def policyFor(username: String): Option[Policy]
+  def policyFor(username: String): Policy
 
+  def policyFor(user: User): Policy
+
+  def urlMappings: List[(String, String)]
 }
 

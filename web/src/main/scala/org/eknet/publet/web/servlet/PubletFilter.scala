@@ -12,7 +12,7 @@ class PubletFilter extends MetaFilter {
 
   override def init(filterConfig: FilterConfig) {
     serveRegex("^/.*")
-      .through(new WebContextFilter)
+//      .through(new WebContextFilter)
       .through(new RedirectFilter)
       .`with`(new PublishServlet)
   }

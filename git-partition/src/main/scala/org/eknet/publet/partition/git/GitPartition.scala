@@ -76,7 +76,7 @@ class GitPartition (
       }
     }
   }
-  pushpoll ! "poll"
+//  pushpoll ! "poll"
 
   Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
     def run() {
@@ -113,6 +113,11 @@ class GitPartition (
 
 
   private val git = new Git(workspaceRepo)
+
+  def updateWorkspace():Boolean = {
+    val result = git.pull().call()
+    result.isSuccessful
+  }
 
   private def push() {
     git.push()

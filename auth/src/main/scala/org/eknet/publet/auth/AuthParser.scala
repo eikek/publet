@@ -10,51 +10,84 @@ import io.Source
  */
 class AuthParser extends JavaTokenParsers {
 
-  private def urlP: Parser[String] = //("(\"|')"+ """[^:]+"""  +"(\"|')").r
-    ("(\"|')" + """([^"\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})*""" + "(\"|')").r
+  private def url: Parser[String] = """[^=]+""".r
+  private def filter: Parser[String] = "auth"|"anon"
 
-  private def url = urlP ^^ (u => u.substring(1, u.length - 1))
+  private def perm: Parser[String] =
+    """[a-zA-Z0-9_:\*]+""".r
+
+  private def role: Parser[String] = ident
+
+  private def fullName: Parser[String] =
+    """[a-zA-Z\s\.]*""".r
+
+  private def email: Parser[String] = """[^:]*""".r
+
+  private def password: Parser[String] = """[^:]*""".r
+
+  private def roles: Parser[List[String]] = repsep(role , ",")
+  private def perms: Parser[List[String]] = repsep(perm, ",")
 
 
-  def principal: Parser[(String, List[String], String)] = ident ~ ":" ~ roles ~ ":" ~ ident ^^ {
-    case p ~ ":" ~ r ~ ":" ~ w => (p, r, w)
+  private def principalParser: Parser[User] = ident~":"~fullName~":"~email~":"~roles~":"~password ^^ {
+    case lo~":"~fn~":"~mail~":"~rs~":"~pw => User(lo, fn, mail, rs.toSet, pw.toCharArray)
+    case _ => sys.error("Wrong user entry")
   }
 
-  def rule: Parser[(String, List[String], List[String])] = url ~ ":" ~ roles ~ ":" ~ perms ^^ {
-    case u ~ ":" ~ r ~ ":" ~ p => (u, r, p)
+  private def permRuleParser: Parser[PermissionRule] = roles~"="~perms ^^ {
+    case rs~"="~ps => PermissionRule(rs.toSet, ps.toSet)
+    case _ => sys.error("Wrong permission input")
   }
 
-  def roles: Parser[List[String]] = repsep(ident, ",")
-
-  def perms: Parser[List[String]] = repsep(ident, ",")
-
-  def parsePrincipal(str: String) = parseAll(principal, str)
-
-  def parsePermission(str: String) = parseAll(rule, str)
-
-  def principal(str: String): User = {
-    val r = parsePrincipal(str).get
-    User(r._1, r._2.toSet, r._3.toCharArray)
+  private def urlMappingParser = url~"="~filter ^^ {
+    case u~"="~f => (u.trim, f.trim)
+    case _ => sys.error("Wrong url mapping input")
   }
 
-  def rule(str: String): Rule = {
-    val r = parsePermission(str).get
-    Rule(r._1, r._2.toSet, r._3.toSet)
-  }
+  def parsePrincipal(str: String) = parseAll(principalParser, str)
+  def parsePermission(str: String) = parseAll(permRuleParser, str)
+  def parseUrlMapping(str: String) = parseAll(urlMappingParser, str)
 
   private def validLine(s: String) = !s.trim.isEmpty && !s.trim.startsWith("#")
 
   def principals(in: InputStream) = Source.fromInputStream(in)
     .getLines()
     .filter(validLine)
-    .map(principal(_)).toSet
+    .map(parsePrincipal(_).get).toSet
 
-  def rules(in: InputStream): List[Rule] = Source.fromInputStream(in)
+  def permissionRules(in: InputStream) = Source.fromInputStream(in)
     .getLines()
     .filter(validLine)
-    .map(rule(_)).toList
+    .map(parsePermission(_).get).toList
+
+  def urlMappings(in: InputStream) = Source.fromInputStream(in)
+    .getLines()
+    .filter(validLine)
+    .map(parseUrlMapping(_).get).toList
+
 }
 
-case class User(username: String, roles: Set[String], password: Array[Char], enabled: Boolean = true)
+case class User(login: String, fullname: String, email: String, roles: Set[String], password: Array[Char], enabled: Boolean = true) {
 
-case class Rule(resource: String, roles: Set[String], permissions: Set[String])
+  login.ensuring(!_.isEmpty, "login is mandatory")
+  password.ensuring(!_.isEmpty, "password is mandatory")
+
+  val algorithmPassword = getAlgorithmAndPassword
+
+  def hasRole(role:String): Boolean = {
+    if (roles.contains("*")) true
+    else roles.contains(role)
+  }
+
+  private def getAlgorithmAndPassword: (Option[String], Array[Char]) = {
+    val algoPassword = """^\{([A-Z0-9a-z]*)\}(.*)""".r
+    new String(password) match {
+      case algoPassword("", p) => (None, p.toCharArray)
+      case algoPassword(a, p) => (Some(a), p.toCharArray)
+      case _ => sys.error("Wrong password input!")
+    }
+  }
+}
+
+case class PermissionRule(roles: Set[String], perms: Set[String])
+

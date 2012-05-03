@@ -48,6 +48,6 @@ object PubletFactory {
     "org.eknet.publet.web.WebContext",
     "org.eknet.publet.web.util.AttributeMap",
     "org.eknet.publet.web.util.Key",
-    "org.apache.shiro.{SecurityUtils => Security}"
+    "org.eknet.publet.web.shiro.Security"
   )
 }

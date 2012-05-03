@@ -77,10 +77,7 @@ class PubletInitListener extends ServletContextListener {
 
     val realm = new UsersRealm(pam)
     webenv.setWebSecurityManager(createWebSecurityManager(publ, realm))
-    createFilterChainResolver match {
-      case Some(fr) => webenv.setFilterChainResolver(fr)
-      case None =>
-    }
+    webenv.setFilterChainResolver(createFilterChainResolver(pam))
     webenv
   }
 
@@ -90,13 +87,17 @@ class PubletInitListener extends ServletContextListener {
     wsm
   }
 
-  def createFilterChainResolver: Option[FilterChainResolver] = {
+  def createFilterChainResolver(pam: PubletAuthManager): FilterChainResolver = {
     val resolver = new PathMatchingFilterChainResolver()
     resolver.getFilterChainManager.addFilter("authc", new FormAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
 
-    resolver.getFilterChainManager.createChain("/**", "authcBasic")
-    Some(resolver)
+    def filter(str: String) = if (str == "anon") str else "authcBasic"
+
+    val mappings = pam.urlMappings
+    if (mappings.isEmpty) resolver.getFilterChainManager.createChain("/**", "anon")
+    else mappings.foreach(t => resolver.getFilterChainManager.createChain(t._1, filter(t._2)))
+    resolver
   }
 }

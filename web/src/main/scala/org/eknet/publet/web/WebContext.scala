@@ -11,6 +11,8 @@ import java.net.URLDecoder
 import shiro.PubletAuthManager
 import util._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import org.apache.shiro.web.env.WebEnvironment
+import org.apache.shiro.web.util.WebUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -97,6 +99,8 @@ trait WebContext {
   def action: Option[String]
 
   def redirect(uri: String)
+
+  def shiroWebEnvironment: WebEnvironment
 
 }
 
@@ -268,6 +272,8 @@ object WebContext {
     def redirect(uri: String) {
       resp.sendRedirect(uri)
     }
+
+    def shiroWebEnvironment = WebUtils.getRequiredWebEnvironment(req.getSession.getServletContext)
   }
 }
 

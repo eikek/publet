@@ -5,7 +5,10 @@ import org.apache.shiro.realm.AuthorizingRealm
 import org.apache.shiro.authz.AuthorizationInfo
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
-import org.eknet.publet.auth.{User, AuthManager}
+import org.eknet.publet.web.WebContext
+import org.eknet.publet.web.util.{Session, Request, Key}
+import org.apache.shiro.SecurityUtils
+import org.eknet.publet.auth.{Policy, User, AuthManager}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,26 +28,28 @@ class UsersRealm(db: AuthManager) extends AuthorizingRealm {
   }
 
   def doGetAuthorizationInfo(principals: PrincipalCollection) = {
-    db.getUser(principals.getPrimaryPrincipal.toString) match {
-      case Some(user) => new PolicyAuthInfo(user)
-      case None => null
-    }
+    val p = principals.getPrimaryPrincipal.asInstanceOf[User]
+    new PolicyAuthInfo(p)
   }
 
   class PolicyAuthInfo(user: User) extends AuthorizationInfo {
     def getRoles = user.roles
 
-    def getStringPermissions = db.policyFor(user.username) match {
-      case None => Set[String]()
-      case Some(p) => p.permissions.flatMap(_.permissions)
+    private def policy = {
+      val op = Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
+      op.getOrElse {
+        val policy = db.policyFor(user)
+        SecurityUtils.getSubject.getSession.setAttribute("policy", policy)
+        policy
+      }
     }
 
+    def getStringPermissions = policy.stringPermissions
     def getObjectPermissions = List()
   }
 
   class UserAuthInfo(user: User) extends AuthenticationInfo {
-    def getPrincipals = new SimplePrincipalCollection(user.username, "Publet Protected")
-
-    def getCredentials = user.password
+    def getPrincipals = new SimplePrincipalCollection(user, "Publet Protected")
+    def getCredentials = user.algorithmPassword._2
   }
 }

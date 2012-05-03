@@ -14,9 +14,10 @@ import javax.servlet._
 class ShiroSecurityFilter extends ShiroFilter {
 
   override def isEnabled = {
+    true
     //only enabled if both user account and permission files are there
-    getServletContext.getAttribute(publetAuthManagerKey.name)
-      .asInstanceOf[PubletAuthManager].active
+//    getServletContext.getAttribute(publetAuthManagerKey.name)
+//      .asInstanceOf[PubletAuthManager].active
   }
 
   //for some reason the servlet context was not available, probably
@@ -35,6 +36,9 @@ object ShiroSecurityFilter {
   }
 
   private class ShiroRequest(req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
-    override def getRemoteUser =  SecurityUtils.getSubject.getPrincipal.toString
+    override def getRemoteUser =  {
+      val p = Option(SecurityUtils.getSubject.getPrincipal)
+      p.map(_.toString).getOrElse("anonymous")
+    }
   }
 }

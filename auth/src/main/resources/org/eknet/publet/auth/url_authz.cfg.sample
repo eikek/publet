@@ -1,0 +1,40 @@
+# Specifies which URLs should be secured.
+#
+# This is a simple mapping url path expressions to
+# one of two possible values: `anon` and `auth`. The
+# first means, that permission checks and authentication
+# are disabled for all paths matching the pattern, while
+# the other will trigger a permission checks before access.
+#
+# The permission used to check is the url path converted
+# into a permission string.
+#
+# For example, to secure all requests to `/main/dev/projects`
+# you'd write this here:
+#
+#   /main/dev/projects/** = auth
+#
+# and define permissions in `permissions.cfg` like this:
+#
+#   projectmembers = get:main:dev:projects:*
+#
+# The first line will activate permission checks for all urls
+# below `/main/dev/projects`, the second line grants the
+# `manager` role the permission `get:main:dev:projects:*`. If a
+# user of role `manager` is accessing `/main/dev/projects/p01`
+# this would result in successfully checking the permission
+# `main:dev:projects:p01`.
+#
+
+# allow anonymous access to the includes and standard css
+/main/.allIncludes/header.html = anon
+/main/.allIncludes/head.html = anon
+/main/.allIncludes/footer.html = anon
+/main/.allIncludes/sidebar.html = anon
+/publet/** = anon
+
+# allow anonymous access to all resources below `/main/scala`
+/main/scala/** = anon
+
+# require authentication and authorize all other requests
+/** = auth
