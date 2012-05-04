@@ -3,10 +3,10 @@ package org.eknet.publet.web
 import scripts._
 import org.eknet.publet.Publet
 import org.eknet.publet.partition.git.GitPartition
-import org.eknet.publet.vfs.util.MapContainer
 import template.{HighlightJs, StandardEngine}
 import org.eknet.publet.engine.scala.{DefaultPubletCompiler, ScalaScriptEngine}
 import org.eknet.publet.vfs.{ResourceName, Path}
+import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,19 +17,20 @@ object PubletFactory {
   def createPublet() = {
     val publ = Publet()
 
-    val gp = new GitPartition(
-      Config.contentRoot,
-      "publetrepo",
-      Config("git.pollInterval").getOrElse("1500").toInt)
-
-    val scriptRoot = Path("/publet/scripts/")
-
+    //main
+    val gp = new GitPartition(Config.contentRoot, "publetrepo", Config("git.pollInterval").getOrElse("1500").toInt)
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
+
+    //scripts
     val cont = new MapContainer()
     cont.addResource(new WebScriptResource(ResourceName("toggleRepo.html"), ToggleGitExport))
     cont.addResource(new WebScriptResource(ResourceName("login.html"), Login))
     cont.addResource(new WebScriptResource(ResourceName("logout.html"), Logout))
-    publ.mountManager.mount(scriptRoot, cont)
+    publ.mountManager.mount(Path("/publet/scripts/"), cont)
+
+    //standard icons
+    val icons = new ClasspathContainer(classOf[StandardEngine], Some(Path("../themes/icons")))
+    publ.mountManager.mount(Path("/publet/icons/"), icons)
 
     val defaultEngine = new StandardEngine(publ).init()
     HighlightJs.install(publ, defaultEngine)

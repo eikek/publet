@@ -10,6 +10,8 @@
 /* import print layout | Druck-Layout einbinden */
 @import url(print/print.css);
 
+@import url(../icons/icons.css);
+
 @media screen {
     #main .ym-wrapper {
         background: #f8f8f8;
