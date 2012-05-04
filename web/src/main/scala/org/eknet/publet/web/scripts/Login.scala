@@ -24,7 +24,7 @@ object Login extends ScalaScript {
     makeHtml {
       <h1>Login</h1>
         <div class="formSubmitResponse">
-          <form class="ym-form linearize-form" action={ actionUrl("login").asString } method="post">
+          <form class="ym-form ym-full linearize-form" style="width:400px; margin:auto;" action={ actionUrl("login").asString } method="post">
             { node }
             <div class="ym-fbox-text">
               <label for="username">Username
