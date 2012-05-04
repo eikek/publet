@@ -55,6 +55,9 @@ trait HtmlTemplate {
     <head>
         <meta charset={ charset }/>
       <title>%s</title>
+      <meta http-equiv="CONTENT-LANGUAGE" content="EN"/>
+      <meta name="revisit-after" content="14 days"/>
+      <meta name="Generator" content="https://github.com/eikek/publet"/>
       %s
     </head>
     <body>

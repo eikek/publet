@@ -8,6 +8,8 @@ import xml.NodeSeq
 import org.eknet.publet.vfs._
 import org.eknet.publet.web.WebContext
 import util._
+import org.eknet.publet.partition.git.GitFile
+import java.util.Date
 
 /** Uses yaml to create a html page layout.
  *
@@ -101,10 +103,11 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     val footer = yamlFooter(path)
     val nav = yamlNav(path)
     val main = stripTitle(content.contentAsString).getOrElse(content.contentAsString)
+    val sig = pageSignature(path, content)
     val base = Path(path.relativeRoot) / yamlPath
     getSidebar(path) match {
-      case Some(sb) => yamlHeaderMainFooter(header, nav, yamlTwoColMain(sb.contentAsString, main), footer, base.asString)
-      case None => yamlHeaderMainFooter(header, nav, yamlOneColMain(main), footer, base.asString)
+      case Some(sb) => yamlHeaderMainFooter(header, nav, yamlTwoColMain(sb.contentAsString, main)+sig, footer, base.asString)
+      case None => yamlHeaderMainFooter(header, nav, yamlOneColMain(main)+sig, footer, base.asString)
     }
   }
 
@@ -203,5 +206,21 @@ class StandardEngine(val publet:Publet) extends PubletEngine
       case Some(c) => c.contentAsString+"\n"
       case None => ""
     }
+  }
+
+  def pageSignature(path: Path, resource: ContentResource): String = {
+    val sig = publet.findSources(path).toList match {
+      case c::cs => c match {
+        case gr: GitFile => gr.lastAuthor map { pi =>
+          "last modified by <em>" + pi.getName + "</em> on <em>"+ pi.getWhen.toString +"</em>"
+        } getOrElse( "" )
+        case _=> resource.lastModification map { lm =>
+          "last modified on <em>"+ new Date(lm).toString + "</em>"
+        } getOrElse( "" )
+      }
+      case _ => ""
+    }
+
+    """<div class="ym-contain-oh"><div class="float-right pageSignature">"""+ sig + """</div></div>"""
   }
 }

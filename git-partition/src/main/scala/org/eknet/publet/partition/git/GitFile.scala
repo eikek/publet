@@ -47,4 +47,8 @@ class GitFile(f: File,
 
   override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
 
+  def lastAuthor = {
+    val commit = gp.lastCommit(this)
+    commit map (_.getAuthorIdent)
+  }
 }

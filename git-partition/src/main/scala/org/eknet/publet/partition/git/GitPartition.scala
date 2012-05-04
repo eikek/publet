@@ -7,9 +7,9 @@ import org.eknet.publet.vfs._
 import java.io.File
 import fs.FilesystemPartition
 import scala.Option
-import org.slf4j.LoggerFactory
 import org.eknet.publet.auth.User
 import org.apache.shiro.{ShiroException, SecurityUtils}
+import grizzled.slf4j.Logging
 
 /**
  *
@@ -22,9 +22,7 @@ class GitPartition (
       val base: File,
       reponame: String,
       pollInterval: Int
-) extends FilesystemPartition(new File(base, reponame+"_wc"), false) {
-
-  private val log = LoggerFactory.getLogger(getClass)
+) extends FilesystemPartition(new File(base, reponame+"_wc"), false) with Logging {
 
   // the working copy is checked out to $base/$reponame_wc while the bare repo is at $base/$reponame.git
 
@@ -32,7 +30,7 @@ class GitPartition (
     val d = new File(base, reponame +".git")
     if (!d.exists()) {
       val r = Git.init().setBare(true).setDirectory(d).call().getRepository
-      log.info("Created bare repository at: "+ r.getDirectory)
+      info("Created bare repository at: "+ r.getDirectory)
       r
     } else {
       val r = new FileRepositoryBuilder()
@@ -40,7 +38,7 @@ class GitPartition (
         .setGitDir(d)
         .readEnvironment()
         .build()
-      log.info("Using bare repository at: "+ r.getDirectory)
+      info("Using bare repository at: "+ r.getDirectory)
       r
     }
   }
@@ -60,14 +58,14 @@ class GitPartition (
       cfg.setBoolean("http", null, "receivepack", true)
       cfg.save()
 
-      log.info("Created workspace at: "+ r.getWorkTree)
+      info("Created workspace at: "+ r.getWorkTree)
       r
     } else {
       val r = new FileRepositoryBuilder()
         .setWorkTree(root)
         .readEnvironment()
         .build();
-      log.info("Using workspace at: "+ r.getWorkTree +" with git dir: "+ r.getDirectory)
+      info("Using workspace at: "+ r.getWorkTree +" with git dir: "+ r.getDirectory)
       r
     }
   }
@@ -78,6 +76,15 @@ class GitPartition (
   def updateWorkspace():Boolean = {
     val result = git.pull().call()
     result.isSuccessful
+  }
+
+  def lastCommit(gf: GitFile) = {
+    val path = gf.file.getAbsolutePath.substring(git.getRepository.getWorkTree.getAbsolutePath.length()+1)
+    var logs = git.log().addPath(path).call().iterator()
+    if (logs.hasNext)
+      Some(logs.next())
+    else
+      None
   }
 
   private def push() {
@@ -102,8 +109,9 @@ class GitPartition (
     val user = getCurrentUser
     val name = user.map(_.fullname).getOrElse("Publet Git")
     val email = user.map(_.email).getOrElse("no@none.com")
+    val message = action +" on "+ c.name.fullName+"\n\nsubject: "+user.map(_.login).getOrElse("anonymous")
     git.commit()
-      .setMessage(action +" on "+ c.name.fullName)
+      .setMessage(message)
       .setAuthor(name, email)
       .setAll(true)
       .call()
@@ -117,7 +125,7 @@ class GitPartition (
       .call()
 
     if (!git.status().call().isClean) {
-      log.info("commit: "+ path.toRelative.asString)
+      info("commit: "+ path.toRelative.asString)
 
       commit(c, "Update")
       push()
@@ -135,7 +143,7 @@ class GitPartition (
 
 
   def close() {
-    log.info("Close git partition at: "+ workspaceRepo.getWorkTree)
+    info("Close git partition at: "+ workspaceRepo.getWorkTree)
     workspaceRepo.close()
     bareRepo.close()
   }

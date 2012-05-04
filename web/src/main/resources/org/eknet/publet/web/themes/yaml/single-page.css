@@ -12,17 +12,18 @@
 
 @media screen {
     #main .ym-wrapper {
-        background: #fff;
+        background: #f8f8f8;
     }
     body {
-        background: #fff;
+        background: #f8f8f8;
     }
 
     /* Layout Module Configuration */
     #main {
-        font-size: 105%;
-        font-family: "Warnock Pro", "Goudy Old Style", "Book Antiqua", Georgia, serif;
-        color: #222;
+        color: #373737;
+        font-size: 16px;
+        font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
     }
 
     #main .ym-wrapper2 {
@@ -37,13 +38,23 @@
         font-size: medium;
         font-style: oblique
     }
+
+    header {
+        background: #212121;
+        background: -moz-linear-gradient(top, #373737, #212121);
+        background: -webkit-linear-gradient(top, #373737, #212121);
+        background: -ms-linear-gradient(top, #373737, #212121);
+        background: -o-linear-gradient(top, #373737, #212121);
+        background: linear-gradient(top, #373737, #212121);
+    }
 }
 
 @media all {
     pre, code {
         color: #000;
-        font-family: "Lucida Console", monospace;
-        font-size: 100%;
+        font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+        font-size: 14px;
+        border-radius: 2px;
     }
     pre {
         border-left: dotted thin #aaaaaa;
@@ -63,5 +74,10 @@
 
     pre.stacktrace {
         font-size: 75%;
+    }
+
+    .pageSignature {
+        font-size: 12px;
+        color: #999999;
     }
 }
