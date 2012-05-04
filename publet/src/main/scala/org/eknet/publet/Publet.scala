@@ -4,6 +4,7 @@ import engine._
 import vfs._
 import convert.PassThrough
 import impl.PubletImpl
+import java.io.InputStream
 
 /**
  *
@@ -47,7 +48,9 @@ trait Publet {
    * @param content
    * @return
    */
-  def push(path: Path, content: Content)
+  def push(path: Path, content: InputStream)
+
+  def delete(path: Path)
 
   /**
    * Finds resources that matches the name of the specified uri

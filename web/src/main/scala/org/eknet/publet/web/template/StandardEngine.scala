@@ -58,6 +58,9 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     jsCont.addResource(new UrlResource(urlOf(jquery), jquery.rn))
     val publJs = "publet.js"
     jsCont.addResource(new UrlResource(urlOf(publJs), publJs.rn))
+    jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/close.png"), "close.png".rn))
+    jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/sticky.min.css"), "sticky.min.css".rn))
+    jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/sticky.min.js"), "sticky.min.js".rn))
     publet.mountManager.mount(jsPath, jsCont)
 
     publet.engineManager.addEngine(includeEngine)
@@ -85,7 +88,9 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     val yamlcss = yamlAt(path, Path("yaml/single-page.css"))
     NodeSeq.fromSeq(<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <link href={ yamlcss.asString } rel="stylesheet" type="text/css"/>
+      <link href={ jsAt(path, Path("sticky.min.css")).asString } rel="stylesheet" type="text/css"/>
       <script src={ jsAt(path, Path("jquery-1.7.2.min.js")).asString } />
+      <script src={ jsAt(path, Path("sticky.min.js")).asString } />
       <script src={ jsAt(path, Path("publet.js")).asString } />
     ).toString()
   }

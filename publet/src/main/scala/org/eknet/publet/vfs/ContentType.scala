@@ -57,4 +57,7 @@ object ContentType {
 
   def forMimeBase(t: ContentType): Seq[ContentType] = all.toSeq.filter(_.mime._1 == t.mime._1)
 
+  def fromExt(ext: String): Option[ContentType] = {
+    all.find(ct => ct.extensions.find(_ == ext).isDefined)
+  }
 }

@@ -5,6 +5,7 @@ import org.eknet.publet.impl.Conversions._
 import org.eknet.publet._
 import engine.{PubletEngine, EngineMangager}
 import vfs._
+import java.io.InputStream
 
 /**
  *
@@ -35,35 +36,35 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     }
   }
 
-  def push(path: Path, content: Content) {
+  def push(path: Path, content: InputStream) {
     def copy(ext: Option[String]) {
       createResource(path, ext) match {
-        case cr: ContentResource => cr.writeFrom(content.inputStream)
+        case cr: ContentResource => cr.writeFrom(content)
         case r@_ => sys.error("Cannot create content for resource: "+ r)
       }
     }
     findSources(path).toList match {
       case Nil => copy(None)
       case c::cs => {
-        if (c.contentType == content.contentType) {
+        if (c.name.ext == path.name.ext) {
           copy(Some(c.name.ext))
         } else {
           Resource.toModifyable(c).map(_.delete()).getOrElse(sys.error("Resource not modifyable"))
-          copy(Some(content.contentType.extensions.head))
+          copy(Some(path.name.ext))
         }
       }
     }
   }
 
+
+  def delete(path: Path) {
+    findSources(path).toList map { c =>
+      Resource.toModifyable(c).map(_.delete()).getOrElse(sys.error("Resource not modifyable"))
+    }
+  }
+
   def findSources(path: Path): Iterable[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
-
-    def matchType(r:Resource):Boolean = {
-      r match {
-        case cc: ContentResource if (cc.contentType == path.name.targetType) => true
-        case _ => false
-      }
-    }
     if (path.name.targetType==ContentType.unknown) Seq()
     else {
       // all extensions but the one requested
