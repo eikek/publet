@@ -14,8 +14,6 @@ class SimpleContentResource(val name: ResourceName, content: Content) extends Co
 
   override def lastModification = content.lastModification
 
-  override def outputStream = content.outputStream
-
   override def length = content.length
 
   override def contentAsString = content.contentAsString

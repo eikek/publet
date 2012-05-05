@@ -4,39 +4,64 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs._
 import util.CompositeContentResource
 import xml._
-import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{WebPublet, WebContext}
 import grizzled.slf4j.Logging
+import org.eknet.publet.web.template.Javascript
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.04.12 00:17
  */
-class EditEngine(del: PubletEngine) extends PubletEngine with Logging {
+class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javascript {
 
-  def editBody(content: ContentResource): NodeSeq = {
-    val path = WebContext().requestPath.withExt(content.name.ext)
+  def contentPath(content: ContentResource) =  {
+    val ext = content.name.ext
+    if (ext != "")
+      WebContext().requestPath.withExt(content.name.ext)
+    else
+      WebContext().requestPath
+  }
+
+  def pushPath(content: ContentResource) = Path(contentPath(content).relativeRoot) / EditorWebExtension.scriptPath / "push.html"
+
+  def deleteButton(content: ContentResource) = {
+    val path = contentPath(content)
+    val delHandler = pushPath(content).asString+"?delete="+path.asString
+    if (Security.hasPerm(Security.delete, path)) {
+      <a class="ym-button ym-delete" onClick="return confirm('Really delete this file?');" href={delHandler}>Delete</a>
+    } else {
+      NodeSeq.Empty
+    }
+  }
+
+  def createForm(content: ContentResource, body: NodeSeq, upload:Boolean): NodeSeq = {
+    val path = contentPath(content)
     val cancelHandler = path.withExt("html").asString
     val pushPath = Path(path.relativeRoot) / EditorWebExtension.scriptPath / "push.html"
-    val delHandler = pushPath.asString+"?delete="+path.asString
+    val delButton = deleteButton(content)
     val head = WebPublet().gitPartition.lastCommit(path.strip.withExt(content.name.ext)).map(_.getId.name())
+    val enctype = if (upload) "multipart/form-data" else ""
+    val saveButton = if (upload) {
+//      <button type="submit" class="ym-button ym-save">Save</button>
+      <button class="ym-button ym-save" onClick="return formAjaxSubmit('editPageForm', 'editFormResponse');">Save</button>
+    } else {
+      <button class="ym-button ym-save" onClick="return formAjaxSubmit('editPageForm', 'editFormResponse');">Save</button>
+    }
     <h3>Edit Page</h3>
       <p>If you'd like to write markdown syntax,
         <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
         is the syntax definition. If you like to use some special html formatting, you can use standard yaml elements as
         <a href="http://www.yaml.de/docs/index.html#yaml-typography">defined here</a>
       </p>
-      <div class="formSubmitResponse"></div>
-      <form action={ pushPath.asString } method="post" class="ym-form linearize-form ym-full">
+      <div id="editFormResponse"></div>
+      <form id="editPageForm" action={ pushPath.asString } method="post" class="ym-form linearize-form ym-full" enctype={enctype}>
         <div class="ym-fbox-button">
-          <button class="ym-button ym-save publetAjaxSubmit">Save</button>
+          { saveButton }
           <a class="ym-button ym-play" href={cancelHandler}>View</a>
-          <a class="ym-button ym-delete" onClick="return confirm('Really delete this file?');" href={delHandler}>Delete</a>
+          { delButton }
         </div>
-          {typeSelect(path, content.contentType)}
-        <div class="ym-fbox-text">
-          <textarea name="page" id="editPage">{content.contentAsString}</textarea>
-        </div>
+        { body }
         <div class="ym-fbox-text">
           <label for="commitMessage">Message</label>
           <input type="text" name="commitMessage" id="commitMessage" size="20"></input>
@@ -48,41 +73,75 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging {
   }
 
   def editContent(content: ContentResource): ContentResource = {
-    val c = NodeContent(editBody(content), ContentType.html)
-    new CompositeContentResource(content, c)
-  }
+    def typeSelect(): NodeSeq = {
+      val path = contentPath(content)
+      val publet = WebPublet().publet
+      val source = publet.findSources(path).headOption
+      val list = ContentType.forMimeBase(WebContext().requestPath.name.targetType)
+      val extensions = list.flatMap(_.extensions).sortWith((t1, t2) => t1 < t2)
 
-  private def typeSelect(path: Path, ct: ContentType): NodeSeq = {
-    val publet = WebPublet().publet
-    val source = publet.findSources(path).headOption
-
-    val list = ContentType.forMimeBase(path.name.targetType)
-    val extensions = list.flatMap(_.extensions).sortWith((t1, t2) => t1 < t2)
-
-    def optionSnippet(ext: String) = {
-      val o = <option>{ext}</option>
-      if (source.exists(_.name.ext == ext)) {
-        o % Attribute("selected", Text("selected"), Null)
-      } else {
-        o
+      def optionSnippet(ext: String) = {
+        val o = <option>{ext}</option>
+        if (source.exists(_.name.ext == ext)) {
+          o % Attribute("selected", Text("selected"), Null)
+        } else {
+          o
+        }
       }
+
+      <div class="ym-fbox-select">
+        <label for="extentionOptions">Extension<sup class="ym-required">*</sup></label>
+        <select id="extentionOptions" name="extension" required="required">
+          { for (ext<-extensions) yield { optionSnippet(ext) }}
+        </select>
+      </div>
     }
 
-    <div class="ym-fbox-select">
-      <label for="extentionOptions">Extension<sup class="ym-required">*</sup></label>
-      <select id="extentionOptions" name="extension" required="required">
-      { for (ext<-extensions) yield { optionSnippet(ext) }}
-      </select>
+    val body = typeSelect() ++ <div class="ym-fbox-text">
+      <textarea name="page" id="editPage">{content.contentAsString}</textarea>
     </div>
+
+    val c = content match {
+      case wc: Writeable => NodeContent(createForm(content, body, false), ContentType.html)
+      case ne if (!ne.exists) => NodeContent(createForm(content, body, false), ContentType.html)
+      case _ => jsFunction(message("Resource is not writeable", Some("error"))).get
+    }
+    new CompositeContentResource(content, c)
   }
 
   def name = 'edit
 
+
+  def uploadBody(path: Path) = {
+    def imageView(): NodeSeq = {
+      if (path.name.targetType.mime._1 == "image")
+        <p>Current image:</p> <img src={path.segments.last} style="max-width:400px;"/>
+      else
+        <p>Current File:
+          <a href={path.segments.last}>
+            {path.segments.last}
+          </a>
+        </p>
+    }
+
+    <div class="ym-fbox-text">
+      <label for="fileInput">File</label>
+      <input id="fileInput" name="file" type="file" maxlength="100000" required="required"></input>
+      <div>{imageView()}</div>
+    </div>
+  }
+
+  def uploadContent(content: ContentResource) = {
+    val formbody = uploadBody(contentPath(content))
+    new CompositeContentResource(content,
+      NodeContent(createForm(content, formbody, true), ContentType.html))
+  }
+
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    Security.checkPerm(name, path)
-    if (target.mime._1 == "text")
+    Security.checkPerm(Security.put, path)
+    if (data.head.contentType.mime._1 == "text")
       del.process(path, Seq(editContent(data.head)), ContentType.html)
     else
-      del.process(path, Seq(UploadContent.uploadContent(path)), ContentType.html)
+      del.process(path, Seq(uploadContent(data.head)), ContentType.html)
   }
 }

@@ -9,11 +9,11 @@ import org.eknet.publet.vfs._
  * @since 01.04.12 14:06
  */
 class FileResource(f: File, root: Path)
-  extends AbstractLocalResource(f, root) with ContentResource with Modifyable {
+  extends AbstractLocalResource(f, root) with ContentResource with Modifyable with Writeable {
 
   def inputStream = new BufferedInputStream(new FileInputStream(file))
 
-  override def outputStream: Option[OutputStream] = Some(new FileOutputStream(file))
+  def outputStream: OutputStream = new FileOutputStream(file)
 
   override def lastModification = Some(file.lastModified())
 

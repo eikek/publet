@@ -24,8 +24,8 @@ object Login extends ScalaScript with Javascript {
 
     makeHtml {
       <h1>Login</h1>
-        <div class="formSubmitResponse"></div>
-        <form class="ym-form ym-full linearize-form" style="width:400px; margin:auto;" action={ actionUrl("login").asString } method="post">
+        <div id="loginResponse"></div>
+        <form id="loginForm" class="ym-form ym-full linearize-form" style="width:400px; margin:auto;" action={ actionUrl("login").asString } method="post">
           { node }
           <div class="ym-fbox-text">
             <label for="username">Username
@@ -40,13 +40,13 @@ object Login extends ScalaScript with Javascript {
               <input type="password" name="password" rows="10" required="required"/>
           </div>
           <input type="hidden" name="a" value="include"/>
-          <button class="ym-button ym-next publetAjaxSubmit">Login</button>
+          <button class="ym-button ym-next" onClick="return formAjaxSubmit('loginForm', 'loginResponse');">Login</button>
         </form>
     }
   }
 
   def alreadyLoggedIn = makeHtml {
-    <span class="logoutSnippet">Logged in as { Security.username }! <a class="ym-button ym-next" href={ actionUrl("logout").asString }>Logout</a></span>
+    <span class="logoutSnippet">Welcome, { Security.username }! <a class="ym-button ym-next" href={ actionUrl("logout").asString }>Logout</a></span>
   }
 
   def loginLink = makeHtml {

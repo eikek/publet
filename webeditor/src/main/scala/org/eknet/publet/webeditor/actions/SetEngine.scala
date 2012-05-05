@@ -22,7 +22,7 @@ object SetEngine extends ScalaScript {
           case Some(pe) => {
             val path = WebContext.stripPath(Path(t._1))
             Security.checkPerm("edit", path)
-            log.info("Registering engine " + pe.name + " with url: " + path.asString)
+            info("Registering engine " + pe.name + " with url: " + path.asString)
             publet.engineManager.register(path.asString, pe)
             success()
           }

@@ -1,6 +1,6 @@
 package org.eknet.publet.vfs.util
 
-import java.io.{InputStream, OutputStream}
+import java.io.OutputStream
 import org.eknet.publet.vfs.{ContentResource, Content, Resource}
 
 /**
@@ -18,11 +18,7 @@ class CompositeContentResource(resource: Resource, content: Content) extends Con
   def contentType = content.contentType
   def inputStream = content.inputStream
   override def lastModification = content.lastModification
-  override def outputStream = content.outputStream
   override def length = content.length
-  override def writeFrom(in: InputStream, message: Option[String] = None) {
-    content.writeFrom(in, message)
-  }
 
   override def copyTo(out: OutputStream) {
     content.copyTo(out)

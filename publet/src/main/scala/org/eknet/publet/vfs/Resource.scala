@@ -1,5 +1,7 @@
 package org.eknet.publet.vfs
 
+import java.io.ByteArrayInputStream
+
 
 /**
  * A resource is an abstract named content, like a file on a
@@ -80,7 +82,7 @@ object Resource {
   }
 
   def emptyContainer(name: ResourceName):ContainerResource = new EmptyContainer(name)
-  def emptyContent(name: ResourceName): ContentResource = new EmptyContent(name)
+  def emptyContent(name: ResourceName, ct: ContentType = ContentType.unknown): ContentResource = new EmptyContent(name, ct)
 
   private class EmptyContainer(val name: ResourceName) extends ContainerResource {
     import ResourceName._
@@ -93,11 +95,10 @@ object Resource {
     def lastModification = None
   }
 
-  private class EmptyContent(val name: ResourceName) extends ContentResource {
+  private class EmptyContent(val name: ResourceName, val contentType: ContentType) extends ContentResource {
 
     def exists = false
-    def contentType = ContentType.unknown
-    def inputStream = throw new RuntimeException("no input available")
+    def inputStream = new ByteArrayInputStream(Array[Byte]())
   }
 
 }

@@ -33,8 +33,6 @@ class UrlResource(val url: Option[URL], val name: ResourceName) extends ContentR
 
   def inputStream = url.get.openStream()
 
-  override def outputStream = if (isWriteable) Some(url.get.openConnection().getOutputStream) else None
-
   override def length = url.flatMap(u => u.openConnection().getContentLength match {
     case -1 => None
     case x => Some(x)

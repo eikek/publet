@@ -21,11 +21,16 @@ object PushContents extends ScalaScript with Logging with Javascript {
   }
 
   def serve() = {
+    val ctx = WebContext()
     WebContext().parameter("delete") match {
       case Some(path) => {
-        delete(Path(path))
-        WebContext().redirect(Path(path).withExt("html").asString)
-        None
+        try {
+          delete(Path(path))
+          WebContext().redirect(Path(path).withExt("html").asString)
+          None
+        } catch {
+          case e:Exception => notify("error", "Error while deleting.", None)
+        }
       }
       case _=> WebContext().parameter("path") match {
         case Some(path) => {
@@ -41,7 +46,7 @@ object PushContents extends ScalaScript with Logging with Javascript {
             }
           }
         }
-        case None => notify("error", "Error while saving!", None)
+        case None => notify("error", "Not enough arguments!", None)
       }
     }
   }
@@ -50,12 +55,12 @@ object PushContents extends ScalaScript with Logging with Javascript {
     val ctx = WebContext()
     ctx.uploads.foreach(fi => {
       Security.checkPerm(Security.put, path)
-      log.debug("Create {} file", ctx.requestPath.name.targetType)
       WebPublet().publet.push(path, fi.getInputStream)
     })
   }
 
   def delete(path: Path) {
+    Security.checkPerm(Security.delete, path)
     info("Deleting now: "+ path)
     WebPublet().publet.delete(path)
   }
@@ -74,7 +79,7 @@ object PushContents extends ScalaScript with Logging with Javascript {
         if (oldhead != newhead) {
           sys.error("The repository has changed since you started editing!")
         }
-        log.debug("Write {} file", target)
+        debug("Write "+target+" file")
         publet.push(path.withExt(target), new ByteArrayInputStream(body.getBytes("UTF-8")), commitMsg)
       }
     }

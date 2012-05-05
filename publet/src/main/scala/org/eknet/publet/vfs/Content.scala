@@ -17,13 +17,7 @@ trait Content {
 
   def lastModification: Option[Long] = None
 
-  def outputStream: Option[OutputStream] = None
-
   def length: Option[Long] = None
-
-  def writeFrom(in: InputStream, message: Option[String] = None) {
-    Content.copy(in, outputStream.get, closeIn = false)
-  }
 
   def copyTo(out: OutputStream) {
     Content.copy(inputStream, out, true, false)
@@ -45,7 +39,7 @@ object Content {
   def apply(file: File, ct: ContentType): Content = new Content {
     def inputStream = new FileInputStream(file);
     override def lastModification = Some(file.lastModified)
-    override def outputStream = Some(new FileOutputStream(file))
+    def outputStream = new FileOutputStream(file)
     val contentType = ct
   }
 

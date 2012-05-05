@@ -14,12 +14,11 @@ class GitFile(f: File,
   }
 
   override def writeFrom(in: InputStream, message: Option[String] = None) {
-    Content.copy(in, new OutStream(super.outputStream.get, message), closeIn = false)
+    Content.copy(in, new OutStream(super.outputStream, message), closeIn = false)
   }
 
-  override def outputStream: Option[OutputStream] = {
-    val out = super.outputStream.get
-    Some(new OutStream(out))
+  override def outputStream: OutputStream = {
+    new OutStream(super.outputStream)
   }
 
   override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, gp)

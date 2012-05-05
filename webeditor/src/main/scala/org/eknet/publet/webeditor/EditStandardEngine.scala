@@ -3,8 +3,9 @@ package org.eknet.publet.webeditor
 import org.eknet.publet.web.template.StandardEngine
 import org.eknet.publet.Publet
 import xml.{Null, Text, Attribute, NodeSeq}
-import org.eknet.publet.vfs.{ContentType, NodeContent, Path}
+import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{WebPublet, WebContext}
+import org.eknet.publet.engine.scala.ScalaScript._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,14 +13,16 @@ import org.eknet.publet.web.{WebPublet, WebContext}
  */
 class EditStandardEngine(publet: Publet) extends StandardEngine(publet) {
   override def getSidebar(path: Path) = {
-    Some(NodeContent(<div>Engine:
-      <select class="publetRegisterEngine">
-        {engineOptions}
-      </select>
-    </div>
+    makeHtml {
+      <div>Engine:
+        <select class="publetRegisterEngine">
+          {engineOptions}
+        </select>
+      </div>
       <h3>File browser</h3>
       <pre id="containerPath"></pre>
-      <div id="filesTree"></div>, ContentType.html))
+      <div id="filesTree"></div>
+    }
   }
 
   private def engineOptions: NodeSeq = {

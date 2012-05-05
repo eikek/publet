@@ -54,10 +54,9 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     def urlOf(name: String) = Option(classOf[StandardEngine].getResource("../themes/"+ name))
 
     val jsCont = new MapContainer()
-    val jquery = "jquery-1.7.2.min.js"
-    jsCont.addResource(new UrlResource(urlOf(jquery), jquery.rn))
-    val publJs = "publet.js"
-    jsCont.addResource(new UrlResource(urlOf(publJs), publJs.rn))
+    jsCont.addResource(new UrlResource(urlOf("jquery-1.7.2.min.js"), "jquery-1.7.2.min.js".rn))
+    jsCont.addResource(new UrlResource(urlOf("jquery.form.js"), "jquery.form.js".rn))
+    jsCont.addResource(new UrlResource(urlOf("publet.js"), "publet.js".rn))
     jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/close.png"), "close.png".rn))
     jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/sticky.min.css"), "sticky.min.css".rn))
     jsCont.addResource(new UrlResource(classOf[StandardEngine].getResource("../themes/sticky/sticky.min.js"), "sticky.min.js".rn))
@@ -90,6 +89,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
       <link href={ yamlcss.asString } rel="stylesheet" type="text/css"/>
       <link href={ jsAt(path, Path("sticky.min.css")).asString } rel="stylesheet" type="text/css"/>
       <script src={ jsAt(path, Path("jquery-1.7.2.min.js")).asString } />
+      <script src={ jsAt(path, Path("jquery.form.js")).asString } />
       <script src={ jsAt(path, Path("sticky.min.js")).asString } />
       <script src={ jsAt(path, Path("publet.js")).asString } />
     ).toString()

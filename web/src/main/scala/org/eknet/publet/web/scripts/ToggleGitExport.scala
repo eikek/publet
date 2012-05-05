@@ -24,7 +24,6 @@ object ToggleGitExport extends ScalaScript {
 
   def serve() = {
     val ctx = WebContext()
-    import ctx._
 
     val exportok = new File(WebPublet().gitPartition.repository, file)
     if (exportok.exists()) {
@@ -36,7 +35,7 @@ object ToggleGitExport extends ScalaScript {
       }
     } else {
       exportok.createNewFile()
-      log.info("Exported publet git repository.")
+      info("Exported publet git repository.")
       if (targetType == ContentType.json) {
         makeJson(Map("success"->true, "message"->String.format(exportOkMsg, gitRepoUrl)))
       } else {

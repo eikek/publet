@@ -29,7 +29,7 @@ div.sticky
     padding:10px;
     position:relative;
 }
-img.sticky-close
+div.sticky-close
 {
     position:absolute;
     top:10px;

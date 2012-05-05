@@ -1,10 +1,10 @@
 package org.eknet.publet.engine.scala
 
-import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.{ContentType, NodeContent, Content}
 import xml.{NodeBuffer, NodeSeq}
 import org.eknet.publet.com.twitter.json.Json
 import java.io.InputStream
+import grizzled.slf4j.Logging
 
 /**
  *
@@ -12,8 +12,7 @@ import java.io.InputStream
  * @since 10.04.12 21:31
  */
 
-trait ScalaScript {
-  protected val log = LoggerFactory.getLogger(getClass)
+trait ScalaScript extends Logging {
 
   def serve(): Option[Content]
 

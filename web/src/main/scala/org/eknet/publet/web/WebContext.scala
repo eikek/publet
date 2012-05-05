@@ -12,7 +12,7 @@ import util._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.apache.shiro.web.env.WebEnvironment
 import org.apache.shiro.web.util.WebUtils
-import org.eknet.publet.vfs.{Content, Path}
+import org.eknet.publet.vfs.Path
 import javax.servlet.ServletContext
 
 /**
@@ -22,6 +22,7 @@ import javax.servlet.ServletContext
 trait WebContext {
 
   def uploads: List[FileItem]
+  def multipartFormFields: List[FileItem]
 
   def session: AttributeMap
 
@@ -213,15 +214,17 @@ object WebContext {
   }
 
   private class WebContextImpl(val req: HttpServletRequest, val resp: HttpServletResponse) extends WebContext {
-    lazy val uploads: List[FileItem] = {
+    lazy val multipartFields = {
       val rct = req.getContentType
       if (rct != null && rct.startsWith("multipart")) {
         val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
-        items.collect({case p:FileItem => p}).filter(!_.isFormField).toList
+        items.collect({case p:FileItem => p}).toList
       } else {
         List[FileItem]()
       }
     }
+    lazy val uploads = multipartFields.filter(!_.isFormField)
+    lazy val multipartFormFields = multipartFields.filter(_.isFormField)
 
     lazy val session = AttributeMap(req.getSession)
 
@@ -247,7 +250,11 @@ object WebContext {
       buf.toMap
     }
 
-    def parameter(name: String) = Option(req.getParameter(name))
+    def parameter(name: String) = {
+      Option(req.getParameter(name)).orElse {
+        multipartFormFields.find(_.getFieldName==name).map(_.getString)
+      }
+    }
 
     lazy val action = parameter("a")
 

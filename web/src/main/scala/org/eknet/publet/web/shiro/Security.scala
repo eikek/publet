@@ -13,9 +13,7 @@ import org.apache.shiro.web.filter.authc.{BasicHttpAuthenticationFilter, FormAut
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{Settings, WebPublet, WebContext}
-import org.apache.shiro.web.util.WebUtils
 import javax.servlet.ServletContext
-import javax.management.remote.rmi._RMIConnection_Stub
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,6 +26,7 @@ object Security extends Logging {
 
   val get = "get"
   val put = "put"
+  val delete = "delete"
 
   def pathPermission(action: String, path: Path) = path.segments.mkString(action+":", ":", "")
   def pathPermission(engine: Symbol, path: Path) = path.segments.mkString(engine.name+":", ":", "")

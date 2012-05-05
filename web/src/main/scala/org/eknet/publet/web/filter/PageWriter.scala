@@ -64,7 +64,10 @@ trait PageWriter {
     val path = WebContext().requestPath
     page match {
       case None => createNew(path, resp)
-      case Some(p) => resp.setContentType(p.contentType.mimeString); p.copyTo(out)
+      case Some(p) => {
+        resp.setContentType(p.contentType.mimeString)
+        p.copyTo(out)
+      };
     }
   }
 
