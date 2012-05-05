@@ -3,8 +3,8 @@ package org.eknet.publet.web.shiro
 import org.eknet.publet.vfs.{Path, ContentResource}
 import org.eknet.publet.{Includes, Publet}
 import org.eknet.publet.vfs.fs.FileResource
-import org.eknet.publet.web.{WebContext, Config}
-import org.eknet.publet.auth.{User, Policy, FileAuthManager, AuthManager}
+import org.eknet.publet.web.Config
+import org.eknet.publet.auth.{User, FileAuthManager, AuthManager}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,7 +33,7 @@ class PubletAuthManager(publet: Publet) extends AuthManager {
   private def configRules = configFile("permissions.cfg")
   private def configMappings = configFile("url_authz.cfg")
 
-  lazy val delegate: AuthManager = {
+  def delegate: AuthManager = {
     val users = configUsers.map(List(_)).getOrElse(List()) :::
       (if (repositoryUsersAllowed) usersResource.map(List(_)).getOrElse(List()) else List())
 
@@ -46,7 +46,7 @@ class PubletAuthManager(publet: Publet) extends AuthManager {
     new FileAuthManager(users, rules, mappings)
   }
 
-  lazy val isActive = configRules.isDefined || configUsers.isDefined ||
+  def isActive = configRules.isDefined || configUsers.isDefined ||
     (repositoryUsersAllowed && (usersResource.isDefined || rulesResource.isDefined))
 
   def getUser(name: String) = delegate.getUser(name)
