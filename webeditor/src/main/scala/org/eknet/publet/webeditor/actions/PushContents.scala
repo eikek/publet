@@ -1,18 +1,24 @@
 package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.engine.scala.ScalaScript._
-import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{WebContext, WebPublet}
 import org.eknet.publet.web.shiro.Security
 import java.io.ByteArrayInputStream
 import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.template.Javascript
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:46
  */
-object PushContents extends ScalaScript with Logging {
+object PushContents extends ScalaScript with Logging with Javascript {
+
+  def notify(level:String, msg: String, head: Option[String]) = {
+    val m = message(msg, Some(level))
+    val headchange = head.map("$('#lastHead').attr('value', '"+ _ + "');").getOrElse("")
+    jsFunction(m+"\n"+ headchange)
+  }
 
   def serve() = {
     WebContext().parameter("delete") match {
@@ -24,11 +30,18 @@ object PushContents extends ScalaScript with Logging {
       case _=> WebContext().parameter("path") match {
         case Some(path) => {
           val p = Path(path)
-          pushBinary(p)
-          pushText(p)
-          makeHtml("<script>\n$(document).ready(function()\n  {\n    $.sticky('<b>Successfully saved!</b>');\n  });\n</script>")
+          try {
+            pushBinary(p)
+            pushText(p)
+            notify("success", "Successfully saved.", getHead(p))
+          } catch {
+            case e:Exception => {
+              error("Error while saving file!", e)
+              notify("error", e.getMessage, None)
+            }
+          }
         }
-        case None => makeHtml("<script>\n$(document).ready(function()\n  {\n    $.sticky('<b>Error while saving!</b>');\n  });\n</script>")
+        case None => notify("error", "Error while saving!", None)
       }
     }
   }
@@ -56,9 +69,18 @@ object PushContents extends ScalaScript with Logging {
         Security.checkPerm(Security.put, path)
         val target = ctx.parameter("extension").getOrElse("md")
         val commitMsg = ctx.parameter("commitMessage").filter(!_.isEmpty)
+        val oldhead = ctx.parameter("head").getOrElse("")
+        val newhead = getHead(path).getOrElse("")
+        if (oldhead != newhead) {
+          sys.error("The repository has changed since you started editing!")
+        }
         log.debug("Write {} file", target)
-        publet.push(path.withExt(target), new ByteArrayInputStream(body.getBytes("UTF-8")))
+        publet.push(path.withExt(target), new ByteArrayInputStream(body.getBytes("UTF-8")), commitMsg)
       }
     }
+  }
+
+  def getHead(path: Path) = {
+    WebPublet().gitPartition.lastCommit(path.strip).map(_.getId.name())
   }
 }

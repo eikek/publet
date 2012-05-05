@@ -48,7 +48,7 @@ trait Publet {
    * @param content
    * @return
    */
-  def push(path: Path, content: InputStream)
+  def push(path: Path, content: InputStream, message: Option[String] = None)
 
   def delete(path: Path)
 

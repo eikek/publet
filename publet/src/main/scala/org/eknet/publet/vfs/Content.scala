@@ -21,7 +21,7 @@ trait Content {
 
   def length: Option[Long] = None
 
-  def writeFrom(in: InputStream) {
+  def writeFrom(in: InputStream, message: Option[String] = None) {
     Content.copy(in, outputStream.get, closeIn = false)
   }
 

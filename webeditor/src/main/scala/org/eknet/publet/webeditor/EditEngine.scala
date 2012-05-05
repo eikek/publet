@@ -6,18 +6,20 @@ import util.CompositeContentResource
 import xml._
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{WebPublet, WebContext}
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.04.12 00:17
  */
-class EditEngine(del: PubletEngine) extends PubletEngine {
+class EditEngine(del: PubletEngine) extends PubletEngine with Logging {
 
   def editBody(content: ContentResource): NodeSeq = {
-    val path = WebContext().requestPath
+    val path = WebContext().requestPath.withExt(content.name.ext)
     val cancelHandler = path.withExt("html").asString
     val pushPath = Path(path.relativeRoot) / EditorWebExtension.scriptPath / "push.html"
     val delHandler = pushPath.asString+"?delete="+path.asString
+    val head = WebPublet().gitPartition.lastCommit(path.strip.withExt(content.name.ext)).map(_.getId.name())
     <h3>Edit Page</h3>
       <p>If you'd like to write markdown syntax,
         <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
@@ -27,9 +29,9 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
       <div class="formSubmitResponse"></div>
       <form action={ pushPath.asString } method="post" class="ym-form linearize-form ym-full">
         <div class="ym-fbox-button">
-          <button class="publetAjaxSubmit">Save</button>
-          <a class="ym-button" href={cancelHandler}>View</a>
-          <a class="ym-button" onClick="return confirm('Really delete this file?');" href={delHandler}>Delete</a>
+          <button class="ym-button ym-save publetAjaxSubmit">Save</button>
+          <a class="ym-button ym-play" href={cancelHandler}>View</a>
+          <a class="ym-button ym-delete" onClick="return confirm('Really delete this file?');" href={delHandler}>Delete</a>
         </div>
           {typeSelect(path, content.contentType)}
         <div class="ym-fbox-text">
@@ -41,6 +43,7 @@ class EditEngine(del: PubletEngine) extends PubletEngine {
         </div>
         <input type="hidden" name="path" value={ path.asString } />
         <input type="hidden" name="a" value="include"/>
+        <input id="lastHead" type="hidden" name="head" value={head.getOrElse("")}/>
       </form>
   }
 

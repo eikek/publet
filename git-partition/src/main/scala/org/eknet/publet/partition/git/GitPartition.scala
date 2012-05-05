@@ -86,6 +86,15 @@ class GitPartition (
     else
       None
   }
+  def lastCommit(path: Path) = {
+    var logs = git.log().addPath(path.toRelative.asString).call().iterator()
+    if (logs.hasNext)
+      Some(logs.next())
+    else
+      None
+  }
+
+  def head = workspaceRepo.resolve("HEAD")
 
   private def push() {
     git.push()
@@ -109,7 +118,7 @@ class GitPartition (
     val user = getCurrentUser
     val name = user.map(_.fullname).getOrElse("Publet Git")
     val email = user.map(_.email).getOrElse("no@none.com")
-    val message = action +" on "+ c.name.fullName+"\n\nsubject: "+user.map(_.login).getOrElse("anonymous")
+    val message = action +"\n\nresource: "+ c.name.fullName+"\nsubject: "+user.map(_.login).getOrElse("anonymous")
     git.commit()
       .setMessage(message)
       .setAuthor(name, email)
@@ -117,7 +126,7 @@ class GitPartition (
       .call()
   }
 
-  protected[git] def commitWrite(c: GitFile) {
+  protected[git] def commitWrite(c: GitFile, message: Option[String] = None) {
     val path = Path(c.file).strip(c.rootPath)
     git.add()
       .addFilepattern(path.toRelative.asString)
@@ -127,7 +136,7 @@ class GitPartition (
     if (!git.status().call().isClean) {
       info("commit: "+ path.toRelative.asString)
 
-      commit(c, "Update")
+      commit(c, message.getOrElse("Update"))
       push()
     }
   }

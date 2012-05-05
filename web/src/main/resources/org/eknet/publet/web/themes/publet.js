@@ -32,6 +32,7 @@ $(document).ready(function() {
         return false;
     }
     function addSubmitHandler() {
+        $(".publetAjaxSubmit").unbind('click');
         $(".publetAjaxSubmit").click(formSubmitHandler);
     }
 
