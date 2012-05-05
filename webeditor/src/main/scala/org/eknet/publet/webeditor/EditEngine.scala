@@ -101,12 +101,8 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
       <textarea name="page" id="editPage">{content.contentAsString}</textarea>
     </div>
 
-    val c = content match {
-      case wc: Writeable => NodeContent(createForm(content, body, false), ContentType.html)
-      case ne if (!ne.exists) => NodeContent(createForm(content, body, false), ContentType.html)
-      case _ => jsFunction(message("Resource is not writeable", Some("error"))).get
-    }
-    new CompositeContentResource(content, c)
+    new CompositeContentResource(content,
+      NodeContent(createForm(content, body, false), ContentType.html))
   }
 
   def name = 'edit
@@ -139,9 +135,14 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
 
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
     Security.checkPerm(Security.put, path)
-    if (data.head.contentType.mime._1 == "text")
-      del.process(path, Seq(editContent(data.head)), ContentType.html)
-    else
-      del.process(path, Seq(uploadContent(data.head)), ContentType.html)
+    if (!data.head.exists || data.head.isInstanceOf[Writeable]) {
+      if (data.head.contentType.mime._1 == "text")
+        del.process(path, Seq(editContent(data.head)), ContentType.html)
+      else
+        del.process(path, Seq(uploadContent(data.head)), ContentType.html)
+    } else {
+      val c = new CompositeContentResource(data.head, jsFunction(message("Resource is not writeable", Some("error"))).get)
+      del.process(path, Seq(c), ContentType.html)
+    }
   }
 }
