@@ -2,6 +2,7 @@ package org.eknet.publet.vfs
 
 import collection.immutable.List
 import java.io.File
+import org.eknet.publet.vfs.Resource._
 
 /**
  *
@@ -84,6 +85,8 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
   def /(s: String): Path = this / Path(s)
 
   def /(rn: ResourceName):Path = this / Path(rn.fullName)
+
+  def /(r: Resource): Path = Path(this.segments++ Path(r.name.fullName).segments, absolute, isContainer(r))
 
   def toFile(p: Path): File = new File(p.asString)
 

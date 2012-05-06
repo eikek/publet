@@ -2,11 +2,12 @@ package org.eknet.publet.web
 
 import scripts._
 import org.eknet.publet.Publet
-import org.eknet.publet.partition.git.GitPartition
 import template.{HighlightJs, StandardEngine}
 import org.eknet.publet.engine.scala.{DefaultPubletCompiler, ScalaScriptEngine}
 import org.eknet.publet.vfs.{ResourceName, Path}
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
+import org.eknet.publet.partition.git.{GitPartManImpl, GitPartition}
+import org.eknet.publet.gitr.{RepositoryName, GitrManImpl}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -14,11 +15,15 @@ import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
  */
 object PubletFactory {
 
+  val mainRepoName = RepositoryName("publetrepo")
+
   def createPublet() = {
     val publ = Publet()
 
     //main
-    val gp = new GitPartition(Config.contentRoot, "publetrepo", Config("git.pollInterval").getOrElse("1500").toInt)
+    val gitr = new GitrManImpl(Config.contentRoot)
+    val gitpartman = new GitPartManImpl(gitr)
+    val gp = gitpartman.getOrCreate(mainRepoName.path, org.eknet.publet.partition.git.Config(None))
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
 
     //scripts
@@ -44,7 +49,7 @@ object PubletFactory {
     val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, defaultEngine.includeEngine)
     publ.engineManager.addEngine(scriptInclude)
 
-    (publ, gp, defaultEngine)
+    (publ, gitr, gitpartman)
   }
 
   def webImports = List(

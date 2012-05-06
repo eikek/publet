@@ -2,7 +2,8 @@ package org.eknet.publet.vfs
 
 import java.io.{InputStream, OutputStream}
 
-/**
+/** A writeable resource.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.05.12 16:19
  */

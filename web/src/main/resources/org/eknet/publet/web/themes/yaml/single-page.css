@@ -12,6 +12,12 @@
 
 @import url(../icons/icons.css);
 
+@media screen, projection {
+    /* override grey-form.css */
+    .ym-form {
+        margin: 0;
+    }
+}
 @media screen {
     #main .ym-wrapper {
         background: #f8f8f8;

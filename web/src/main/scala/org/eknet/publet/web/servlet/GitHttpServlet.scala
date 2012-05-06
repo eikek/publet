@@ -10,8 +10,8 @@ import org.eclipse.jgit.http.server.{GitSmartHttpTools, GitFilter}
 import org.apache.shiro.subject.Subject
 import org.apache.shiro.SecurityUtils
 import org.eclipse.jgit.lib.Constants
-import org.eknet.publet.web.{WebPublet, WebContext, Config}
 import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{PubletFactory, WebPublet, WebContext, Config}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -56,7 +56,7 @@ class GitHttpServlet extends MetaServlet(new GitFilter()) with Logging {
       if (GitSmartHttpTools.isReceivePack(req)) {
         val publ = WebPublet()
         info("Updating git workspace...")
-        publ.gitPartition.updateWorkspace()
+        publ.gitPartMan.get(PubletFactory.mainRepoName.path).foreach(_.updateWorkspace())
       }
 
     } catch {

@@ -1,9 +1,8 @@
 package org.eknet.publet.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
-import java.io.File
 import ScalaScript._
-import org.eknet.publet.web.{WebContext, WebPublet}
+import org.eknet.publet.web.{WebContext, PubletFactory, WebPublet}
 import WebContext._
 import org.eknet.publet.vfs.ContentType
 
@@ -13,8 +12,6 @@ import org.eknet.publet.vfs.ContentType
  */
 object ToggleGitExport extends ScalaScript {
 
-  private val file = "git-daemon-export-ok"
-
   private val exportOkMsg = "Content repository now available under %s."
   private val noExportMsg = "Content repository not exported."
 
@@ -23,18 +20,16 @@ object ToggleGitExport extends ScalaScript {
   def gitRepoUrl = WebContext(contextUrl).get +"/git/publetrepo.git"
 
   def serve() = {
-    val ctx = WebContext()
-
-    val exportok = new File(WebPublet().gitPartition.repository, file)
-    if (exportok.exists()) {
-      exportok.delete()
+    val gitr = WebPublet().gitr
+    val exported = gitr.isExportOk(PubletFactory.mainRepoName)
+    gitr.setExportOk(PubletFactory.mainRepoName, !exported)
+    if (!exported) {
       if (targetType == ContentType.json) {
         makeJson(Map("success" -> true, "message" -> noExportMsg))
       } else {
         makeHtml(<p class="box success">{ noExportMsg }</p>)
       }
     } else {
-      exportok.createNewFile()
       info("Exported publet git repository.")
       if (targetType == ContentType.json) {
         makeJson(Map("success"->true, "message"->String.format(exportOkMsg, gitRepoUrl)))

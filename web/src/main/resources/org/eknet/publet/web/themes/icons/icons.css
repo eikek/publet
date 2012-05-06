@@ -201,6 +201,13 @@
     height: 16px;
     background: url(bullet_toggle_plus.png) no-repeat;
 }
+.icon_lightbulb {
+    display: inline-block;
+    margin-bottom: -2px;
+    width: 16px;
+    height: 16px;
+    background: url(lightbulb.png) no-repeat;
+}
 .icon_lock {
     display: inline-block;
     margin-bottom: -2px;

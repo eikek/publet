@@ -85,10 +85,10 @@ object GitPartition extends Build {
   lazy val module = Project(
     id = "git-partition", 
     base = file("git-partition"),
-    settings = buildProperties
+    settings = buildSettings
   ) dependsOn (Publet.module, Auth.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+  val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "git-partition",
     description := "Provides a partition for publet around jgit.",
     libraryDependencies ++= deps

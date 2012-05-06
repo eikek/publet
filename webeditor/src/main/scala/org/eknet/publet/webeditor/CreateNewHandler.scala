@@ -13,6 +13,9 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
   def resourceNotFound(path: Path, resp: HttpServletResponse) {
     val targetType = path.name.targetType
     val publet = WebPublet().publet
+    publet.mountManager.resolveMount(path) orElse {
+      sys.error("Invalid path: "+ path.asString)
+    }
     val c = if (targetType.mime._1 == "text") {
       val res = Resource.emptyContent(ResourceName("edit"), ContentType.markdown)
       publet.engineManager.getEngine('edit).get

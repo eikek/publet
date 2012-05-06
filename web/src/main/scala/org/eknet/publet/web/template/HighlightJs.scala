@@ -11,7 +11,7 @@ import org.eknet.publet.vfs.{Content, Path}
  */
 object HighlightJs {
 
-  val root = "/publet/highlightjs"
+  val root = "publet/highlightjs"
 
   def install(publet: Publet, e: StandardEngine) {
     val cp = new ClasspathContainer(classOf[HtmlTemplate], Some(Path("../themes/")))
@@ -21,7 +21,7 @@ object HighlightJs {
   }
 
   def htmlHeadSnippet(path: Path, content: Content): String = {
-    val base = (Path(path.relativeRoot) / Path(root).toRelative).asString+ "/"
+    val base = (Path(path.relativeRoot + root).toRelative).asString+ "/"
 
     NodeSeq.fromSeq(<link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
       <script src={ base + "highlight/highlight.pack.js" }></script>

@@ -30,8 +30,8 @@ import java.util.Date
 class StandardEngine(val publet:Publet) extends PubletEngine
     with WebIncludes with HtmlTemplate {
 
-  val yamlPath = Path("/publet/yaml/")
-  val jsPath = Path("/publet/std/js/")
+  val yamlPath = Path("publet/yaml/")
+  val jsPath = Path("publet/std/js/")
 
   val includeEngine = ConverterEngine('include)
 
@@ -80,8 +80,8 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   }
 
   /** Relocates ref underneath the yaml path */
-  private def yamlAt(path: Path, ref: Path) = Path(path.relativeRoot) / yamlPath / ref
-  private def jsAt(path: Path, ref: Path) = Path(path.relativeRoot) / jsPath / ref
+  private def yamlAt(path: Path, ref: Path) = Path(path.relativeRoot + yamlPath.asString) / ref
+  private def jsAt(path: Path, ref: Path) = Path(path.relativeRoot + jsPath.asString) / ref
 
   def standardHtmlHead(path: Path) = {
     val yamlcss = yamlAt(path, Path("yaml/single-page.css"))
@@ -109,7 +109,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     val nav = yamlNav(path)
     val main = stripTitle(content.contentAsString).getOrElse(content.contentAsString)
     val sig = pageSignature(path, content)
-    val base = Path(path.relativeRoot) / yamlPath
+    val base = Path(path.relativeRoot + yamlPath.asString)
     getSidebar(path) match {
       case Some(sb) => yamlHeaderMainFooter(header, nav, yamlTwoColMain(sb.contentAsString, main)+sig, footer, base.asString)
       case None => yamlHeaderMainFooter(header, nav, yamlOneColMain(main)+sig, footer, base.asString)

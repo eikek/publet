@@ -20,21 +20,16 @@ object ListContents extends ScalaScript {
     val ctx = WebContext()
 
     val path = ctx.parameter("path").map(Path(_)).getOrElse(ctx.decodePath)
-
-    val prefixPath = WebContext.getContextPath() match {
-      case Some(cp) => cp + "/" + Config.mainMount
-      case None => "/" + Config.mainMount
-    }
     val p = WebContext.stripPath(if (path.directory) path else path.parent)
-    val json = createJsonMap(p, WebPublet().publet, prefixPath)
+    val json = createJsonMap(p, WebPublet().publet)
 
     makeJson(json)
   }
 
-  private def createJsonMap(path: Path, publet: Publet, contextPath: String) = {
+  private def createJsonMap(path: Path, publet: Publet) = {
     val jsonMap = mutable.Map[String, Any]()
     jsonMap.put("containerPath", path.asString)
-    jsonMap.put("files", container(path, publet).map(resourceEntry(path, _, contextPath)))
+    jsonMap.put("files", container(path, publet).map(resourceEntry(path, _)))
     if (!path.isRoot) {
       jsonMap.put("parent", path.parent.asString)
     }
@@ -51,7 +46,7 @@ object ListContents extends ScalaScript {
     children(path).toList.sortWith(resourceComparator)
   }
 
-  private def resourceEntry(path: Path, r: Resource, contextPath: String) = {
+  private def resourceEntry(path: Path, r: Resource) = {
     val contentType = r match {
       case cr: ContentResource => cr.contentType.typeName.name
       case cr: ContainerResource => "unknown"
@@ -60,7 +55,7 @@ object ListContents extends ScalaScript {
       "name" -> r.name,
       "container" -> isContainer(r),
       "type" -> contentType,
-      "href" -> (path / r.name).asString
+      "href" -> (path / r).asString
     )
   }
 }

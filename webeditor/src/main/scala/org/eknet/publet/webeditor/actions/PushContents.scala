@@ -22,17 +22,17 @@ object PushContents extends ScalaScript with Logging with Javascript {
 
   def serve() = {
     val ctx = WebContext()
-    WebContext().parameter("delete") match {
+    ctx.parameter("delete") match {
       case Some(path) => {
         try {
           delete(Path(path))
-          WebContext().redirect(Path(path).withExt("html").asString)
+          ctx.redirect(Path(path).withExt("html").asString)
           None
         } catch {
           case e:Exception => notify("error", "Error while deleting.", None)
         }
       }
-      case _=> WebContext().parameter("path") match {
+      case _=> ctx.parameter("path") match {
         case Some(path) => {
           val p = Path(path)
           try {
@@ -86,6 +86,6 @@ object PushContents extends ScalaScript with Logging with Javascript {
   }
 
   def getHead(path: Path) = {
-    WebPublet().gitPartition.lastCommit(path.strip).map(_.getId.name())
+    WebPublet().publet.rootContainer.lookup(path).flatMap(_.lastModification).map(_.toString)
   }
 }

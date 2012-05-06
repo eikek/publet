@@ -40,7 +40,7 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
     val cancelHandler = path.withExt("html").asString
     val pushPath = Path(path.relativeRoot) / EditorWebExtension.scriptPath / "push.html"
     val delButton = deleteButton(content)
-    val head = WebPublet().gitPartition.lastCommit(path.strip.withExt(content.name.ext)).map(_.getId.name())
+    val lastmod = content.lastModification.map(_.toString).getOrElse("")
     val enctype = if (upload) "multipart/form-data" else ""
     val saveButton = if (upload) {
 //      <button type="submit" class="ym-button ym-save">Save</button>
@@ -49,11 +49,6 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
       <button class="ym-button ym-save" onClick="return formAjaxSubmit('editPageForm', 'editFormResponse');">Save</button>
     }
     <h3>Edit Page</h3>
-      <p>If you'd like to write markdown syntax,
-        <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
-        is the syntax definition. If you like to use some special html formatting, you can use standard yaml elements as
-        <a href="http://www.yaml.de/docs/index.html#yaml-typography">defined here</a>
-      </p>
       <div id="editFormResponse"></div>
       <form id="editPageForm" action={ pushPath.asString } method="post" class="ym-form linearize-form ym-full" enctype={enctype}>
         <div class="ym-fbox-button">
@@ -68,8 +63,13 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
         </div>
         <input type="hidden" name="path" value={ path.asString } />
         <input type="hidden" name="a" value="include"/>
-        <input id="lastHead" type="hidden" name="head" value={head.getOrElse("")}/>
+        <input id="lastHead" type="hidden" name="head" value={lastmod}/>
       </form>
+      <p>If you'd like to write markdown syntax,
+        <a href="http://daringfireball.net/projects/markdown/syntax" target="_new">here</a>
+        is the syntax definition. If you like to use some special html formatting, you can use standard yaml elements as
+        <a href="http://www.yaml.de/docs/index.html#yaml-typography">defined here</a>
+      </p>
   }
 
   def editContent(content: ContentResource): ContentResource = {
@@ -78,21 +78,25 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
       val publet = WebPublet().publet
       val source = publet.findSources(path).headOption
       val list = ContentType.forMimeBase(WebContext().requestPath.name.targetType)
-      val extensions = list.flatMap(_.extensions).sortWith((t1, t2) => t1 < t2)
-
-      def optionSnippet(ext: String) = {
-        val o = <option>{ext}</option>
-        if (source.exists(_.name.ext == ext)) {
-          o % Attribute("selected", Text("selected"), Null)
-        } else {
-          o
-        }
-      }
+      val prefExt = source.map(_.name.ext).getOrElse("md")
+      val options = for (ct <- list) yield
+        { <optgroup label={ct.typeName.name}>
+          {
+            for (ext<-ct.extensions.toList.sortWith(_ < _)) yield {
+              val o = <option>{ext}</option>
+              if (prefExt == ext) {
+                o % Attribute("selected", Text("selected"), Null)
+              } else {
+                o
+              }
+            }
+          }
+        </optgroup> }
 
       <div class="ym-fbox-select">
         <label for="extentionOptions">Extension<sup class="ym-required">*</sup></label>
         <select id="extentionOptions" name="extension" required="required">
-          { for (ext<-extensions) yield { optionSnippet(ext) }}
+          { options }
         </select>
       </div>
     }

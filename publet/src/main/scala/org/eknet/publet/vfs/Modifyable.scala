@@ -2,10 +2,13 @@ package org.eknet.publet.vfs
 
 
 /**
+ * A modifyable resource
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 25.04.12 18:25
  */
 trait Modifyable {
+  this: Resource =>
 
   /**
    * Deletes this resource. If this is a container

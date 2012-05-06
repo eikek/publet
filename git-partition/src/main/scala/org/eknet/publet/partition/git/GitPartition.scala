@@ -10,68 +10,12 @@ import scala.Option
 import org.eknet.publet.auth.User
 import org.apache.shiro.{ShiroException, SecurityUtils}
 import grizzled.slf4j.Logging
+import org.eclipse.jgit.lib.Repository
 
-/**
- *
- * @param base
- * @param reponame
- * @param pollInterval the bare repository is polled frequently to integrate the
- *                     latest changes into the workspace
- */
-class GitPartition (
-      val base: File,
-      reponame: String,
-      pollInterval: Int
-) extends FilesystemPartition(new File(base, reponame+"_wc"), false) with Logging {
+class GitPartition (bareRepo: Repository, wsRepo: Repository)
+  extends FilesystemPartition(wsRepo.getWorkTree, false) with Logging {
 
-  // the working copy is checked out to $base/$reponame_wc while the bare repo is at $base/$reponame.git
-
-  private val bareRepo = {
-    val d = new File(base, reponame +".git")
-    if (!d.exists()) {
-      val r = Git.init().setBare(true).setDirectory(d).call().getRepository
-      info("Created bare repository at: "+ r.getDirectory)
-      r
-    } else {
-      val r = new FileRepositoryBuilder()
-        .setBare()
-        .setGitDir(d)
-        .readEnvironment()
-        .build()
-      info("Using bare repository at: "+ r.getDirectory)
-      r
-    }
-  }
-
-  private val workspaceRepo = {
-    if (!root.exists()) {
-      val r = Git.cloneRepository()
-        .setBare(false)
-        .setCloneAllBranches(true)
-        .setURI(bareRepo.getDirectory.toURI.toString)
-        .setDirectory(root)
-        .call().getRepository
-
-      val cfg = r.getConfig
-      cfg.setString("branch", "master", "remote", "origin")
-      cfg.setString("branch", "master", "merge", "refs/heads/master")
-      cfg.setBoolean("http", null, "receivepack", true)
-      cfg.save()
-
-      info("Created workspace at: "+ r.getWorkTree)
-      r
-    } else {
-      val r = new FileRepositoryBuilder()
-        .setWorkTree(root)
-        .readEnvironment()
-        .build();
-      info("Using workspace at: "+ r.getWorkTree +" with git dir: "+ r.getDirectory)
-      r
-    }
-  }
-
-
-  private val git = new Git(workspaceRepo)
+  private val git = new Git(wsRepo)
 
   def updateWorkspace():Boolean = {
     val result = git.pull().call()
@@ -94,12 +38,10 @@ class GitPartition (
       None
   }
 
-  def head = workspaceRepo.resolve("HEAD")
+  def head = wsRepo.resolve("HEAD")
 
   private def push() {
     git.push()
-      .setRemote("origin")
-      .setRefSpecs(new RefSpec("master"))
       .call()
   }
 
@@ -150,14 +92,10 @@ class GitPartition (
     push()
   }
 
-
-  def close() {
-    info("Close git partition at: "+ workspaceRepo.getWorkTree)
-    workspaceRepo.close()
-    bareRepo.close()
-  }
-
   lazy val repository = bareRepo.getDirectory
+
+
+  override def children = super.children.filterNot(_.name.name == ".git/")
 
   override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, this)
   override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, this)
@@ -166,7 +104,7 @@ class GitPartition (
 
 object GitPartition {
 
-  def newDirectory(f: File, root: Path, gp: GitPartition): ContainerResource = new GitDirectory(f, root, gp)
-  def newFile(f: File, root: Path, gp: GitPartition): ContentResource = new GitFile(f, root, gp)
+  def newDirectory(f: File, root: Path, gp: GitPartition) = new GitDirectory(f, root, gp)
+  def newFile(f: File, root: Path, gp: GitPartition) = new GitFile(f, root, gp)
 
 }

@@ -10,6 +10,7 @@ import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthenticatedException, AuthorizationException}
 import org.eknet.publet.web.{WebPublet, WebContext, Config}
 import scala.Some
+import org.eknet.publet.Includes
 
 /**
  *
@@ -22,7 +23,7 @@ trait PageWriter {
 
   def writeUnauthorizedError(resp:HttpServletResponse) {
     val publet = WebPublet().publet
-    val r401 = publet.process(Path(Config.mainMount+"/.allIncludes/401.html").toAbsolute)
+    val r401 = publet.process(Path(Config.mainMount+"/"+Includes.allIncludes+"401.html").toAbsolute)
     if (r401.isDefined) {
       val resource = new SimpleContentResource(WebContext().requestPath.name, r401.get)
       val result = publet.engineManager.getEngine('include).get
@@ -31,6 +32,20 @@ trait PageWriter {
 
     } else {
       resp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+    }
+  }
+
+  def writeInternalError(resp: HttpServletResponse) {
+    val publet = WebPublet().publet
+    val path500 = Path(Config.mainMount+"/"+Includes.allIncludes+"500.html").toAbsolute
+    val r500 = publet.process(path500)
+    if (r500.isDefined) {
+      val resource = new SimpleContentResource(WebContext().requestPath.name, r500.get)
+      val result = publet.engineManager.getEngine('include).get
+        .process(WebContext().requestPath, Seq(resource), ContentType.html)
+      writePage(result, resp)
+    } else {
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
     }
   }
 
@@ -44,7 +59,7 @@ trait PageWriter {
         writeUnauthorizedError(resp)
       }
     }
-    else if (Config("mode").getOrElse("development") == "development") {
+    else if (Config("publet.mode").getOrElse("development") == "development") {
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
@@ -55,7 +70,7 @@ trait PageWriter {
 
       writePage(result, resp)
     } else {
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+      writeInternalError(resp)
     }
   }
 

@@ -1,13 +1,14 @@
 package org.eknet.publet.web
 
 import org.eknet.publet.Publet
-import org.eknet.publet.partition.git.GitPartition
 import shiro.Security
 import template.StandardEngine
 import javax.servlet.ServletContext
 import org.eknet.publet.web.WebContext._
 import grizzled.slf4j.Logging
 import util.Key
+import org.eknet.publet.gitr.GitrMan
+import org.eknet.publet.partition.git.{GitPartMan, GitPartition}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,9 +18,9 @@ trait WebPublet {
 
   def publet: Publet
 
-  def gitPartition: GitPartition
+  def gitr: GitrMan
 
-  def standardEngine: StandardEngine
+  def gitPartMan: GitPartMan
 
   def servletContext: ServletContext
 }
@@ -39,7 +40,7 @@ object WebPublet extends Logging {
 
   def close(sc:ServletContext) {
     val wp = WebPublet(sc)
-    wp.gitPartition.close()
+    wp.gitr.closeAll()
     sc.removeAttribute(publetAuthManagerKey.name)
     wp.servletContext.removeAttribute(webPubletKey.name)
   }
@@ -50,7 +51,9 @@ object WebPublet extends Logging {
     exts.foreach(_.onStartup(this, servletContext))
 
     def publet = triple._1
-    def gitPartition = triple._2
-    def standardEngine = triple._3
+
+    def gitr = triple._2
+
+    def gitPartMan = triple._3
   }
 }
