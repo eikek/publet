@@ -7,3 +7,6 @@ libraryDependencies <+= sbtVersion(v => v match {
 })
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
+
+addSbtPlugin("com.typesafe.sbtosgi" % "sbtosgi" % "0.1.0")
+
