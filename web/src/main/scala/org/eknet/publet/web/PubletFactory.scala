@@ -33,6 +33,11 @@ object PubletFactory {
     cont.addResource(new WebScriptResource(ResourceName("logout.html"), Logout))
     publ.mountManager.mount(Path("/publet/scripts/"), cont)
 
+    val gitrc = new MapContainer()
+    gitrc.addResource(new WebScriptResource(ResourceName("new.html"), GitrNewRepository))
+    gitrc.addResource(new WebScriptResource(ResourceName("myrepos.html"), GitrMyRepositories))
+    publ.mountManager.mount(Path("/gitr"), gitrc)
+
     //standard icons
     val icons = new ClasspathContainer(classOf[StandardEngine], Some(Path("../themes/icons")))
     publ.mountManager.mount(Path("/publet/icons/"), icons)

@@ -1,6 +1,5 @@
 package org.eknet.publet.web.filter
 
-import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletResponse
 import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.vfs._
@@ -11,6 +10,7 @@ import org.apache.shiro.authz.{UnauthenticatedException, AuthorizationException}
 import org.eknet.publet.web.{WebPublet, WebContext, Config}
 import scala.Some
 import org.eknet.publet.Includes
+import grizzled.slf4j.Logging
 
 /**
  *
@@ -18,8 +18,7 @@ import org.eknet.publet.Includes
  * @since 05.04.12 15:12
  *
  */
-trait PageWriter {
-  private val log = LoggerFactory.getLogger(getClass)
+trait PageWriter extends Logging {
 
   def writeUnauthorizedError(resp:HttpServletResponse) {
     val publet = WebPublet().publet
@@ -50,16 +49,18 @@ trait PageWriter {
   }
 
   def writeError(ex: Throwable, resp: HttpServletResponse) {
-    log.error("Error!", ex)
     val publet = WebPublet().publet
     if (ex.getCause.isInstanceOf[AuthorizationException]) {
       if (ex.getCause.isInstanceOf[UnauthenticatedException]) {
+        info("Unauthorized request redirected to login page")
         Security.redirectToLoginPage()
       } else {
+        info("Unauthorized request denied.")
         writeUnauthorizedError(resp)
       }
     }
     else if (Config("publet.mode").getOrElse("development") == "development") {
+      error("Error!", ex)
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
@@ -70,6 +71,7 @@ trait PageWriter {
 
       writePage(result, resp)
     } else {
+      error("Error!", ex)
       writeInternalError(resp)
     }
   }

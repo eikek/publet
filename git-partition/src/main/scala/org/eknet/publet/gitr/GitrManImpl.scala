@@ -98,7 +98,9 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
   def allRepositories(f: (RepositoryName) => Boolean) = {
     def children(xf: File) = if (xf.isDirectory) xf.listFiles(dfilter) else Array[File]()
     def tree(xf: File):Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
-    tree(root).filter(isRepo(_).isDefined).map(f=>Git.open(f).getRepository)
+    tree(root).filter(isRepo(_).isDefined)
+      .filter(dir => f(RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length+1))))
+      .map(dir=>Git.open(dir).getRepository)
   }
 
   def closeAll() {

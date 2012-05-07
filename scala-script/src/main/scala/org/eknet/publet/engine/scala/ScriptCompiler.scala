@@ -112,7 +112,7 @@ class ScriptCompiler(target: AbstractFile,
   }
 }
 
-object ScriptCompiler {
+object ScriptCompiler extends Logging {
 
   def compilerSettings(target: AbstractFile, mp: Option[MiniProject]): Settings = {
     val settings = new Settings()
@@ -131,7 +131,7 @@ object ScriptCompiler {
     settings.bootclasspath.value = (compilerPath ::: libPath).mkString(File.pathSeparator)
     settings.outputDirs.setSingleOutput(target)
 
-    val cp = (libPath::: compilerPath ) ++ impliedClassPath ++ mp.map(_.libraryClassPath).getOrElse(List())
+    val cp = (libPath::: compilerPath ::: servletPath) ++ impliedClassPath ++ mp.map(_.libraryClassPath).getOrElse(List())
     settings.classpath.value = cp.mkString(File.pathSeparator)
     settings
   }
@@ -148,6 +148,11 @@ object ScriptCompiler {
   } catch {
     case e =>
       throw new RuntimeException("Unable to load scala base object from classpath (scala-library jar is missing?)", e)
+  }
+  private lazy val servletPath = try {
+    jarPathOfClass("javax.servlet.Servlet")
+  } catch {
+    case e => sys.error("Unable to load servlet classpath.")
   }
 
   /*

@@ -13,6 +13,7 @@ import org.apache.shiro.web.filter.authc.{BasicHttpAuthenticationFilter, FormAut
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{WebPublet, WebContext}
+import org.apache.shiro.authz.UnauthenticatedException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -22,6 +23,7 @@ object Security extends Logging {
 
   val gitRead = "git:read"
   val gitWrite = "git:write"
+  val gitCreate = "git:create"
 
   val get = "get"
   val put = "put"
@@ -33,6 +35,9 @@ object Security extends Logging {
   def subject = SecurityUtils.getSubject
 
   def isAuthenticated = subject.getPrincipals!=null
+  def checkAuthenticated() {
+    if (!isAuthenticated) throw new UnauthenticatedException()
+  }
 
   /**
    * Returns the currently logged in user or [[scala.None]] if

@@ -14,7 +14,7 @@ class AuthParser extends JavaTokenParsers {
   private def filter: Parser[String] = "auth"|"anon"
 
   private def perm: Parser[String] =
-    """[a-zA-Z0-9_:\*]+""".r
+    """[a-zA-Z0-9_\-:\*\.]+""".r
 
   private def role: Parser[String] = ident
 
