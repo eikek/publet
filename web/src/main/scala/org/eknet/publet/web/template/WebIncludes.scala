@@ -24,11 +24,11 @@ trait WebIncludes extends Includes {
    * @return
    */
   def headerIncludes(path: Path) = {
-    val siblingPath = (p:Path, cr: ContentResource) => includes(path).asString
+    val siblingPath = (p:Path, cr: ContentResource) => p.rebase(path).asString
     val rootPath = (p:Path, cr: ContentResource) => allIncludes(path)
 
     val h = getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
-    getSiblingResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
+    getIncludesResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
     h.toString()
   }
 

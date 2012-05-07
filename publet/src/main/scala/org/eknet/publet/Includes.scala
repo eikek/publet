@@ -2,14 +2,12 @@ package org.eknet.publet
 
 import engine.PubletEngine
 import vfs._
-import org.slf4j.LoggerFactory
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 19:05
  */
 trait Includes {
-  private val log = LoggerFactory.getLogger(getClass)
 
   def allIncludesPath = Path(pathPrefix+ "/"+ Includes.allIncludes).toAbsolute
 
@@ -25,33 +23,33 @@ trait Includes {
    */
   def allIncludes(path:Path) = path.relativeRoot + allIncludesPath.name+ "/" + path.name.fullName
 
-  /**
-   * Returns a path to the specified resource name at `./.includes` location.
-   *
-   * For example, for the path `/a/b/c.html` it would return `/a/b/.includes/c.html`.
-   *
-   * @param path
-   * @return
-   */
-  def includes(path: Path) = path.sibling(Includes.includes) / path.name
-
   def publet: Publet
 
+  /**
+   * The engine used to process the resources in [[.processInclude]]
+   * @return
+   */
   def includeEngine: PubletEngine
 
   /**
-   * Processes the path by first looking at `.includes`
-   * and then at `/.allIncludes`.
+   * Processes the path by first looking at `.includes` and travelling
+   * up the hierarchy. If that fails, it then tries at last `/.allIncludes`.
    *
-   * The path `/a/b/c/d.html` is translated to `/a/b/.includes/d.html`
+   * The path `/a/b/c/d.html` is translated to `/a/b/c/.includes/d.html`
    * and after that to `/.allIncludes/d.html`.
    *
    * @param path
    * @return
    */
   def processInclude(path: Path): Option[Content] = {
-    log.trace("get include: {} and {}", includes(path).asString, (allIncludesPath / path.name).asString)
-    publet.process(includes(path), ContentType.html, includeEngine).orElse {
+    def recursiveInclude(p: Path): Option[Content] = {
+      val cand = p.sibling(Includes.includes) / p.name
+      publet.process(cand, ContentType.html, includeEngine) orElse {
+        if (p.size > 1) recursiveInclude(p.parent.sibling(p.name.fullName))
+        else None
+      }
+    }
+    recursiveInclude(path).orElse {
       publet.process(allIncludesPath/path.name, ContentType.html, includeEngine)
     }
   }
@@ -70,17 +68,18 @@ trait Includes {
   }
 
   /**
-   * Returns a list of all resources at `./.includes` (relative to the
-   * specified path).
+   * Returns a list of all resources at `./.includes`. It first tries at
+   * `.includes/` relative to the given path and travels up the hierarchy
+   * until a `.includes/` folder is found.
    *
    * @param path
    * @return
    */
-  def getSiblingResources(path: Path): List[(Path, ContentResource)] = {
-    val incl = path.sibling(includes(path).asString)
+  def getIncludesResources(path: Path): List[(Path, ContentResource)] = {
+    val incl = path.sibling(Includes.includes)
     publet.rootContainer.lookup(incl) match {
       case Some(c: ContainerResource) => c.children.collect({ case p:ContentResource => p}).map(c=>(incl/c.name, c)).toList
-      case _ => List()
+      case _ => if (path.size>0) getIncludesResources(path.parent) else List()
     }
   }
 }

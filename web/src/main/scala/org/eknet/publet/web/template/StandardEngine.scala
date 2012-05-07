@@ -98,6 +98,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   override def htmlHead(content: ContentResource, source: Seq[ContentResource]) = {
     val path = WebContext().requestPath
     standardHtmlHead(path) +
+    headerIncludes(path) +
     processInclude(path.parent/"head.html").getOrElse(Content.empty(ContentType.html)).contentAsString +
     htmlHeadContribs.toList.map(_.apply(path, content)).mkString("\n")
   }
