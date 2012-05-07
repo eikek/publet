@@ -13,6 +13,10 @@ trait GitPartMan {
   def get(location: Path): Option[GitPartition]
 
   def getOrCreate(location: Path, config: Config): GitPartition
+
+  def setExportOk(location: Path, flag: Boolean): Boolean
+
+  def isExportOk(location: Path): Boolean
 }
 
 case class Config(initial: Option[Map[Path, Content]], branch: String = "master")

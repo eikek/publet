@@ -14,9 +14,12 @@ import org.eclipse.jgit.transport.RefSpec
  */
 class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
 
+  private def pathToBareReponame(p: Path): RepositoryName = RepositoryName(p.name.name+".git")
+  private def pathToWorkspaceReponame(p: Path): RepositoryName = RepositoryName(p.name.name+"_wc")
+
   def create(location: Path, config: Config) = {
-    val bareName = RepositoryName(location.name.name + ".git")
-    val wsName = RepositoryName(location.name.name +"_wc")
+    val bareName = pathToBareReponame(location)
+    val wsName = pathToWorkspaceReponame(location)
 
     val bare = gitr.create(bareName, true)
     val ws = gitr.clone(bareName, wsName, false)
@@ -50,8 +53,8 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
   }
 
   def get(location: Path) = {
-    val bareName = RepositoryName(location.name.name + ".git")
-    val wsName = RepositoryName(location.name.name +"_wc")
+    val bareName = pathToBareReponame(location)
+    val wsName = pathToWorkspaceReponame(location)
 
     val bare = gitr.get(bareName)
     val ws = gitr.get(wsName)
@@ -67,6 +70,10 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
       create(location, config)
     }
   }
+
+  def setExportOk(location: Path, flag: Boolean) = gitr.setExportOk(pathToBareReponame(location), flag)
+
+  def isExportOk(location: Path) = gitr.isExportOk(pathToBareReponame(location))
 
   private def createInitialContent(ws: Repository, init: Map[Path, Content]) {
     val git = Git.wrap(ws)

@@ -1,9 +1,10 @@
 package org.eknet.publet.gitr
 
-import scala.collection.mutable
-import java.io.File
 import org.eclipse.jgit.api.Git
 import grizzled.slf4j.Logging
+import org.eclipse.jgit.util.FS
+import java.io.{FileFilter, File}
+import org.eclipse.jgit.lib.RepositoryCache
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,7 +13,6 @@ import grizzled.slf4j.Logging
 class GitrManImpl(root: File) extends GitrMan with Logging {
 
   private val daemonExportOk = "git-daemon-export-ok"
-  private val names = mutable.Set[RepositoryName]()
 
   if (!root.exists()) {
     if (!root.mkdirs()) sys.error("Cannot create directory for git repos")
@@ -33,7 +33,6 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
     val file = repoFile(name)
     if (file.exists()) sys.error("Repository '"+name+"' already exists")
     val repo = Git.init().setBare(bare).setDirectory(file).call().getRepository
-    names add name
     repo
   }
 
@@ -52,7 +51,6 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
       f.delete()
     }
     deleteall(file)
-    names remove name
   }
 
   def clone(source: RepositoryName, target: RepositoryName, bare: Boolean) = {
@@ -66,7 +64,6 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
       .setDirectory(file)
       .call().getRepository
 
-    names add target
     cloned
   }
 
@@ -92,11 +89,22 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
 
   def getGitrRoot = root
 
+  private def isRepo(f: File) = Option(RepositoryCache.FileKey.resolve(f, FS.detect()))
+
+  private val dfilter = new FileFilter {
+    def accept(pathname: File) = pathname.getName != ".git" && pathname.isDirectory
+  }
+
   def allRepositories(f: (RepositoryName) => Boolean) = {
-    names.filter(f).map(get(_).get)
+    def children(xf: File) = if (xf.isDirectory) xf.listFiles(dfilter) else Array[File]()
+    def tree(xf: File):Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
+    tree(root).filter(isRepo(_).isDefined).map(f=>Git.open(f).getRepository)
   }
 
   def closeAll() {
-    allRepositories(r=>true).foreach(_.close())
+    allRepositories(r=>true).foreach { r =>
+      info("Closing repository: "+ r)
+      r.close()
+    }
   }
 }

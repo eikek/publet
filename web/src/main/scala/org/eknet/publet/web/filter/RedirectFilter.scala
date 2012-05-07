@@ -3,11 +3,8 @@ package org.eknet.publet.web.filter
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.FilterChain
 import org.eknet.publet.web.WebContext._
-import org.eknet.publet.vfs.Path
-import org.slf4j.LoggerFactory
 import grizzled.slf4j.Logging
-import org.eknet.publet.Includes
-import org.eknet.publet.web.{Settings, Config, WebContext}
+import org.eknet.publet.web.{WebPublet, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,9 +29,9 @@ class RedirectFilter extends SimpleFilter with Logging {
    *
    * @return
    */
-  private lazy val redirects = Settings.keySet.filter(_.startsWith("redirect."))
+  private lazy val redirects = WebPublet().settings.keySet.filter(_.startsWith("redirect."))
 
-  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), Settings(key).get)).toMap
+  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), WebPublet().settings(key).get)).toMap
 
   def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
     val path = WebContext().requestPath

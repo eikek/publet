@@ -2,13 +2,13 @@ package org.eknet.publet.web
 
 import org.eknet.publet.Publet
 import shiro.Security
-import template.StandardEngine
 import javax.servlet.ServletContext
 import org.eknet.publet.web.WebContext._
 import grizzled.slf4j.Logging
-import util.Key
 import org.eknet.publet.gitr.GitrMan
-import org.eknet.publet.partition.git.{GitPartMan, GitPartition}
+import org.eknet.publet.partition.git.GitPartMan
+import util.{PropertiesMap, Key}
+import org.eknet.publet.vfs.{ContentResource, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -23,6 +23,8 @@ trait WebPublet {
   def gitPartMan: GitPartMan
 
   def servletContext: ServletContext
+
+  def settings: PropertiesMap
 }
 
 object WebPublet extends Logging {
@@ -55,5 +57,17 @@ object WebPublet extends Logging {
     def gitr = triple._2
 
     def gitPartMan = triple._3
+
+    lazy val settings = new PropertiesMap {
+
+      reload()
+
+      protected def file = {
+        publet.rootContainer.lookup(Path(Config.mainMount+"/.allIncludes/settings.properties")) match {
+          case Some(r: ContentResource) => Some(r.inputStream)
+          case None => None
+        }
+      }
+    }
   }
 }

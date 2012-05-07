@@ -1,17 +1,17 @@
 package org.eknet.publet.web.servlet
 
 import org.eclipse.jgit.http.server.glue.MetaServlet
-import org.eclipse.jgit.transport.resolver.FileResolver
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.slf4j.LoggerFactory
 import javax.servlet._
 import grizzled.slf4j.Logging
 import org.eclipse.jgit.http.server.{GitSmartHttpTools, GitFilter}
-import org.apache.shiro.subject.Subject
-import org.apache.shiro.SecurityUtils
 import org.eclipse.jgit.lib.Constants
+import org.eknet.publet.web.{WebPublet, Config}
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletFactory, WebPublet, WebContext, Config}
+import org.eclipse.jgit.transport.resolver.{ServiceNotAuthorizedException, FileResolver}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -37,28 +37,40 @@ class GitHttpServlet extends MetaServlet(new GitFilter()) with Logging {
     gitFilter.init(fc)
   }
 
+  def getRepositoryName(req:HttpServletRequest): RepositoryName = {
+    val repopath = Path(GitSmartHttpTools.stripServiceSuffix(req.getRequestURI)).strip
+    RepositoryName(repopath.withExt("").asString)
+  }
+
+  def permissionCheck(req:HttpServletRequest): Boolean = {
+    val reponame = getRepositoryName(req)
+    if (GitSmartHttpTools.isUploadPack(req)) {
+      //clone/pull
+      return Security.hasPerm(Security.gitRead, reponame.path)
+    }
+    if (req.getRequestURI.endsWith("/"+ Constants.INFO_REFS)) {
+      //fetch
+      return Security.hasPerm(Security.gitRead, reponame.path)
+    }
+    if (GitSmartHttpTools.isReceivePack(req)) {
+      //push
+      return Security.hasPerm(Security.gitWrite, reponame.path)
+    }
+    true
+  }
   override def service(req: HttpServletRequest, res: HttpServletResponse) {
     try {
-      val subj = SecurityUtils.getSubject
-      if (GitSmartHttpTools.isUploadPack(req)) {
-        //clone/pull
-        subj.checkPermission(Security.gitRead)
+      if (!permissionCheck(req)) {
+        throw new ServiceNotAuthorizedException()
+      } else {
+        super.service(req, res)
+        if (GitSmartHttpTools.isReceivePack(req)) {
+          val publ = WebPublet()
+          info("Updating git workspace...")
+          val reponame = getRepositoryName(req)
+          publ.gitPartMan.get(reponame.path).foreach(_.updateWorkspace())
+        }
       }
-      if (req.getRequestURI.endsWith("/"+ Constants.INFO_REFS)) {
-        //fetch
-        subj.checkPermission(Security.gitRead)
-      }
-      if (GitSmartHttpTools.isReceivePack(req)) {
-        //push
-        subj.checkPermission(Security.gitWrite)
-      }
-      super.service(req, res)
-      if (GitSmartHttpTools.isReceivePack(req)) {
-        val publ = WebPublet()
-        info("Updating git workspace...")
-        publ.gitPartMan.get(PubletFactory.mainRepoName.path).foreach(_.updateWorkspace())
-      }
-
     } catch {
       case e:Throwable => log.error("Error in git servlet!", e); throw e;
     }

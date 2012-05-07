@@ -6,8 +6,8 @@ import template.{HighlightJs, StandardEngine}
 import org.eknet.publet.engine.scala.{DefaultPubletCompiler, ScalaScriptEngine}
 import org.eknet.publet.vfs.{ResourceName, Path}
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
-import org.eknet.publet.partition.git.{GitPartManImpl, GitPartition}
-import org.eknet.publet.gitr.{RepositoryName, GitrManImpl}
+import org.eknet.publet.partition.git.GitPartManImpl
+import org.eknet.publet.gitr.GitrManImpl
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,7 +15,7 @@ import org.eknet.publet.gitr.{RepositoryName, GitrManImpl}
  */
 object PubletFactory {
 
-  val mainRepoName = RepositoryName("publetrepo")
+  val mainRepoPath = Path("publetrepo")
 
   def createPublet() = {
     val publ = Publet()
@@ -23,7 +23,7 @@ object PubletFactory {
     //main
     val gitr = new GitrManImpl(Config.contentRoot)
     val gitpartman = new GitPartManImpl(gitr)
-    val gp = gitpartman.getOrCreate(mainRepoName.path, org.eknet.publet.partition.git.Config(None))
+    val gp = gitpartman.getOrCreate(mainRepoPath, org.eknet.publet.partition.git.Config(None))
     publ.mountManager.mount(Path("/"+ Config.mainMount), gp)
 
     //scripts

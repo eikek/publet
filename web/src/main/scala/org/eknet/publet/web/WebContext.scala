@@ -121,7 +121,7 @@ object WebContext {
     case Session => synchronized {
       // Config has preference
       Config("publet.contextUrl").getOrElse {
-        Settings("publet.contextUrl").getOrElse {
+        WebPublet().settings("publet.contextUrl").getOrElse {
           val uriRegex = "https?://[^:]+(:\\d+)?" + request.getContextPath
           uriRegex.r.findFirstIn(request.getRequestURL.toString).get
         }

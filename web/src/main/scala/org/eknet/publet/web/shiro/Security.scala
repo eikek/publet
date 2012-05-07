@@ -12,8 +12,7 @@ import org.apache.shiro.web.filter.mgt.{FilterChainResolver, PathMatchingFilterC
 import org.apache.shiro.web.filter.authc.{BasicHttpAuthenticationFilter, FormAuthenticationFilter, AnonymousFilter}
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{Settings, WebPublet, WebContext}
-import javax.servlet.ServletContext
+import org.eknet.publet.web.{WebPublet, WebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -97,11 +96,11 @@ object Security extends Logging {
     hasPerm(pathPermission(engine, path))
   }
 
-  def loginUrl(sc: Option[ServletContext] = None):String = {
-    val cp = WebContext.getContextPath(sc)
+  def loginUrl():String = {
+    val cp = WebContext.getContextPath()
     val defaultLoginUrl = "/publet/scripts/login.html"
     val loginUrl = cp.map(_ + defaultLoginUrl).getOrElse(defaultLoginUrl)
-    Settings("publet.loginUrl").getOrElse(loginUrl)
+    WebPublet().settings("publet.loginUrl").getOrElse(loginUrl)
   }
 
   def redirectToLoginPage() {
@@ -135,10 +134,17 @@ object Security extends Logging {
       wsm
     }
 
+    def loginUrl():String = {
+      val cp = Option(publ.servletContext.getContextPath).filter(!_.isEmpty)
+      val defaultLoginUrl = "/publet/scripts/login.html"
+      val loginUrl = cp.map(_ + defaultLoginUrl).getOrElse(defaultLoginUrl)
+      publ.settings("publet.loginUrl").getOrElse(loginUrl)
+    }
+
     def createFilterChainResolver(pam: PubletAuthManager): FilterChainResolver = {
       val resolver = new PathMatchingFilterChainResolver()
       val formauth = new FormAuthenticationFilter()
-      formauth.setLoginUrl(loginUrl(Some(publ.servletContext)))
+      formauth.setLoginUrl(loginUrl())
       resolver.getFilterChainManager.addFilter("authc", formauth)
       resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
       resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)

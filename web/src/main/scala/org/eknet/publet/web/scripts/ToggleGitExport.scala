@@ -4,7 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.{WebContext, PubletFactory, WebPublet}
 import WebContext._
-import org.eknet.publet.vfs.ContentType
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -19,25 +19,37 @@ object ToggleGitExport extends ScalaScript {
 
   def gitRepoUrl = WebContext(contextUrl).get +"/git/publetrepo.git"
 
-  def serve() = {
-    val gitr = WebPublet().gitr
-    val exported = gitr.isExportOk(PubletFactory.mainRepoName)
-    gitr.setExportOk(PubletFactory.mainRepoName, !exported)
-    if (!exported) {
-      if (targetType == ContentType.json) {
-        makeJson(Map("success" -> true, "message" -> noExportMsg))
-      } else {
-        makeHtml(<p class="box success">{ noExportMsg }</p>)
-      }
-    } else {
-      info("Exported publet git repository.")
-      if (targetType == ContentType.json) {
-        makeJson(Map("success"->true, "message"->String.format(exportOkMsg, gitRepoUrl)))
-      } else {
-        val repo = "<code>"+ gitRepoUrl +"</code>"
-        makeHtml("<p class='box success'>"+ String.format(exportOkMsg, repo) +"</p>")
-      }
+  def isExported = {
+    val gitpartman = WebPublet().gitPartMan
+    gitpartman.isExportOk(PubletFactory.mainRepoPath)
+  }
+
+  def markup() = {
+    val msgOk = <span>Content repository now available under <code>{gitRepoUrl}</code>.</span>
+    val msgOff = <span>Content repository not exported.</span>
+    val exported = isExported
+    makeHtml {
+      <p class="box warning">
+        { if (exported) msgOk else msgOff }
+        <form action={ WebContext().requestPath.asString } method="post">
+          <input type="hidden" name="toggle"/>
+          <button class="ym-button ym-star" type="submit">{ if (exported) "Make repository private" else "Publish repository" }</button>
+        </form>
+      </p>
     }
+  }
+
+  def serve() = {
+    WebContext().parameter("toggle") match {
+      case Some(_) => {
+        Security.checkPerm("git:export", PubletFactory.mainRepoPath)
+        val gitpartman = WebPublet().gitPartMan
+        val exported = gitpartman.isExportOk(PubletFactory.mainRepoPath)
+        gitpartman.setExportOk(PubletFactory.mainRepoPath, !exported)
+      }
+      case None =>
+    }
+    markup()
   }
 
 }
