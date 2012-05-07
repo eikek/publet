@@ -22,7 +22,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     val ws = gitr.clone(bareName, wsName, false)
 
     //create some initial content
-    val init = config.initial.getOrElse(initialResource)
+    val init = config.initial.getOrElse(initialResources)
     createInitialContent(ws, init)
 
     //rename branch, in case different from "master"
@@ -68,12 +68,16 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     }
   }
 
-  private def createInitialContent(ws: Repository, init: Content) {
-    val indexmd = new File(ws.getWorkTree, "index.md")
-    init.copyTo(new FileOutputStream(indexmd))
-
+  private def createInitialContent(ws: Repository, init: Map[Path, Content]) {
     val git = Git.wrap(ws)
-    git.add().addFilepattern("index.md").setUpdate(false).call()
+    for (t <- init) {
+      val file = t._1.segments.foldLeft(ws.getWorkTree)((file, seg) => new File(file, seg))
+      if (!file.getParentFile.exists()) file.getParentFile.mkdirs()
+      t._2.copyTo(new FileOutputStream(file))
+
+      git.add().addFilepattern(t._1.segments.mkString(File.separator)).setUpdate(false).call()
+    }
+
     git.commit()
       .setAuthor("Publet Install", "none@none")
       .setMessage("Initial commit.")
@@ -82,14 +86,19 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
 
   }
 
-  private lazy val initialResource = {
-    val content = """# Welcome
+  private lazy val initialResources = {
+    val ct = ContentType.markdown
+    val index = """# Welcome
 
-    <p class="box success">Publet installation was successful!</p>
+<p class="box success">Publet installation was successful!</p>
 
-    Publet has been succesfully installed. You're viewing its sample page
-    right now. Please have a look at the [user guide](guide) to get started.
-    """
-    Content(content, ContentType.markdown)
+Publet has been succesfully installed. You're viewing its sample page
+right now. Please have a look at the [user guide](guide) to get started.
+"""
+    Map(
+      Path("/index.md") -> Content(index, ct),
+      Path("/.includes/nav.md") -> Content("* [Edit](?a=edit)", ct),
+      Path("/.includes/header.md") -> Content("# ${pageTitle}", ct)
+    )
   }
 }

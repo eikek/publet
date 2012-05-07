@@ -15,4 +15,4 @@ trait GitPartMan {
   def getOrCreate(location: Path, config: Config): GitPartition
 }
 
-case class Config(initial: Option[Content], branch: String = "master")
+case class Config(initial: Option[Map[Path, Content]], branch: String = "master")

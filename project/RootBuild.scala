@@ -55,7 +55,7 @@ object RootBuild extends Build {
     scalacOptions ++= Seq("-unchecked", "-deprecation")
   )
 
-  lazy val deps = Seq(osgiCore)
+  lazy val deps = Seq()
 
 }
 
