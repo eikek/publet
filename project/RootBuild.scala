@@ -62,6 +62,24 @@ object RootBuild extends Build {
 
 // Sub Modules
 
+object Gitr extends Build {
+
+  lazy val module = Project(
+    id = "gitr",
+    base = file("gitr"),
+    settings = buildSettings
+  )
+
+  lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-gitr",
+    libraryDependencies ++= deps
+  ) ++ osgiSettings
+
+  lazy val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
+
+}
+
+
 object Publet extends Build {
 
   lazy val module = Project(
@@ -83,13 +101,13 @@ object Publet extends Build {
 object GitPartition extends Build {
 
   lazy val module = Project(
-    id = "git-partition", 
-    base = file("git-partition"),
+    id = "git-part", 
+    base = file("git-part"),
     settings = buildSettings
   ) dependsOn (Publet.module, Auth.module)
 
   val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "git-partition",
+    name := "publet-git-part",
     description := "Provides a partition for publet around jgit.",
     libraryDependencies ++= deps
   ) ++ osgiSettings 
