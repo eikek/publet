@@ -38,7 +38,7 @@ object RootBuild extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (Web.module, Publet.module, GitPartition.module, Auth.module, War.module, WebEditor.module, Ext.module)
+  ) aggregate (Web.module, Publet.module, GitPart.module, Auth.module, War.module, WebEditor.module, Ext.module)
 
   val globalScalaVersion = "2.9.1"
 
@@ -98,13 +98,13 @@ object Publet extends Build {
 
 }
 
-object GitPartition extends Build {
+object GitPart extends Build {
 
   lazy val module = Project(
     id = "git-part", 
     base = file("git-part"),
     settings = buildSettings
-  ) dependsOn (Publet.module, Auth.module)
+  ) dependsOn (Publet.module, Auth.module, Gitr.module)
 
   val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-git-part",
@@ -112,7 +112,7 @@ object GitPartition extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings 
 
-  val deps = Seq(slf4jApi, jgit, shiro, grizzledSlf4j, scalaTest)
+  val deps = Seq(slf4jApi, shiro, grizzledSlf4j, scalaTest)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.gitr", "org.eknet.publet.partition.git")
 }
@@ -143,7 +143,7 @@ object Web extends Build {
     id = "web", 
     base = file("web"),
     settings = buildProperties
-  ) dependsOn (Publet.module, ScalaScriptEngine.module, GitPartition.module, Auth.module)
+  ) dependsOn (Publet.module, ScalaScriptEngine.module, GitPart.module, Auth.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
@@ -167,7 +167,7 @@ object War extends Build {
     id = "war",
     base = file("war"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPartition.module, Web.module, WebEditor.module, Ext.module)
+  ) dependsOn (Publet.module, GitPart.module, Web.module, WebEditor.module, Ext.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",

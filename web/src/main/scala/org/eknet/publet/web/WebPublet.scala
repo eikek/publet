@@ -5,10 +5,10 @@ import shiro.Security
 import javax.servlet.ServletContext
 import org.eknet.publet.web.WebContext._
 import grizzled.slf4j.Logging
-import org.eknet.publet.gitr.GitrMan
 import org.eknet.publet.partition.git.GitPartMan
 import util.{PropertiesMap, Key}
 import org.eknet.publet.vfs.{ContentResource, Path}
+import org.eknet.publet.gitr.GitrMan
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

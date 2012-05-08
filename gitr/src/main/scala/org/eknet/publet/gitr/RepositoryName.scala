@@ -2,6 +2,7 @@ package org.eknet.publet.gitr
 
 import org.eknet.publet.vfs.Path
 
+
 /**
  * A name of a repository. Can be a simple name
  * or a path, where segments must be separated

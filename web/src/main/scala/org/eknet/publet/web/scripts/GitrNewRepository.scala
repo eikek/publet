@@ -5,9 +5,9 @@ import ScalaScript._
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eknet.publet.web.{WebPublet, WebContext}
-import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.template.Javascript
+import org.eknet.publet.gitr.RepositoryName
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

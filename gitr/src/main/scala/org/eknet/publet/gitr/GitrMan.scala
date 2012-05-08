@@ -99,7 +99,7 @@ trait GitrMan {
    * @param f
    * @return
    */
-  def allRepositories(f:RepositoryName=>Boolean): Iterable[Repository]
+  def allRepositories(f: RepositoryName => Boolean): Iterable[Repository]
 
   /**
    * Invokes the `close()` method on all repositories.

@@ -9,9 +9,9 @@ import org.eclipse.jgit.http.server.{GitSmartHttpTools, GitFilter}
 import org.eclipse.jgit.lib.Constants
 import org.eknet.publet.web.{WebPublet, Config}
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.web.shiro.Security
 import org.eclipse.jgit.transport.resolver.{ServiceNotAuthorizedException, FileResolver}
+import org.eknet.publet.gitr.RepositoryName
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

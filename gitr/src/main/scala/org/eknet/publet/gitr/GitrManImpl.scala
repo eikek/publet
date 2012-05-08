@@ -17,7 +17,7 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
   if (!root.exists()) {
     if (!root.mkdirs()) sys.error("Cannot create directory for git repos")
   }
-  if (!root.isDirectory) sys.error("Not a directory: "+ root)
+  if (!root.isDirectory) sys.error("Not a directory: " + root)
 
   private def repoFile(name: RepositoryName) = new File(root, name.path.segments.mkString(File.separator))
 
@@ -31,7 +31,7 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
 
   def create(name: RepositoryName, bare: Boolean) = {
     val file = repoFile(name)
-    if (file.exists()) sys.error("Repository '"+name+"' already exists")
+    if (file.exists()) sys.error("Repository '" + name + "' already exists")
     val repo = Git.init().setBare(bare).setDirectory(file).call().getRepository
     repo
   }
@@ -44,7 +44,7 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
 
   def delete(name: RepositoryName) {
     val file = repoFile(name)
-    if (!file.exists()) sys.error("Repository '"+name+"' does not exist")
+    if (!file.exists()) sys.error("Repository '" + name + "' does not exist")
 
     def deleteall(f: File) {
       if (f.isDirectory && f.exists()) f.listFiles().foreach(deleteall)
@@ -56,7 +56,7 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
   def clone(source: RepositoryName, target: RepositoryName, bare: Boolean) = {
     val repo = get(source).get
     val file = repoFile(target)
-    if (file.exists()) sys.error("Repository '"+target+"' already exists")
+    if (file.exists()) sys.error("Repository '" + target + "' already exists")
     val cloned = Git.cloneRepository()
       .setBare(bare)
       .setCloneAllBranches(true)
@@ -97,16 +97,17 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
 
   def allRepositories(f: (RepositoryName) => Boolean) = {
     def children(xf: File) = if (xf.isDirectory) xf.listFiles(dfilter) else Array[File]()
-    def tree(xf: File):Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
+    def tree(xf: File): Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
     tree(root).filter(isRepo(_).isDefined)
-      .filter(dir => f(RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length+1))))
-      .map(dir=>Git.open(dir).getRepository)
+      .filter(dir => f(RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length + 1))))
+      .map(dir => Git.open(dir).getRepository)
   }
 
   def closeAll() {
-    allRepositories(r=>true).foreach { r =>
-      info("Closing repository: "+ r)
-      r.close()
+    allRepositories(r => true).foreach {
+      r =>
+        info("Closing repository: " + r)
+        r.close()
     }
   }
 }

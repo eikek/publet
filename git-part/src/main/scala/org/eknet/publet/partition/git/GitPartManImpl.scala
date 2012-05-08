@@ -1,11 +1,11 @@
 package org.eknet.publet.partition.git
 
-import org.eknet.publet.gitr.{GitrMan, RepositoryName}
 import org.eclipse.jgit.api.Git
 import org.eknet.publet.vfs._
 import java.io.{FileOutputStream, File}
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.transport.RefSpec
+import org.eknet.publet.gitr.{RepositoryName, GitrMan}
 
 
 /**

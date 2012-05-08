@@ -24,7 +24,7 @@ object GitrMyRepositories extends ScalaScript {
 
   def makeRepositoryList(repos:Iterable[Repository]) = {
     makeHtml {
-      <h2>My git repositories</h2>
+      <h2>My git repositories</h2 >
       <p class="box info">Your repositories</p>
       <ul>
       {
