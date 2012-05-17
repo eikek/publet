@@ -2,8 +2,8 @@ package org.eknet.publet.ext
 
 import javax.mail.internet.InternetAddress
 import org.eknet.squaremail._
-import org.eknet.publet.web.{WebContext, Config}
 import org.eknet.publet.web.util.{Context, Key}
+import org.eknet.publet.web.{PubletWebContext, PubletWeb, Config}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -44,8 +44,7 @@ object MailSupport {
 
   class EasyMail(mail: MailMessage) {
     def send() {
-      val ctx = WebContext()
-      ctx.service(senderKey()).send(mail)
+      PubletWebContext.attr(senderKey()).get.send(mail)
     }
 
     def to(em: InternetAddress) = {

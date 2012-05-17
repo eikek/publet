@@ -1,0 +1,34 @@
+<publetAuth>
+  <!-- user database
+   -
+   - users are filtered on login property. This must be unique
+   - any duplicates are ignored, the first entry wins.
+  -->
+  <users>
+    <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5">
+      <fullName>John Doe</fullName>
+      <email>jdoe@mail.com</email>
+      <group>wikiuser</group>
+      <group>editor</group>
+    </user>
+  </users>
+
+  <!-- Defines repository states, default is `closed` -->
+  <repositories>
+    <repository name="wikis/mywiki" tag="open"/>
+    <repository name="contentroot" tag="closed"/>
+  </repositories>
+
+  <permissions>
+    <!-- allows many on and to tags -->
+    <grant name="PULL">
+      <on>contentroot</on>
+      <on>wikis/mywiki</on>
+      <on>wikis/yourwiki</on>
+      <to>manager</to>
+      <to>editor</to>
+      <to>coders</to>
+    </grant> <!-- manager,editor and coders all have PULL permission on contentroot,wikis/mywiki and wikis/yourwiki -->
+  </permissions>
+
+</publetAuth>

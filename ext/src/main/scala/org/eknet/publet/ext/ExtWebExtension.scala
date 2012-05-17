@@ -4,21 +4,21 @@ import org.eknet.publet.Publet
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
-import org.slf4j.LoggerFactory
-import org.eknet.publet.web.{WebPublet, WebExtension}
-import javax.servlet.ServletContext
+import org.eknet.publet.web.{PubletWeb, WebExtension}
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:17
  */
-class ExtWebExtension extends WebExtension {
+class ExtWebExtension extends WebExtension with Logging {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  def onStartup() {
+    info("Installing publet extensions...")
+    ExtWebExtension.install(PubletWeb.publet)
+  }
 
-  def onStartup(publet: WebPublet, sc: ServletContext) {
-    log.info("Installing publet extensions...")
-    ExtWebExtension.install(publet.publet)
+  def onShutdown() {
   }
 }
 

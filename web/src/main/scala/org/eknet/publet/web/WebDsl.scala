@@ -83,15 +83,14 @@ object WebDsl {
   import org.eknet.publet.engine.scala.ScalaScript._
 
   val successKey = Key[Boolean]("success")
-  val ctx = WebContext()
 
   page {
     <h1>This is my headline</h1> ~
       form(
         // gives the xhtml content.
         markup = <h2>Kontakt</h2> ~
-          <p class="box success"></p>.when(ctx(successKey).exists(_ == true)) ~
-          when(ctx(successKey).isEmpty) {
+          <p class="box success"></p>.when(PubletWebContext.attr(successKey).exists(_ == true)) ~
+          when(PubletWebContext.attr(successKey).isEmpty) {
             """<form class="ym-form linearize-form" action={ctx(WebContext.requestUrl)}>
               <input type="hidden" name="a" value="eval"/>
               <div class="ym-fbox-text">

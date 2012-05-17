@@ -3,7 +3,7 @@ package org.eknet.publet.webeditor
 import javax.servlet.http.HttpServletResponse
 import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
 import org.eknet.publet.vfs._
-import org.eknet.publet.web.WebPublet
+import org.eknet.publet.web.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,7 +12,7 @@ import org.eknet.publet.web.WebPublet
 class CreateNewHandler extends NotFoundHandler with PageWriter {
   def resourceNotFound(path: Path, resp: HttpServletResponse) {
     val targetType = path.name.targetType
-    val publet = WebPublet().publet
+    val publet = PubletWeb.publet
     publet.mountManager.resolveMount(path) orElse {
       sys.error("Invalid path: "+ path.asString)
     }

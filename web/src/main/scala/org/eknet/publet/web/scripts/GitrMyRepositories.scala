@@ -5,8 +5,9 @@ import ScalaScript._
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eclipse.jgit.lib.Repository
-import org.eknet.publet.web.WebPublet
 import org.eknet.publet.vfs.{ResourceName, Path}
+import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.gitr.GitrRepository
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,14 +16,13 @@ import org.eknet.publet.vfs.{ResourceName, Path}
 object GitrMyRepositories extends ScalaScript {
   def serve() = {
     val username = Security.user.map(_.login).getOrElse(throw new UnauthenticatedException())
-    Security.checkPerm(Security.gitCreate, Path(username))
-    val gitr = WebPublet().gitr
+    val gitr = PubletWeb.gitr
     makeRepositoryList(gitr.allRepositories {rn =>
       rn.name.startsWith(username+"/")
     })
   }
 
-  def makeRepositoryList(repos:Iterable[Repository]) = {
+  def makeRepositoryList(repos:Iterable[GitrRepository]) = {
     makeHtml {
       <h2>My git repositories</h2 >
       <p class="box info">Your repositories</p>

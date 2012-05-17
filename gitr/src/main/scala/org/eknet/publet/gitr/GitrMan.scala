@@ -1,6 +1,5 @@
 package org.eknet.publet.gitr
 
-import org.eclipse.jgit.lib.Repository
 import java.io.File
 
 /**
@@ -9,7 +8,7 @@ import java.io.File
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.05.12 01:58
  */
-trait GitrMan {
+trait GitrMan extends GitrTandem with GitrManListenerSupport {
 
   /**
    * Checks whether a repository with the specified name
@@ -26,7 +25,7 @@ trait GitrMan {
    * @param name
    * @return
    */
-  def get(name: RepositoryName): Option[Repository]
+  def get(name: RepositoryName): Option[GitrRepository]
 
   /**
    * Creates a non-existing repository with the specified name. It
@@ -36,7 +35,7 @@ trait GitrMan {
    * @param bare
    * @return
    */
-  def create(name: RepositoryName, bare: Boolean): Repository
+  def create(name: RepositoryName, bare: Boolean): GitrRepository
 
   /**
    * Gets an existing repository or creates a new one if it
@@ -46,7 +45,7 @@ trait GitrMan {
    * @param bare
    * @return
    */
-  def getOrCreate(name: RepositoryName, bare: Boolean): Repository
+  def getOrCreate(name: RepositoryName, bare: Boolean): GitrRepository
 
   /**
    * Completely deletes a repository with the specified name. The
@@ -64,26 +63,7 @@ trait GitrMan {
    * @param target
    * @return
    */
-  def clone(source: RepositoryName, target: RepositoryName, bare: Boolean): Repository
-
-  /**
-   * Checks whether this repository contains the `git-export-ok`
-   * file that allows access to the repo via http/s.
-   *
-   * @param name
-   * @return
-   */
-  def isExportOk(name: RepositoryName): Boolean
-
-  /**
-   * Sets the `git-export-ok` file or removes it as indicated
-   * by the `flag` argument. Returns the previous state.
-   *
-   * @param name
-   * @param flag
-   * @return
-   */
-  def setExportOk(name: RepositoryName, flag: Boolean): Boolean
+  def clone(source: RepositoryName, target: RepositoryName, bare: Boolean): GitrRepository
 
   /**
    * The root containing all repositories.
@@ -99,13 +79,14 @@ trait GitrMan {
    * @param f
    * @return
    */
-  def allRepositories(f: RepositoryName => Boolean): Iterable[Repository]
+  def allRepositories(f: RepositoryName => Boolean): Iterable[GitrRepository]
 
   /**
    * Invokes the `close()` method on all repositories.
    *
    */
   def closeAll()
+
 }
 
 

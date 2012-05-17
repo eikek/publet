@@ -1,7 +1,6 @@
 package org.eknet.publet.web
 
 import java.io.{FileInputStream, File}
-import org.slf4j.LoggerFactory
 import System._
 import util.PropertiesMap
 import grizzled.slf4j.Logging
@@ -24,7 +23,7 @@ object Config extends PropertiesMap with Logging {
    * property or `$PUBLET_DIR`  environment variable (in that order)
    *
    */
-  val directory = {
+  private val rootDirectory = {
     var dir = Option(getProperty("publet.dir"))
     if (!dir.isDefined) {
       info("System property 'publet.dir' not defined.")
@@ -42,18 +41,27 @@ object Config extends PropertiesMap with Logging {
     d
   }
 
+  private var directory: File = null
+  private[web] def setContextPath(str: String) {
+    if (!str.isEmpty)
+      this.directory = new File(rootDirectory, str)
+    else
+      this.directory = new File(rootDirectory, "root")
+
+    info("Loading configuration file: "+ configfile)
+    reload()
+  }
+
   /**
    * The directory content root.
    */
-  val contentRoot = subdir("contents")
+  def repositories = subdir("repositories")
 
   /**
    * publet global configuration file `publet.properties`
    *
    */
-  val configfile = new File(directory, "publet.properties")
-  info("Loading configuration file: "+ configfile)
-  reload()
+  def configfile = new File(directory, "publet.properties")
 
   /**
    * Returns the configured string to use as prefix for
@@ -62,6 +70,14 @@ object Config extends PropertiesMap with Logging {
    * @return
    */
   def mainMount = apply("publet.mainMount").getOrElse("main")
+
+  /**
+   * Returns the configured string where the GitServlet
+   * is listening.
+   *
+   * @return
+   */
+  def gitMount = apply("publet.gitMount").getOrElse("git")
 
   def getFile(name: String) = new File(directory, name)
 

@@ -1,48 +1,20 @@
 package org.eknet.publet.partition.git
 
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.transport.RefSpec
 import org.eknet.publet.vfs._
 import java.io.File
 import fs.FilesystemPartition
 import scala.Option
-import org.eknet.publet.auth.User
 import org.apache.shiro.{ShiroException, SecurityUtils}
 import grizzled.slf4j.Logging
-import org.eclipse.jgit.lib.Repository
+import org.eknet.publet.gitr.Tandem
+import org.eknet.publet.auth.{UserProperty, User}
 
-class GitPartition (bareRepo: Repository, wsRepo: Repository)
-  extends FilesystemPartition(wsRepo.getWorkTree, false) with Logging {
-
-  private val git = new Git(wsRepo)
+class GitPartition (val tandem: Tandem)
+  extends FilesystemPartition(tandem.workTree.getWorkTree, false) with Logging {
 
   def updateWorkspace():Boolean = {
-    val result = git.pull().call()
+    val result = tandem.updateWorkTree()
     result.isSuccessful
-  }
-
-  def lastCommit(gf: GitFile) = {
-    val path = gf.file.getAbsolutePath.substring(git.getRepository.getWorkTree.getAbsolutePath.length()+1)
-    var logs = git.log().addPath(path).call().iterator()
-    if (logs.hasNext)
-      Some(logs.next())
-    else
-      None
-  }
-  def lastCommit(path: Path) = {
-    var logs = git.log().addPath(path.toRelative.asString).call().iterator()
-    if (logs.hasNext)
-      Some(logs.next())
-    else
-      None
-  }
-
-  def head = wsRepo.resolve("HEAD")
-
-  private def push() {
-    git.push()
-      .call()
   }
 
   private def getCurrentUser = {
@@ -56,10 +28,12 @@ class GitPartition (bareRepo: Repository, wsRepo: Repository)
     }
   }
 
+  private def git = tandem.workTree.git
+
   private def commit(c: GitFile, action:String) {
     val user = getCurrentUser
-    val name = user.map(_.fullname).getOrElse("Publet Git")
-    val email = user.map(_.email).getOrElse("no@none.com")
+    val name = user.flatMap(_.getProperty(UserProperty.fullName)).getOrElse("Publet Git")
+    val email = user.flatMap(_.getProperty(UserProperty.email)).getOrElse("no@none.com")
     val message = action +"\n\nresource: "+ c.name.fullName+"\nsubject: "+user.map(_.login).getOrElse("anonymous")
     git.commit()
       .setMessage(message)
@@ -79,7 +53,7 @@ class GitPartition (bareRepo: Repository, wsRepo: Repository)
       info("commit: "+ path.toRelative.asString)
 
       commit(c, message.getOrElse("Update"))
-      push()
+      tandem.pushToBare()
     }
   }
 
@@ -89,11 +63,8 @@ class GitPartition (bareRepo: Repository, wsRepo: Repository)
       .addFilepattern(path.toRelative.asString)
       .call()
     commit(c, "Delete")
-    push()
+    tandem.pushToBare()
   }
-
-  lazy val repository = bareRepo.getDirectory
-
 
   override def children = super.children.filterNot(_.name.name == ".git/")
 

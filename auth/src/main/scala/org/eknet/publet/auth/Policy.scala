@@ -1,6 +1,5 @@
 package org.eknet.publet.auth
 
-import org.eknet.publet.vfs.Path
 
 /**
  * A policy is a set of permissions reduced to a
@@ -9,23 +8,17 @@ import org.eknet.publet.vfs.Path
  */
 trait Policy {
 
-  /**
-   * Returns all permissions associated to a user.
-   *
-   * @return
-   */
-  def permissions: Set[PermissionRule]
+  def getRoles: Set[String]
 
-  def stringPermissions = permissions.flatMap(_.perms).toSet
+  def getPermissions: Set[String]
+
 }
 
 object Policy {
 
-  lazy val empty: Policy = new Policy {
-    def permissions = Set()
+  lazy val Empty: Policy = new Policy {
+    def getRoles = Set()
+    def getPermissions = Set()
   }
 
-  def apply(perms: Set[PermissionRule]):Policy = new Policy {
-    val permissions = perms
-  }
 }

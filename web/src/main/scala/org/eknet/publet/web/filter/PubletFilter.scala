@@ -1,9 +1,9 @@
 package org.eknet.publet.web.filter
 
 import org.eknet.publet.vfs.ContentType
-import javax.servlet.http.{HttpServlet, HttpServletResponse, HttpServletRequest}
-import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{WebPublet, WebContext}
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet._
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 
 /** Servlet that processes the resource using the engine
  * as specified with `a=` http request parameter or the
@@ -13,10 +13,15 @@ import org.eknet.publet.web.{WebPublet, WebContext}
  * @since 05.04.12 15:03
  *
  */
-class PublishServlet extends HttpServlet with PageWriter {
+class PubletFilter extends Filter with PageWriter with HttpFilter {
 
-  override def service(req: HttpServletRequest, resp: HttpServletResponse) {
-    WebContext().action match {
+
+  def init(filterConfig: FilterConfig) {}
+
+  def destroy() {}
+
+  def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
+    PubletWebContext.param("a") match {
       case Some(engine) => processEngine(req, resp, engine);
       case _ => processDefault(req, resp)
     }
@@ -24,22 +29,24 @@ class PublishServlet extends HttpServlet with PageWriter {
 
   def processEngine(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
-    val path = WebContext().requestPath
-    val publet = WebPublet().publet
+    val path = if (PubletWebContext.applicationPath.directory)
+      PubletWebContext.applicationPath / "index.html"
+    else
+      PubletWebContext.applicationPath
+
+    val publet = PubletWeb.publet
     val targetType = path.name.targetType
-    if (!Security.isAnonymousRequest) {
-      Security.checkPerm(engineId, path)
-    }
     val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).get)
     writePage(html, resp)
   }
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
-    val publet = WebPublet().publet
-    val path = WebContext().requestPath
-    if (!Security.isAnonymousRequest) {
-      Security.checkPerm(Security.get, path)
-    }
+    val publet = PubletWeb.publet
+    val path = if (PubletWebContext.applicationPath.directory)
+      PubletWebContext.applicationPath / "index.html"
+    else
+      PubletWebContext.applicationPath
+
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
     val html = publet.process(path, tt)
     writePage(html, resp)

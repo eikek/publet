@@ -1,18 +1,16 @@
 package org.eknet.publet.web.filter
 
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import javax.servlet.FilterChain
-import org.eknet.publet.web.WebContext._
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{WebPublet, WebContext}
+import org.eknet.publet.web.{PubletWebContext, Config, PubletWeb}
+import javax.servlet._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 06:50
  */
-class RedirectFilter extends SimpleFilter with Logging {
+class RedirectFilter extends Filter with Logging with HttpFilter {
 
-  private lazy val mount = WebContext(mainMount).get
+  private lazy val mount = Config.mainMount
 
   private lazy val defaultRedirects = Map(
     "/" -> (mount + "/"),
@@ -29,15 +27,14 @@ class RedirectFilter extends SimpleFilter with Logging {
    *
    * @return
    */
-  private lazy val redirects = WebPublet().settings.keySet.filter(_.startsWith("redirect."))
+  private lazy val redirects = PubletWeb.publetSettings.keySet.filter(_.startsWith("redirect."))
 
-  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), WebPublet().settings(key).get)).toMap
+  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), PubletWeb.publetSettings(key).get)).toMap
 
-  def doFilter(req: HttpServletRequest, resp: HttpServletResponse, chain: FilterChain) {
-    val path = WebContext().requestPath
-    val contextPath = WebContext.getContextPath().getOrElse("")
+  def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
+    val path = PubletWebContext.applicationPath
     if (allRedirects.keySet.contains(path.asString)) {
-      val newUri = contextPath + allRedirects.get(path.asString).get
+      val newUri = PubletWebContext.urlBase +"/"+ allRedirects.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
       resp.sendRedirect(newUri)
     } else {
@@ -45,4 +42,7 @@ class RedirectFilter extends SimpleFilter with Logging {
     }
   }
 
+  def init(filterConfig: FilterConfig) {}
+
+  def destroy() {}
 }

@@ -6,12 +6,15 @@ import scala.Option
 import org.eknet.publet.vfs.{Content, Path}
 
 class GitFile(f: File,
-              root: Path,
-              gp: GitPartition) extends FileResource(f, root) {
+              rootPath: Path,
+              gp: GitPartition) extends FileResource(f, rootPath) with GitFileTools {
   override def delete() {
     super.delete()
     gp.commitDelete(this)
   }
+
+
+  protected def root = gp
 
   override def writeFrom(in: InputStream, message: Option[String] = None) {
     Content.copy(in, new OutStream(super.outputStream, message), closeIn = false)
@@ -26,7 +29,7 @@ class GitFile(f: File,
   override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
 
   def lastAuthor = {
-    val commit = gp.lastCommit(this)
+    val commit = lastCommit
     commit map (_.getAuthorIdent)
   }
 

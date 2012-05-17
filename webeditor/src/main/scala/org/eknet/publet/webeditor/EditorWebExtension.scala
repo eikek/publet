@@ -3,28 +3,27 @@ package org.eknet.publet.webeditor
 import actions.{BrowserJs, PushContents, ListContents, SetEngine}
 import org.eknet.publet.Publet
 import xml.NodeSeq
-import org.slf4j.LoggerFactory
 import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.scripts.WebScriptResource
-import javax.servlet.ServletContext
-import org.eknet.publet.web.{WebContext, WebPublet, WebExtension}
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
+import org.eknet.publet.web.{PubletWeb, WebExtension}
+import org.eknet.publet.web.util.Key
+import org.eknet.publet.web.filter.NotFoundHandler
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 16:16
  */
-class EditorWebExtension extends WebExtension {
+class EditorWebExtension extends WebExtension with Logging {
 
-  private val log = LoggerFactory.getLogger(classOf[EditorWebExtension])
-
-
-  def onStartup(publet: WebPublet, sc: ServletContext) {
-    log.info("Installing webeditor ...")
-    EditorWebExtension.setup(publet.publet)
-    sc.setAttribute(WebContext.notFoundHandlerKey.name, new CreateNewHandler())
+  def onStartup() {
+    info("Installing webeditor ...")
+    EditorWebExtension.setup(PubletWeb.publet)
+    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
   }
 
+  def onShutdown() {}
 }
 
 object EditorWebExtension {

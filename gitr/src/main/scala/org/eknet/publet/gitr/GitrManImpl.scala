@@ -10,30 +10,29 @@ import org.eclipse.jgit.lib.RepositoryCache
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.05.12 12:32
  */
-class GitrManImpl(root: File) extends GitrMan with Logging {
-
-  private val daemonExportOk = "git-daemon-export-ok"
+class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with GitrTandem with Logging {
 
   if (!root.exists()) {
     if (!root.mkdirs()) sys.error("Cannot create directory for git repos")
   }
   if (!root.isDirectory) sys.error("Not a directory: " + root)
 
-  private def repoFile(name: RepositoryName) = new File(root, name.path.segments.mkString(File.separator))
+  private def repoFile(name: RepositoryName) = new File(root, name.segments.mkString(File.separator))
 
   def exists(name: RepositoryName) = repoFile(name).exists()
 
   def get(name: RepositoryName) = {
     val file = repoFile(name)
     if (!file.exists()) None
-    else Some(Git.open(file).getRepository)
+    else Some(GitrRepository(Git.open(file).getRepository, name))
   }
 
   def create(name: RepositoryName, bare: Boolean) = {
-    val file = repoFile(name)
-    if (file.exists()) sys.error("Repository '" + name + "' already exists")
+    val realname = (if (bare) name.toDotGit else name)
+    val file = repoFile(realname)
+    if (file.exists()) sys.error("Repository '" + realname + "' already exists")
     val repo = Git.init().setBare(bare).setDirectory(file).call().getRepository
-    repo
+    emit(GitrRepository(repo, realname))
   }
 
   def getOrCreate(name: RepositoryName, bare: Boolean) = {
@@ -43,14 +42,22 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
   }
 
   def delete(name: RepositoryName) {
-    val file = repoFile(name)
-    if (!file.exists()) sys.error("Repository '" + name + "' does not exist")
+    val repo = get(name).getOrElse(sys.error("Repository '" + name + "' does not exist"))
 
-    def deleteall(f: File) {
-      if (f.isDirectory && f.exists()) f.listFiles().foreach(deleteall)
-      f.delete()
+    def removeDir(file: File) {
+      def deleteall(f: File) {
+        if (f.isDirectory && f.exists()) f.listFiles().foreach(deleteall)
+        f.delete()
+      }
+      deleteall(file)
     }
-    deleteall(file)
+    if (repo.isTandem) {
+      val td = getTandem(name).get
+      removeDir(repoFile(td.bare.name))
+      removeDir(repoFile(td.workTree.name))
+    } else {
+      removeDir(repoFile(name))
+    }
   }
 
   def clone(source: RepositoryName, target: RepositoryName, bare: Boolean) = {
@@ -64,27 +71,7 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
       .setDirectory(file)
       .call().getRepository
 
-    cloned
-  }
-
-  private def getExportOkFile(name: RepositoryName) = {
-    val repo = get(name).get
-    new File(repo.getDirectory, daemonExportOk)
-  }
-
-  def isExportOk(name: RepositoryName) = {
-    val exportok = getExportOkFile(name)
-    exportok.exists()
-  }
-
-  def setExportOk(name: RepositoryName, flag: Boolean) = {
-    val exportok = getExportOkFile(name)
-    val prev = exportok.exists()
-    if (!flag) exportok.delete()
-    else if (!exportok.exists()) {
-      exportok.createNewFile()
-    }
-    prev
+    emit(GitrRepository(cloned, target))
   }
 
   def getGitrRoot = root
@@ -99,8 +86,9 @@ class GitrManImpl(root: File) extends GitrMan with Logging {
     def children(xf: File) = if (xf.isDirectory) xf.listFiles(dfilter) else Array[File]()
     def tree(xf: File): Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
     tree(root).filter(isRepo(_).isDefined)
-      .filter(dir => f(RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length + 1))))
-      .map(dir => Git.open(dir).getRepository)
+      .map(dir => (RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length + 1)), dir))
+      .filter(t => f(t._1))
+      .map(t => GitrRepository(Git.open(t._2).getRepository, t._1))
   }
 
   def closeAll() {

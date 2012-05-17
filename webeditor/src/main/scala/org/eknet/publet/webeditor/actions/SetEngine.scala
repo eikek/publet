@@ -3,8 +3,8 @@ package org.eknet.publet.webeditor.actions
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{WebPublet, WebContext}
 import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -16,11 +16,11 @@ object SetEngine extends ScalaScript {
     params("path", "publetEngine") match {
       case None => error("Arguments missing")
       case Some(t) => {
-        val publet = WebPublet().publet
+        val publet = PubletWeb.publet
         publet.engineManager.getEngine(Symbol(t._2)) match {
           case None => error("Engine '" + t._2 + "' not found.")
           case Some(pe) => {
-            val path = WebContext.stripPath(Path(t._1))
+            val path = Path(t._1)
             Security.checkPerm("edit", path)
             info("Registering engine " + pe.name + " with url: " + path.asString)
             publet.engineManager.register(path.asString, pe)
@@ -32,9 +32,9 @@ object SetEngine extends ScalaScript {
   }
 
   private def params(p1: String, p2: String): Option[(String, String)] = {
-    WebContext().parameter(p1) match {
+    PubletWebContext.param(p1) match {
       case None => None
-      case Some(a1) => WebContext().parameter(p2) match {
+      case Some(a1) => PubletWebContext.param(p2) match {
         case None => None
         case Some(a2) => Some((a1, a2))
       }

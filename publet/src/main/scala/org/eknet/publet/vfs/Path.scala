@@ -14,7 +14,7 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
   /**
    * Returns a copy of this without the last element
    */
-  lazy val parent = Path(segments.take(segments.length - 1), absolute, true)
+  lazy val parent = if (isRoot) this else Path(segments.take(segments.length - 1), absolute, true)
 
   def strip = Path(segments.tail, absolute, directory)
 
@@ -64,7 +64,7 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
    * A concatenation of '../' up to the root
    *
    */
-  lazy val relativeRoot = ("../" * parent.size)
+  lazy val relativeRoot = if (directory) ("../" * size) else ("../" * parent.size)
 
   /**
    * Checks if this path is a descendend of the given path.

@@ -1,12 +1,12 @@
 package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.{WebContext, WebPublet}
 import org.eknet.publet.web.shiro.Security
 import java.io.ByteArrayInputStream
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.template.Javascript
+import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,8 +21,8 @@ object PushContents extends ScalaScript with Logging with Javascript {
   }
 
   def serve() = {
-    val ctx = WebContext()
-    ctx.parameter("delete") match {
+    val ctx = PubletWebContext
+    ctx.param("delete") match {
       case Some(path) => {
         try {
           delete(Path(path))
@@ -32,7 +32,7 @@ object PushContents extends ScalaScript with Logging with Javascript {
           case e:Exception => notify("error", "Error while deleting.", None)
         }
       }
-      case _=> ctx.parameter("path") match {
+      case _=> ctx.param("path") match {
         case Some(path) => {
           val p = Path(path)
           try {
@@ -52,29 +52,29 @@ object PushContents extends ScalaScript with Logging with Javascript {
   }
 
   def pushBinary(path: Path) {
-    val ctx = WebContext()
+    val ctx = PubletWebContext
     ctx.uploads.foreach(fi => {
-      Security.checkPerm(Security.put, path)
-      WebPublet().publet.push(path, fi.getInputStream)
+      Security.checkGitAction(GitAction.push)
+      PubletWeb.publet.push(path, fi.getInputStream)
     })
   }
 
   def delete(path: Path) {
-    Security.checkPerm(Security.delete, path)
+    Security.checkGitAction(GitAction.push)
     info("Deleting now: "+ path)
-    WebPublet().publet.delete(path)
+    PubletWeb.publet.delete(path)
   }
 
   def pushText(path: Path) {
-    val ctx = WebContext()
-    val publet = WebPublet().publet
-    ctx.parameter("page") match {
+    val ctx = PubletWebContext
+    val publet = PubletWeb.publet
+    ctx.param("page") match {
       case None =>
       case Some(body) => {
-        Security.checkPerm(Security.put, path)
-        val target = ctx.parameter("extension").getOrElse("md")
-        val commitMsg = ctx.parameter("commitMessage").filter(!_.isEmpty)
-        val oldhead = ctx.parameter("head").getOrElse("")
+        Security.checkGitAction(GitAction.push)
+        val target = ctx.param("extension").getOrElse("md")
+        val commitMsg = ctx.param("commitMessage").filter(!_.isEmpty)
+        val oldhead = ctx.param("head").getOrElse("")
         val newhead = getHead(path).getOrElse("")
         if (oldhead != newhead) {
           sys.error("The repository has changed since you started editing!")
@@ -86,6 +86,9 @@ object PushContents extends ScalaScript with Logging with Javascript {
   }
 
   def getHead(path: Path) = {
-    WebPublet().publet.rootContainer.lookup(path).flatMap(_.lastModification).map(_.toString)
+    PubletWeb.publet.findSources(path).toList match {
+      case d::ds => d.lastModification.map(_.toString)
+      case _ => None
+    }
   }
 }

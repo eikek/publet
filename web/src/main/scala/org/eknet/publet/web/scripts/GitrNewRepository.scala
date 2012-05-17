@@ -4,10 +4,10 @@ import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.UnauthenticatedException
-import org.eknet.publet.web.{WebPublet, WebContext}
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.template.Javascript
 import org.eknet.publet.gitr.RepositoryName
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -19,7 +19,7 @@ object GitrNewRepository extends ScalaScript with Javascript {
     <h2>Create a new Repository</h2>
     <p>Create a new git repository. Use a short repository name that may not contain dashes and other weird characters.</p>
     <div id="formResponse"></div>
-    <form id="newRepositoryForm" action={WebContext().requestPath.asString} method="post" class="ym-form ym-full linearize-form" >
+    <form id="newRepositoryForm" action={PubletWebContext.applicationPath.asString} method="post" class="ym-form ym-full linearize-form" >
       <div class="ym-fbox-text">
         <label for="repositoryName">Repository name</label>
           <input type="text" name="repositoryName" id="from" size="20" />
@@ -41,25 +41,24 @@ object GitrNewRepository extends ScalaScript with Javascript {
     } else {
       val username = Security.user.map(_.login).getOrElse(throw new UnauthenticatedException())
       val reponame = username +"/"+ stripDotGitExtension(name)
-      Security.checkPerm(Security.gitCreate, Path(reponame))
-      val gitr = WebPublet().gitr
+      Security.checkPerm("gitcreate", Path(reponame))
+      val gitr = PubletWeb.gitr
       val rname = RepositoryName(reponame+".git")
       if (gitr.exists(rname)) {
         jsFunction(message("Repository already exists!", Some("error")))
       } else {
         //todo permissions??
         gitr.create(rname, true)
-        gitr.setExportOk(rname, true)
-        jsFunction("window.location='"+ WebContext().requestPath.sibling("myrepos.html").asString +"'")
+        jsFunction("window.location='"+ PubletWebContext.applicationPath.sibling("myrepos.html").asString +"'")
       }
     }
   }
 
   def serve() = {
     Security.checkAuthenticated()
-    Security.checkPerm(Security.gitCreate, Path(Security.username))
-    WebContext().parameter("repositoryName") match {
-      case Some(n)=> createRepository(n, WebContext().parameter("description"))
+    Security.checkPerm("gitcreate", Path(Security.username))
+    PubletWebContext.param("repositoryName") match {
+      case Some(n)=> createRepository(n, PubletWebContext.param("description"))
       case None => formMarkup
     }
   }

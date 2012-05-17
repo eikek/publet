@@ -3,7 +3,7 @@ package org.eknet.publet.ext
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.vfs._
 import ScalaScript._
-import org.eknet.publet.web.{WebPublet, Config, WebContext}
+import org.eknet.publet.web.{PubletWebContext, PubletWeb, Config}
 
 /**TODO replace with javascript browser...
  *
@@ -14,7 +14,7 @@ object Listing extends ScalaScript {
 
   def anchor(path: Path, res: Resource): String = {
     val container = Resource.isContainer(res)
-    val ref =  WebContext.getContextPath().getOrElse("") +
+    val ref =  PubletWeb.servletContext.getContextPath +
       (if (container) path.asString else path.withExt("html").asString)
 
     "<a href=\"" + ref + "\">" + path.name.fullName + (if (container) "/" else "") + "</a>"
@@ -40,14 +40,14 @@ object Listing extends ScalaScript {
   def hidden(name: String): Boolean = name.startsWith(".")
 
   def serve() = {
-    val ctx = WebContext()
+    val ctx = PubletWebContext
     import ctx._
 
-    val maxdepth = parameter("maxd").getOrElse("1").toInt
-    val startpath = Path(parameter("start").getOrElse("/"+ Config.mainMount))
+    val maxdepth = param("maxd").getOrElse("1").toInt
+    val startpath = Path(param("start").getOrElse("/"+ Config.mainMount))
     makeHtml {
       "<h3><pre>" + startpath.asString + "</pre></h3>\n" +
-        list(startpath.parent, WebPublet().publet.rootContainer.lookup(startpath).get, 0, maxdepth)
+        list(startpath.parent, PubletWeb.publet.rootContainer.lookup(startpath).get, 0, maxdepth)
     }
   }
 }

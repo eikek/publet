@@ -4,12 +4,12 @@ import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.convert.ConverterEngine
 import collection.mutable
-import xml.NodeSeq
 import org.eknet.publet.vfs._
-import org.eknet.publet.web.WebContext
 import util._
 import org.eknet.publet.partition.git.GitFile
 import java.util.Date
+import org.eknet.publet.web.PubletWebContext
+import xml.{PrettyPrinter, NodeSeq}
 
 /** Uses yaml to create a html page layout.
  *
@@ -73,7 +73,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
     includeEngine.process(path, data, target) match {
       case Some(nc) if (nc.contentType == ContentType.html) => {
         val resource = new CompositeContentResource(data.head, nc)
-        apply(resource, data)
+        apply(path, resource, data)
       }
       case l @ _  => l
     }
@@ -85,26 +85,27 @@ class StandardEngine(val publet:Publet) extends PubletEngine
 
   def standardHtmlHead(path: Path) = {
     val yamlcss = yamlAt(path, Path("yaml/single-page.css"))
-    NodeSeq.fromSeq(<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    val pp = new PrettyPrinter(90, 2)
+    val nodes = NodeSeq.fromSeq(
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <link href={ yamlcss.asString } rel="stylesheet" type="text/css"/>
       <link href={ jsAt(path, Path("sticky.min.css")).asString } rel="stylesheet" type="text/css"/>
       <script src={ jsAt(path, Path("jquery-1.7.2.min.js")).asString } />
       <script src={ jsAt(path, Path("jquery.form.js")).asString } />
       <script src={ jsAt(path, Path("sticky.min.js")).asString } />
       <script src={ jsAt(path, Path("publet.js")).asString } />
-    ).toString()
+    )
+    pp.formatNodes(nodes)
   }
 
-  override def htmlHead(content: ContentResource, source: Seq[ContentResource]) = {
-    val path = WebContext().requestPath
+  override def htmlHead(path: Path, content: ContentResource, source: Seq[ContentResource]) = {
     standardHtmlHead(path) +
     headerIncludes(path) +
     processInclude(path.parent/"head.html").getOrElse(Content.empty(ContentType.html)).contentAsString +
     htmlHeadContribs.toList.map(_.apply(path, content)).mkString("\n")
   }
 
-  override def htmlBody(content: ContentResource, source: Seq[ContentResource]) = {
-    val path = WebContext().requestPath
+  override def htmlBody(path: Path, content: ContentResource, source: Seq[ContentResource]) = {
     val header = yamlHeader(path, content)
     val footer = yamlFooter(path)
     val nav = yamlNav(path)
@@ -162,12 +163,13 @@ class StandardEngine(val publet:Publet) extends PubletEngine
   }
 
   def yamlOneColMain(body: String) = {
+    val pp = new PrettyPrinter(90, 2)
     val xml = <div class="ym-wrapper ym-wrapper2">
       <div class="ym-wbox">
         %s
       </div>
     </div>
-    String.format(xml.toString(), body)
+    String.format(pp.format(xml), body)
   }
 
   def yamlTwoColMain(yamlColumn: String, body: String) = {
@@ -196,7 +198,7 @@ class StandardEngine(val publet:Publet) extends PubletEngine
       case Some(c) => c.contentAsString
       case None => ""
     }
-    val t = title(content, Seq[ContentResource]())
+    val t = title(path, content, Seq[ContentResource]())
     custom.replace("${pageTitle}", t)
   }
 

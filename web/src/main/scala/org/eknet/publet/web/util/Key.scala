@@ -1,6 +1,6 @@
 package org.eknet.publet.web.util
 
-case class Key[T](name: String, init: PartialFunction[Scope, T])
+case class Key[+T](name: String, init: PartialFunction[Scope, T])
 
 object Key {
   def apply[T](name: String): Key[T] = Key(name, new PartialFunction[Scope, T] {

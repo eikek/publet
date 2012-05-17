@@ -7,8 +7,7 @@ import collection.mutable
 import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs._
 import ScalaScript._
-import org.eknet.publet.web.{WebPublet, Config, WebContext}
-import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,11 +16,11 @@ import org.eknet.publet.web.shiro.Security
 object ListContents extends ScalaScript {
 
   def serve() = {
-    val ctx = WebContext()
+    val ctx = PubletWebContext
 
-    val path = ctx.parameter("path").map(Path(_)).getOrElse(ctx.decodePath)
-    val p = WebContext.stripPath(if (path.directory) path else path.parent)
-    val json = createJsonMap(p, WebPublet().publet)
+    val path = ctx.param("path").map(Path(_)).getOrElse(ctx.applicationPath)
+    val p = if (path.directory) path else path.parent
+    val json = createJsonMap(p, PubletWeb.publet)
 
     makeJson(json)
   }

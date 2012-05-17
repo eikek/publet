@@ -2,10 +2,10 @@ package org.eknet.publet.ext
 
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
-import org.eknet.publet.web.{Config, WebContext}
 import org.eknet.publet.web.util.Key
 import org.eknet.publet.ext.MailSupport._
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.{Config, PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -13,13 +13,13 @@ import org.eknet.publet.vfs.Path
  */
 object MailContact extends ScalaScript {
 
-  def actionUrl = WebContext.rebasePath(Path("/publet/ext/scripts/mailcontact.html"))
-  def captchaUrl = WebContext.rebasePath(Path("/publet/ext/scripts/captcha.png"))
+  def actionUrl = PubletWeb.servletContext.getContextPath+ "/publet/ext/scripts/mailcontact.html"
+  def captchaUrl = PubletWeb.servletContext.getContextPath+ "/publet/ext/scripts/captcha.png"
 
   def contactForm() = makeHtml {
     <h2>Kontakt</h2>
       <div class="formSubmitResponse"></div>
-      <form class="ym-form linearize-form" action={ actionUrl.asString }>
+      <form class="ym-form linearize-form" action={ actionUrl }>
         <input type="hidden" name="a" value="include"/>
         <div class="ym-fbox-text">
           <label for="from">Von (Email)
@@ -40,7 +40,7 @@ object MailContact extends ScalaScript {
             <input type="text" name="captcha" id="captcha" size="20" required="required"/>
         </div>
         <div class="ym-fbox-select">
-          <img alt="captcha" src={ captchaUrl.asString+ "?col1=ffffff&col2=ffffff&fgcol=000000&captchaParam=contactCaptcha"} />
+          <img alt="captcha" src={ captchaUrl + "?col1=ffffff&col2=ffffff&fgcol=000000&captchaParam=contactCaptcha"} />
     </div>
     <button class="ym-button ym-email publetAjaxSubmit">Senden</button>
     </form>
@@ -48,16 +48,16 @@ object MailContact extends ScalaScript {
   //TODO supply i18n possiblity
 
   def serve() = {
-    val ctx = WebContext()
+    val ctx = PubletWebContext
     import ctx._
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
       makeHtml(<p class="box error">No SMTP configuration and/or defaultReceiver provided.</p>)
     } else {
-      val from = parameter("from")
-      val msg = parameter("message")
-      val captcha = parameter("captcha")
-      val cstr = ctx.session.remove(Key[String]("contactCaptcha"))
+      val from = param("from")
+      val msg = param("message")
+      val captcha = param("captcha")
+      val cstr = ctx.sessionMap.remove(Key[String]("contactCaptcha"))
 
       if (from.isDefined && msg.isDefined && captcha.isDefined) {
         if (cstr == captcha) {

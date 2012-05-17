@@ -4,8 +4,8 @@ import org.eknet.publet.web.template.StandardEngine
 import org.eknet.publet.Publet
 import xml.{Null, Text, Attribute, NodeSeq}
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{WebPublet, WebContext}
 import org.eknet.publet.engine.scala.ScalaScript._
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -26,8 +26,8 @@ class EditStandardEngine(publet: Publet) extends StandardEngine(publet) {
   }
 
   private def engineOptions: NodeSeq = {
-    val publet = WebPublet().publet
-    val current = publet.engineManager.resolveEngine(WebContext().requestPath)
+    val publet = PubletWeb.publet
+    val current = publet.engineManager.resolveEngine(PubletWebContext.applicationPath)
     val opts = publet.engineManager.engines.keySet.filter(_ != 'edit).map(s => {
       val tag = <option>
         {s.name}

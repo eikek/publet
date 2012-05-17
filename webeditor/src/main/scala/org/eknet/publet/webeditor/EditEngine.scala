@@ -4,10 +4,10 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs._
 import util.CompositeContentResource
 import xml._
-import org.eknet.publet.web.{WebPublet, WebContext}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.template.Javascript
 import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,31 +15,29 @@ import org.eknet.publet.web.shiro.Security
  */
 class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javascript {
 
-  def contentPath(content: ContentResource) =  {
-    val ext = content.name.ext
-    if (ext != "")
-      WebContext().requestPath.withExt(content.name.ext)
-    else
-      WebContext().requestPath
-  }
+//  def contentPath(content: ContentResource) =  {
+//    val ext = content.name.ext
+//    if (ext != "")
+//      PubletWebContext.applicationPath.withExt(content.name.ext)
+//    else
+//      PubletWebContext.applicationPath
+//  }
 
-  def pushPath(content: ContentResource) = Path(contentPath(content).relativeRoot) / EditorWebExtension.scriptPath / "push.html"
+  def pushPath(path: Path, content: ContentResource) = Path(path.relativeRoot + EditorWebExtension.scriptPath.asString) / "push.html"
 
-  def deleteButton(content: ContentResource) = {
-    val path = contentPath(content)
-    val delHandler = pushPath(content).asString+"?delete="+path.asString
-    if (Security.hasPerm(Security.delete, path)) {
+  def deleteButton(path: Path, content: ContentResource) = {
+    val delHandler = pushPath(path, content).asString+"?delete="+path.asString
+    if (Security.hasGitAction(GitAction.push)) {
       <a class="ym-button ym-delete" onClick="return confirm('Really delete this file?');" href={delHandler}>Delete</a>
     } else {
       NodeSeq.Empty
     }
   }
 
-  def createForm(content: ContentResource, body: NodeSeq, upload:Boolean): NodeSeq = {
-    val path = contentPath(content)
+  def createForm(path: Path, content: ContentResource, body: NodeSeq, upload:Boolean): NodeSeq = {
     val cancelHandler = path.withExt("html").asString
     val pushPath = Path(path.relativeRoot) / EditorWebExtension.scriptPath / "push.html"
-    val delButton = deleteButton(content)
+    val delButton = deleteButton(path, content)
     val lastmod = content.lastModification.map(_.toString).getOrElse("")
     val enctype = if (upload) "multipart/form-data" else ""
     val saveButton = if (upload) {
@@ -72,12 +70,11 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
       </p>
   }
 
-  def editContent(content: ContentResource): ContentResource = {
+  def editContent(path: Path, content: ContentResource): ContentResource = {
     def typeSelect(): NodeSeq = {
-      val path = contentPath(content)
-      val publet = WebPublet().publet
+      val publet = PubletWeb.publet
       val source = publet.findSources(path).headOption
-      val list = ContentType.forMimeBase(WebContext().requestPath.name.targetType)
+      val list = ContentType.forMimeBase(PubletWebContext.applicationPath.name.targetType)
       val prefExt = source.map(_.name.ext).getOrElse("md")
       val options = for (ct <- list) yield
         { <optgroup label={ct.typeName.name}>
@@ -106,7 +103,7 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
     </div>
 
     new CompositeContentResource(content,
-      NodeContent(createForm(content, body, false), ContentType.html))
+      NodeContent(createForm(path, content, body, false), ContentType.html))
   }
 
   def name = 'edit
@@ -131,19 +128,19 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
     </div>
   }
 
-  def uploadContent(content: ContentResource) = {
-    val formbody = uploadBody(contentPath(content))
+  def uploadContent(path: Path, content: ContentResource) = {
+    val formbody = uploadBody(path)
     new CompositeContentResource(content,
-      NodeContent(createForm(content, formbody, true), ContentType.html))
+      NodeContent(createForm(path, content, formbody, true), ContentType.html))
   }
 
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    Security.checkPerm(Security.put, path)
+    Security.checkGitAction(GitAction.push)
     if (!data.head.exists || data.head.isInstanceOf[Writeable]) {
       if (data.head.contentType.mime._1 == "text")
-        del.process(path, Seq(editContent(data.head)), ContentType.html)
+        del.process(path, Seq(editContent(path, data.head)), ContentType.html)
       else
-        del.process(path, Seq(uploadContent(data.head)), ContentType.html)
+        del.process(path, Seq(uploadContent(path, data.head)), ContentType.html)
     } else {
       val c = new CompositeContentResource(data.head, jsFunction(message("Resource is not writeable", Some("error"))).get)
       del.process(path, Seq(c), ContentType.html)

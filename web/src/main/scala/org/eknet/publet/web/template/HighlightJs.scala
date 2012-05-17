@@ -1,9 +1,9 @@
 package org.eknet.publet.web.template
 
-import xml.NodeSeq
 import org.eknet.publet.vfs.util.ClasspathContainer
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Content, Path}
+import xml.{PrettyPrinter, NodeSeq}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -22,10 +22,10 @@ object HighlightJs {
 
   def htmlHeadSnippet(path: Path, content: Content): String = {
     val base = (Path(path.relativeRoot + root).toRelative).asString+ "/"
-
-    NodeSeq.fromSeq(<link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
+    val pp = new PrettyPrinter(90, 2)
+    pp.formatNodes(NodeSeq.fromSeq(<link rel="stylesheet" href={ base + "highlight/styles/"+ highlightStyle +".css" } ></link>
       <script src={ base + "highlight/highlight.pack.js" }></script>
-      <script>hljs.initHighlightingOnLoad();</script>).toString()
+      <script>hljs.initHighlightingOnLoad();</script>))
   }
 
   val highlightStyle = HighlightJs.Styles.googlecode

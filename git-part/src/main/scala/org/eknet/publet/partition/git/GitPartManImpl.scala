@@ -4,7 +4,6 @@ import org.eclipse.jgit.api.Git
 import org.eknet.publet.vfs._
 import java.io.{FileOutputStream, File}
 import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.transport.RefSpec
 import org.eknet.publet.gitr.{RepositoryName, GitrMan}
 
 
@@ -14,54 +13,20 @@ import org.eknet.publet.gitr.{RepositoryName, GitrMan}
  */
 class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
 
-  private def pathToBareReponame(p: Path): RepositoryName = RepositoryName(p.name.name+".git")
-  private def pathToWorkspaceReponame(p: Path): RepositoryName = RepositoryName(p.name.name+"_wc")
-
   def create(location: Path, config: Config) = {
-    val bareName = pathToBareReponame(location)
-    val wsName = pathToWorkspaceReponame(location)
-
-    val bare = gitr.create(bareName, true)
-    val ws = gitr.clone(bareName, wsName, false)
+    val tandem = gitr.createTandem(RepositoryName(location.asString), config.branch)
 
     //create some initial content
     val init = config.initial.getOrElse(initialResources)
-    createInitialContent(ws, init)
+    createInitialContent(tandem.workTree, init)
+    tandem.pushToBare()
 
-    //rename branch, in case different from "master"
-    val git = Git.wrap(ws)
-    if (config.branch != "master") {
-      git.branchRename()
-        .setOldName("master")
-        .setNewName(config.branch)
-        .call()
-    }
-    //push initial content to bare repo
-    git.push()
-      .setRemote("origin")
-      .setRefSpecs(new RefSpec(config.branch))
-      .call()
-
-    //add remote tracking
-    val cfg = ws.getConfig
-    cfg.setString("branch", config.branch, "remote", "origin")
-    cfg.setString("branch", config.branch, "merge", "refs/heads/master")
-    cfg.setBoolean("http", null, "receivepack", true)
-    cfg.save()
-
-    new GitPartition(bare, ws)
+    new GitPartition(tandem)
   }
 
   def get(location: Path) = {
-    val bareName = pathToBareReponame(location)
-    val wsName = pathToWorkspaceReponame(location)
-
-    val bare = gitr.get(bareName)
-    val ws = gitr.get(wsName)
-    if (ws.isDefined && bare.isDefined) {
-      Some(new GitPartition(bare.get, ws.get))
-    } else {
-      None
+    gitr.getTandem(RepositoryName(location.asString)) map {
+      new GitPartition(_)
     }
   }
 
@@ -71,9 +36,9 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     }
   }
 
-  def setExportOk(location: Path, flag: Boolean) = gitr.setExportOk(pathToBareReponame(location), flag)
+  def setExportOk(location: Path, flag: Boolean) = get(location).get.tandem.setExportOk(flag)
 
-  def isExportOk(location: Path) = gitr.isExportOk(pathToBareReponame(location))
+  def isExportOk(location: Path) = get(location).get.tandem.isExportOk
 
   private def createInitialContent(ws: Repository, init: Map[Path, Content]) {
     val git = Git.wrap(ws)
@@ -82,15 +47,15 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
       if (!file.getParentFile.exists()) file.getParentFile.mkdirs()
       t._2.copyTo(new FileOutputStream(file))
 
-      git.add().addFilepattern(t._1.segments.mkString(File.separator)).setUpdate(false).call()
+      val pattern = t._1.segments.mkString(File.separator)
+      git.add().addFilepattern(pattern).setUpdate(false).call()
     }
 
     git.commit()
       .setAuthor("Publet Install", "none@none")
-      .setMessage("Initial commit.")
+      .setMessage("Initial sample content.")
       .setAll(true)
       .call()
-
   }
 
   private lazy val initialResources = {

@@ -7,8 +7,8 @@ import util.Random
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import ScalaScript._
-import org.eknet.publet.web.WebContext
 import org.eknet.publet.web.util.{Session, Key}
+import org.eknet.publet.web.PubletWebContext
 
 /**Script generates a png image containing a random string. The
  * same string is set into the session.
@@ -50,19 +50,19 @@ object CaptchaScript extends ScalaScript {
 
     g2d.setRenderingHints(rh);
 
-    val gcol1 = "#" + WebContext().parameter("col1").getOrElse("ffffff")
-    val gcol2 = "#" + WebContext().parameter("col2").getOrElse("0000ff")
+    val gcol1 = "#" + PubletWebContext.param("col1").getOrElse("ffffff")
+    val gcol2 = "#" + PubletWebContext.param("col2").getOrElse("0000ff")
     val gp = new GradientPaint(0, 0,
       Color.decode(gcol1), 0, height / 2, Color.decode(gcol2), true);
 
     g2d.setPaint(gp);
     g2d.fillRect(0, 0, width, height);
 
-    val frameCol = "#" + WebContext().parameter("frcol").getOrElse("000000")
+    val frameCol = "#" + PubletWebContext.param("frcol").getOrElse("000000")
     g2d.setColor(Color.decode(frameCol))
     g2d.drawRect(0, 0, width - 1, height - 1)
 
-    val fgcol = "#" + WebContext().parameter("fgcol").getOrElse("ff0f00")
+    val fgcol = "#" + PubletWebContext.param("fgcol").getOrElse("ff0f00")
     g2d.setColor(Color.decode(fgcol));
 
     val r = new Random();
@@ -88,14 +88,14 @@ object CaptchaScript extends ScalaScript {
   }
 
   def serve() = {
-    val ctx = WebContext()
+    val ctx = PubletWebContext
     import ctx._
     val captchaData = createCaptcha()
 
-    val captchaKey = Key(parameter("captchaParam").getOrElse("captchaString"), {
+    val captchaKey = Key(param("captchaParam").getOrElse("captchaString"), {
       case Session => captchaData._1
     })
-    ctx(captchaKey);
+    ctx.attr(captchaKey);
 
     makePng(captchaData._2)
   }

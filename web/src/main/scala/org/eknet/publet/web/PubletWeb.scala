@@ -1,0 +1,158 @@
+package org.eknet.publet.web
+
+import filter.NotFoundHandler
+import javax.servlet.ServletContext
+import scripts._
+import shiro.{UsersRealm, AuthManager}
+import template.{HighlightJs, StandardEngine}
+import org.eknet.publet.vfs.util.MapContainer
+import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler}
+import org.eknet.publet.partition.git.{GitPartMan, GitPartManImpl}
+import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
+import org.eknet.publet.{Includes, Publet}
+import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
+import util.{PropertiesMap, AttributeMap, Context, Key}
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager
+import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
+import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
+import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
+import javax.servlet.http.HttpServletResponse
+import org.apache.shiro.SecurityUtils
+
+
+/**
+ * @author Eike Kettner eike.kettner@gmail.com
+ * @since 09.05.12 20:02
+ */
+object PubletWeb {
+
+  // initialized on context startup
+  private var servletContextI: ServletContext = null
+  private var contextMapI: AttributeMap = null
+
+  private val contentRootRepo = Path("contentroot")
+
+  //key definitions
+  private val gitrKey = Key("gitr", {
+    case Context => new GitrManImpl(Config.repositories)
+  })
+
+  private val gitPartKey = Key("gitpart", {
+    case Context => new GitPartManImpl(contextMap(gitrKey).get)
+  })
+
+  private val contentRootKey = Key("contentroot", {
+    case Context => contextMap(gitPartKey).get.getOrCreate(contentRootRepo, org.eknet.publet.partition.git.Config(None))
+  })
+  private val authManagerKey = Key("publetAuthManager", {
+    case Context => new AuthManager()
+  })
+
+  // initializes the Publet root container
+  private val publetKey = Key("publet", {
+    case Context => {
+      val publ = Publet()
+      publ.mountManager.mount(Path(Config.mainMount).toAbsolute, contextMap(contentRootKey).get)
+
+      //scripts
+      val cont = new MapContainer()
+      cont.addResource(new WebScriptResource(ResourceName("login.html"), Login))
+      cont.addResource(new WebScriptResource(ResourceName("logout.html"), Logout))
+      //todo move to gitr-web module
+      cont.addResource(new WebScriptResource(ResourceName("gitrnew.html"), GitrNewRepository))
+      cont.addResource(new WebScriptResource(ResourceName("myrepos.html"), GitrMyRepositories))
+      publ.mountManager.mount(Path("/publet/scripts/"), cont)
+
+      val defaultEngine = new StandardEngine(publ).init()
+      HighlightJs.install(publ, defaultEngine)
+      publ.engineManager.register("/*", defaultEngine)
+      publ.engineManager.addEngine(defaultEngine.includeEngine)
+
+      val webImports = List(
+        "org.eknet.publet.web.WebContext",
+        "org.eknet.publet.web.util.AttributeMap",
+        "org.eknet.publet.web.util.Key",
+        "org.eknet.publet.web.shiro.Security"
+      )
+      val compiler = new DefaultPubletCompiler(publ, Config.mainMount, webImports)
+      val scalaEngine = new ScalaScriptEngine('eval, compiler, defaultEngine)
+      publ.engineManager.addEngine(scalaEngine)
+
+      val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, defaultEngine.includeEngine)
+      publ.engineManager.addEngine(scriptInclude)
+
+      publ
+    }
+  })
+
+  def servletContext = servletContextI
+  def contextMap = contextMapI
+  lazy val publet = contextMap(publetKey).get
+  lazy val gitr: GitrMan = contextMap(gitrKey).get
+  lazy val gitpartman: GitPartMan = contextMap(gitPartKey).get
+  lazy val contentRoot = contextMap(contentRootKey).get
+  lazy val authManager = contextMap(authManagerKey).get
+  lazy val publetSettings = new PropertiesMap {
+    override def file = contentRoot.lookup(Path(Includes.allIncludes+"settings.properties"))
+      .collect({case cc: ContentResource => cc})
+      .map(_.inputStream)
+  }
+
+  /**
+   * Returns the uri to the login page. The uri is either fetched
+   * from the settings file or the default login page is returned.
+   *
+   * @return
+   */
+  def getLoginPath = PubletWeb.servletContext.getContextPath +
+    publetSettings("publet.loginUrl").getOrElse("/publet/scripts/login.html")
+
+  lazy val notFoundHandlerKey = Key("notFoundHandler", {
+    case Context => new NotFoundHandler {
+      def resourceNotFound(path: Path, resp: HttpServletResponse) {
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND)
+      }
+    }
+  })
+
+  def notFoundHandler = contextMap(notFoundHandlerKey).get
+
+  // ~~~ servlet context listener
+
+  def initialize(sc: ServletContext) {
+    this.servletContextI = sc
+    this.contextMapI = AttributeMap(servletContext)
+    Config.setContextPath(servletContext.getContextPath)
+    //initiate here
+    contextMap(publetKey).get
+    initShiro()
+  }
+
+  private def initShiro() {
+    //construct securitymanager and filterchain
+    val webenv = new DefaultWebEnvironment()
+
+    val sm = new DefaultWebSecurityManager()
+    sm.setRealm(new UsersRealm(authManager))
+    webenv.setSecurityManager(sm)
+
+    val resolver = new PathMatchingFilterChainResolver()
+    val formauth = new FormAuthenticationFilter()
+    formauth.setLoginUrl(getLoginPath)
+    resolver.getFilterChainManager.addFilter("authc", formauth)
+    resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
+    resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
+
+    val gitPath = Path(Config.gitMount).toAbsolute.asString + "/**"
+    resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
+    resolver.getFilterChainManager.createChain("/**", "anon")
+    webenv.setFilterChainResolver(resolver)
+    servletContextI.setAttribute(EnvironmentLoader.ENVIRONMENT_ATTRIBUTE_KEY, webenv)
+  }
+
+
+  def destroy(sc: ServletContext) {
+    this.servletContextI = null
+    this.contextMapI = null
+  }
+}

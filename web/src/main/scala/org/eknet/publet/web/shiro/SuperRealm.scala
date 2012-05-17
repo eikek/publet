@@ -9,9 +9,7 @@ import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.eknet.publet.auth.User
 
 /**
- * This realm is used, when security is disabled. It will create a
- * super user with all permissions, so that access checks always
- * succeed.
+ * A super-user realm, that offers a user with all privileges.
  *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.05.12 17:27
@@ -20,7 +18,7 @@ class SuperRealm extends AuthorizingRealm {
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val info = new SimpleAuthenticationInfo()
     info.setCredentials("superadmin".toCharArray)
-    val superuser = User("superadmin", "superadmin", "", Set(), "{}superadmin".toCharArray)
+    val superuser = User("superadmin", "superadmin".toCharArray, None, Set(), Map())
     info.setPrincipals(new SimplePrincipalCollection(superuser, "publet"))
     info
   }

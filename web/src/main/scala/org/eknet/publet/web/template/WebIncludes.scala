@@ -1,9 +1,9 @@
 package org.eknet.publet.web.template
 
 import org.eknet.publet.vfs._
-import xml.NodeSeq
 import org.eknet.publet.Includes
 import org.eknet.publet.web.Config
+import xml.{PrettyPrinter, NodeSeq}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,7 +29,7 @@ trait WebIncludes extends Includes {
 
     val h = getRootResources.map(include(_, rootPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
     getIncludesResources(path).map(include(_, siblingPath)).foldLeft(NodeSeq.Empty)((a,b) => a++b)
-    h.toString()
+    new PrettyPrinter(90, 2).formatNodes(h)
   }
 
   private def include(in:(Path, ContentResource), f:(Path, ContentResource)=>String): NodeSeq = {
