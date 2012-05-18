@@ -5,6 +5,7 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,6 +35,10 @@ trait RepositoryNameResolver {
     }
   })
 
+  /**
+   * The name of the repository the current request points to.
+   * @return
+   */
   def getRepositoryName = PubletWebContext.attr(gitRepositoryNameKey).get
 
   private def stripGitSuffixes(url: String, suffixes: List[String]): String = {
@@ -48,12 +53,21 @@ trait RepositoryNameResolver {
   }
 
   private val repositoryModelKey = Key("requestRepositoryModel", {
-    case Request => getRepositoryName.flatMap { name =>
+    case Request => getRepositoryName.map { name =>
       PubletWeb.authManager
         .getAllRepositories
         .find(_.name == name.name)
+        .getOrElse(RepositoryModel(name.name, RepositoryTag.open))
     }
   })
+
+  /**Returns the current repository and its state. If no state
+   * is defined, the repository is considered [[org.eknet.publet.auth.RepositoryTag.open]]
+   * If the current request does not point to an repository,
+   * [[scala.None]] is returned.
+   *
+   * @return
+   */
   def getRepositoryModel = PubletWebContext.attr(repositoryModelKey).get
 
   private val gitActionKey = Key("gitrequestAction", {
@@ -75,6 +89,14 @@ trait RepositoryNameResolver {
       }
     }
   })
+
+  /**Returns the action of the current request regarding the git
+   * repository. It is either `pull` or `push` and only refers
+   * to git clients. This only returns `Some` if `isGitRequest`
+   * is `true`
+   *
+   * @return
+   */
   def getGitAction: Option[GitAction.Value] = PubletWebContext.attr(gitActionKey).get
 
   private lazy val containerRequestUriKey = Key("containerRequestUri", {
