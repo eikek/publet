@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest
 import java.net.URLDecoder
 import org.eknet.publet.vfs.Path
 import util.{Request, Key}
-import scala.util.matching.Regex
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -54,13 +53,7 @@ trait RequestUrl {
 
 
   private val applicationUriKey: Key[String] = Key("applicationUri", {
-    case Request => {
-      val Uri = (req.getContextPath +"(.*)").r
-      req.getRequestURI match {
-        case Uri(path) => path
-        case _ => sys.error("Cannot get application path")
-      }
-    }
+    case Request => req.getRequestURI.substring(req.getContextPath.length)
   })
 
   /** The part of the uri after the context path. */
