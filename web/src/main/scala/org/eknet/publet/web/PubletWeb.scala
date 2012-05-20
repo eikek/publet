@@ -19,7 +19,7 @@ import org.eknet.publet.engine.scalate.ScalateEngine
 import org.fusesource.scalate.Binding
 import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, DefaultPubletCompiler}
 import java.io.File
-import org.eknet.publet.vfs.util.{UrlResource, ClasspathContainer, MapContainer}
+import org.eknet.publet.vfs.util.MapContainer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -107,7 +107,7 @@ object PubletWeb {
    * @return
    */
   def getLoginPath = PubletWeb.servletContext.getContextPath +
-    publetSettings("publet.loginUrl").getOrElse("/publet/scripts/login.html")
+    publetSettings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
   lazy val notFoundHandlerKey = Key("notFoundHandler", {
     case Context => new NotFoundHandler {

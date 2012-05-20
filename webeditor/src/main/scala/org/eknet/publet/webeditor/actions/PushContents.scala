@@ -13,11 +13,8 @@ import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
  */
 object PushContents extends ScalaScript with Logging {
 
-  def notify(level:String, msg: String, head: Option[String]) = {
-//    val m = message(msg, Some(level))
-//    val headchange = head.map("$('#lastHead').attr('value', '"+ _ + "');").getOrElse("")
-//    jsFunction(m+"\n"+ headchange)
-    ScalaScript.makeSsp("")
+  def notify(success:Boolean, msg: String, head: Option[String]) = {
+    ScalaScript.makeJson(Map("success"->success, "message"->msg, "lastMod"->head.getOrElse("")))
   }
 
   def serve() = {
@@ -26,10 +23,9 @@ object PushContents extends ScalaScript with Logging {
       case Some(path) => {
         try {
           delete(Path(path))
-          ctx.redirect(Path(path).withExt("html").asString)
-          None
+          notify(true, "File deleted!", None)
         } catch {
-          case e:Exception => notify("error", "Error while deleting.", None)
+          case e:Exception => notify(false, "Error while deleting.", None)
         }
       }
       case _=> ctx.param("path") match {
@@ -38,15 +34,15 @@ object PushContents extends ScalaScript with Logging {
           try {
             pushBinary(p)
             pushText(p)
-            notify("success", "Successfully saved.", getHead(p))
+            notify(true, "Successfully saved.", getHead(p))
           } catch {
             case e:Exception => {
               error("Error while saving file!", e)
-              notify("error", e.getMessage, None)
+              notify(false, e.getMessage, None)
             }
           }
         }
-        case None => notify("error", "Not enough arguments!", None)
+        case None => notify(false, "Not enough arguments!", None)
       }
     }
   }

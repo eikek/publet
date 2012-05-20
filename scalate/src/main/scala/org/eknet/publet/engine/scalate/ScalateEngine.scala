@@ -2,11 +2,8 @@ package org.eknet.publet.engine.scalate
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.Publet
-import java.io.{PrintWriter, StringWriter}
-import org.eknet.publet.engine.convert.ConverterEngine
 import org.eknet.publet.vfs._
-import org.fusesource.scalate.{TemplateSource, DefaultRenderContext, TemplateEngine}
-import util.SimpleContentResource
+import org.fusesource.scalate.{TemplateSource, TemplateEngine}
 import org.fusesource.scalate.layout.{NullLayoutStrategy, DefaultLayoutStrategy}
 
 /**
@@ -41,8 +38,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
           val resource = data.find(r => engine.extensions.contains(r.name.ext))
           if (resource.isDefined) {
             val uri = path.withExt(resource.get.name.ext).asString
-            val out = engine.layout(uri, attributes)
-            Some(Content(out, ContentType.html))
+            Some(processUri(uri, attributes))
           } else {
             val templateSource = if (data.head.contentType.mime._1 == "text")
               new CodeTemplateSource(path, data.head)
@@ -50,14 +46,23 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
               new DownloadTemplateSource(path, data.head)
 
             urlResources.put(templateSource.uri, templateSource)
-            val out = engine.layout(templateSource, attributes)
-            Some(Content(out, ContentType.html))
+            Some(processSource(templateSource, attributes))
           }
         } else {
           None
         }
       }
     }
+  }
+
+  def processUri(uri: String, attributes: Map[String, Any] = Map()): Content = {
+    val out = engine.layout(uri, attributes)
+    Content(out, ContentType.html)
+  }
+
+  def processSource(source: TemplateSource, attributes: Map[String, Any] = Map()): Content = {
+    val out = engine.layout(source, attributes)
+    Content(out, ContentType.html)
   }
 
 }

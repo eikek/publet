@@ -1,5 +1,8 @@
 -@ var body: String
 -@ var title : String = "Welcome"
+-@ var head: String = null
+-@ var nav: String = null
+-@ var footer: String = null
 - val contextPath = PubletWebContext.contextPath
 - val home = if (contextPath.isEmpty) "/" else contextPath
 - import org.eknet.publet.web.Config
@@ -13,7 +16,6 @@ html(lang="en")
     link(href="/publet/highlightjs/styles/googlecode.css" rel="stylesheet")
     script(type="text/javascript" src="/publet/bootstrap/js/bootstrap.min.js")
     script(type="text/javascript" src="/publet/highlightjs/highlight.pack.js")
-    script(type="text/javascript" src="/publet/js/publet.js")
     :css
       body {
         padding-top: 60px;
@@ -29,13 +31,22 @@ html(lang="en")
       }
     :javascript
       hljs.initHighlightingOnLoad();
-    title = title
 
+    - if (head!=null)
+      !~~ head
+    title = title
   body
     #nav.navbar.navbar-fixed-top
       .navbar-inner
         .container
-          =include(loadInclude("nav"))
+          - if (nav != null)
+            !~~ nav
+          - if (nav == null)
+            =include(loadInclude("nav"))
 
     #content.container
       !~~ body
+    - if (footer != null)
+      !~~ nav
+    - if (footer == null)
+      =include(loadInclude("footer"))

@@ -1,0 +1,36 @@
+.row
+  .span4.offset4
+    #response
+    form(method="post" class="well" action="/publet/scripts/login.json" id="loginForm")
+      label
+        | Username
+        input(name="username" type="text" size="20" required="required" id="from")
+      label
+        | Password
+        input(name="password" type="password" required="required")
+      label.checkbox
+        input(type="checkbox" name="rememberMe")/
+        | Remember me
+      input(type="hidden" name="redirect" value={PubletWebContext.param("redirect").getOrElse("")})
+      button(type="submit" class="btn btn-primary")
+        i.icon-ok.icon-white
+        | Login
+:javascript
+  $(document).ready(function() {
+    var options = {
+      success: function(data) {
+        var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
+        if (data.success) {
+          if (data.redirect) {
+            window.location=data.redirect;
+          } else {
+            $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
+          }
+        } else {
+          $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
+        }
+      },
+      dataType: 'json'
+    };
+    $('#loginForm').ajaxForm(options);
+  });

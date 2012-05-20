@@ -1,0 +1,57 @@
+---
+title: Edit Page
+--- name:head pipeline:jade
+script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
+link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
+
+--- name:content pipeline:jade
+
+-@ val actionPath: String = ""
+-@ val contentAsString: String = ""
+-@ val lastMod: String = ""
+-@ val resourcePath: String = ""
+-@ val extensionOptions: Seq[scala.xml.Elem] = Seq()
+- val viewResource = org.eknet.publet.vfs.Path(resourcePath).withExt("html").asString
+.row
+  .span8
+    #response
+    form(method="post" id="editPageForm" action={actionPath})
+      .form-actions
+        button.btn.btn-primary Save
+        a.btn.btn-info(href={viewResource}) View
+        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={actionPath+"?delete="+viewResource}) Delete
+      label
+        | Extensions
+        select(name="extension" class="span8")
+          =extensionOptions
+      label
+        | Text
+        textarea(name="page" id="editPage" class="span8" style="height:380px; font-family:monospace;")
+          ~~ contentAsString
+      label
+        | Commit Message
+        input(name="commitMessage" class="span8")
+      input(type="hidden" name="path" value={resourcePath})
+      input(id="lastHead" type="hidden" name="head" value={lastMod})
+  .span4
+    h3 File browser
+    pre#containerPath
+    #filesTree
+:javascript
+  $(document).ready(function() {
+    var options = {
+      success: function(data) {
+        var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
+        if (data.success) {
+          $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
+          if (data.lastMod) {
+            $('#lastHead').attr('value', data.lastMod);
+          }
+        } else {
+          $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
+        }
+      },
+      dataType: 'json'
+    };
+    $('#editPageForm').ajaxForm(options);
+  });

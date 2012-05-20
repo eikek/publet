@@ -10,6 +10,7 @@ import org.eknet.publet.web.{PubletWebContext, PubletWeb}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.04.12 19:17
  */
+@deprecated
 object SetEngine extends ScalaScript {
 
   def serve() = {

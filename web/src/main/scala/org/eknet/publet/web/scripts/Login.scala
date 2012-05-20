@@ -25,9 +25,10 @@ object Login extends ScalaScript {
       try {
         subject.login(token)
         if (redirectUri.isDefined) {
-          PubletWebContext.redirect(redirectUri.get)
+          makeJson(Map("success"->true, "message"->"Login successful.", "redirect"->redirectUri.get))
+        } else {
+          makeJson(Map("success"->true, "message"->"Login successful."))
         }
-        makeJson(Map("success"->true, "message"->"Login successful."))
       } catch {
         case e:ShiroException => {
           makeJson(Map("success"->false, "message"->"Login failed."))

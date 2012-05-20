@@ -15,7 +15,7 @@ object BrowserJs extends ScalaScript {
   val pathRegex = ("\"("+ EditorWebExtension.editorPath.asString +"[^\"]*\")").r
 
   def serve() = {
-    val file = getClass.getResource("../browser_templ.js")
+    val file = getClass.getResource("../includes/js/browser_templ.js")
     val cp = PubletWeb.servletContext.getContextPath
     if (cp.isEmpty) {
       makeJs(Source.fromURL(file, "UTF-8").getLines().mkString("\n"))

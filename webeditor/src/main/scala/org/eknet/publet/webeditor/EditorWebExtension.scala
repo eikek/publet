@@ -2,12 +2,12 @@ package org.eknet.publet.webeditor
 
 import actions.{BrowserJs, PushContents, ListContents, SetEngine}
 import org.eknet.publet.Publet
-import xml.NodeSeq
-import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import org.eknet.publet.web.{PubletWeb, WebExtension}
 import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.engine.scalate.ScalateEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,8 +17,8 @@ class EditorWebExtension extends WebExtension with Logging {
 
   def onStartup() {
     info("Installing webeditor ...")
-    EditorWebExtension.setup(PubletWeb.publet)
-    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
+    EditorWebExtension.setup(PubletWeb.publet, PubletWeb.scalateEngine)
+//    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
   }
 
   def onShutdown() {}
@@ -29,10 +29,10 @@ object EditorWebExtension {
   val editorPath = Path("/publet/webeditor/")
   val scriptPath = editorPath / "scripts"
 
-  def setup(publet: Publet) {
+  def setup(publet: Publet, scalateEngine: ScalateEngine) {
     import org.eknet.publet.vfs.ResourceName._
 
-    val cp = new ClasspathContainer(classOf[CreateNewHandler], None)
+    val cp = new ClasspathContainer(classOf[CreateNewHandler], Some(Path("includes/")))
     publet.mountManager.mount(editorPath, cp)
 
     val muc = new MapContainer()
@@ -42,14 +42,8 @@ object EditorWebExtension {
     muc.addResource(new WebScriptResource("browser.js".rn, BrowserJs))
     publet.mountManager.mount(scriptPath, muc)
 
-    val se = new EditStandardEngine(publet)
-//    publet.engineManager.addEngine(new EditEngine(se))
+    val editEngine = new WebEditor('edit, scalateEngine)
+    publet.engineManager.addEngine(editEngine)
   }
 
-  def headerHtml(path: Path, content: Content) = {
-    val base = (Path(path.relativeRoot) / editorPath).asString
-    //super.headerHtml(path, content, source) +
-    NodeSeq.fromSeq(<link type="text/css" rel="stylesheet" href={base + "browser.css"}></link>
-      <script src={base + "scripts/browser.js"}></script>).toString()
-  }
 }

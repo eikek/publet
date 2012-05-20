@@ -1,7 +1,6 @@
 package org.eknet.publet.war
 
 import javax.servlet.{ServletContextEvent, ServletContextListener}
-import org.eknet.publet.ext.ExtWebExtension
 import org.eknet.publet.webeditor.EditorWebExtension
 import org.eknet.publet.web.{WebExtension, PubletWeb}
 import org.eknet.publet.web.template.BootstrapTemplate
@@ -14,7 +13,8 @@ import org.eknet.publet.web.template.BootstrapTemplate
 class PubletContextListener extends ServletContextListener {
 
   val extensions = List[WebExtension](
-    new BootstrapTemplate()
+    new BootstrapTemplate(),
+    new EditorWebExtension()
   )
 
   def contextInitialized(sce: ServletContextEvent) {
