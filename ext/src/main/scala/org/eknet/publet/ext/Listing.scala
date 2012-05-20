@@ -45,7 +45,7 @@ object Listing extends ScalaScript {
 
     val maxdepth = param("maxd").getOrElse("1").toInt
     val startpath = Path(param("start").getOrElse("/"+ Config.mainMount))
-    makeHtml {
+    makeSsp {
       "<h3><pre>" + startpath.asString + "</pre></h3>\n" +
         list(startpath.parent, PubletWeb.publet.rootContainer.lookup(startpath).get, 0, maxdepth)
     }

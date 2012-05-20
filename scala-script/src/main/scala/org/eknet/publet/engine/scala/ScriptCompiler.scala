@@ -136,20 +136,20 @@ object ScriptCompiler extends Logging {
     settings
   }
 
-  private lazy val compilerPath = try {
+  lazy val compilerPath = try {
     jarPathOfClass("scala.tools.nsc.Interpreter")
   } catch {
     case e =>
       throw new RuntimeException("Unable lo load scala interpreter from classpath (scala-compiler jar is missing?)", e)
   }
 
-  private lazy val libPath = try {
+  lazy val libPath = try {
     jarPathOfClass("scala.ScalaObject")
   } catch {
     case e =>
       throw new RuntimeException("Unable to load scala base object from classpath (scala-library jar is missing?)", e)
   }
-  private lazy val servletPath = try {
+  lazy val servletPath = try {
     jarPathOfClass("javax.servlet.Servlet")
   } catch {
     case e => sys.error("Unable to load servlet classpath.")

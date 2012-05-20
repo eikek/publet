@@ -27,24 +27,19 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
     }
   }
 
-  def getAppPath(req:HttpServletRequest) = {
-    val p = Path(req.getRequestURI.substring(req.getContextPath.length))
-    if (p.directory) p/"index.html" else p
-  }
-
   def processEngine(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
-    val path = getAppPath(req)
+    val path = PubletWebContext.applicationPath
 
     val publet = PubletWeb.publet
     val targetType = path.name.targetType
-    val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).get)
+    val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).getOrElse(sys.error("No engine '"+engineId+"' available")))
     writePage(html, resp)
   }
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
     val publet = PubletWeb.publet
-    val path = getAppPath(req)
+    val path = PubletWebContext.applicationPath
 
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
     val html = publet.process(path, tt)

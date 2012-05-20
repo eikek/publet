@@ -4,21 +4,22 @@ import filter.NotFoundHandler
 import javax.servlet.ServletContext
 import scripts._
 import shiro.{UsersRealm, AuthManager}
-import template.{HighlightJs, StandardEngine}
-import org.eknet.publet.vfs.util.MapContainer
-import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler}
 import org.eknet.publet.partition.git.{GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.{Includes, Publet}
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
+import template.Templates
 import util.{PropertiesMap, AttributeMap, Context, Key}
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
 import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import javax.servlet.http.HttpServletResponse
-import org.apache.shiro.SecurityUtils
-
+import org.eknet.publet.engine.scalate.ScalateEngine
+import org.fusesource.scalate.Binding
+import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, DefaultPubletCompiler}
+import java.io.File
+import org.eknet.publet.vfs.util.{UrlResource, ClasspathContainer, MapContainer}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -48,6 +49,26 @@ object PubletWeb {
     case Context => new AuthManager()
   })
 
+  private val scalateEngineKey = Key("scalateEngine", {
+    case Context => {
+      val e = ScalateEngine('wikiMain, publet)
+      e.engine.combinedClassPath = true
+      e.engine.importStatements ++= webImports.map("import "+ _)
+      e.engine.classpath = ScriptCompiler.servletPath.mkString(File.pathSeparator)
+      e.engine.bindings ++= List(Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true))
+      e.attributes = Map("includeLoader" -> new IncludeLoader)
+      e
+    }
+  })
+
+  private val webImports = List(
+    "org.eknet.publet.web.PubletWeb",
+    "org.eknet.publet.web.PubletWebContext",
+    "org.eknet.publet.web.util.AttributeMap",
+    "org.eknet.publet.web.util.Key",
+    "org.eknet.publet.web.shiro.Security"
+  )
+
   // initializes the Publet root container
   private val publetKey = Key("publet", {
     case Context => {
@@ -56,31 +77,11 @@ object PubletWeb {
 
       //scripts
       val cont = new MapContainer()
-      cont.addResource(new WebScriptResource(ResourceName("login.html"), Login))
-      cont.addResource(new WebScriptResource(ResourceName("logout.html"), Logout))
-      //todo move to gitr-web module
-      cont.addResource(new WebScriptResource(ResourceName("gitrnew.html"), GitrNewRepository))
-      cont.addResource(new WebScriptResource(ResourceName("myrepos.html"), GitrMyRepositories))
+      cont.addResource(new WebScriptResource(ResourceName("login.json"), Login))
+      cont.addResource(new WebScriptResource(ResourceName("logout.json"), Logout))
       publ.mountManager.mount(Path("/publet/scripts/"), cont)
 
-      val defaultEngine = new StandardEngine(publ).init()
-      HighlightJs.install(publ, defaultEngine)
-      publ.engineManager.register("/*", defaultEngine)
-      publ.engineManager.addEngine(defaultEngine.includeEngine)
-
-      val webImports = List(
-        "org.eknet.publet.web.WebContext",
-        "org.eknet.publet.web.util.AttributeMap",
-        "org.eknet.publet.web.util.Key",
-        "org.eknet.publet.web.shiro.Security"
-      )
-      val compiler = new DefaultPubletCompiler(publ, Config.mainMount, webImports)
-      val scalaEngine = new ScalaScriptEngine('eval, compiler, defaultEngine)
-      publ.engineManager.addEngine(scalaEngine)
-
-      val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, defaultEngine.includeEngine)
-      publ.engineManager.addEngine(scriptInclude)
-
+      Templates.mountPubletResources(publ)
       publ
     }
   })
@@ -88,6 +89,7 @@ object PubletWeb {
   def servletContext = servletContextI
   def contextMap = contextMapI
   lazy val publet = contextMap(publetKey).get
+  lazy val scalateEngine = contextMap(scalateEngineKey).get
   lazy val gitr: GitrMan = contextMap(gitrKey).get
   lazy val gitpartman: GitPartMan = contextMap(gitPartKey).get
   lazy val contentRoot = contextMap(contentRootKey).get
@@ -123,7 +125,19 @@ object PubletWeb {
     this.servletContextI = sc
     this.contextMapI = AttributeMap(servletContext)
     Config.setContextPath(servletContext.getContextPath)
-    //initiate here
+
+    publet.engineManager.register("/*", scalateEngine)
+    //      val inclEngine = ScalateEngine('include, publ)
+    //      inclEngine.disableLayout()
+    //      publ.engineManager.addEngine(inclEngine)
+
+    val compiler = new DefaultPubletCompiler(publet, Config.mainMount, webImports)
+    val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
+    publet.engineManager.addEngine(scalaEngine)
+
+    //      val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, inclEngine)
+    //      publ.engineManager.addEngine(scriptInclude)
+
     contextMap(publetKey).get
     initShiro()
   }

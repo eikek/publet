@@ -115,7 +115,7 @@ object WebDsl {
         //is called after form submit, that is a request to the current url with parameters
         onSubmit = {
 //          newMail("me@you.com").to("you@me.come").subject("my mail").text("this is text").send()
-          makeHtml("<p>yes</p>")
+          makeSsp("<p>yes</p>")
         },
 
         //optional partial function that is applied to the params before onsubmit
@@ -136,7 +136,7 @@ object WebDsl {
       //is called after form submit, that is a request to the current url with parameters
       onSubmit = {
 //        newMail("me@you.com").to("you@me.come").subject("my mail").text("this is text").send()
-        makeHtml("<p>yes</p>")
+        makeSsp("<p>yes</p>")
       },
 
       //optional partial function that is applied to the params before onsubmit

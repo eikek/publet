@@ -5,7 +5,6 @@ import org.eknet.publet.vfs._
 import util.CompositeContentResource
 import xml._
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.template.Javascript
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 
@@ -13,16 +12,16 @@ import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.04.12 00:17
  */
-class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javascript {
-
-//  def contentPath(content: ContentResource) =  {
-//    val ext = content.name.ext
-//    if (ext != "")
-//      PubletWebContext.applicationPath.withExt(content.name.ext)
-//    else
-//      PubletWebContext.applicationPath
-//  }
-
+class EditEngine(del: PubletEngine) extends PubletEngine with Logging {
+/*
+  textarea#editPage {
+    height: 400px;
+    font-family: monospace;
+    line-height: 1.2;
+    font-size: medium;
+    font-style: oblique
+  }
+*/
   def pushPath(path: Path, content: ContentResource) = Path(path.relativeRoot + EditorWebExtension.scriptPath.asString) / "push.html"
 
   def deleteButton(path: Path, content: ContentResource) = {
@@ -73,27 +72,11 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
   def editContent(path: Path, content: ContentResource): ContentResource = {
     def typeSelect(): NodeSeq = {
       val publet = PubletWeb.publet
-      val source = publet.findSources(path).headOption
-      val list = ContentType.forMimeBase(PubletWebContext.applicationPath.name.targetType)
-      val prefExt = source.map(_.name.ext).getOrElse("md")
-      val options = for (ct <- list) yield
-        { <optgroup label={ct.typeName.name}>
-          {
-            for (ext<-ct.extensions.toList.sortWith(_ < _)) yield {
-              val o = <option>{ext}</option>
-              if (prefExt == ext) {
-                o % Attribute("selected", Text("selected"), Null)
-              } else {
-                o
-              }
-            }
-          }
-        </optgroup> }
+
 
       <div class="ym-fbox-select">
         <label for="extentionOptions">Extension<sup class="ym-required">*</sup></label>
         <select id="extentionOptions" name="extension" required="required">
-          { options }
         </select>
       </div>
     }
@@ -142,8 +125,9 @@ class EditEngine(del: PubletEngine) extends PubletEngine with Logging with Javas
       else
         del.process(path, Seq(uploadContent(path, data.head)), ContentType.html)
     } else {
-      val c = new CompositeContentResource(data.head, jsFunction(message("Resource is not writeable", Some("error"))).get)
-      del.process(path, Seq(c), ContentType.html)
+//      val c = new CompositeContentResource(data.head, jsFunction(message("Resource is not writeable", Some("error"))).get)
+//      del.process(path, Seq(c), ContentType.html)
     }
+    null
   }
 }

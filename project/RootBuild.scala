@@ -11,23 +11,28 @@ object Resolvers {
 
 object Dependencies {
 
-  val osgiCore = "org.osgi" % "org.osgi.core" % "4.3"
+  val osgiCore = "org.osgi" % "org.osgi.core" % "4.3" withSources()
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1"
-  val servletApi = "javax.servlet" % "servlet-api" % "2.5" % "provided"
-  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16" //scala 2.9.1 only
-  val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1" withSources()
+  val servletApi = "javax.servlet" % "servlet-api" % "2.5" % "provided" withSources()
+//  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16" //scala 2.9.1 only
+  val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
-  val commonsIo = "commons-io" % "commons-io" % "2.2"
-  val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4"
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion
+  val commonsIo = "commons-io" % "commons-io" % "2.2" withSources()
+  val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4" withSources()
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
-  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r"
-  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r"
-  val shiro = "org.apache.shiro" % "shiro-core" % "1.2.0"
-  val shiroWeb = "org.apache.shiro" % "shiro-web" % "1.2.0"
-  val scalaTest = "org.scalatest" %% "scalatest" % "1.8.RC1" % "test"
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "0.6.8" //scala 2.9.1 only
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r" withSources()
+  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % "1.3.0.201202151440-r" withSources()
+  val shiro = "org.apache.shiro" % "shiro-core" % "1.2.0" withSources()
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % "1.2.0" withSources()
+  val scalaTest = "org.scalatest" %% "scalatest" % "1.8.RC1" % "test" withSources()
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "0.6.8" withSources() //scala 2.9.1 only
+
+  private val scalateVersion = "1.5.3"
+  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % scalateVersion withSources()
+  val scalateCore = "org.fusesource.scalate" % "scalate-core" % scalateVersion withSources()
+  val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion withSources()
 }
 
 // Root Module 
@@ -38,7 +43,7 @@ object RootBuild extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (Web.module, Publet.module, GitPart.module, Auth.module, War.module, WebEditor.module, Ext.module)
+  ) aggregate (Web.module, Publet.module, GitPart.module, Auth.module, ScalateEngine.module, War.module, WebEditor.module, Ext.module)
 
   val globalScalaVersion = "2.9.1"
 
@@ -94,7 +99,7 @@ object Publet extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
   
-  lazy val deps = Seq(knockoff, slf4jApi, grizzledSlf4j, scalaTest)
+  lazy val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
 
 }
 
@@ -143,7 +148,7 @@ object Web extends Build {
     id = "web", 
     base = file("web"),
     settings = buildProperties
-  ) dependsOn (Publet.module, ScalaScriptEngine.module, GitPart.module, Auth.module)
+  ) dependsOn (Publet.module, ScalaScriptEngine.module, ScalateEngine.module, GitPart.module, Auth.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
@@ -167,7 +172,7 @@ object War extends Build {
     id = "war",
     base = file("war"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPart.module, Web.module, WebEditor.module, Ext.module)
+  ) dependsOn (Publet.module, GitPart.module, Web.module, ScalateEngine.module, WebEditor.module, Ext.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
@@ -230,4 +235,20 @@ object Ext extends Build {
   val deps = Seq(squareMail, servletApi, grizzledSlf4j, scalaTest)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.ext")
+}
+
+object ScalateEngine extends Build {
+
+  lazy val module = Project(
+    id = "scalate",
+    base = file("scalate"),
+    settings = buildProperties
+  ) dependsOn Publet.module
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-scalate",
+    libraryDependencies ++= deps
+  ) ++ osgiSettings
+
+  val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateWikitext, scalatePage)
 }

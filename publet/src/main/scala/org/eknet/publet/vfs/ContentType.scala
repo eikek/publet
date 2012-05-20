@@ -19,6 +19,14 @@ object ContentType {
   val text = ContentType('text, Set("txt", "text", "cfg", "properties"), ("text", "plain"))
   val html = ContentType('html, Set("html", "htm"), ("text", "html"))
   val markdown = ContentType('markdown, Set("md", "markdown"), ("text", "markdown"))
+  val textile = ContentType('textile, Set("textile"), ("text", "textile"))
+  val confluence = ContentType('confluence, Set("conf"), ("text", "conf"))
+  val page = ContentType('page, Set("page"), ("text", "page"))
+  val feed = ContentType('feed, Set("feed"), ("text", "feed"))
+  val ssp = ContentType('ssp, Set("ssp"), ("text", "ssp"))
+  val scaml = ContentType('scaml, Set("scaml"), ("text", "scaml"))
+  val mustache = ContentType('mustache, Set("mustache"), ("text", "mustache"))
+  val jade = ContentType('jade, Set("jade"), ("text", "jade"))
   val xml = ContentType('xml, Set("xml"), ("text", "xml"))
   val css = ContentType('css, Set("css"), ("text", "css"))
   val javascript = ContentType('javascript, Set("js"), ("text", "javascript"))
@@ -34,7 +42,7 @@ object ContentType {
   val jar = ContentType('jar, Set("jar"), ("application", "java-archive"))
   val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
 
-  val all = Set(text, html, pdf, markdown, xml, css, javascript, json, png, jpg, gif, icon, scal)
+  val all = Set(text, html, markdown, textile, confluence, page, feed, ssp, scaml, mustache, jade, xml, css, javascript, json, png, jpg, gif, icon, scal, pdf)
 
   def apply(f: File): ContentType = apply(extension(f))
 

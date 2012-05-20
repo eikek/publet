@@ -1,0 +1,20 @@
+h3 Edit Page
+.row
+  .span8
+    form(method="post" action="")
+      .controls
+        button Save
+        button View
+        button Delete
+      label Extensions
+        select(name="extension") #{extensionOptions}
+      label File
+        input(id="fileInput" name="file" type="file" maxlength="100000" required="required")
+      label Commit Message
+        input(name="commitMessage")
+      input(type="hidden" name="path" value="#{ path.asString }")
+      input(id="lastHead" type="hidden" name="head" value="#{lastmod}")
+  .span4
+    h3 File browser
+    pre#containerPath
+    #filesTree

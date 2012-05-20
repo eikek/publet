@@ -45,18 +45,21 @@ trait RequestUrl {
   /**Url prefix of this application. This is read from the config file or constructed
    * using the information provided by the request.
    *
-   * This base should be used when constructing urls. The path does not end
-   * with a `/` character
+   * This base should be used when constructing urls.
    * @return
    */
   def urlBasePath = Path(urlBase+"/")
 
 
   private val applicationUriKey: Key[String] = Key("applicationUri", {
-    case Request => req.getRequestURI.substring(req.getContextPath.length)
+    case Request => {
+      val p = Path(req.getRequestURI.substring(req.getContextPath.length))
+      if (p.directory) (p/"index.html").asString else p.asString
+    }
   })
 
-  /** The part of the uri after the context path. */
+  /** The part of the uri after the context path. If it is a directory,
+   * the standard `index.html` is appended. */
   def applicationUri = PubletWebContext.attr(applicationUriKey).get
   /** The part of the uri after the context path. */
   def applicationPath = Path(applicationUri)
@@ -75,4 +78,9 @@ trait RequestUrl {
 
   def isGitRequest = applicationUri.startsWith("/"+Config.gitMount)
 
+  /**
+   * Returns the decoded context path
+   * @return
+   */
+  def contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
 }

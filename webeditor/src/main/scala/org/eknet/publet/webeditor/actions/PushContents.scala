@@ -5,19 +5,19 @@ import org.eknet.publet.web.shiro.Security
 import java.io.ByteArrayInputStream
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.template.Javascript
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:46
  */
-object PushContents extends ScalaScript with Logging with Javascript {
+object PushContents extends ScalaScript with Logging {
 
   def notify(level:String, msg: String, head: Option[String]) = {
-    val m = message(msg, Some(level))
-    val headchange = head.map("$('#lastHead').attr('value', '"+ _ + "');").getOrElse("")
-    jsFunction(m+"\n"+ headchange)
+//    val m = message(msg, Some(level))
+//    val headchange = head.map("$('#lastHead').attr('value', '"+ _ + "');").getOrElse("")
+//    jsFunction(m+"\n"+ headchange)
+    ScalaScript.makeSsp("")
   }
 
   def serve() = {

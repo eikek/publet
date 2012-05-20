@@ -13,16 +13,9 @@ import org.eknet.publet.web.PubletWebContext
 object Logout extends ScalaScript {
 
   def serve() = {
-    val path = PubletWebContext.applicationPath
     if (Security.isAuthenticated) {
       Security.subject.logout()
-      if (path.name.targetType == ContentType.json) {
-        makeJson(Map("success"->true, "message"->"Logged out."))
-      } else {
-        Login.serve()
-      }
-    } else {
-      Login.serve()
     }
+    makeJson(Map("success"->true, "message"->"Logged out."))
   }
 }

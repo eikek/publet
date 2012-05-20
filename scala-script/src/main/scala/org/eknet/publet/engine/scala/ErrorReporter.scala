@@ -4,7 +4,6 @@ import tools.nsc.reporters.AbstractReporter
 import tools.nsc.util.Position
 import tools.nsc.Settings
 import collection.mutable
-import org.eknet.publet.engine.convert.CodeHtmlConverter
 import org.eknet.publet.vfs.{ContentType, Content, Path}
 
 /**
@@ -42,6 +41,6 @@ class ErrorReporter(val settings: Settings, lineOff: Int = 0) extends AbstractRe
   }
 
   def htmlEscapeMessages = {
-    messages.map(_.map(s => CodeHtmlConverter.replaceChars(s)))
+    messages.map(_.map(s => s.replace("<", "&lt;").replace(">", "&gt;")))
   }
 }

@@ -1,6 +1,5 @@
 package org.eknet.publet.webeditor
 
-import org.eknet.publet.web.template.StandardEngine
 import org.eknet.publet.Publet
 import xml.{Null, Text, Attribute, NodeSeq}
 import org.eknet.publet.vfs.Path
@@ -11,9 +10,9 @@ import org.eknet.publet.web.{PubletWebContext, PubletWeb}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:10
  */
-class EditStandardEngine(publet: Publet) extends StandardEngine(publet) {
-  override def getSidebar(path: Path) = {
-    makeHtml {
+class EditStandardEngine(publet: Publet) {
+  def getSidebar(path: Path) = {
+    makeSsp {
       <div>Engine:
         <select class="publetRegisterEngine">
           {engineOptions}

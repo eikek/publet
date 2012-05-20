@@ -3,7 +3,6 @@ package org.eknet.publet.web.filter
 import javax.servlet.http.HttpServletResponse
 import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.vfs._
-import org.eknet.publet.engine.convert.CodeHtmlConverter
 import util.SimpleContentResource
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthenticatedException, AuthorizationException}
@@ -54,7 +53,7 @@ trait PageWriter extends Logging {
       //print the exception in development mode
       val sw = new StringWriter()
       ex.printStackTrace(new PrintWriter(sw))
-      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+CodeHtmlConverter.replaceChars(sw.toString)+ "</pre>", ContentType.html)
+      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+ sw.toString.replace("<", "&lt;").replace(">", "&gt;")+ "</pre>", ContentType.html)
       val resource = new SimpleContentResource(PubletWebContext.applicationPath.name, content)
       val result = publet.engineManager.getEngine('mainWiki).get
         .process(PubletWebContext.applicationPath, Seq(resource), ContentType.html)

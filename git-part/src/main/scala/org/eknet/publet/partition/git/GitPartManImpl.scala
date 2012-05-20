@@ -59,18 +59,26 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
   }
 
   private lazy val initialResources = {
-    val ct = ContentType.markdown
-    val index = """# Welcome
-
-<p class="box success">Publet installation was successful!</p>
-
-Publet has been succesfully installed. You're viewing its sample page
-right now. Please have a look at the [user guide](guide) to get started.
-"""
+    val index =
+      """# Welcome
+        | <div class="alert alert-success">Publet installation was successful!</div>
+        | Publet has been succesfully installed. You're viewing its sample page
+        | right now. Please have a look at the [user guide](guide) to get started.
+        """.stripMargin
+    val nav =
+      """a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
+        |  span(class="icon-bar")
+        |  span(class="icon-bar")
+        |  span(class="icon-bar")
+        |a(class="brand" href="/") Project
+        |.nav-collapse
+        |  ul.nav
+        |    li
+        |      a(href="?a=edit") Edit
+      """.stripMargin
     Map(
-      Path("/index.md") -> Content(index, ct),
-      Path("/.includes/nav.md") -> Content("* [Edit](?a=edit)", ct),
-      Path("/.includes/header.md") -> Content("# ${pageTitle}", ct)
+      Path("/index.md") -> Content(index, ContentType.markdown),
+      Path("/.includes/nav.jade") -> Content(nav, ContentType.jade)
     )
   }
 }

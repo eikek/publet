@@ -16,7 +16,7 @@ object MailContact extends ScalaScript {
   def actionUrl = PubletWeb.servletContext.getContextPath+ "/publet/ext/scripts/mailcontact.html"
   def captchaUrl = PubletWeb.servletContext.getContextPath+ "/publet/ext/scripts/captcha.png"
 
-  def contactForm() = makeHtml {
+  def contactForm() = makeSsp {
     <h2>Kontakt</h2>
       <div class="formSubmitResponse"></div>
       <form class="ym-form linearize-form" action={ actionUrl }>
@@ -52,7 +52,7 @@ object MailContact extends ScalaScript {
     import ctx._
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
-      makeHtml(<p class="box error">No SMTP configuration and/or defaultReceiver provided.</p>)
+      makeSsp(<p class="box error">No SMTP configuration and/or defaultReceiver provided.</p>)
     } else {
       val from = param("from")
       val msg = param("message")
@@ -66,11 +66,11 @@ object MailContact extends ScalaScript {
             .subject("Kontaktformular")
             .text(msg.get)
             .send()
-          makeHtml(<p class="box success">Message sent!
+          makeSsp(<p class="box success">Message sent!
             <a href=" ">Reload</a>
           </p>)
         } else {
-          makeHtml(<p class="box error">Captcha does not match!
+          makeSsp(<p class="box error">Captcha does not match!
             <a href=" ">Reload</a>
           </p>)
         }

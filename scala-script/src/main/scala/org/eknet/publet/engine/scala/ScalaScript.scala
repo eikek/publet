@@ -20,9 +20,9 @@ trait ScalaScript extends Logging {
 
 object ScalaScript {
 
-  def makeHtml(nseq: NodeSeq): Option[NodeContent] = Some(NodeContent(nseq, ContentType.html))
-  def makeHtml(nseq: NodeBuffer): Option[NodeContent] = Some(NodeContent(nseq, ContentType.html))
-  def makeHtml(str: String): Option[Content] = Some(Content(str, ContentType.html))
+  def makeSsp(nseq: NodeSeq): Option[NodeContent] = Some(NodeContent(nseq, ContentType.ssp))
+  def makeSsp(nseq: NodeBuffer): Option[NodeContent] = Some(NodeContent(nseq, ContentType.ssp))
+  def makeSsp(str: String): Option[Content] = Some(Content(str, ContentType.ssp))
 
   def makeJson(any: Any): Option[Content] = Some(Content(Json.build(any).toString, ContentType.json))
 

@@ -7,8 +7,6 @@ import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import org.eknet.publet.web.{PubletWeb, WebExtension}
-import org.eknet.publet.web.util.Key
-import org.eknet.publet.web.filter.NotFoundHandler
 import grizzled.slf4j.Logging
 
 /**
@@ -45,8 +43,7 @@ object EditorWebExtension {
     publet.mountManager.mount(scriptPath, muc)
 
     val se = new EditStandardEngine(publet)
-    se.htmlHeadContribs.append(headerHtml)
-    publet.engineManager.addEngine(new EditEngine(se))
+//    publet.engineManager.addEngine(new EditEngine(se))
   }
 
   def headerHtml(path: Path, content: Content) = {
