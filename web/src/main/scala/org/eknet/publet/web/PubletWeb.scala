@@ -6,7 +6,7 @@ import scripts._
 import shiro.{UsersRealm, AuthManager}
 import org.eknet.publet.partition.git.{GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
-import org.eknet.publet.{Includes, Publet}
+import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
 import template.Templates
 import util.{PropertiesMap, AttributeMap, Context, Key}
@@ -95,7 +95,7 @@ object PubletWeb {
   lazy val contentRoot = contextMap(contentRootKey).get
   lazy val authManager = contextMap(authManagerKey).get
   lazy val publetSettings = new PropertiesMap {
-    override def file = contentRoot.lookup(Path(Includes.allIncludes+"settings.properties"))
+    override def file = contentRoot.lookup(Path(Publet.allIncludes+"settings.properties"))
       .collect({case cc: ContentResource => cc})
       .map(_.inputStream)
   }

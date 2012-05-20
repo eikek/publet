@@ -36,7 +36,7 @@ object EditorWebExtension {
     publet.mountManager.mount(editorPath, cp)
 
     val muc = new MapContainer()
-    muc.addResource(new WebScriptResource("setengine.json".rn, SetEngine))
+//    muc.addResource(new WebScriptResource("setengine.json".rn, SetEngine))
     muc.addResource(new WebScriptResource("toc.json".rn, ListContents))
     muc.addResource(new WebScriptResource("push.json".rn, PushContents))
     muc.addResource(new WebScriptResource("browser.js".rn, BrowserJs))

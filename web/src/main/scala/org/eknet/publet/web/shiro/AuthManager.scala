@@ -1,12 +1,12 @@
 package org.eknet.publet.web.shiro
 
-import org.eknet.publet.Includes
 import org.eknet.publet.vfs.{ContentResource, Path}
 import org.eknet.publet.web.{Config, PubletWeb}
 import org.eknet.publet.auth.xml.{PermissionModel, XmlDatabase}
 import org.eknet.publet.auth._
 import org.xml.sax.SAXParseException
 import grizzled.slf4j.Logging
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,7 +15,7 @@ import grizzled.slf4j.Logging
 class AuthManager extends PubletAuth with Logging {
 
   private def getPermissionXml = {
-    val permissionPath = Path(Includes.allIncludes+"config/permissions.xml").toAbsolute
+    val permissionPath = Path(Publet.allIncludes+"config/permissions.xml").toAbsolute
     PubletWeb.contentRoot
       .lookup(permissionPath)
       .collect({case c:ContentResource=>c})

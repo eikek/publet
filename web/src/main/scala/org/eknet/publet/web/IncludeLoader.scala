@@ -1,7 +1,7 @@
 package org.eknet.publet.web
 
-import org.eknet.publet.{Publet, Includes}
-import org.eknet.publet.vfs.{ContentType, Content, Path}
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.Publet
 
 
 /**
@@ -10,7 +10,7 @@ import org.eknet.publet.vfs.{ContentType, Content, Path}
  */
 class IncludeLoader {
 
-  val allIncludesPath = Path(Config.mainMount + "/.allIncludes/")
+  val allIncludesPath = Path(Config.mainMount + "/"+ Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
 
   def loadInclude(name: String): String = {

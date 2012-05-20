@@ -2,7 +2,7 @@ package org.eknet.publet.engine.scala
 
 import scala.collection.mutable
 import org.eknet.publet.vfs.fs.FileResource
-import org.eknet.publet.{Includes, Publet}
+import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Resource, ContainerResource, Path}
 import io.Source
 import java.io._
@@ -116,7 +116,7 @@ object MiniProject {
     val max = Path(pathPrefix).size +2
     val root = rootProject(pathPrefix, publet)
     def findProjectDir(p: Path): Option[MiniProject] = {
-      val projectPath = p / Includes.includesPath / projectDir
+      val projectPath = p / Publet.includesPath / projectDir
       publet.rootContainer.lookup(projectPath) match {
         case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(projectPath, cr, root, publet))
         case None => if (p.size>max) findProjectDir(p.tail) else root.headOption
@@ -126,9 +126,10 @@ object MiniProject {
   }
 
   def rootProject(pathPrefix: String, publet: Publet): List[MiniProject] =  {
-    val path = Path(pathPrefix) / Includes.allIncludesPath / projectDir
+    val path = Path(pathPrefix) / Publet.allIncludesPath / projectDir
     publet.rootContainer.lookup(path)
       .collect({case cr:ContainerResource if (cr.exists)=> cr})
       .map(cont => List(new MiniProject(path, cont, List(), publet))).getOrElse(List())
   }
+
 }

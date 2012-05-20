@@ -84,5 +84,9 @@ object Publet {
     p.engineManager.addEngine(PassThrough)
     p
   }
-  
+
+  val includes = ".includes/"
+  val includesPath = Path(includes)
+  val allIncludes = ".allIncludes/"
+  val allIncludesPath = Path(allIncludes)
 }

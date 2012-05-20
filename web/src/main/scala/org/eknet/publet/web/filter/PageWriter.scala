@@ -4,12 +4,10 @@ import javax.servlet.http.HttpServletResponse
 import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.vfs._
 import util.SimpleContentResource
-import org.eknet.publet.web.shiro.Security
-import org.apache.shiro.authz.{UnauthenticatedException, AuthorizationException}
 import scala.Some
-import org.eknet.publet.Includes
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{PubletWebContext, PubletWeb, Config}
+import org.eknet.publet.Publet
 
 /**
  *
@@ -21,7 +19,7 @@ trait PageWriter extends Logging {
 
   def writeUnauthorizedError(resp:HttpServletResponse) {
     val publet = PubletWeb.publet
-    val r401 = publet.process(Path(Config.mainMount+"/"+Includes.allIncludes+"401.html").toAbsolute)
+    val r401 = publet.process(Path(Config.mainMount+"/"+Publet.allIncludes+"401.html").toAbsolute)
     if (r401.isDefined) {
       val resource = new SimpleContentResource(ResourceName("401.html"), r401.get)
       val result = publet.engineManager.getEngine('include).get
@@ -35,7 +33,7 @@ trait PageWriter extends Logging {
 
   def writeInternalError(resp: HttpServletResponse) {
     val publet = PubletWeb.publet
-    val path500 = Path(Config.mainMount+"/"+Includes.allIncludes+"500.html").toAbsolute
+    val path500 = Path(Config.mainMount+"/"+Publet.allIncludes+"500.html").toAbsolute
     val r500 = publet.process(path500)
     if (r500.isDefined) {
       val resource = new SimpleContentResource(ResourceName("500.html"), r500.get)
