@@ -38,4 +38,5 @@ class MapContainer extends Container {
   }
 
   def exists = true
+  def isWriteable = false
 }

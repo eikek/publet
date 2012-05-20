@@ -107,4 +107,11 @@ trait Container {
       case Nil => sys.error("Cannot create new resource at root!")
     }
   }
+
+  /**Wether this container is able to create new
+   * child resources.
+   *
+   * @return
+   */
+  def isWriteable: Boolean
 }

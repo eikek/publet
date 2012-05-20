@@ -1,0 +1,17 @@
+---
+title: Error
+--- name:head pipeline:jade
+script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
+link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
+
+--- name:content pipeline:jade
+
+-@ val message: String = ""
+.row
+  .span8
+    .alert.alert-error
+      =message
+  .span4
+    h3 File browser
+    pre#containerPath
+    #filesTree

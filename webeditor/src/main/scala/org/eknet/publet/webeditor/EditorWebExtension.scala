@@ -18,7 +18,7 @@ class EditorWebExtension extends WebExtension with Logging {
   def onStartup() {
     info("Installing webeditor ...")
     EditorWebExtension.setup(PubletWeb.publet, PubletWeb.scalateEngine)
-//    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
+    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
   }
 
   def onShutdown() {}

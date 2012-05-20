@@ -45,7 +45,7 @@ trait RootContainer extends Container {
   }
 
   val exists = true
-
+  lazy val isWriteable = false
   val lastModification = None
 
   private def toContainer(child:SegTree): ContainerResource = new Inner(child.seg.rn, child)
@@ -81,6 +81,8 @@ trait RootContainer extends Container {
         case _ => None
       }
     }
+
+    def isWriteable = node.container.exists(_.isWriteable)
 
     override def toString = "Inner:["+ node.seg +"]"
 

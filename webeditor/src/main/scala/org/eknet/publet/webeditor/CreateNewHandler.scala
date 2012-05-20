@@ -3,7 +3,7 @@ package org.eknet.publet.webeditor
 import javax.servlet.http.HttpServletResponse
 import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
 import org.eknet.publet.vfs._
-import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -16,12 +16,13 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
     publet.mountManager.resolveMount(path) orElse {
       sys.error("Invalid path: "+ path.asString)
     }
+    val appPath = PubletWebContext.applicationPath
     val c = if (targetType.mime._1 == "text") {
-      val res = Resource.emptyContent(ResourceName("edit"), ContentType.markdown)
+      val res = Resource.emptyContent(appPath.name, ContentType.markdown)
       publet.engineManager.getEngine('edit).get
         .process(path, Seq(res), ContentType.markdown);
     } else {
-      val res = Resource.emptyContent(ResourceName("upload"), targetType)
+      val res = Resource.emptyContent(appPath.name, targetType)
       publet.engineManager.getEngine('edit).get
         .process(path, Seq(res), targetType)
     }

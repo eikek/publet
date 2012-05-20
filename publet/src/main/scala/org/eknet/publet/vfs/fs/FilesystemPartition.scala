@@ -38,4 +38,5 @@ class FilesystemPartition(val root: File, createDir: Boolean = true) extends Con
   else
     Some(newFile(f, root))
 
+  lazy val isWriteable = true
 }

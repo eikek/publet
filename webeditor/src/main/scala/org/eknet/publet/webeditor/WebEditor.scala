@@ -4,8 +4,8 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.vfs.{Writeable, ContentType, ContentResource, Path}
-import org.eknet.publet.web.{PubletWebContext, GitAction}
 import xml.{Null, Text, Attribute}
+import org.eknet.publet.web.{PubletWeb, PubletWebContext, GitAction}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -14,11 +14,18 @@ import xml.{Null, Text, Attribute}
 class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEngine {
 
   val editPageTemplate = "/publet/webeditor/templates/editpage.page"
+  val uploadTemplate = "/publet/webeditor/templates/uploadpage.page"
+  val errorTemplate = "/publet/webeditor/templates/errorpage.page"
   def pushPath(path: Path) = EditorWebExtension.scriptPath / "push.json"
 
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    Security.checkGitAction(GitAction.push)
-    if (!data.head.exists || data.head.isInstanceOf[Writeable]) {
+    if (!PubletWeb.publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
+      val attr = Map(
+        "message" -> "Content not writeable!"
+      ) ++ scalateEngine.attributes
+      Some(scalateEngine.processUri(errorTemplate, attr))
+    } else {
+      Security.checkGitAction(GitAction.push)
       if (data.head.contentType.mime._1 == "text") {
         val attr = Map(
           "contentAsString" -> data.head.contentAsString,
@@ -29,12 +36,13 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
         ) ++ scalateEngine.attributes
         Some(scalateEngine.processUri(editPageTemplate, attr))
       } else {
-        sys.error("not implemented")
+        val attr = Map(
+          "actionPath" -> pushPath(path).asString,
+          "lastMod" -> data.head.lastModification.map(_.toString).getOrElse(""),
+          "resourcePath" -> path.sibling(data.head.name.fullName).asString
+        ) ++ scalateEngine.attributes
+        Some(scalateEngine.processUri(uploadTemplate, attr))
       }
-    } else {
-      sys.error("not implemented")
-      //      val c = new CompositeContentResource(data.head, jsFunction(message("Resource is not writeable", Some("error"))).get)
-      //      del.process(path, Seq(c), ContentType.html)
     }
   }
 

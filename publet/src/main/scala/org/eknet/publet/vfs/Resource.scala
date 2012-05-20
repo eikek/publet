@@ -93,6 +93,7 @@ object Resource {
     def container(name: String) = emptyContainer(name.rn)
     def child(name: String) = None
     def lastModification = None
+    lazy val isWriteable = false
   }
 
   private class EmptyContent(val name: ResourceName, val contentType: ContentType) extends ContentResource {

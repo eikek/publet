@@ -31,5 +31,7 @@ class DirectoryResource(dir: File, root: Path)
     dir.mkdir()
   }
 
+  def isWriteable = true
+
   override def toString = "Directory[" + dir.toString + "]"
 }

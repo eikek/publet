@@ -48,5 +48,6 @@ class ClasspathContainer(scope: Class[_],
 
   def exists = true
 
+  lazy val isWriteable = false
   lazy val lastModification = None
 }
