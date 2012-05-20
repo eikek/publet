@@ -85,8 +85,13 @@ object Publet {
     p
   }
 
+  /** The `.includes/` constant */
   val includes = ".includes/"
+  /** The `.includes/` constant */
   val includesPath = Path(includes)
+
+  /** The `.allIncludes/` constant */
   val allIncludes = ".allIncludes/"
+  /** The `.allIncludes/` constant */
   val allIncludesPath = Path(allIncludes)
 }

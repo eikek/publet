@@ -63,7 +63,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
       """# Welcome
         | <div class="alert alert-success">Publet installation was successful!</div>
         | Publet has been succesfully installed. You're viewing its sample page
-        | right now. Please have a look at the [user guide](guide) to get started.
+        | right now. Please have a look at the [user guide](../publet/doc/index.html) to get started.
         """.stripMargin
     val nav =
       """a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
@@ -73,12 +73,13 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |a(class="brand" href="/") Project
         |.nav-collapse
         |  ul.nav
-        |    li
-        |      a(href="?a=edit") Edit
+        |    - if (isResourceEditable)
+        |      li
+        |        a(href="?a=edit") Edit
       """.stripMargin
     Map(
       Path("/index.md") -> Content(index, ContentType.markdown),
-      Path("/.includes/nav.jade") -> Content(nav, ContentType.jade)
+      Path("/.allIncludes/nav.jade") -> Content(nav, ContentType.jade)
     )
   }
 }

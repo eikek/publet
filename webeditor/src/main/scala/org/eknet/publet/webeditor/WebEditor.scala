@@ -3,7 +3,7 @@ package org.eknet.publet.webeditor
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.vfs.{Writeable, ContentType, ContentResource, Path}
+import org.eknet.publet.vfs.{ContentType, ContentResource, Path}
 import xml.{Null, Text, Attribute}
 import org.eknet.publet.web.{PubletWeb, PubletWebContext, GitAction}
 
@@ -19,13 +19,13 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
   def pushPath(path: Path) = EditorWebExtension.scriptPath / "push.json"
 
   def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
+    Security.checkGitAction(GitAction.push)
     if (!PubletWeb.publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
       val attr = Map(
-        "message" -> "Content not writeable!"
+      "message" -> "Content not writeable!"
       ) ++ scalateEngine.attributes
       Some(scalateEngine.processUri(errorTemplate, attr))
     } else {
-      Security.checkGitAction(GitAction.push)
       if (data.head.contentType.mime._1 == "text") {
         val attr = Map(
           "contentAsString" -> data.head.contentAsString,

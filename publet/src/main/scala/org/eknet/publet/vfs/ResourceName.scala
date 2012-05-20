@@ -28,6 +28,8 @@ case class ResourceName(name: String, ext: String) extends Ordered[ResourceName]
    */
   def withExtension(ext: String) = ResourceName(name, ext)
 
+  def withExtIfEmpty(ext: String) = if (hasExtension) this else withExtension(ext)
+
   def compare(that: ResourceName) = fullName.compare(that.fullName)
 
   override lazy val toString = fullName

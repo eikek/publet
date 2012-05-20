@@ -26,8 +26,8 @@ link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
           =extensionOptions
       label
         | Text
-        textarea(name="page" id="editPage" class="span8" style="height:380px; font-family:monospace;")
-          ~~ contentAsString
+        textarea(name="page" id="editPage" class="span8" style="height:380px; font-family:monospace;")<
+          !~~ contentAsString
       label
         | Commit Message
         input(name="commitMessage" class="span8")
