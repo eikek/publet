@@ -1,0 +1,18 @@
+---
+title: Publet Userdoc
+
+--- name:content
+
+# Publet
+
+This is the user documentation for publet.
+
+Publet is a small application that glues together three major players:
+
+* [Scalate](http://scalate.fusesource.org/) which is a template engine
+* [Git](http://git-scm.com/) and especially [JGit](http://www.jgit.org/)
+* [Bootstrap]() for a great ui
+
+Git is used as a repository system to back all sources that are feed into
+the template engine to produce html pages. The default layout for those
+pages is based on bootstrap.

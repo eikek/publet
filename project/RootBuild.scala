@@ -43,7 +43,8 @@ object RootBuild extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (Web.module, Publet.module, GitPart.module, Auth.module, ScalateEngine.module, War.module, WebEditor.module, Ext.module)
+  ) aggregate (Publet.module, Web.module, GitPart.module, Auth.module,
+    ScalateEngine.module, War.module, WebEditor.module, Ext.module, Doc.module)
 
   val globalScalaVersion = "2.9.1"
 
@@ -172,7 +173,8 @@ object War extends Build {
     id = "war",
     base = file("war"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPart.module, Web.module, ScalateEngine.module, WebEditor.module, Ext.module)
+  ) dependsOn (Publet.module, GitPart.module, Web.module,
+    ScalateEngine.module, WebEditor.module, Ext.module, Doc.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
@@ -251,4 +253,20 @@ object ScalateEngine extends Build {
   ) ++ osgiSettings
 
   val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateWikitext, scalatePage)
+}
+
+object Doc extends Build {
+
+  lazy val module = Project(
+    id = "doc",
+    base = file("doc"),
+    settings = buildProperties
+  ) dependsOn Web.module
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-doc",
+    libraryDependencies ++= deps
+  ) ++ osgiSettings
+
+  val deps = Seq(grizzledSlf4j)
 }

@@ -4,6 +4,7 @@ import javax.servlet.{ServletContextEvent, ServletContextListener}
 import org.eknet.publet.webeditor.EditorWebExtension
 import org.eknet.publet.web.{WebExtension, PubletWeb}
 import org.eknet.publet.web.template.BootstrapTemplate
+import org.eknet.publet.doc.PubletDocExtension
 
 
 /**
@@ -14,7 +15,8 @@ class PubletContextListener extends ServletContextListener {
 
   val extensions = List[WebExtension](
     new BootstrapTemplate(),
-    new EditorWebExtension()
+    new EditorWebExtension(),
+    new PubletDocExtension()
   )
 
   def contextInitialized(sce: ServletContextEvent) {
