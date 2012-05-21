@@ -1,0 +1,57 @@
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+    background: #F8F8F8;
+    color: #373737;
+}
+pre {
+    margin: 0.5em 0 9px;
+}
+div#content, div#content p {
+    color: #373737;
+    font-size: 16px;
+    font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+#content p {
+    margin: 1.2em 0 0 0;
+}
+
+#content h1,
+#content h2,
+#content h3,
+#content h4,
+#content h5,
+#content h6 {
+    color:#161e21;
+}
+
+#content h1 {
+    line-height: 0.8571em;
+    margin: 0.4286em 0 0;
+}
+
+#content h2 {
+    line-height: 1.2em;
+    margin: 0.6em 0 0 0;
+}
+
+#content h3 {
+    line-height: 0.8571em;
+    margin:0.8571em 0 0 0;
+}
+
+#content h4 {
+    line-height: 1.125em;
+    margin:1.125em 0 0 0;
+}
+
+#content h5 {
+    line-height: 1.2857em;
+    margin: 1.2857em 0 0 0;
+}
+
+#content h6 {
+    line-height: 1.5em;
+    margin: 1.5em 0 0 0;
+}
