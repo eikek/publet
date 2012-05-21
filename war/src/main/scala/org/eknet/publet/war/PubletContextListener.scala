@@ -1,5 +1,6 @@
 package org.eknet.publet.war
 
+import scala.collection.JavaConversions._
 import javax.servlet.{ServletContextEvent, ServletContextListener}
 import org.eknet.publet.webeditor.EditorWebExtension
 import org.eknet.publet.web.template.BootstrapTemplate
@@ -11,6 +12,7 @@ import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
+import java.util.ServiceLoader
 
 
 /**
@@ -19,16 +21,15 @@ import ch.qos.logback.core.util.StatusPrinter
  */
 class PubletContextListener extends ServletContextListener {
 
-  val extensions = List[WebExtension](
-    new BootstrapTemplate(),
-    new EditorWebExtension(),
-    new PubletDocExtension()
-  )
+  def loadExtensions(): List[WebExtension] = {
+    val loader = ServiceLoader.load(classOf[WebExtension])
+    loader.iterator().toList
+  }
 
   def contextInitialized(sce: ServletContextEvent) {
     PubletWeb.initialize(sce.getServletContext)
     initLogging()
-    extensions.foreach(_.onStartup())
+    loadExtensions().foreach(_.onStartup())
   }
 
   def contextDestroyed(sce: ServletContextEvent) {
