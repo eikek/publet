@@ -30,9 +30,9 @@ object Dependencies {
   val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "0.6.8" withSources() //scala 2.9.1 only
 
   private val scalateVersion = "1.5.3"
-  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % scalateVersion withSources()
-  val scalateCore = "org.fusesource.scalate" % "scalate-core" % scalateVersion withSources()
-  val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion withSources()
+  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % scalateVersion 
+  val scalateCore = "org.fusesource.scalate" % "scalate-core" % scalateVersion 
+  val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion
 }
 
 // Root Module 
