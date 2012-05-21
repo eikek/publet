@@ -47,8 +47,8 @@ class AuthManager extends PubletAuth with Logging {
 }
 
 private object SuperUserAuth extends PubletAuth {
-  private val superuser = User("superadmin",
-    "superadmin".toCharArray,
+  private def superuser = User("superadmin",
+    Config("superadminPassword").getOrElse("superadmin").toCharArray,
     None,
     Set("superadmin"),
     Map(UserProperty.fullName.toString -> "Publet Superadmin"))
