@@ -15,7 +15,7 @@ function getContentsAsUl(pathname, f) {
                 var handler = "replaceContents('"+file.href+"');";
                 lis.push('<li class="folder"><a href="#" onClick="'+ handler +'">'+ file.name+'</a></li>');
             } else {
-                lis.push('<li class="page"><a href="'+ file.href +'?a=edit">'+ file.name+'</a></li>');
+                lis.push('<li class="page"><a href="/publet/webeditor/scripts/edit.html?resource='+ file.href+'">'+ file.name+'</a></li>');
             }
         });
         $("#containerPath").html(data.containerPath);
@@ -37,7 +37,8 @@ function replaceContents(pathname) {
 }
 
 function renderFileBrowser() {
-    getContentsAsUl(window.location.pathname, function(el) {
+    var resourcePath = getURLParameter("resource");
+    getContentsAsUl(resourcePath, function(el) {
         el.appendTo("#filesTree");
     });
 }

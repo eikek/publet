@@ -1,6 +1,6 @@
 package org.eknet.publet.webeditor
 
-import actions.{BrowserJs, PushContents, ListContents, SetEngine}
+import actions._
 import org.eknet.publet.Publet
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
@@ -36,14 +36,20 @@ object EditorWebExtension {
     publet.mountManager.mount(editorPath, cp)
 
     val muc = new MapContainer()
-//    muc.addResource(new WebScriptResource("setengine.json".rn, SetEngine))
     muc.addResource(new WebScriptResource("toc.json".rn, ListContents))
     muc.addResource(new WebScriptResource("push.json".rn, PushContents))
     muc.addResource(new WebScriptResource("browser.js".rn, BrowserJs))
+    muc.addResource(new WebScriptResource("edit.html".rn, new Edit))
     publet.mountManager.mount(scriptPath, muc)
 
     val editEngine = new WebEditor('edit, scalateEngine)
     publet.engineManager.addEngine(editEngine)
   }
+
+
+  val editPageTemplate = "/publet/webeditor/templates/editpage.page"
+  val uploadTemplate = "/publet/webeditor/templates/uploadpage.page"
+  val errorTemplate = "/publet/webeditor/templates/errorpage.page"
+  val editPage = "/publet/webeditor/scripts/edit.html"
 
 }

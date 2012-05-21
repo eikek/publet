@@ -27,6 +27,7 @@ class RoutingFilter extends Filter with HttpFilter {
   val mainfilters = List(
     new WebContextFilter,
     new RedirectFilter,
+    new BlacklistFilter,
     new PubletShiroFilter,
     new AuthzFilter
   )

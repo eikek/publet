@@ -83,4 +83,22 @@ trait RequestUrl {
    * @return
    */
   def contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
+
+  private val resourceUri = Key("applicationSourceUri", {
+    case Request => {
+      PubletWeb.publet.findSources(applicationPath).toList match {
+        case c::cs => Some(applicationPath.sibling(c.name.fullName))
+        case _ => None
+      }
+    }
+  })
+
+  /**
+   * Returns the path to the source file that this request
+   * is pointing to.
+   * @return
+   */
+  def resourcePath = PubletWebContext.attr(resourceUri).get
+
+  def getResourceUri = resourcePath.map(_.asString).getOrElse("")
 }

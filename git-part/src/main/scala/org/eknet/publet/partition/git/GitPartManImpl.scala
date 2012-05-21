@@ -75,7 +75,9 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |  ul.nav
         |    - if (isResourceEditable)
         |      li
-        |        a(href="?a=edit") Edit
+        |        - val cp = PubletWebContext.contextPath
+        |        - val path = PubletWebContext.getResourceUri
+        |        a(href={cp + "/publet/webeditor/scripts/edit.html?resource="+path}) Edit
       """.stripMargin
     Map(
       Path("/index.md") -> Content(index, ContentType.markdown),
