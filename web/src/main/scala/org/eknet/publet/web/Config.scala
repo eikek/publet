@@ -23,7 +23,7 @@ object Config extends PropertiesMap with Logging {
    * property or `$PUBLET_DIR`  environment variable (in that order)
    *
    */
-  private val rootDirectory = {
+  val rootDirectory = {
     var dir = Option(getProperty("publet.dir"))
     if (!dir.isDefined) {
       info("System property 'publet.dir' not defined.")
@@ -79,6 +79,12 @@ object Config extends PropertiesMap with Logging {
    */
   def gitMount = apply("publet.gitMount").getOrElse("git")
 
+  /**
+   * Returns a file beneath configuration directory of this
+   * application.
+   * @param name
+   * @return
+   */
   def getFile(name: String) = new File(directory, name)
 
   protected def file = if (configfile.exists()) Some(new FileInputStream(configfile)) else None

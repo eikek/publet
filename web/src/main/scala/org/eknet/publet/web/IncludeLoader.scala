@@ -37,7 +37,7 @@ class IncludeLoader {
   /**
    * Creates a set of xml tags for the html head part. The
    * root container is searched for js, css and meta resources
-   * 
+   *
    * @return
    */
   def loadHeadIncludes(): NodeSeq = {

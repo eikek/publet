@@ -15,7 +15,6 @@ import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
 import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import javax.servlet.http.HttpServletResponse
-import org.eknet.publet.engine.scalate.ScalateEngine
 import org.fusesource.scalate.Binding
 import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, DefaultPubletCompiler}
 import java.io.File
