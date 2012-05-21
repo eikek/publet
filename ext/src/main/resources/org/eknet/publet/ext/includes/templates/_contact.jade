@@ -1,0 +1,35 @@
+-@ var success: Boolean = false
+-@ var message: String = ""
+-@ var actionUrl: String = ""
+- if (success)
+  .alert.alert-success
+    =message
+- if (!success)
+  #response
+  form(method="post" action={actionUrl} id="contactForm")
+    label
+      | From (Email)
+      input(type="text" name="from" required="required")
+    label
+      | Message
+      textarea(name="message" required="required")
+    input.noheight(name="text")
+    .form-actions
+      button.btn.btn-primary
+        i.icon-envelope.icon-white
+        | Send
+  :javascript
+    $(document).ready(function() {
+      var options = {
+        success: function(data) {
+          var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
+          if (data.success) {
+            $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
+          } else {
+            $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
+          }
+        },
+        dataType: 'json'
+      };
+      $('#contactForm').ajaxForm(options);
+    });

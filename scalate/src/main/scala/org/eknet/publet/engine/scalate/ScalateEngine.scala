@@ -41,6 +41,8 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
         } else {
           val templateSource = if (data.contentType.mime._1 == "text")
             new CodeTemplateSource(path, data)
+          else if (data.contentType.mime._1 == "image")
+            new ImageTemplateSource(path, data)
           else
             new DownloadTemplateSource(path, data)
 
@@ -99,4 +101,17 @@ private class CodeTemplateSource(path: Path, c: ContentResource) extends Templat
 
   def lastModified = c.lastModification.getOrElse(created)
   override def toString = "CodeTemplateSource["+c.toString+": "+ lastModified+"]"
+}
+
+private class ImageTemplateSource(path: Path, c: ContentResource) extends TemplateSource {
+  private val created = System.currentTimeMillis()
+
+  def uri = path.withExt("ssp").asString
+
+  def inputStream = {
+    NodeContent(<img src={ path.sibling(c.name.fullName).asString } alt={c.name.fullName}></img>, ContentType.ssp).inputStream
+  }
+
+  def lastModified = c.lastModification.getOrElse(created)
+  override def toString = "ImageTemplateSource["+c.toString+": "+ lastModified+"]"
 }

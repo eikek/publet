@@ -1,0 +1,9 @@
+---
+title: Error
+searchForSidebar: false
+
+--- name:content pipeline:jade
+
+-@ val message: String = "An error occured."
+.alert.alert-error
+  =message
