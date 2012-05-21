@@ -127,16 +127,10 @@ object PubletWeb {
     Config.setContextPath(servletContext.getContextPath)
 
     publet.engineManager.register("/*", scalateEngine)
-    //      val inclEngine = ScalateEngine('include, publ)
-    //      inclEngine.disableLayout()
-    //      publ.engineManager.addEngine(inclEngine)
 
     val compiler = new DefaultPubletCompiler(publet, Config.mainMount, webImports)
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
-    publet.engineManager.addEngine(scalaEngine)
-
-    //      val scriptInclude = new ScalaScriptEngine('evalinclude, compiler, inclEngine)
-    //      publ.engineManager.addEngine(scriptInclude)
+    publet.engineManager.register("*.scala", scalaEngine)
 
     contextMap(publetKey).get
     initShiro()

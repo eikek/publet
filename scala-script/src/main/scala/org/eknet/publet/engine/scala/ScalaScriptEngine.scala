@@ -12,10 +12,11 @@ class ScalaScriptEngine(val name: Symbol,
                         compiler: PubletCompiler,
                         engine: PubletEngine) extends PubletEngine {
 
-  def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    data find (_.contentType == ContentType.scal) match {
-      case Some(resource) => eval(path, resource) flatMap(out => engine.process(path, Seq(out), target))
-      case None => throw new RuntimeException("no scala script content found")
+  def process(path: Path, data: ContentResource, target: ContentType) = {
+    if (data.contentType == ContentType.scal) {
+      eval(path, data) flatMap (out => engine.process(path, out, target))
+    } else {
+      throw new RuntimeException("no scala script content found")
     }
   }
 

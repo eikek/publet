@@ -22,7 +22,7 @@ trait Publet {
    */
   def process(path: Path): Option[Content]
 
-  /** Processes the source at the given URI and retursn
+  /** Processes the source at the given URI and returns
    * the transformed result according to the specified
    * target format.
    * <p>
@@ -35,9 +35,7 @@ trait Publet {
    * @param targetType
    * @return
    */
-  def process(path: Path, targetType: ContentType): Option[Content]
-
-  def process(path: Path, targetType: ContentType, engine: PubletEngine): Option[Content]
+  def process(path: Path, targetType: ContentType, engine: Option[PubletEngine] = None): Option[Content]
 
   /** Copies the given content to the content at the specified path.
    *

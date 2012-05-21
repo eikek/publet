@@ -9,10 +9,16 @@ package org.eknet.publet.engine
 protected[engine] case class Glob(pattern: String) extends Ordered[Glob] {
 
   //create a regex and match against that
-  lazy val regex = ("^" + pattern.replaceAll("\\?", ".?").replaceAll("\\*", ".*")).r
+  lazy val regex = {
+    val r = "^" + pattern.replaceAll("\\?", ".?").replaceAll("\\*", ".*")
+    if (!pattern.endsWith("*")) {
+      (r+ "$").r
+    } else {
+      r.r
+    }
+  }
 
   def matches(str: String): Boolean = regex.findFirstIn(str).isDefined
-
 
   def compare(that: Glob) = pattern.length().compare(that.pattern.length())
 

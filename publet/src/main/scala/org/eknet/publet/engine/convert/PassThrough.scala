@@ -11,7 +11,6 @@ import org.eknet.publet.vfs.{Path, ContentResource, ContentType}
 object PassThrough extends PubletEngine {
 
   def name = 'source
-
-  def process(path: Path, data: Seq[ContentResource], target: ContentType) = Some(data.head)
+  def process(path: Path, data: ContentResource, target: ContentType) = Some(data)
 
 }

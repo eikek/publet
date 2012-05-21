@@ -30,27 +30,25 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
 
   var attributes: Map[String, Any] = Map()
 
-  def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
-    data.find(_.contentType == target) match {
-      case a@Some(c) => a
-      case _ => {
-        if (target == ContentType.html) {
-          val resource = data.find(r => engine.extensions.contains(r.name.ext))
-          if (resource.isDefined) {
-            val uri = path.withExt(resource.get.name.ext).asString
-            Some(processUri(uri, attributes))
-          } else {
-            val templateSource = if (data.head.contentType.mime._1 == "text")
-              new CodeTemplateSource(path, data.head)
-            else
-              new DownloadTemplateSource(path, data.head)
-
-            urlResources.put(templateSource.uri, templateSource)
-            Some(processSource(templateSource, attributes))
-          }
+  def process(path: Path, data: ContentResource, target: ContentType) = {
+    if (data.contentType == target) {
+      Some(data)
+    } else {
+      if (target == ContentType.html) {
+        if (engine.extensions.contains(data.name.ext)) {
+          val uri = path.withExt(data.name.ext).asString
+          Some(processUri(uri, attributes))
         } else {
-          None
+          val templateSource = if (data.contentType.mime._1 == "text")
+            new CodeTemplateSource(path, data)
+          else
+            new DownloadTemplateSource(path, data)
+
+          urlResources.put(templateSource.uri, templateSource)
+          Some(processSource(templateSource, attributes))
         }
+      } else {
+        None
       }
     }
   }

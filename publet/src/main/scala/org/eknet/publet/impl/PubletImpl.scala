@@ -6,33 +6,33 @@ import org.eknet.publet._
 import engine.{PubletEngine, EngineMangager}
 import vfs._
 import java.io.InputStream
+import grizzled.slf4j.Logging
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-class PubletImpl extends MountManager with Publet with EngineMangager with RootContainer {
+class PubletImpl extends MountManager with Publet with EngineMangager with RootContainer with Logging {
 
   def process(path: Path): Option[Content] = {
     Predef.ensuring(path != null, "null is illegal")
     process(path, path.name.targetType)
   }
 
-  def process(path: Path, target: ContentType) = {
-    //lookup engine for uri pattern
-    val engine = resolveEngine(path)
-      .getOrElse(throwException("No engine found for uri: "+ path))
-
-    process(path, target, engine)
-  }
-
-  def process(path: Path, target: ContentType, engine: PubletEngine): Option[Content] = {
+  def process(path: Path, targetType: ContentType, engine: Option[PubletEngine] = None): Option[Content] = {
     // lookup the source
     findSources(path) match {
       case Nil => None
       //lookup the engine according to the uri scheme and process data
-      case data => engine.process(path, data.toSeq, target)
+      case data => {
+        if (data.size > 1) warn("More than one source file found for: "+ path.asString)
+        val sourcePath = path.sibling(data.head.name.fullName)
+        val eng = engine.orElse(resolveEngine(sourcePath))
+          .getOrElse(sys.error("No engine found for uri: "+ path.asString))
+
+        eng.process(path, data.head, targetType)
+      }
     }
   }
 

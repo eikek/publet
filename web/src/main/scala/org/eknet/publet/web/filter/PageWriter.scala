@@ -23,7 +23,7 @@ trait PageWriter extends Logging {
     if (r401.isDefined) {
       val resource = new SimpleContentResource(ResourceName("401.html"), r401.get)
       val result = publet.engineManager.getEngine('include).get
-        .process(PubletWebContext.applicationPath, Seq(resource), ContentType.html)
+        .process(PubletWebContext.applicationPath, resource, ContentType.html)
       writePage(result, resp)
 
     } else {
@@ -38,7 +38,7 @@ trait PageWriter extends Logging {
     if (r500.isDefined) {
       val resource = new SimpleContentResource(ResourceName("500.html"), r500.get)
       val result = publet.engineManager.getEngine('include).get
-        .process(PubletWebContext.applicationPath, Seq(resource), ContentType.html)
+        .process(PubletWebContext.applicationPath, resource, ContentType.html)
       writePage(result, resp)
     } else {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -54,7 +54,7 @@ trait PageWriter extends Logging {
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+ sw.toString.replace("<", "&lt;").replace(">", "&gt;")+ "</pre>", ContentType.html)
       val resource = new SimpleContentResource(PubletWebContext.applicationPath.name, content)
       val result = publet.engineManager.getEngine('mainWiki).get
-        .process(PubletWebContext.applicationPath, Seq(resource), ContentType.html)
+        .process(PubletWebContext.applicationPath, resource, ContentType.html)
 
       writePage(result, resp)
     } else {

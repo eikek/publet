@@ -33,7 +33,8 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
 
     val publet = PubletWeb.publet
     val targetType = path.name.targetType
-    val html = publet.process(path, targetType, publet.engineManager.getEngine(engineId).getOrElse(sys.error("No engine '"+engineId+"' available")))
+    val someEngine = Some(publet.engineManager.getEngine(engineId).getOrElse(sys.error("No engine '"+engineId+"' available")))
+    val html = publet.process(path, targetType, someEngine)
     writePage(html, resp)
   }
 

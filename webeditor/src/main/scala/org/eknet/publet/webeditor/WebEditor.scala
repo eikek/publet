@@ -18,7 +18,7 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
   val errorTemplate = "/publet/webeditor/templates/errorpage.page"
   def pushPath(path: Path) = EditorWebExtension.scriptPath / "push.json"
 
-  def process(path: Path, data: Seq[ContentResource], target: ContentType) = {
+  def process(path: Path, data: ContentResource, target: ContentType) = {
     Security.checkGitAction(GitAction.push)
     if (!PubletWeb.publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
       val attr = Map(
@@ -26,20 +26,20 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
       ) ++ scalateEngine.attributes
       Some(scalateEngine.processUri(errorTemplate, attr))
     } else {
-      if (data.head.contentType.mime._1 == "text") {
+      if (data.contentType.mime._1 == "text") {
         val attr = Map(
-          "contentAsString" -> data.head.contentAsString,
+          "contentAsString" -> data.contentAsString,
           "actionPath" -> pushPath(path).asString,
-          "lastMod" -> data.head.lastModification.map(_.toString).getOrElse(""),
-          "resourcePath" -> path.sibling(data.head.name.fullName).asString,
-          "extensionOptions" -> extensionOptions(path, Some(data.head))
+          "lastMod" -> data.lastModification.map(_.toString).getOrElse(""),
+          "resourcePath" -> path.sibling(data.name.fullName).asString,
+          "extensionOptions" -> extensionOptions(path, Some(data))
         ) ++ scalateEngine.attributes
         Some(scalateEngine.processUri(editPageTemplate, attr))
       } else {
         val attr = Map(
           "actionPath" -> pushPath(path).asString,
-          "lastMod" -> data.head.lastModification.map(_.toString).getOrElse(""),
-          "resourcePath" -> path.sibling(data.head.name.fullName).asString
+          "lastMod" -> data.lastModification.map(_.toString).getOrElse(""),
+          "resourcePath" -> path.sibling(data.name.fullName).asString
         ) ++ scalateEngine.attributes
         Some(scalateEngine.processUri(uploadTemplate, attr))
       }

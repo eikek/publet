@@ -13,15 +13,11 @@ trait PubletEngine {
   def name: Symbol
 
   /**
-   * Processes one of the given data inputs to an output format.
-   * There must be at least one element in the Seq
-   * <p>
-   * The input are different format variations of the same content.
-   * </p>
+   * Processes the given data input to an output format.
    *
    * @param data
    * @return
    */
-  def process(path: Path, data: Seq[ContentResource], target: ContentType): Option[Content]
+  def process(path: Path, data: ContentResource, target: ContentType): Option[Content]
 
 }
