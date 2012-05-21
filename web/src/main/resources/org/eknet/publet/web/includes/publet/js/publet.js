@@ -6,7 +6,13 @@ $(document).ready(function() {
      */
     $('div[p\\:ref]').each(function(index, el) {
         var jel = $(el);
-        $.get(jel.attr("p:ref"), function(data) {
+        var uri = jel.attr("p:ref");
+        if (uri.indexOf("?") > 0) {
+            uri = uri +"&noLayout"
+        } else {
+            uri = uri +"?noLayout"
+        }
+        $.get(uri, function(data) {
           jel.replaceWith("<div>"+ data +"</div>");
         });
     });
