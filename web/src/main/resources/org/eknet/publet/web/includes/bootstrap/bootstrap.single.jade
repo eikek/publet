@@ -10,13 +10,13 @@
 html(lang="en")
   head
     meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    script(type="text/javascript" src="/publet/jquery/jquery-1.7.2.min.js")
-    script(type="text/javascript" src="/publet/jquery/jquery.form.js")
-    link(href="/publet/bootstrap/css/bootstrap.min.css" rel="stylesheet")
-    link(href="/publet/bootstrap/css/bootstrap.custom.css" rel="stylesheet")
-    link(href="/publet/highlightjs/styles/googlecode.css" rel="stylesheet")
-    script(type="text/javascript" src="/publet/bootstrap/js/bootstrap.min.js")
-    script(type="text/javascript" src="/publet/highlightjs/highlight.pack.js")
+    script(type="text/javascript" src={contextPath + "/publet/jquery/jquery-1.7.2.min.js"})
+    script(type="text/javascript" src={contextPath + "/publet/jquery/jquery.form.js"})
+    link(href={contextPath + "/publet/bootstrap/css/bootstrap.min.css"} rel="stylesheet")
+    link(href={contextPath + "/publet/highlightjs/styles/googlecode.css"} rel="stylesheet")
+    script(type="text/javascript" src={contextPath + "/publet/bootstrap/js/bootstrap.min.js"})
+    script(type="text/javascript" src={contextPath + "/publet/highlightjs/highlight.pack.js"})
+    link(href={contextPath + "/publet/bootstrap/css/bootstrap.custom.css"} rel="stylesheet")
     :javascript
       hljs.initHighlightingOnLoad();
 
