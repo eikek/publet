@@ -9,6 +9,8 @@ import xml.{Null, Text, Attribute}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
+import org.eknet.publet.partition.git.GitPartition
+import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -16,11 +18,13 @@ import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
  */
 class Edit extends ScalaScript {
   def serve() = {
-    Security.checkGitAction(GitAction.push)
     val resourcePath = PubletWebContext.param("resource").map(Path(_))
     if (resourcePath.isEmpty) {
       renderErrorMessage("No resource specified.")
     } else {
+      getRepositoryModel(resourcePath.get).foreach { model =>
+        Security.checkGitAction(GitAction.push, model)
+      }
       val resource = PubletWeb.publet.rootContainer.lookup(resourcePath.get)
         .collect({ case c: ContentResource => c })
       resource map { r =>
@@ -34,6 +38,19 @@ class Edit extends ScalaScript {
           handleBinaryContent(resourcePath.get, res)
         }
       }
+    }
+  }
+
+  def getRepositoryModel(path: Path): Option[RepositoryModel] = {
+    val gitrepo = PubletWeb.publet.mountManager.resolveMount(path)
+      .map(_._2)
+      .collect({ case t: GitPartition => t })
+      .map(_.tandem.name)
+    gitrepo.map { name =>
+      PubletWeb.authManager
+        .getAllRepositories
+        .find(_.name == name.name)
+        .getOrElse(RepositoryModel(name.name, RepositoryTag.open))
     }
   }
 

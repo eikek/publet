@@ -70,7 +70,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |  span(class="icon-bar")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
-        |a(class="brand" href="/") Project
+        |a(class="brand" href="/") =Config("applicationName").getOrElse("Project")
         |.nav-collapse
         |  ul.nav
         |    - if (isResourceEditable)
@@ -78,6 +78,24 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |        - val cp = PubletWebContext.contextPath
         |        - val path = PubletWebContext.getResourceUri
         |        a(href={cp + "/publet/webeditor/scripts/edit.html?resource="+path}) Edit
+        |  ul.nav.pull-right
+        |    - if (Security.isAuthenticated)
+        |      li
+        |        .btn-group
+        |          a.btn.btn-inverse.dropdown-toggle(data-toggle="dropdown" href="#")
+        |            i.icon-user.icon-white
+        |            =Security.username
+        |            span.caret
+        |          ul.dropdown-menu
+        |            li
+        |              a(href={PubletWebContext.contextPath +"/publet/scripts/logout.json?redirect="+PubletWebContext.contextPath+"/"})
+        |                i.icon-hand-right
+        |                | Logout
+        |    - if (!Security.isAuthenticated)
+        |      li
+        |        a(href={PubletWebContext.contextPath +"/publet/templates/login.html"})
+        |          i.icon-user.icon-white
+        |          | Login
       """.stripMargin
     Map(
       Path("/index.md") -> Content(index, ContentType.markdown),
