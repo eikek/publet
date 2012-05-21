@@ -3,6 +3,8 @@
 -@ var head: String = null
 -@ var nav: String = null
 -@ var footer: String = null
+-@ var searchForSidebar: Boolean = true
+-@ var searchForHeadIncludes: Boolean = true
 - val contextPath = PubletWebContext.contextPath
 - val home = if (contextPath.isEmpty) "/" else contextPath
 - import org.eknet.publet.web.Config
@@ -17,12 +19,14 @@ html(lang="en")
     script(type="text/javascript" src={contextPath + "/publet/bootstrap/js/bootstrap.min.js"})
     script(type="text/javascript" src={contextPath + "/publet/highlightjs/highlight.pack.js"})
     link(href={contextPath + "/publet/bootstrap/css/bootstrap.custom.css"} rel="stylesheet")
+    - if (searchForHeadIncludes)
+      =loadHeadIncludes()
     :javascript
       hljs.initHighlightingOnLoad();
 
     - if (head!=null)
       !~~ head
-    title = title
+    title = Config("applicationName").map(_ + " - ").getOrElse("") + title
   body
     #nav.navbar.navbar-fixed-top
       .navbar-inner
@@ -33,7 +37,16 @@ html(lang="en")
             =include(loadInclude("nav"))
 
     #content.container
-      !~~ body
+      - val sidebar = if (searchForSidebar) findInclude("sidebar", false) else None
+      - if (sidebar.isDefined)
+        .row
+          .span8
+            !~~ body
+          .span4
+            !~~ include(sidebar.get)
+      - if (sidebar.isEmpty)
+        !~~ body
+
     - if (footer != null)
       !~~ nav
     - if (footer == null)

@@ -55,13 +55,16 @@ object PubletWeb {
       e.engine.combinedClassPath = true
       e.engine.importStatements ++= webImports.map("import "+ _)
       e.engine.classpath = ScriptCompiler.servletPath.mkString(File.pathSeparator)
-      e.engine.bindings ++= List(Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true))
+      e.engine.bindings ++= List(
+        Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true)
+      )
       e.attributes = Map("includeLoader" -> new IncludeLoader)
       e
     }
   })
 
   private val webImports = List(
+    "org.eknet.publet.web.Config",
     "org.eknet.publet.web.PubletWeb",
     "org.eknet.publet.web.PubletWebContext",
     "org.eknet.publet.web.util.AttributeMap",

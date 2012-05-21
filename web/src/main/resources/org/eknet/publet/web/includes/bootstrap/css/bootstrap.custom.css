@@ -17,17 +17,44 @@ div#content, div#content p {
     margin: 1.2em 0 0 0;
 }
 
-#content li {
-    font-size: 1em;
-    line-height: 1.2em;
-}
 #content ul,
 #content ol,
 #content dl {
-    font-size: 1em;
-    line-height: 1.2em;
-    margin-top: 1em;
+    line-height:1.2em;
+    margin: 1.2em 0 0 1em;
 }
+
+#content ul {
+    list-style-type:disc;
+}
+
+#content ol {
+    list-style-type:decimal;
+}
+
+#content ul ul {
+    list-style-type:circle;
+    margin-top:0;
+}
+
+#content ol ol {
+    list-style-type:lower-latin;
+    margin-top:0;
+}
+
+#content ol ul {
+    list-style-type:circle;
+    margin-top:0;
+}
+
+#content li {
+    line-height:1.2em;
+    margin-left:0.8em;
+}
+#content dt { font-weight:bold; }
+#content dd { margin:0 0 1.5em 0.8em; }
+
+/* headings --------------------------------------- */
 
 #content h1,
 #content h2,

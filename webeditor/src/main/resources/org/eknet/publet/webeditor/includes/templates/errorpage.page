@@ -1,5 +1,6 @@
 ---
 title: Error
+searchForSidebar: false
 --- name:head pipeline:jade
 script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
 link(href="/publet/webeditor/css/browser.css" rel="stylesheet")

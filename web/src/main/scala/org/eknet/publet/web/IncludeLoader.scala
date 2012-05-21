@@ -1,7 +1,8 @@
 package org.eknet.publet.web
 
 import org.eknet.publet.Publet
-import org.eknet.publet.vfs.{Writeable, ResourceName, Path}
+import org.eknet.publet.vfs._
+import xml.{XML, NodeSeq}
 
 
 /**
@@ -18,17 +19,72 @@ class IncludeLoader {
    * @param name
    * @return
    */
-  def loadInclude(name: String): String = {
-     findInclude(name) getOrElse emptyResource
+  def loadInclude(name: String, mainInclude:Boolean = true): String = {
+     findInclude(name, mainInclude) getOrElse emptyResource
   }
 
-  def findInclude(name: String): Option[String] = {
+  def findInclude(name: String, mainInclude:Boolean = true): Option[String] = {
     val currentPath = PubletWebContext.applicationPath
     val path = currentPath.parent
     val resource = ResourceName(name).withExtIfEmpty("html").fullName
     (findInclude(path, resource)
       orElse findAllInclude(path, resource)
-      orElse findMainAllInclude(resource)).map(_.asString)
+      orElse {
+        if (mainInclude) findMainAllInclude(resource) else None
+    }).map(_.asString)
+  }
+
+  /**
+   * Creates a set of xml tags for the html head part. The
+   * root container is searched for js, css and meta resources
+   * 
+   * @return
+   */
+  def loadHeadIncludes(): NodeSeq = {
+    val publet = PubletWeb.publet
+    val extensions = Set("js", "css", "meta")
+    val currentPath = PubletWebContext.applicationPath.parent
+
+    val mainAll = (withMountedContainer(currentPath) { (path, container) =>
+      publet.rootContainer.lookup(path / Publet.allIncludes)
+        .collect({ case r: ContainerResource => r})
+        .map(r => (path/ Publet.allIncludes, r))
+    } orElse {
+      publet.rootContainer.lookup(allIncludesPath)
+        .collect({ case r: ContainerResource => r})
+        .map(r => (allIncludesPath, r))
+    }).map(t => t._2.children
+                      .filter(c => extensions.contains(c.name.ext))
+                      .map(c => t._1 / c.name.fullName)
+    ).map(_.toList)
+
+    val incl = findNextIncludes(currentPath).map(t => t._2.children
+      .filter(c => extensions.contains(c.name.ext))
+      .map(c => t._1 / c.name.fullName)
+    ).map(_.toList)
+
+    val contextPath = PubletWebContext.contextPath
+    for (r <- (mainAll.getOrElse(List()):::incl.getOrElse(List()))) yield {
+      if (r.name.ext == "css") {
+        <link href={contextPath + r.toAbsolute.asString} rel="stylesheet"/>
+      } else if (r.name.ext == "js") {
+        <script type="text/javascript" src={contextPath + r.toAbsolute.asString}/>
+      } else {
+        XML.load(publet.rootContainer.lookup(r).get.asInstanceOf[ContentResource].inputStream)
+      }
+    }
+  }
+
+  def findNextIncludes(path: Path): Option[(Path, ContainerResource)] = {
+    val publet = PubletWeb.publet
+    if (path.isRoot) None
+    else {
+      val cand = path / Publet.includes
+      publet.rootContainer.lookup(cand) match {
+        case Some(r) if (r.isInstanceOf[ContainerResource]) => Some(cand, r.asInstanceOf[ContainerResource])
+        case _ => findNextIncludes(path.parent)
+      }
+    }
   }
 
   def findMainAllInclude(name: String): Option[Path] = {
@@ -40,21 +96,26 @@ class IncludeLoader {
     }
   }
 
+  private def withMountedContainer[A](path: Path)(f: (Path, Container) => Option[A]) = {
+    val publet = PubletWeb.publet
+    publet.mountManager.resolveMount(path).flatMap(tuple => f(tuple._1, tuple._2))
+  }
+
   def findAllInclude(path: Path, name: String): Option[Path] = {
     val publet = PubletWeb.publet
-    publet.mountManager.resolveMount(path).flatMap(tuple => {
-      val cand = tuple._1 / Publet.allIncludes / name
+    withMountedContainer(path) { (path, container) =>
+      val cand = path / Publet.allIncludes / name
       publet.findSources(cand).toList match {
         case c::cs => Some(cand.sibling(c.name.fullName))
         case _ => None
       }
-    })
+    }
   }
 
   def findInclude(path: Path, name: String): Option[Path] = {
     if (path.isRoot) None
     else {
-      val cand = path / ".includes" / name
+      val cand = path / Publet.includes / name
       PubletWeb.publet.findSources(cand).toList match {
         case c::cs => Some(cand.sibling(c.name.fullName))
         case _ => findInclude(path.parent, name)
