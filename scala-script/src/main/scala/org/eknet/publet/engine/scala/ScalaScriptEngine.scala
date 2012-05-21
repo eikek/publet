@@ -14,7 +14,12 @@ class ScalaScriptEngine(val name: Symbol,
 
   def process(path: Path, data: ContentResource, target: ContentType) = {
     if (data.contentType == ContentType.scal) {
-      eval(path, data) flatMap (out => engine.process(path, out, target))
+      val out = eval(path, data)
+      if (out.exists(_.contentType == target)) {
+        out
+      } else {
+        out flatMap (out => engine.process(path, out, target))
+      }
     } else {
       throw new RuntimeException("no scala script content found")
     }

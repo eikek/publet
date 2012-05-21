@@ -128,7 +128,11 @@ object PubletWeb {
 
     publet.engineManager.register("/*", scalateEngine)
 
-    val compiler = new DefaultPubletCompiler(publet, Config.mainMount, webImports)
+    val additionalImports = List(
+      "org.eknet.publet.web.util.RenderUtils",
+      "RenderUtils._"
+    )
+    val compiler = new DefaultPubletCompiler(publet, Config.mainMount, webImports ::: additionalImports)
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
     publet.engineManager.register("*.scala", scalaEngine)
 
