@@ -4,10 +4,11 @@ import collection.mutable
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import org.eknet.publet.webeditor.EditorWebExtension._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.webeditor.EditorWebExtension
-import org.eknet.publet.vfs.{ContentType, ContentResource, Path}
 import xml.{Null, Text, Attribute}
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
+import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,17 +16,24 @@ import xml.{Null, Text, Attribute}
  */
 class Edit extends ScalaScript {
   def serve() = {
+    Security.checkGitAction(GitAction.push)
     val resourcePath = PubletWebContext.param("resource").map(Path(_))
-    val resource = resourcePath
-      .flatMap(PubletWeb.publet.rootContainer.lookup)
-      .collect({
-      case c: ContentResource => c
-    })
-    resource map { r =>
-      if (r.contentType.mime._1 == "text") handleTextContent(resourcePath.get, r)
-      else handleBinaryContent(resourcePath.get, r)
-    } getOrElse {
-      renderErrorMessage("Resource not found.")
+    if (resourcePath.isEmpty) {
+      renderErrorMessage("No resource specified.")
+    } else {
+      val resource = PubletWeb.publet.rootContainer.lookup(resourcePath.get)
+        .collect({ case c: ContentResource => c })
+      resource map { r =>
+        if (r.contentType.mime._1 == "text") handleTextContent(resourcePath.get, r)
+        else handleBinaryContent(resourcePath.get, r)
+      } getOrElse {
+        val res = Resource.emptyContent(resourcePath.get.name, resourcePath.get.name.targetType)
+        if (res.contentType.mime._1 == "text") {
+          handleTextContent(resourcePath.get, res)
+        } else {
+          handleBinaryContent(resourcePath.get, res)
+        }
+      }
     }
   }
 

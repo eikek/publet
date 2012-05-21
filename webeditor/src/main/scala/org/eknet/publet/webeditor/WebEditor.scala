@@ -2,8 +2,7 @@ package org.eknet.publet.webeditor
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
-import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletWeb, PubletWebContext, GitAction}
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import EditorWebExtension._
 import org.eknet.publet.vfs.{Content, ContentType, ContentResource, Path}
 
@@ -14,7 +13,6 @@ import org.eknet.publet.vfs.{Content, ContentType, ContentResource, Path}
 class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEngine {
 
   def process(path: Path, data: ContentResource, target: ContentType) = {
-    Security.checkGitAction(GitAction.push)
     if (!PubletWeb.publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
       val attr = Map(
       "message" -> "Content not writeable!"
