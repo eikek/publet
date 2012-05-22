@@ -1,0 +1,9 @@
+---
+searchForSidebar: false
+
+--- name:content pipeline:jade
+
+-@ var message: String = "An error occured."
+-@ var level: String = "error"
+div(class={ "alert alert-"+level })
+  =message

@@ -30,7 +30,7 @@ object ContentType {
   val xml = ContentType('xml, Set("xml"), ("text", "xml"))
   val css = ContentType('css, Set("css"), ("text", "css"))
   val javascript = ContentType('javascript, Set("js"), ("text", "javascript"))
-  val json = ContentType('json, Set("json"), ("text", "json"))
+  val json = ContentType('json, Set("json"), ("application", "json"))
 
   val png = ContentType('png, Set("png"), ("image", "png"))
   val jpg = ContentType('jpg, Set("jpg", "jpeg"), ("image", "jpg"))

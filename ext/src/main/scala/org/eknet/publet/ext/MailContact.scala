@@ -20,7 +20,7 @@ object MailContact extends ScalaScript {
     import ctx._
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
-      renderTemplate("/publet/templates/_errorpage.page", Map("message"->"Mailer not configured."))
+      renderMessage("Mailer not configured", "Mailer not configured! Sorry, the contact form is not working.", "error")
     } else {
       val from = param("from")
       val msg = param("message")

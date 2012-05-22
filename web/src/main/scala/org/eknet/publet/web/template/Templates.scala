@@ -34,7 +34,7 @@ object Templates {
     val publTempl = new MapContainer()
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/empty.ssp"), ResourceName("empty.ssp")))
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/login.jade"), ResourceName("login.jade")))
-    publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/_errorpage.page"), ResourceName("_errorpage.page")))
+    publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/_messagepage.page"), ResourceName("_messagepage.page")))
     publet.mountManager.mount(Path("/publet/templates/"), publTempl)
   }
 }

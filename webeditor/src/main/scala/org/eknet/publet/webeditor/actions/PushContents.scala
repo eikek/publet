@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
+import org.eknet.publet.web.util.RenderUtils
+import org.eknet.publet.webeditor.EditorWebExtension
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -13,7 +15,7 @@ import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
  */
 object PushContents extends ScalaScript with Logging {
 
-  def notify(success:Boolean, msg: String, head: Option[String]) = {
+  def notify(success: Boolean, msg: String, head: Option[String] = None) = {
     ScalaScript.makeJson(Map("success"->success, "message"->msg, "lastMod"->head.getOrElse("")))
   }
 
@@ -23,9 +25,10 @@ object PushContents extends ScalaScript with Logging {
       case Some(path) => {
         try {
           delete(Path(path))
-          notify(true, "File deleted!", None)
+          PubletWebContext.redirect(EditorWebExtension.editPage+"?resource="+path)
+          notify(success = true, msg = "File deleted!")
         } catch {
-          case e:Exception => notify(false, "Error while deleting.", None)
+          case e:Exception => RenderUtils.renderMessage("Error", "Error while deleting.", "error")
         }
       }
       case _=> ctx.param("path") match {
@@ -34,15 +37,15 @@ object PushContents extends ScalaScript with Logging {
           try {
             pushBinary(p)
             pushText(p)
-            notify(true, "Successfully saved.", getHead(p))
+            notify(success = true, msg = "Successfully saved.", head = getHead(p))
           } catch {
             case e:Exception => {
               error("Error while saving file!", e)
-              notify(false, e.getMessage, None)
+              notify(success = false, msg = e.getMessage)
             }
           }
         }
-        case None => notify(false, "Not enough arguments!", None)
+        case None => notify(success = false, msg = "Not enough arguments!")
       }
     }
   }
