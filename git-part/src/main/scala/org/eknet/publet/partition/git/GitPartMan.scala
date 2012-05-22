@@ -17,6 +17,8 @@ trait GitPartMan {
   def setExportOk(location: Path, flag: Boolean): Boolean
 
   def isExportOk(location: Path): Boolean
+
+  def getAllPartitions: Iterable[GitPartition]
 }
 
-case class Config(initial: Option[Map[Path, Content]], branch: String = "master")
+case class Config(initial: Option[Map[Path, Content]] = None, branch: String = "master", mountPoint: Option[Path] = None)

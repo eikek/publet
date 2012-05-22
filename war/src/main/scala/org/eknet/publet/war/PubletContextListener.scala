@@ -2,9 +2,6 @@ package org.eknet.publet.war
 
 import scala.collection.JavaConversions._
 import javax.servlet.{ServletContextEvent, ServletContextListener}
-import org.eknet.publet.webeditor.EditorWebExtension
-import org.eknet.publet.web.template.BootstrapTemplate
-import org.eknet.publet.doc.PubletDocExtension
 import org.eknet.publet.web.{Config, WebExtension, PubletWeb}
 import java.io.File
 import org.slf4j.LoggerFactory
@@ -13,13 +10,14 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
 import java.util.ServiceLoader
+import grizzled.slf4j.Logging
 
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 10.05.12 13:01
  */
-class PubletContextListener extends ServletContextListener {
+class PubletContextListener extends ServletContextListener with Logging {
 
   def loadExtensions(): List[WebExtension] = {
     val loader = ServiceLoader.load(classOf[WebExtension])
@@ -27,9 +25,14 @@ class PubletContextListener extends ServletContextListener {
   }
 
   def contextInitialized(sce: ServletContextEvent) {
-    PubletWeb.initialize(sce.getServletContext)
-    initLogging()
-    loadExtensions().foreach(_.onStartup())
+    try {
+      PubletWeb.initialize(sce.getServletContext)
+      initLogging()
+      loadExtensions().foreach(_.onStartup())
+    }
+    catch {
+      case e:Throwable => error("Error on startup!", e); throw e
+    }
   }
 
   def contextDestroyed(sce: ServletContextEvent) {

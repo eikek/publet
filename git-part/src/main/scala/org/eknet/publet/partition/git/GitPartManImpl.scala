@@ -4,7 +4,7 @@ import org.eclipse.jgit.api.Git
 import org.eknet.publet.vfs._
 import java.io.{FileOutputStream, File}
 import org.eclipse.jgit.lib.Repository
-import org.eknet.publet.gitr.{RepositoryName, GitrMan}
+import org.eknet.publet.gitr.{Tandem, RepositoryName, GitrMan}
 
 
 /**
@@ -12,6 +12,15 @@ import org.eknet.publet.gitr.{RepositoryName, GitrMan}
  * @since 06.05.12 16:38
  */
 class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
+
+  private val partitionProperty = "gitPartition"
+
+  def getAllPartitions = {
+    gitr.allRepositories(x=>true)
+      .collect({case r if (r.isTandem) => gitr.getTandem(r.name)})
+      .flatten
+      .map(new GitPartition(_))
+  }
 
   def create(location: Path, config: Config) = {
     val tandem = gitr.createTandem(RepositoryName(location.asString), config.branch)
@@ -21,11 +30,22 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     createInitialContent(tandem.workTree, init)
     tandem.pushToBare()
 
-    new GitPartition(tandem)
+    val gitconf = tandem.workTree.getConfig
+    gitconf.setBoolean("publet", null, partitionProperty, true)
+    gitconf.save()
+
+    val gitp = new GitPartition(tandem)
+    config.mountPoint.foreach(gitp.setMountPoint)
+    gitp
+  }
+
+  def isGitPartition(tandem: Tandem): Boolean = {
+    val conf = tandem.workTree.getConfig
+    conf.getBoolean("publet", null, partitionProperty, false)
   }
 
   def get(location: Path) = {
-    gitr.getTandem(RepositoryName(location.asString)) map {
+    gitr.getTandem(RepositoryName(location.asString)) filter (isGitPartition) map {
       new GitPartition(_)
     }
   }
