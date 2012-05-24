@@ -3,20 +3,21 @@ package org.eknet.publet.webeditor.actions
 import collection.mutable
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
-import org.eknet.publet.webeditor.EditorWebExtension._
-import org.eknet.publet.webeditor.EditorWebExtension
 import xml.{Null, Text, Attribute}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
+import org.eknet.publet.webeditor.EditorPaths
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.05.12 20:45
  */
 class Edit extends ScalaScript {
+  import org.eknet.publet.webeditor.EditorPaths._
+
   def serve() = {
     val resourcePath = PubletWebContext.param("resource").map(Path(_))
     if (resourcePath.isEmpty) {
@@ -57,22 +58,24 @@ class Edit extends ScalaScript {
   def handleTextContent(resourcePath: Path, data: ContentResource) = {
     val attr = mutable.Map[String, Any]()
     attr += "contentAsString" -> data.contentAsString
-    attr += "actionPath" -> pushPath(resourcePath).asString
+    attr += "actionPath" -> EditorPaths.pushScript.asString
     attr += "lastMod" -> data.lastModification.map(_.toString).getOrElse("")
     attr += "resourcePath" -> resourcePath.sibling(data.name.fullName).asString
     attr += "extensionOptions" -> extensionOptions(resourcePath, Some(data))
-    renderTemplate(editPageTemplate, attr.toMap)
+    renderTemplate(editPageTemplate.asString, attr.toMap)
   }
 
   def handleBinaryContent(resourcePath: Path, data: ContentResource) = {
-    renderErrorMessage("Not implemented yet :(")
+    val attr = mutable.Map[String, Any]()
+    attr += "actionPath" -> EditorPaths.uploadScript.asString
+    attr += "lastMod" -> data.lastModification.map(_.toString).getOrElse("")
+    attr += "resourcePath" -> resourcePath.sibling(data.name.fullName).asString
+    renderTemplate(uploadTemplate.asString, attr.toMap)
   }
 
   def renderErrorMessage(msg: String) = {
-    renderTemplate(errorTemplate, Map("message" -> msg))
+    renderTemplate(errorTemplate.asString, Map("message" -> msg))
   }
-
-  def pushPath(path: Path) = EditorWebExtension.scriptPath / "push.json"
 
   def extensionOptions(path: Path, source: Option[ContentResource]) = {
     val list = ContentType.forMimeBase(PubletWebContext.applicationPath.name.targetType)

@@ -4,10 +4,10 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.vfs.Resource._
 import org.eknet.publet.Publet
 import collection.mutable
-import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs._
 import ScalaScript._
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.webeditor.EditorPaths
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,7 +32,7 @@ object ListContents extends ScalaScript {
     if (!path.isRoot) {
       jsonMap.put("parent", path.parent.asString)
     }
-    Json.build(jsonMap)
+    jsonMap
   }
 
   private def container(path: Path, publet: Publet): List[_ <: Resource] = {
@@ -46,15 +46,20 @@ object ListContents extends ScalaScript {
   }
 
   private def resourceEntry(path: Path, r: Resource) = {
-    val contentType = r match {
-      case cr: ContentResource => cr.contentType.typeName.name
-      case cr: ContainerResource => "unknown"
+    val (contentType, size) = r match {
+      case cr: ContentResource => (cr.contentType, cr.length.getOrElse(0L))
+      case cr: ContainerResource => (ContentType.unknown, 0L)
     }
     Map(
       "name" -> r.name,
       "container" -> isContainer(r),
-      "type" -> contentType,
-      "href" -> (path / r).asString
+      "type" -> contentType.typeName.name,
+      "sourceRef" -> (path / r).asString,
+      "thumbnail" -> (EditorPaths.thumbNailer.asString+"?resource="+(path/r).asString),
+      "delete_url" -> (EditorPaths.pushScript.asString+"?delete="+(path/r).asString),
+      "href" -> ((path/ r.name.withExtension("html")).asString),
+      "mimeBase" -> contentType.mime._1,
+      "size" -> size
     )
   }
 }

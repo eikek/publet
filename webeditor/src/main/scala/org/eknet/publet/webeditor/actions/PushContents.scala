@@ -7,7 +7,7 @@ import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
 import org.eknet.publet.web.util.RenderUtils
-import org.eknet.publet.webeditor.EditorWebExtension
+import org.eknet.publet.webeditor.EditorPaths
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,7 +25,7 @@ object PushContents extends ScalaScript with Logging {
       case Some(path) => {
         try {
           delete(Path(path))
-          PubletWebContext.redirect(EditorWebExtension.editPage+"?resource="+path)
+          PubletWebContext.redirect(EditorPaths.editHtmlPage.asString+"?resource="+path)
           notify(success = true, msg = "File deleted!")
         } catch {
           case e:Exception => RenderUtils.renderMessage("Error", "Error while deleting.", "error")
@@ -52,8 +52,8 @@ object PushContents extends ScalaScript with Logging {
 
   def pushBinary(path: Path) {
     val ctx = PubletWebContext
+    Security.checkGitAction(GitAction.push)
     ctx.uploads.foreach(fi => {
-      Security.checkGitAction(GitAction.push)
       PubletWeb.publet.push(path, fi.getInputStream)
     })
   }

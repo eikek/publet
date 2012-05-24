@@ -3,7 +3,6 @@ package org.eknet.publet.webeditor
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
-import EditorWebExtension._
 import org.eknet.publet.vfs.{Content, ContentType, ContentResource, Path}
 
 /**
@@ -17,10 +16,10 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
       val attr = Map(
       "message" -> "Content not writeable!"
       ) ++ scalateEngine.attributes
-      Some(scalateEngine.processUri(errorTemplate, attr))
+      Some(scalateEngine.processUri(EditorPaths.errorTemplate.asString, attr))
     } else {
       val resourcePath = path.sibling(data.name.fullName).asString
-      PubletWebContext.redirect(PubletWebContext.contextPath + editPage+"?resource="+resourcePath)
+      PubletWebContext.redirect(PubletWebContext.contextPath + EditorPaths.editHtmlPage.asString+"?resource="+resourcePath)
       Some(Content.empty(ContentType.html))
     }
   }

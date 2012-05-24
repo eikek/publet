@@ -3,8 +3,8 @@ package org.eknet.publet.webeditor.actions
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import io.Source
-import org.eknet.publet.webeditor.EditorWebExtension
 import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.webeditor.EditorPaths
 
 /** Replaces all absolute urls by prefixing the context path.
  * @author Eike Kettner eike.kettner@gmail.com
@@ -12,7 +12,7 @@ import org.eknet.publet.web.PubletWeb
  */
 object BrowserJs extends ScalaScript {
 
-  val pathRegex = ("\"("+ EditorWebExtension.editorPath.asString +"[^\"]*\")").r
+  val pathRegex = ("\"("+ EditorPaths.editorPath.asString +"[^\"]*\")").r
 
   def serve() = {
     val file = getClass.getResource("../includes/js/browser_templ.js")

@@ -2,8 +2,10 @@
 title: Error
 searchForSidebar: false
 --- name:head pipeline:jade
+script(type="text/javascript" src="/publet/webeditor/js/publet-browser.js")
 script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
 link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
+
 
 --- name:content pipeline:jade
 
@@ -14,5 +16,4 @@ link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
       =message
   .span4
     h3 File browser
-    pre#containerPath
     #filesTree

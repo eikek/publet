@@ -20,7 +20,7 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
     val c = if (targetType.mime._1 == "text") {
       val res = Resource.emptyContent(appPath.name, ContentType.markdown)
       publet.engineManager.getEngine('edit).get
-        .process(path, res, ContentType.markdown);
+        .process(path, res, ContentType.markdown)
     } else {
       val res = Resource.emptyContent(appPath.name, targetType)
       publet.engineManager.getEngine('edit).get

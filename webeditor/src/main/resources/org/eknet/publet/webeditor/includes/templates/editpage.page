@@ -2,6 +2,7 @@
 title: Edit Page
 searchForSidebar: false
 --- name:head pipeline:jade
+script(type="text/javascript" src="/publet/webeditor/js/publet-browser.js")
 script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
 link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
 
@@ -14,13 +15,15 @@ link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
 -@ val extensionOptions: Seq[scala.xml.Elem] = Seq()
 - val viewResource = org.eknet.publet.vfs.Path(resourcePath).withExt("html").asString
 .row
-  .span8
+  .span9
     #response
     form(method="post" id="editPageForm" action={actionPath})
       .form-actions
         button.btn.btn-primary Save
         a.btn.btn-info(href={viewResource}) View
-        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={actionPath+"?delete="+viewResource}) Delete
+        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={actionPath+"?delete="+viewResource})
+          i.icon-trash.icon-white
+          | Delete
       label
         | Extensions
         select(name="extension" class="span8")
@@ -34,9 +37,8 @@ link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
         input(name="commitMessage" class="span8")
       input(type="hidden" name="path" value={resourcePath})
       input(id="lastHead" type="hidden" name="head" value={lastMod})
-  .span4
+  .span3
     h3 File browser
-    pre#containerPath
     #filesTree
 :javascript
   $(document).ready(function() {
