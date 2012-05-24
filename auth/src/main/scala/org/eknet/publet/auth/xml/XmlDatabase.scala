@@ -1,22 +1,25 @@
 package org.eknet.publet.auth.xml
 
 
-import xml.{PrettyPrinter, XML}
+import scala.xml.{PrettyPrinter, XML}
 import org.eknet.publet.vfs.{Writeable, ContentResource}
 import java.io.ByteArrayInputStream
-import org.eknet.publet.auth.{Policy, PubletAuth, RepositoryModel, User}
+import org.eknet.publet.auth._
+import org.eknet.publet.engine.Glob
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.05.12 21:57
  */
-class XmlDatabase(source: ContentResource) extends PubletAuth {
+class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
   private val prettyPrinter = new PrettyPrinter(90, 2)
 
   private var lastLoaded: Long = -1
   protected var users: Set[User] = Set()
   protected var repositories:Set[RepositoryModel] = Set()
   protected var permissions:Set[PermissionModel] = Set()
+  protected var resourceConstraints: List[ResourceConstraint] = List()
 
   load()
 
@@ -24,6 +27,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth {
    * since.
    */
   protected def load() {
+    info("LOADING XML permissions file...")
     val lastMod = source.lastModification.getOrElse(-1L)
     if (lastMod > lastLoaded) {
       lastLoaded = lastMod
@@ -31,6 +35,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth {
       users = (rootElem \ "users" \ "user").map(User(_)).toSet
       repositories = (rootElem \ "repositories" \ "repository").map(RepositoryModel(_)).toSet
       permissions = (rootElem \ "permissions" \ "grant").map(PermissionModel(_)).toSet
+      resourceConstraints = (rootElem \ "resourceConstraints" \ "pattern").map(ResourceConstraint(_)).toList
     }
   }
 
@@ -57,6 +62,9 @@ class XmlDatabase(source: ContentResource) extends PubletAuth {
       <permissions>
         { permissions.map(_.toXml) }
       </permissions>
+      <resourceConstraints>
+        { resourceConstraints.map(_.toXml) }
+      </resourceConstraints>
     </publetAuth>
   }
 
@@ -88,6 +96,23 @@ class XmlDatabase(source: ContentResource) extends PubletAuth {
       this.permissions = newList
       write()
     }
+  }
+
+
+  def addResourceConstraint(rc: ResourceConstraint) {
+    synchronized {
+      val newList = rc :: resourceConstraints
+      this.resourceConstraints = newList
+      write()
+    }
+  }
+
+
+  def getResourceConstraints(uri: String) = {
+    resourceConstraints.find( rc => {
+      val glob = Glob(rc.uriPattern)
+      glob.matches(uri)
+    })
   }
 
   def findUser(login: String) = users.find(_.login == login)

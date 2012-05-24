@@ -21,15 +21,30 @@ class AuthManager extends PubletAuth with Logging {
       .collect({case c:ContentResource=>c})
   }
 
-  private def delegate = try {
-    getPermissionXml.map(r => new XmlDatabase(r)).getOrElse(SuperUserAuth)
-  } catch {
-    case e: SAXParseException => {
-      error("Error parsing permission xml. Fallback to superuser realm!", e)
-      SuperUserAuth
+  @volatile
+  private var database: Option[PubletAuth] = None
+
+  private def delegate: PubletAuth = {
+    database.getOrElse {
+      val db = try {
+        getPermissionXml.map(r => new XmlDatabase(r)).getOrElse(SuperUserAuth)
+      } catch {
+        case e: SAXParseException => {
+          error("Error parsing permission xml. Fallback to superuser realm!", e)
+          SuperUserAuth
+        }
+      }
+      this.database = Some(db)
+
+      delegate
     }
   }
 
+  def reload() {
+    database = None
+  }
+
+  def getResourceConstraints(uri: String) = delegate.getResourceConstraints(uri)
   def getAllRepositories = delegate.getAllRepositories
   def getAllUser = delegate.getAllUser
   def findUser(login: String) = delegate.findUser(login)
@@ -44,6 +59,9 @@ class AuthManager extends PubletAuth with Logging {
   def updatePermission(perm: PermissionModel) {
     delegate.updatePermission(perm)
   }
+  def addResourceConstraint(rc: ResourceConstraint) {
+    delegate.addResourceConstraint(rc)
+  }
 }
 
 private object SuperUserAuth extends PubletAuth {
@@ -53,6 +71,8 @@ private object SuperUserAuth extends PubletAuth {
     Set("superadmin"),
     Map(UserProperty.fullName.toString -> "Publet Superadmin"))
 
+
+  def getResourceConstraints(uri: String) = None
   def getAllRepositories = List()
   def getAllUser = List(superuser)
   def findUser(login: String) = getAllUser.find(_.login==login)
@@ -64,4 +84,5 @@ private object SuperUserAuth extends PubletAuth {
   def updateUser(user: User) {}
   def updateRepository(repo: RepositoryModel) {}
   def updatePermission(perm: PermissionModel) {}
+  def addResourceConstraint(rc: ResourceConstraint) {}
 }

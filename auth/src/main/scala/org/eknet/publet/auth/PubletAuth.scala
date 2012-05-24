@@ -20,6 +20,9 @@ trait PubletAuth {
   def updateUser(user: User)
   def updateRepository(repo: RepositoryModel)
   def updatePermission(perm: PermissionModel)
+
+  def getResourceConstraints(uri: String): Option[ResourceConstraint]
+  def addResourceConstraint(rc: ResourceConstraint)
 }
 
 object PubletAuth {
@@ -33,5 +36,7 @@ object PubletAuth {
     def updateUser(user: User) {}
     def updateRepository(repo: RepositoryModel) {}
     def updatePermission(perm: PermissionModel) {}
+    def getResourceConstraints(uri: String) = None
+    def addResourceConstraint(rc: ResourceConstraint) {}
   }
 }

@@ -19,6 +19,7 @@
     <repository name="contentroot" tag="closed"/>
   </repositories>
 
+  <!-- Defines permissions and associates them to roles -->
   <permissions>
     <!-- allows many on and to tags -->
     <grant name="PULL">
@@ -28,7 +29,11 @@
       <to>manager</to>
       <to>editor</to>
       <to>coders</to>
-    </grant> <!-- manager,editor and coders all have PULL permission on contentroot,wikis/mywiki and wikis/yourwiki -->
+    </grant>
   </permissions>
 
+  <resourceConstraints>
+    <pattern name="/c/**" perm="anon"/>
+    <pattern name="/sec/**" perm="superperm"/>
+  </resourceConstraints>
 </publetAuth>

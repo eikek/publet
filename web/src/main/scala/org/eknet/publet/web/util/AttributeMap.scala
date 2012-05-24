@@ -26,8 +26,10 @@ trait AttributeMap {
           None
         }
       }
-      case Some(t) if (manifest[T].erasure.isAssignableFrom(t.getClass)) => Some(t.asInstanceOf[T])
-      case x@_ => throw new RuntimeException("Wrong type for attribute: "+key+" and value: "+ x)
+      case Some(t) => Some(t.asInstanceOf[T])
+      case x@_ => {
+        sys.error("Wrong type for attribute: "+key+" and value: "+ x + " erasure: "+ manifest[T].erasure)
+      }
     }
   }
 

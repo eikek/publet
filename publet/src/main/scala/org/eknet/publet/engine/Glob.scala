@@ -13,6 +13,8 @@ protected[engine] case class Glob(pattern: String) extends Ordered[Glob] {
     val r = "^" + pattern.replaceAll("\\?", ".?").replaceAll("\\*", ".*")
     if (!pattern.endsWith("*")) {
       (r+ "$").r
+    } else if (!pattern.startsWith("*")) {
+      ("^" + r).r
     } else {
       r.r
     }

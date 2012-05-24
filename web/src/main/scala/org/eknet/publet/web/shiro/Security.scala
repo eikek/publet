@@ -1,17 +1,12 @@
 package org.eknet.publet.web.shiro
 
-import org.apache.shiro.SecurityUtils
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.Publet
-import org.apache.shiro.realm.AuthorizingRealm
-import org.apache.shiro.web.mgt.{DefaultWebSecurityManager, WebSecurityManager}
-import org.apache.shiro.web.filter.mgt.{FilterChainResolver, PathMatchingFilterChainResolver}
-import org.apache.shiro.web.filter.authc.{BasicHttpAuthenticationFilter, FormAuthenticationFilter, AnonymousFilter}
-import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eknet.publet.web.{PubletWebContext, GitAction}
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel, User}
+import org.apache.shiro.SecurityUtils
+import org.eknet.publet.web.filter.PubletShiroFilter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,9 +16,21 @@ object Security extends Logging {
 
   def pathPermission(action: String, path: Path) = path.segments.mkString(action+":", ":", "")
 
+  /**Returns whether the shiro request filter is enabled for this request.
+   * Note, that any access to the shiro subsystem is forbidden if this returns
+   * false.
+   *
+   * @return
+   */
+  def securityFilterEnabled = PubletShiroFilter.shiroFilterEnabled
+
   def subject = SecurityUtils.getSubject
 
-  def isAuthenticated = subject.getPrincipals!=null
+  def isAuthenticated = {
+    if (!PubletShiroFilter.shiroFilterEnabled) false
+    else subject.getPrincipals != null
+  }
+
   def checkAuthenticated() {
     if (!isAuthenticated) throw new UnauthenticatedException()
   }
@@ -34,7 +41,7 @@ object Security extends Logging {
    *
    * @return
    */
-  def user = Option(subject.getPrincipal).map(_.asInstanceOf[User])
+  def user = if (!isAuthenticated) None else Option(subject.getPrincipal).map(_.asInstanceOf[User])
 
   /**
    * Returns the username of the currently logged in user
@@ -46,7 +53,7 @@ object Security extends Logging {
 
   /**
    * Returns shiros session associated to the
-   * current subject
+   * current subject.
    *
    * @return
    */
@@ -62,8 +69,11 @@ object Security extends Logging {
 
   def checkGitAction(action: GitAction.Value, model: RepositoryModel) {
     if (model.tag == RepositoryTag.closed || action == GitAction.push) {
-      val perm = action.toString +":"+ model.name
-      checkPerm(perm)
+      val push= GitAction.push.toString +":"+ model.name
+      if (!hasPerm(push)) {
+        val perm = action.toString +":"+ model.name
+        checkPerm(perm)
+      }
     }
   }
   def checkGitAction(action: GitAction.Value) {
@@ -74,7 +84,7 @@ object Security extends Logging {
   }
 
   def hasPerm(perm: String): Boolean = {
-    subject.isPermitted(perm)
+    isAuthenticated && subject.isPermitted(perm)
   }
 
   def hasPerm(action: String, path: Path): Boolean = {

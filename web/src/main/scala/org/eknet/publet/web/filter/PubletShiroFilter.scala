@@ -7,7 +7,7 @@ import org.apache.shiro.web.filter.mgt.FilterChainResolver
 import org.eknet.publet.auth.RepositoryTag
 import org.eknet.publet.web.{PubletWebContext, GitAction, PubletWeb}
 import org.eknet.publet.web.util.{Key, Request}
-import javax.servlet.{FilterChain, ServletResponse, ServletRequest}
+import javax.servlet.{ServletResponse, ServletRequest}
 
 /**
  * The [[org.apache.shiro.web.servlet.ShiroFilter]] is usually configured
@@ -40,20 +40,44 @@ class PubletShiroFilter extends AbstractShiroFilter with HttpFilter {
   }
 
   override def isEnabled(request: ServletRequest, response: ServletResponse) = {
-    val utils = getRequestUtils(request)
-
-    val action = utils.getGitAction
-
     //disable filter if this is a read request to an open repository. otherwise
     //activate filter
-    val disable = {
-      val tag = utils.getRepositoryModel
+    PubletShiroFilter.shiroFilterEnabled
+  }
+
+}
+
+object PubletShiroFilter {
+
+  def anonRequestAllowed = PubletWebContext.attr(anonRequestKey).get
+
+  def shiroFilterEnabled = PubletWebContext.attr(shiroEnabledKey).get
+
+  private val anonRequestKey = Key("anonymousRequestAllowed", {
+    case Request => {
+      val action = PubletWebContext.getGitAction
+      val tag = PubletWebContext.getRepositoryModel
         .map(_.tag)
         .getOrElse(RepositoryTag.open)
 
-      tag == RepositoryTag.open && action.exists(_ == GitAction.pull)
-    }
-    !disable
-  }
+      val anon = tag == RepositoryTag.open && action.exists(_ == GitAction.pull)
 
+      if (!anon && !PubletWebContext.isGitRequest) {
+        val constr = PubletWeb.authManager.getResourceConstraints(PubletWebContext.requestUri)
+        constr.find(_.perm.isAnon).isDefined
+      } else {
+        anon
+      }
+    }
+  })
+
+  private val shiroEnabledKey = Key("shiroOnRequestEnabled", {
+    case Request => {
+      val anonAllowed = anonRequestAllowed
+      if (PubletWebContext.isGitRequest && anonAllowed)
+        false
+      else
+        true
+    }
+  })
 }

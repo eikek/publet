@@ -3,16 +3,39 @@ title: Publet Userdoc
 
 --- name:content
 
-# Publet
-
-This is the user documentation for publet.
+## What
 
 Publet is a small application that glues together three major players:
 
 * [Scalate](http://scalate.fusesource.org/) which is a template engine
-* [Git](http://git-scm.com/) and especially [JGit](http://www.jgit.org/)
+* [Git](http://git-scm.com/) using the java implementation [JGit](http://www.jgit.org/)
 * [Bootstrap]() for a great ui
 
-Git is used as a repository system to back all sources that are feed into
+Git is used as a repository system holding all sources that are fed into
 the template engine to produce html pages. The default layout for those
-pages is based on bootstrap.
+pages is based on bootstrap. The templates and wiki pages can be edited
+online or offline -- then using `git push` to deploy changes.
+
+## Why
+I like the wiki approach. It allows me to quickly edit a page and
+add content. But that's not enough ;-) For small web sites, I'd also
+like to add dynamic content as quickly as well.
+
+What I found missing too often with other wikis is the ability to create
+whatever html page I want. Often I'd like to create a very custom front
+page but use wiki markup for all the text-heavy pages.
+
+Then sometimes, there is need to integrate another app into existing
+sites. For example, I once created a small app that let me manage my pdf files.
+I could full text search all files upload them etc. I don't want to manage
+a new war file for that. Besides, I'd like the pages of the new app to be
+dressed up as my web sites. Since I couldn't find an existing application
+that suited my needs, so I started with this one.
+
+## Other Tools used
+
+Publet uses a lot of other open source tools:
+
+* [JQuery](http://jquery.com/) obvously!
+* [JQuery File Upload plugin](https://github.com/blueimp/jQuery-File-Upload)
+* [Apache Shiro](http://shiro.apache.org/) for integrating Security needs

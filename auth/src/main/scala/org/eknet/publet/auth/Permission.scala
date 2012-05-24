@@ -6,6 +6,9 @@ package org.eknet.publet.auth
  */
 case class Permission(perm: String, repository: Option[String]) {
 
+  val anonString = "anon"
+
   def permString = perm + repository.map(":"+_).getOrElse("")
 
+  def isAnon = perm == anonString
 }
