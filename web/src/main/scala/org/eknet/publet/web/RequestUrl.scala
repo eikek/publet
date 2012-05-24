@@ -4,12 +4,13 @@ import javax.servlet.http.HttpServletRequest
 import java.net.URLDecoder
 import org.eknet.publet.vfs.Path
 import util.{Request, Key}
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 21:03
  */
-trait RequestUrl {
+trait RequestUrl extends Logging {
 
   protected def req: HttpServletRequest
 
@@ -42,18 +43,10 @@ trait RequestUrl {
    */
   def urlBase = PubletWebContext.attr(urlBaseKey).get
 
-  /**Url prefix of this application. This is read from the config file or constructed
-   * using the information provided by the request.
-   *
-   * This base should be used when constructing urls.
-   * @return
-   */
-  def urlBasePath = Path(urlBase+"/")
-
-
   private val applicationUriKey: Key[String] = Key("applicationUri", {
     case Request => {
-      val p = Path(req.getRequestURI.substring(req.getContextPath.length))
+      val cp = PubletWeb.publetSettings("publet.contextPath").getOrElse(req.getContextPath)
+      val p = Path(req.getRequestURI.substring(cp.length))
       if (p.directory) (p/"index.html").asString else p.asString
     }
   })
@@ -78,12 +71,6 @@ trait RequestUrl {
 
   def isGitRequest = applicationUri.startsWith("/"+Config.gitMount)
 
-  /**
-   * Returns the decoded context path
-   * @return
-   */
-  def contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
-
   private val resourceUri = Key("applicationSourceUri", {
     case Request => {
       PubletWeb.publet.findSources(applicationPath).toList match {
@@ -92,6 +79,25 @@ trait RequestUrl {
       }
     }
   })
+
+  /**
+   * Creates an absolute url by prefixing the host and
+   * context path to the given path
+   *
+   * @param path
+   * @return
+   */
+  def urlOf(path: String): String = urlOf(Path(path))
+
+  /**
+   * Creates an absolute url by prefixing the host and
+   * context path to the given path
+   *
+   * @param path
+   * @return
+   */
+  def urlOf(path: Path): String =  urlBase + path.toAbsolute.asString
+
 
   /**
    * Returns the path to the source file that this request

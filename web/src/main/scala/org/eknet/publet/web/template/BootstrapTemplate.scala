@@ -18,9 +18,9 @@ class BootstrapTemplate extends WebExtension with Logging {
     Templates.mountJQuery(publ)
     Templates.mountHighlightJs(publ)
     publ.mountManager.mount(Path("/publet/bootstrap/"),
-      new ClasspathContainer(classOf[BootstrapTemplate], Some(Path("../includes/bootstrap"))))
+      new ClasspathContainer(base = "/org/eknet/publet/web/includes/bootstrap"))
 
-    val layoutUrl = classOf[BootstrapTemplate].getResource("../includes/bootstrap/bootstrap.single.jade")
+    val layoutUrl = classOf[BootstrapTemplate].getResource("/org/eknet/publet/web/includes/bootstrap/bootstrap.single.jade")
     PubletWeb.scalateEngine.urlResources.addUrl(layoutUrl)
     PubletWeb.scalateEngine.setDefaultLayoutUri(layoutUrl.toString)
   }

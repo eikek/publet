@@ -2,19 +2,20 @@
 title: Upload File
 searchForSidebar: false
 --- name:head pipeline:jade
-link(href="/publet/webeditor/css/jquery.fileupload-ui.css" rel="stylesheet")
-script(type="text/javascript" src="/publet/webeditor/js/vendor/jquery.ui.widget.js")
-script(type="text/javascript" src="/publet/webeditor/js/blueimp/tmpl.min.js")
-script(type="text/javascript" src="/publet/webeditor/js/blueimp/load-image.min.js")
-script(type="text/javascript" src="/publet/webeditor/js/blueimp/canvas-to-blob.min.js")
-script(type="text/javascript" src="/publet/webeditor/js/jquery.iframe-transport.js")
-script(type="text/javascript" src="/publet/webeditor/js/jquery.fileupload.js")
-script(type="text/javascript" src="/publet/webeditor/js/jquery.fileupload-fp.js")
-script(type="text/javascript" src="/publet/webeditor/js/jquery.fileupload-ui.js")
-script(type="text/javascript" src="/publet/webeditor/js/locale.js")
-script(type="text/javascript" src="/publet/webeditor/js/publet-browser.js")
-script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
-link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
+- def urlOf(str:String) = PubletWebContext.urlOf(str)
+link(href={ urlOf("/publet/webeditor/css/jquery.fileupload-ui.css") } rel="stylesheet")
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/vendor/jquery.ui.widget.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/tmpl.min.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/load-image.min.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/canvas-to-blob.min.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.iframe-transport.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload-fp.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload-ui.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/locale.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/publet-browser.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/scripts/browser.js") })
+link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 
 --- name:content pipeline:ssp
 <% import org.eknet.publet.webeditor.EditorPaths %>

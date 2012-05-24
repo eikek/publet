@@ -34,7 +34,7 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     val path = PubletWebContext.applicationPath
     if (allRedirects.keySet.contains(path.asString)) {
-      val newUri = PubletWebContext.urlBase +"/"+ allRedirects.get(path.asString).get
+      val newUri = allRedirects.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
       resp.sendRedirect(newUri)
     } else {

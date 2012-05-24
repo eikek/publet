@@ -19,7 +19,8 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
       Some(scalateEngine.processUri(EditorPaths.errorTemplate.asString, Some(data), attr))
     } else {
       val resourcePath = path.sibling(data.name.fullName).asString
-      PubletWebContext.redirect(PubletWebContext.contextPath + EditorPaths.editHtmlPage.asString+"?resource="+resourcePath)
+      val ctx = PubletWebContext
+      ctx.redirect(EditorPaths.editHtmlPage.asString+"?resource="+resourcePath)
       Some(Content.empty(ContentType.html))
     }
   }

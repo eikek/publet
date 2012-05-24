@@ -12,8 +12,8 @@ import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
  */
 object MailContact extends ScalaScript {
 
-  val formTemplate = "/publet/ext/includes/templates/_contact.jade"
-  val actionUrl = PubletWeb.servletContext.getContextPath + "/publet/ext/scripts/contact.json"
+  lazy val formTemplate = "/publet/ext/includes/templates/_contact.jade"
+  lazy val actionUrl = PubletWebContext.urlOf("/publet/ext/scripts/contact.json")
 
   def serve() = {
     val ctx = PubletWebContext

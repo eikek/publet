@@ -13,17 +13,17 @@ object Templates {
 
   def mountJQuery(publet: Publet) {
     publet.mountManager.mount(Path("/publet/jquery/"),
-      new ClasspathContainer(classOf[BootstrapTemplate], Some(Path("../includes/jquery"))))
+      new ClasspathContainer(base ="/org/eknet/publet/web/includes/jquery"))
   }
 
   def mountHighlightJs(publet: Publet) {
     publet.mountManager.mount(Path("/publet/highlightjs/"),
-      new ClasspathContainer(classOf[BootstrapTemplate], Some(Path("../includes/highlight"))))
+      new ClasspathContainer(base = "/org/eknet/publet/web/includes/highlight"))
   }
 
   def mountSticky(publet: Publet) {
     publet.mountManager.mount(Path("/publet/sticky/"),
-      new ClasspathContainer(classOf[BootstrapTemplate], Some(Path("../includes/sticky"))))
+      new ClasspathContainer(base = "/org/eknet/publet/web/includes/sticky"))
   }
 
   def mountPubletResources(publet: Publet) {

@@ -33,7 +33,7 @@ object ExtWebExtension {
     muc.addResource(new WebScriptResource("contact.html".rn, MailContact))
     publet.mountManager.mount(extScriptPath, muc)
 
-    val cont = new ClasspathContainer(classOf[ExtWebExtension], Some(Path("includes/")))
+    val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
     publet.mountManager.mount(Path("/publet/ext/includes/"), cont)
   }
 }

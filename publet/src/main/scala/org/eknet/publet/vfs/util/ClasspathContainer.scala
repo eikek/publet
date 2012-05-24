@@ -8,16 +8,12 @@ import org.eknet.publet.vfs._
  *
  * If path is not specified, the uri of the class resource is used.
  *
- * @param relative a path relative to the class path of `scope`. If this
- *                 is specified, a lookup of `x/y.txt` will be translated
- *                 to `relative/x/y.txt` and then looked up from the `scope`
- *                 class
- *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.04.12 23:52
  */
-class ClasspathContainer(scope: Class[_],
-                         relative: Option[Path]) extends Container {
+class ClasspathContainer(cl: ClassLoader = Thread.currentThread().getContextClassLoader, base: String = "") extends Container {
+
+  private val basePath = Path(base).toAbsolute
 
   def children = List() //not working
 
@@ -30,8 +26,8 @@ class ClasspathContainer(scope: Class[_],
    * @return
    */
   def getUrl(name: String): Option[URL] = {
-    val uri = relative.map(_ / name).getOrElse(Path(name).toRelative)
-    Option(scope.getResource(uri.asString))
+    val uri = basePath / name
+    Option(cl.getResource(uri.toRelative.asString))
   }
 
   import ResourceName._

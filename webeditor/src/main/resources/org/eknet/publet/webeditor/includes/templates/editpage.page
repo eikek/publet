@@ -2,9 +2,10 @@
 title: Edit Page
 searchForSidebar: false
 --- name:head pipeline:jade
-script(type="text/javascript" src="/publet/webeditor/js/publet-browser.js")
-script(type="text/javascript" src="/publet/webeditor/scripts/browser.js")
-link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
+- def urlOf(str:String) = PubletWebContext.urlOf(str)
+script(type="text/javascript" src={ urlOf("/publet/webeditor/js/publet-browser.js") })
+script(type="text/javascript" src={ urlOf("/publet/webeditor/scripts/browser.js") })
+link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 
 --- name:content pipeline:jade
 

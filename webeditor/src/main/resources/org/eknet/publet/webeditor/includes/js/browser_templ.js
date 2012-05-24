@@ -2,7 +2,7 @@ $(function () {
     //initialize file browser
     $('#filesTree').publetBrowser({
         locationBarEl: 'pre',
-        actionUrl:     '/publet/webeditor/scripts/toc.json',
+        actionUrl:     "/publet/webeditor/scripts/toc.json",
         locationBarId: 'containerPath'
     });
 

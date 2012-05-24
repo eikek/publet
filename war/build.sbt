@@ -1,6 +1,6 @@
 seq(webSettings :_*)
 
-libraryDependencies += "org.mortbay.jetty" % "jetty" % "6.1.22" % "container"
+libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container"
 
 port in container.Configuration := 8081
 

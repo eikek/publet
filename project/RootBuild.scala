@@ -15,7 +15,6 @@ object Dependencies {
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1" withSources()
   val servletApi = "javax.servlet" % "servlet-api" % "2.5" % "provided" withSources()
-//  val knockoff = "com.tristanhunt" %% "knockoff" % "0.8.0-16" //scala 2.9.1 only
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2" withSources()
@@ -57,6 +56,7 @@ object RootBuild extends Build {
     version := "1.0.0-SNAPSHOT",
     scalaVersion := globalScalaVersion,
     sbtPlugin := true,
+    exportJars := true,
     resolvers := Seq(Resolvers.eknet),
     scalacOptions ++= Seq("-unchecked", "-deprecation")
   )

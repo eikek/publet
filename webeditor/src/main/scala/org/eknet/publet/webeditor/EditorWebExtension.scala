@@ -31,7 +31,7 @@ object EditorWebExtension {
   def setup(publet: Publet, scalateEngine: ScalateEngine) {
     import org.eknet.publet.vfs.ResourceName._
 
-    val cp = new ClasspathContainer(classOf[CreateNewHandler], Some(Path("includes/")))
+    val cp = new ClasspathContainer(base = "/org/eknet/publet/webeditor/includes")
     publet.mountManager.mount(editorPath, cp)
 
     val muc = new MapContainer()

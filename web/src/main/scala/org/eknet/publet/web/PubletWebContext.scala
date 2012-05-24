@@ -51,7 +51,7 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
    */
   def redirectToLoginPage() {
     val p = params.map(t => t._1 +"="+ t._2.mkString(",")).mkString("&")
-    redirect(PubletWeb.getLoginPath+"?redirect="+requestUri+"?"+p)
+    redirect(PubletWeb.getLoginPath+"?redirect="+applicationUri+"?"+p)
   }
 
   /**

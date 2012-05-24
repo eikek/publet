@@ -5,21 +5,21 @@
 -@ var footer: String = null
 -@ var searchForSidebar: Boolean = true
 -@ var searchForHeadIncludes: Boolean = true
-- val contextPath = PubletWebContext.contextPath
-- val home = if (contextPath.isEmpty) "/" else contextPath
+- val ctx = PubletWebContext
+- val home = ctx.urlOf("/")
 - import org.eknet.publet.web.Config
 !!! 5
 html(lang="en")
   head
     meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    script(type="text/javascript" src={contextPath + "/publet/jquery/jquery-1.7.2.min.js"})
-    script(type="text/javascript" src={contextPath + "/publet/jquery/jquery.form.js"})
-    link(href={contextPath + "/publet/bootstrap/css/bootstrap.min.css"} rel="stylesheet")
-    link(href={contextPath + "/publet/highlightjs/styles/googlecode.css"} rel="stylesheet")
-    script(type="text/javascript" src={contextPath + "/publet/bootstrap/js/bootstrap.min.js"})
-    script(type="text/javascript" src={contextPath + "/publet/highlightjs/highlight.pack.js"})
-    script(type="text/javascript" src={contextPath + "/publet/js/publet.js"})
-    link(href={contextPath + "/publet/bootstrap/css/bootstrap.custom.css"} rel="stylesheet")
+    script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery-1.7.2.min.js") })
+    script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery.form.js") })
+    link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.min.css") } rel="stylesheet")
+    link(href={ ctx.urlOf("/publet/highlightjs/styles/googlecode.css") } rel="stylesheet")
+    script(type="text/javascript" src={ ctx.urlOf("/publet/bootstrap/js/bootstrap.min.js") })
+    script(type="text/javascript" src={ ctx.urlOf("/publet/highlightjs/highlight.pack.js") })
+    script(type="text/javascript" src={ ctx.urlOf("/publet/js/publet.js") })
+    link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.custom.css") } rel="stylesheet")
     - if (searchForHeadIncludes)
       =loadHeadIncludes()
     :javascript

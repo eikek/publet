@@ -63,12 +63,11 @@ class IncludeLoader {
       .map(c => t._1 / c.name.fullName)
     ).map(_.toList)
 
-    val contextPath = PubletWebContext.contextPath
     for (r <- (mainAll.getOrElse(List()):::incl.getOrElse(List()))) yield {
       if (r.name.ext == "css") {
-        <link href={contextPath + r.toAbsolute.asString} rel="stylesheet"/>
+        <link href={ PubletWebContext.urlOf(r) } rel="stylesheet"/>
       } else if (r.name.ext == "js") {
-        <script type="text/javascript" src={contextPath + r.toAbsolute.asString}/>
+        <script type="text/javascript" src={ PubletWebContext.urlOf(r) }/>
       } else {
         XML.load(publet.rootContainer.lookup(r).get.asInstanceOf[ContentResource].inputStream)
       }

@@ -13,7 +13,7 @@ class PubletDocExtension extends WebExtension with Logging {
 
   def onStartup() {
     info("Installing publet user documentation...")
-    val cont = new ClasspathContainer(classOf[PubletDocExtension], None)
+    val cont = new ClasspathContainer(base = "/org/eknet/publet/doc")
     PubletWeb.publet.mountManager.mount(Path("/publet/doc"), cont)
   }
 

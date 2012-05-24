@@ -14,7 +14,7 @@ class CreateNewHandler extends NotFoundHandler with PageWriter {
     val targetType = path.name.targetType
     val publet = PubletWeb.publet
     publet.mountManager.resolveMount(path) orElse {
-      sys.error("Invalid path: "+ path.asString)
+      sys.error("Path not mounted: "+ path.asString)
     }
     val appPath = PubletWebContext.applicationPath
     val c = if (targetType.mime._1 == "text") {

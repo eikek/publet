@@ -86,7 +86,12 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         | right now. Please have a look at the [user guide](../publet/doc/index.html) to get started.
         """.stripMargin
     val nav =
-      """a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
+      """- def urlOf(str: String) = PubletWebContext.urlOf(str)
+        |- val path = PubletWebContext.getResourceUri
+        |- val loginUrl = urlOf("/publet/templates/login.html")
+        |- val logoutUrl = urlOf("/publet/scripts/logout.json?redirect=" + urlOf("/"))
+        |- val editUrl = urlOf("/publet/webeditor/scripts/edit.html?resource="+path)
+        |a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
@@ -95,9 +100,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |  ul.nav
         |    - if (isResourceEditable)
         |      li
-        |        - val cp = PubletWebContext.contextPath
-        |        - val path = PubletWebContext.getResourceUri
-        |        a(href={cp + "/publet/webeditor/scripts/edit.html?resource="+path}) Edit
+        |        a(href={ editUrl }) Edit
         |  ul.nav.pull-right
         |    - if (Security.isAuthenticated)
         |      li
@@ -108,12 +111,12 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |            span.caret
         |          ul.dropdown-menu
         |            li
-        |              a(href={PubletWebContext.contextPath +"/publet/scripts/logout.json?redirect="+PubletWebContext.contextPath+"/"})
+        |              a(href={ logoutUrl })
         |                i.icon-hand-right
         |                | Logout
         |    - if (!Security.isAuthenticated)
         |      li
-        |        a(href={PubletWebContext.contextPath +"/publet/templates/login.html"})
+        |        a(href={ loginUrl })
         |          i.icon-user.icon-white
         |          | Login
       """.stripMargin
