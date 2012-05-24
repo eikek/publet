@@ -1,7 +1,6 @@
 package org.eknet.publet.impl
 
 import scala.collection.mutable
-import org.eknet.publet.impl.Conversions._
 import org.eknet.publet._
 import engine.{PubletEngine, EngineMangager}
 import vfs._
@@ -36,10 +35,10 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     }
   }
 
-  def push(path: Path, content: InputStream, message: Option[String] = None) {
-    def copy(ext: Option[String]) {
+  def push(path: Path, content: InputStream, message: Option[String] = None) = {
+    def copy(ext: Option[String]) = {
       createResource(path, ext) match {
-        case cr: Writeable => cr.writeFrom(content, message)
+        case cr: Writeable => cr.writeFrom(content, message); cr.asInstanceOf[ContentResource]
         case r@_ => sys.error("Cannot create content for resource: "+ r)
       }
     }
@@ -65,21 +64,36 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
 
   def findSources(path: Path): Iterable[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
-    if (path.name.targetType==ContentType.unknown) Seq()
+    if (path.directory || path.name.targetType==ContentType.unknown) Seq()
     else {
-      // all extensions but the one requested
-      val allexts = ContentType.all.filter(_ != path.name.targetType).flatMap(_.extensions)
+      // at first try by listing all children in the container
+      // if that results in an empty list, try looking up files
+      // with the same name and all known extensions. The latter
+      // case implies case sensitivtiy of the underlying platform
+      // and is a fallback for containers that don't support listing
+      // its children (like ClasspathContainer). Only lowercase
+      // extensions are used for lookups!
 
-      // requested extensions
-      val reqexts = path.name.targetType.extensions
+      lookup(path.parent).collect({case c: ContainerResource=>c})
+        .map(_.children.filter(_.name.name == path.name.name))
+        .filter(!_.isEmpty)
+        .map(_.collect({case c: ContentResource=> c}))
+        .getOrElse {
 
-      //lookup first sources with requested extensions
-      val rsources = reqexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc}).toSeq
-      val others = mutable.ListBuffer[ContentResource]()
-      if (rsources.isEmpty) {
-        others ++= allexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc})
+          // all extensions but the one requested
+          val allexts = ContentType.all.filter(_ != path.name.targetType).flatMap(_.extensions)
+
+          // requested extensions
+          val reqexts = path.name.targetType.extensions
+
+          //lookup first sources with requested extensions
+          val rsources = reqexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc}).toSeq
+          val others = mutable.ListBuffer[ContentResource]()
+          if (rsources.isEmpty) {
+            others ++= allexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc})
+          }
+          rsources ++ others.toSeq
       }
-      rsources ++ others.toSeq
     }
   }
 

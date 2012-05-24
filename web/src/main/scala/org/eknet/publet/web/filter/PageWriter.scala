@@ -6,8 +6,8 @@ import org.eknet.publet.vfs._
 import util.SimpleContentResource
 import scala.Some
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{PubletWebContext, PubletWeb, Config}
 import org.eknet.publet.Publet
+import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb, Config}
 
 /**
  *
@@ -27,7 +27,7 @@ trait PageWriter extends Logging {
       writePage(result, resp)
 
     } else {
-      resp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+      ErrorResponse.unauthorized.send(resp)
     }
   }
 
@@ -41,7 +41,7 @@ trait PageWriter extends Logging {
         .process(PubletWebContext.applicationPath, resource, ContentType.html)
       writePage(result, resp)
     } else {
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+      ErrorResponse.internalError.send(resp)
     }
   }
 
@@ -67,10 +67,13 @@ trait PageWriter extends Logging {
     val path = PubletWebContext.applicationPath
     page match {
       case None => createNew(path, resp)
+      case Some(p:ErrorResponse) => {
+        p.send(resp)
+      }
       case Some(p) => {
         resp.setContentType(p.contentType.mimeString)
         p.copyTo(out)
-      };
+      }
     }
   }
 

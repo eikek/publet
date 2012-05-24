@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import org.apache.commons.fileupload.FileItem
+import util.{Request, Key}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,14 +26,19 @@ trait RequestParams {
 
   def uploads = multipartFields.filter(!_.isFormField)
 
-  private def multipartFields = {
-    val rct = req.getContentType
-    if (rct != null && rct.startsWith("multipart")) {
-      val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
-      items.collect({case p:FileItem => p}).toList
-    } else {
-      List[FileItem]()
+  private val multipartFieldsKey = Key("reqMultipartFields", {
+    case Request => {
+      val rct = req.getContentType
+      if (rct != null && rct.startsWith("multipart")) {
+        val items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req)
+        items.collect({case p:FileItem => p}).toList
+      } else {
+        List[FileItem]()
+      }
     }
-  }
+  })
+
+  def multipartFields = PubletWebContext.attr(multipartFieldsKey).get
+
   private def multipartFormFields = multipartFields.filter(_.isFormField)
 }

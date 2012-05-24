@@ -2,6 +2,7 @@ package org.eknet.publet.web
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import util.{Key, AttributeMap}
+import java.util.Locale
 
 
 /**
@@ -52,5 +53,11 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
     val p = params.map(t => t._1 +"="+ t._2.mkString(",")).mkString("&")
     redirect(PubletWeb.getLoginPath+"?redirect="+requestUri+"?"+p)
   }
+
+  /**
+   * Returns the http request method.
+   * @return
+   */
+  def getMethod: Method.Value = Method.withName(req.getMethod.toUpperCase(Locale.ROOT))
 
 }
