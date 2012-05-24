@@ -22,14 +22,14 @@ trait RequestUrl {
 
   private val urlBaseKey = Key("urlBase", {
     case Request => PubletWeb.publetSettings("publet.urlBase").getOrElse {
-//      val uri = req.getScheme +"://"+ req.getServerName
-//      val base = if (Set(80, 443) contains req.getServerPort)
-//        uri
-//      else
-//        uri +":" +req.getServerPort
-      req.getContextPath
-//      if (PubletWeb.servletContext.getContextPath.isEmpty) base
-//      else base + PubletWeb.servletContext.getContextPath
+      val uri = req.getScheme +"://"+ req.getServerName
+      val base = if (Set(80, 443) contains req.getServerPort)
+        uri
+      else
+        uri +":" +req.getServerPort
+
+      if (PubletWeb.servletContext.getContextPath.isEmpty) base
+      else base + PubletWeb.servletContext.getContextPath
     }
   })
 
@@ -82,7 +82,7 @@ trait RequestUrl {
    * Returns the decoded context path
    * @return
    */
-  def contextPath = URLDecoder.decode(urlBase, "UTF-8")
+  def contextPath = URLDecoder.decode(req.getContextPath, "UTF-8")
 
   private val resourceUri = Key("applicationSourceUri", {
     case Request => {
