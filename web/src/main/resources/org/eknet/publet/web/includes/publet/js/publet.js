@@ -1,10 +1,11 @@
-$(document).ready(function() {
+$(function() {
 
     /**
      * Replace all `p:ref=...` elements with the
      * corresponding content.
+     * Implements client-side includes
      */
-    $('div[p\\:ref]').each(function(index, el) {
+    $('[p\\:ref]').each(function(index, el) {
         var jel = $(el);
         var uri = jel.attr("p:ref");
         if (uri.indexOf("?") > 0) {
@@ -13,7 +14,9 @@ $(document).ready(function() {
             uri = uri +"?noLayout"
         }
         $.get(uri, function(data) {
-          jel.replaceWith("<div>"+ data +"</div>");
+            jel.empty();
+            jel.removeAttr("p:ref");
+            $(data).appendTo(jel);
         });
     });
 });
