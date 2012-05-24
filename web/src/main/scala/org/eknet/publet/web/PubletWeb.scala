@@ -97,6 +97,7 @@ object PubletWeb {
   lazy val contentRoot = contextMap(contentRootKey).get
   lazy val authManager = contextMap(authManagerKey).get
   lazy val publetSettings = new PropertiesMap {
+    reload()
     override def file = contentRoot.lookup(Path(Publet.allIncludes+"settings.properties"))
       .collect({case cc: ContentResource => cc})
       .map(_.inputStream)
