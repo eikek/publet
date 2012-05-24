@@ -1,0 +1,54 @@
+---
+searchForSidebar: false
+
+--- name:head pipeline:jade
+:css
+  code.sourcecode {
+    background: #fff;
+    color: #000;
+    white-space: pre;
+    border: none;
+  }
+  tr.bad {
+    background: #FFF8C6;
+  }
+  tr.bad .linenum {
+    font-weight: bold;
+  }
+--- name:content pipeline:jade
+- import scala.util.parsing.input._
+- import org.eknet.publet.engine.scalate.ErrorMessage
+-@ var content: List[String] = List()
+-@ var errors: Map[Int, ErrorMessage]
+-@ var templateUri: String = ""
+- if (Security.isAuthenticated)
+  .alert.alert-error
+    h1
+      | Error in '#{templateUri}'
+      a.btn.btn-large(href={templateUri+"?a=edit"})
+        i.icon-edit
+        | Edit
+    br/
+    ol
+      - for (e <- errors)
+        li
+          | #{e._2.message} @ #{e._2.pos.line} . #{e._2.pos.column}
+  table.table.table-condensed
+    - for ((line, no) <- (content zip (1 to content.size+1)))
+      - val error = errors.get(no)
+      - val css = error.map(e=>"bad").getOrElse("good")
+      tr(class={css})
+        td.linenum
+          = no
+        td
+          code.sourcecode<
+            =line
+      - if (error.isDefined)
+        tr(class={css})
+          td.linenum
+          td
+            code.sourcecode<
+              =(" ")*(error.get.pos.column-1) + "^  " + error.get.message
+- if (!Security.isAuthenticated)
+  .alert.alert-error
+    h1 Internal Error

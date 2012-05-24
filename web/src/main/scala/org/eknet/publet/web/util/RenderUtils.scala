@@ -15,12 +15,12 @@ object RenderUtils {
 
   def renderTemplate(uri: String, attributes: Map[String, Any]): Option[Content] = {
     val attr = PubletWeb.scalateEngine.attributes ++ attributes
-    Some(PubletWeb.scalateEngine.processUri(uri, attr))
+    Some(PubletWeb.scalateEngine.processUri(uri, None, attr))
   }
 
   def renderTemplate(source: TemplateSource, attributes: Map[String, Any]): Option[Content] = {
     val attr = PubletWeb.scalateEngine.attributes ++ attributes
-    Some(PubletWeb.scalateEngine.processSource(source, attr))
+    Some(PubletWeb.scalateEngine.processSource(source, None, attr))
   }
 
   /**

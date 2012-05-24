@@ -19,8 +19,12 @@ link(href="/publet/webeditor/css/browser.css" rel="stylesheet")
     #response
     form(method="post" id="editPageForm" action={actionPath})
       .form-actions
-        button.btn.btn-primary Save
-        a.btn.btn-info(href={viewResource}) View
+        button.btn.btn-primary
+          i.icon-hdd.icon-white
+          | Save
+        a.btn.btn-info(href={viewResource})
+          i.icon-eye-open.icon-white
+          | View
         a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={actionPath+"?delete="+viewResource})
           i.icon-trash.icon-white
           | Delete

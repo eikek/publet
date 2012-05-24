@@ -16,7 +16,7 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
       val attr = Map(
       "message" -> "Content not writeable!"
       ) ++ scalateEngine.attributes
-      Some(scalateEngine.processUri(EditorPaths.errorTemplate.asString, attr))
+      Some(scalateEngine.processUri(EditorPaths.errorTemplate.asString, Some(data), attr))
     } else {
       val resourcePath = path.sibling(data.name.fullName).asString
       PubletWebContext.redirect(PubletWebContext.contextPath + EditorPaths.editHtmlPage.asString+"?resource="+resourcePath)

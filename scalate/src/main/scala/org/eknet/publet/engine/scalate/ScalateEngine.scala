@@ -3,20 +3,24 @@ package org.eknet.publet.engine.scalate
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
-import org.fusesource.scalate.{TemplateSource, TemplateEngine}
 import org.fusesource.scalate.layout.{NullLayoutStrategy, DefaultLayoutStrategy}
+import grizzled.slf4j.Logging
+import org.fusesource.scalate.{CompilerException, InvalidSyntaxException, TemplateSource, TemplateEngine}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 00:09
  */
-class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends PubletEngine {
+class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends PubletEngine with Logging {
 
   val urlResources = new UrlResources(Some(engine.resourceLoader))
   engine.resourceLoader = urlResources
 
   private val defaultLayout = classOf[ScalateEngine].getResource("default.jade")
   urlResources.addUrl(defaultLayout)
+
+  private val errorViewLayout = classOf[ScalateEngine].getResource("_errorView.page")
+  urlResources.addUrl(errorViewLayout)
 
   setDefaultLayoutUri(defaultLayout.toString)
 
@@ -37,7 +41,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
       if (target == ContentType.html) {
         if (engine.extensions.contains(data.name.ext)) {
           val uri = path.withExt(data.name.ext).asString
-          Some(processUri(uri, attributes))
+          Some(processUri(uri, Some(data), attributes))
         } else {
           val templateSource = if (data.contentType.mime._1 == "text")
             new CodeTemplateSource(path, data)
@@ -47,7 +51,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
             new DownloadTemplateSource(path, data)
 
           urlResources.put(templateSource.uri, templateSource)
-          Some(processSource(templateSource, attributes))
+          Some(processSource(templateSource, Some(data), attributes))
         }
       } else {
         None
@@ -55,16 +59,60 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
     }
   }
 
-  def processUri(uri: String, attributes: Map[String, Any] = Map()): Content = {
-    val out = engine.layout(uri, attributes)
+  def processUri(uri: String, data: Option[ContentResource], attributes: Map[String, Any] = Map()): Content = {
+    try {
+      val out = engine.layout(uri, attributes)
+      Content(out, ContentType.html)
+    }
+    catch {
+      case e:InvalidSyntaxException => {
+        error("Invalid template syntax: " + e.getMessage)
+        renderErrorView(e, data)
+      }
+      case e: CompilerException => {
+        error("Compiler error in template: "+ e.getMessage)
+        renderErrorView(e, data)
+      }
+    }
+  }
+
+  def processSource(source: TemplateSource, data: Option[ContentResource], attributes: Map[String, Any] = Map()): Content = {
+    try {
+      val out = engine.layout(source, attributes)
+      Content(out, ContentType.html)
+    }
+    catch {
+      case e:InvalidSyntaxException => {
+        error("Invalid template syntax: "+ e.getMessage)
+        renderErrorView(e, data)
+      }
+      case e: CompilerException => {
+        error("Compiler error in template: "+ e.getMessage)
+        renderErrorView(e, data)
+      }
+    }
+  }
+
+  def renderErrorView(e: InvalidSyntaxException, data: Option[ContentResource]): Content = {
+    val info = Map(
+      "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
+      "templateUri" -> e.template,
+      "errors" -> Map(e.pos.line -> ErrorMessage(e.pos, e.brief))
+    )
+    val out = engine.layout(errorViewLayout.toString, (attributes ++ info))
     Content(out, ContentType.html)
   }
 
-  def processSource(source: TemplateSource, attributes: Map[String, Any] = Map()): Content = {
-    val out = engine.layout(source, attributes)
+  def renderErrorView(e: CompilerException, data: Option[ContentResource]): Content = {
+    val errors = e.errors.map(error => error.pos.line -> ErrorMessage(error.pos, error.message))
+    val info = Map(
+      "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
+      "templateUri" -> data.map(_.name.fullName).getOrElse(""),
+      "errors" -> errors.toMap
+    )
+    val out = engine.layout(errorViewLayout.toString, (attributes ++ info))
     Content(out, ContentType.html)
   }
-
 }
 
 object ScalateEngine {

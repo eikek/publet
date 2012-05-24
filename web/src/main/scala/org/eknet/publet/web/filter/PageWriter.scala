@@ -22,7 +22,7 @@ trait PageWriter extends Logging {
     val r401 = publet.process(Path(Config.mainMount+"/"+Publet.allIncludes+"401.html").toAbsolute)
     if (r401.isDefined) {
       val resource = new SimpleContentResource(ResourceName("401.html"), r401.get)
-      val result = publet.engineManager.getEngine('include).get
+      val result = PubletWeb.scalateEngine
         .process(PubletWebContext.applicationPath, resource, ContentType.html)
       writePage(result, resp)
 
@@ -37,7 +37,7 @@ trait PageWriter extends Logging {
     val r500 = publet.process(path500)
     if (r500.isDefined) {
       val resource = new SimpleContentResource(ResourceName("500.html"), r500.get)
-      val result = publet.engineManager.getEngine('include).get
+      val result = PubletWeb.scalateEngine
         .process(PubletWebContext.applicationPath, resource, ContentType.html)
       writePage(result, resp)
     } else {
@@ -53,7 +53,7 @@ trait PageWriter extends Logging {
       ex.printStackTrace(new PrintWriter(sw))
       val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+ sw.toString.replace("<", "&lt;").replace(">", "&gt;")+ "</pre>", ContentType.html)
       val resource = new SimpleContentResource(PubletWebContext.applicationPath.name, content)
-      val result = publet.engineManager.getEngine('mainWiki).get
+      val result = PubletWeb.scalateEngine
         .process(PubletWebContext.applicationPath, resource, ContentType.html)
 
       writePage(result, resp)
