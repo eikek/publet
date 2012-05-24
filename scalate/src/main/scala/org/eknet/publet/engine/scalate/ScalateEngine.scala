@@ -95,6 +95,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
 
   def renderErrorView(e: InvalidSyntaxException, data: Option[ContentResource]): Content = {
     val info = Map(
+      "title" -> ("Error in "+e.template),
       "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
       "templateUri" -> e.template,
       "errors" -> Map(e.pos.line -> ErrorMessage(e.pos, e.brief))
@@ -105,9 +106,11 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
 
   def renderErrorView(e: CompilerException, data: Option[ContentResource]): Content = {
     val errors = e.errors.map(error => error.pos.line -> ErrorMessage(error.pos, error.message))
+    val name = data.map(_.name.fullName).getOrElse("")
     val info = Map(
+      "title" -> ("Error in "+ name),
       "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
-      "templateUri" -> data.map(_.name.fullName).getOrElse(""),
+      "templateUri" -> name,
       "errors" -> errors.toMap
     )
     val out = engine.layout(errorViewLayout.toString, (attributes ++ info))
