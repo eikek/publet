@@ -9,6 +9,7 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 
 --- name:content pipeline:jade
 
+- val ctx = PubletWebContext
 -@ val actionPath: String = ""
 -@ val contentAsString: String = ""
 -@ val lastMod: String = ""
@@ -23,10 +24,10 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
         button.btn.btn-primary
           i.icon-hdd.icon-white
           | Save
-        a.btn.btn-info(href={viewResource})
+        a.btn.btn-info(href={ ctx.urlOf(viewResource) })
           i.icon-eye-open.icon-white
           | View
-        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={actionPath+"?delete="+viewResource})
+        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={ ctx.urlOf(actionPath)+"?delete="+viewResource})
           i.icon-trash.icon-white
           | Delete
       label
