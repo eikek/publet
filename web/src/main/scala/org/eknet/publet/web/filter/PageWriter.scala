@@ -46,7 +46,6 @@ trait PageWriter extends Logging {
   }
 
   def writeError(ex: Throwable, resp: HttpServletResponse) {
-    val publet = PubletWeb.publet
     if (Config("publet.mode").getOrElse("development") == "development") {
       //print the exception in development mode
       val sw = new StringWriter()

@@ -30,6 +30,8 @@ div#content, div#content p {
 
 .noheight {
     display: none;
+    height: 0;
+    width: 0;
     position: absolute;
     top: -50px;
 }
