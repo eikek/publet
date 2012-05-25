@@ -6,7 +6,7 @@
     =message
 - if (!success)
   #response
-  form(method="post" action={actionUrl} id="contactForm")
+  form(method="post" action={ PubletWebContext.urlOf(actionUrl) } id="contactForm")
     label
       | From (Email)
       input(type="text" name="from" required="required")

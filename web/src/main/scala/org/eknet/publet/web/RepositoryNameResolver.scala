@@ -22,7 +22,7 @@ trait RepositoryNameResolver {
   private val gitRepositoryNameKey = Key("gitRepositoryName", {
     case Request => {
       if (isGitRequest) {
-        val uri = Path(requestUri).strip(Path(Config.gitMount)).toRelative
+        val uri = applicationPath.strip(Path(Config.gitMount)).toRelative
         val name = stripGitSuffixes(uri.asString, gitSuffixes)
         val rname = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
         Some(RepositoryName(rname))

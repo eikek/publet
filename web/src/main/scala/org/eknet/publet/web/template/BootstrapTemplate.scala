@@ -1,9 +1,8 @@
 package org.eknet.publet.web.template
 
-import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
-import org.eknet.publet.vfs.{Path, ResourceName}
+import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{PubletWeb, WebExtension}
-import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
+import org.eknet.publet.vfs.util.ClasspathContainer
 import grizzled.slf4j.Logging
 
 /**
@@ -20,9 +19,7 @@ class BootstrapTemplate extends WebExtension with Logging {
     publ.mountManager.mount(Path("/publet/bootstrap/"),
       new ClasspathContainer(base = "/org/eknet/publet/web/includes/bootstrap"))
 
-    val layoutUrl = classOf[BootstrapTemplate].getResource("/org/eknet/publet/web/includes/bootstrap/bootstrap.single.jade")
-    PubletWeb.scalateEngine.urlResources.addUrl(layoutUrl)
-    PubletWeb.scalateEngine.setDefaultLayoutUri(layoutUrl.toString)
+    PubletWeb.scalateEngine.setDefaultLayoutUri("/publet/bootstrap/bootstrap.single.jade")
   }
 
   def onShutdown() {

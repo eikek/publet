@@ -18,7 +18,7 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 .row
   .span9
     #response
-    form(method="post" id="editPageForm" action={actionPath})
+    form(method="post" id="editPageForm" action={ PubletWebContext.urlOf(actionPath) })
       .form-actions
         button.btn.btn-primary
           i.icon-hdd.icon-white

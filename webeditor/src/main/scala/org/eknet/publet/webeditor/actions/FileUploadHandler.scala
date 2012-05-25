@@ -16,8 +16,8 @@ import org.eknet.publet.web._
  */
 object FileUploadHandler extends ScalaScript with Logging {
 
-  lazy val pushJson = PubletWebContext.urlBase + EditorPaths.pushScript.asString
-  lazy val uploadJson = PubletWebContext.urlBase + EditorPaths.uploadScript.asString
+  lazy val pushJson = EditorPaths.pushScript.asString
+  lazy val uploadJson = EditorPaths.uploadScript.asString
 
 
   def serve() = {
@@ -53,12 +53,13 @@ object FileUploadHandler extends ScalaScript with Logging {
   }
 
   def toMap(path: Path, res: ContentResource) = {
+    val ctx = PubletWebContext
     val map = mutable.Map[String, Any]()
     map.put("name", res.name.fullName)
     map.put("size", res.length.getOrElse(0L))
-    map.put("url", path.sibling(res.name.fullName).asString)
-    map.put("thumbnail_url", EditorPaths.thumbNailer.asString+"?resource="+path.sibling(res.name.fullName).asString)
-    map.put("delete_url", pushJson+"?delete=" + path.sibling(res.name.fullName).asString)
+    map.put("url", ctx.urlOf(path.sibling(res.name.fullName).asString))
+    map.put("thumbnail_url", ctx.urlOf(EditorPaths.thumbNailer.asString+"?resource="+path.sibling(res.name.fullName).asString))
+    map.put("delete_url", ctx.urlOf(pushJson+"?delete=" + path.sibling(res.name.fullName).asString))
     map.put("delete_type", "DELETE")
     map.toMap
   }

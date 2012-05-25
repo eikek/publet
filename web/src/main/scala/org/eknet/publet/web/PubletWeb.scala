@@ -104,13 +104,12 @@ object PubletWeb {
   }
 
   /**
-   * Returns the uri to the login page. The uri is either fetched
-   * from the settings file or the default login page is returned.
+   * Returns the uri to the login page. This is the inner-application
+   * uri. Use `urlOf()` to create a URL.
    *
    * @return
    */
-  def getLoginPath = PubletWeb.servletContext.getContextPath +
-    publetSettings("publet.loginUrl").getOrElse("/publet/templates/login.html")
+  def getLoginPath = publetSettings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
   lazy val notFoundHandlerKey = Key("notFoundHandler", {
     case Context => new NotFoundHandler {
@@ -153,7 +152,8 @@ object PubletWeb {
 
     val resolver = new PathMatchingFilterChainResolver()
     val formauth = new FormAuthenticationFilter()
-    formauth.setLoginUrl(getLoginPath)
+    val loginPath = Config("publet.urlBase").getOrElse(servletContext.getContextPath) + getLoginPath
+    formauth.setLoginUrl(loginPath)
     resolver.getFilterChainManager.addFilter("authc", formauth)
     resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)

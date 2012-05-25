@@ -50,14 +50,15 @@ object ListContents extends ScalaScript {
       case cr: ContentResource => (cr.contentType, cr.length.getOrElse(0L))
       case cr: ContainerResource => (ContentType.unknown, 0L)
     }
+    val ctx = PubletWebContext
     Map(
       "name" -> r.name,
       "container" -> isContainer(r),
       "type" -> contentType.typeName.name,
       "sourceRef" -> (path / r).asString,
-      "thumbnail" -> (EditorPaths.thumbNailer.asString+"?resource="+(path/r).asString),
-      "delete_url" -> (EditorPaths.pushScript.asString+"?delete="+(path/r).asString),
-      "href" -> ((path/ r.name.withExtension("html")).asString),
+      "thumbnail" -> ctx.urlOf(EditorPaths.thumbNailer.asString+"?resource="+(path/r).asString),
+      "delete_url" -> ctx.urlOf(EditorPaths.pushScript.asString+"?delete="+(path/r).asString),
+      "href" -> ctx.urlOf(path/ r.name.withExtension("html")),
       "mimeBase" -> contentType.mime._1,
       "size" -> size
     )

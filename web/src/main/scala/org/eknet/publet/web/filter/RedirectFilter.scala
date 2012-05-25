@@ -36,7 +36,7 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
     if (allRedirects.keySet.contains(path.asString)) {
       val newUri = allRedirects.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
-      resp.sendRedirect(newUri)
+      resp.sendRedirect(PubletWebContext.urlOf(newUri))
     } else {
       chain.doFilter(req, resp)
     }

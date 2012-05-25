@@ -73,7 +73,8 @@ private class PathInfoServletReq(req: HttpServletRequest) extends HttpServletReq
   val gitMount = Config.gitMount
 
   override def getPathInfo = {
-    getRequestURI.substring(gitMount.length+1)
+    val len = req.getContextPath.length + gitMount.length +1
+    getRequestURI.substring(len)
       //+ (if (getQueryString != null) "?"+getQueryString else "")
   }
 

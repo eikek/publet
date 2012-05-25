@@ -22,7 +22,7 @@ trait RequestUrl extends Logging {
   def requestUri = PubletWebContext.attr(requestUriKey).get
 
   private val urlBaseKey = Key("urlBase", {
-    case Request => PubletWeb.publetSettings("publet.urlBase").getOrElse {
+    case Request => Config("publet.urlBase").getOrElse {
       val uri = req.getScheme +"://"+ req.getServerName
       val base = if (Set(80, 443) contains req.getServerPort)
         uri
@@ -45,7 +45,7 @@ trait RequestUrl extends Logging {
 
   private val applicationUriKey: Key[String] = Key("applicationUri", {
     case Request => {
-      val cp = PubletWeb.publetSettings("publet.contextPath").getOrElse(req.getContextPath)
+      val cp = Config("publet.contextPath").getOrElse(req.getContextPath)
       val p = Path(req.getRequestURI.substring(cp.length))
       if (p.directory) (p/"index.html").asString else p.asString
     }

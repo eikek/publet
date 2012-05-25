@@ -41,7 +41,7 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
         writeUnauthorizedError(resp)
       }
       case ue: UnauthenticatedException => {
-        info("Unauthenticated user. Redirect to login")
+        info("Unauthenticated user for '"+req.getRequestURI+"'. Redirect to login")
         PubletWebContext.redirectToLoginPage()
       }
     }

@@ -20,7 +20,8 @@ class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEn
     } else {
       val resourcePath = path.sibling(data.name.fullName).asString
       val ctx = PubletWebContext
-      ctx.redirect(EditorPaths.editHtmlPage.asString+"?resource="+resourcePath)
+      val uri = EditorPaths.editHtmlPage.asString+"?resource="+resourcePath
+      ctx.redirect(ctx.urlOf(uri))
       Some(Content.empty(ContentType.html))
     }
   }

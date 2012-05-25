@@ -89,8 +89,8 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
       """- def urlOf(str: String) = PubletWebContext.urlOf(str)
         |- val path = PubletWebContext.getResourceUri
         |- val loginUrl = urlOf("/publet/templates/login.html")
-        |- val logoutUrl = urlOf("/publet/scripts/logout.json?redirect=" + urlOf("/"))
-        |- val editUrl = urlOf("/publet/webeditor/scripts/edit.html?resource="+path)
+        |- val logoutUrl = urlOf("/publet/scripts/logout.json")+ "?redirect=" + urlOf("/")
+        |- val editUrl = urlOf("/publet/webeditor/scripts/edit.html")+ "?resource="+path
         |a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
         |  span(class="icon-bar")
         |  span(class="icon-bar")

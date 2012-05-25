@@ -1,7 +1,8 @@
+- val actionUrl = PubletWebContext.urlOf("/publet/scripts/login.json")
 .row
   .span4.offset4
     #response
-    form(method="post" class="well" action="/publet/scripts/login.json" id="loginForm")
+    form(method="post" class="well" action={actionUrl} id="loginForm")
       label
         | Username
         input(name="username" id="username" type="text" size="20" required="required")

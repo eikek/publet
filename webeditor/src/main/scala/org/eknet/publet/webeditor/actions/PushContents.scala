@@ -25,7 +25,7 @@ object PushContents extends ScalaScript with Logging {
       case Some(path) => {
         try {
           delete(Path(path))
-          PubletWebContext.redirect(EditorPaths.editHtmlPage.asString+"?resource="+path)
+          ctx.redirect(ctx.urlOf(EditorPaths.editHtmlPage.asString+"?resource="+path))
           notify(success = true, msg = "File deleted!")
         } catch {
           case e:Exception => RenderUtils.renderMessage("Error", "Error while deleting.", "error")
@@ -51,7 +51,7 @@ object PushContents extends ScalaScript with Logging {
 
   def delete(path: Path) {
     Security.checkGitAction(GitAction.push)
-    info("Deleting now: "+ path)
+    info("Deleting now: "+ path.asString)
     PubletWeb.publet.delete(path)
   }
 
