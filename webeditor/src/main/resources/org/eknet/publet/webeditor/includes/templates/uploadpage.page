@@ -72,7 +72,14 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
     <div class="row">
       <div class="span9">
         <!-- The table listing the files available for upload/download -->
-        <table class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+        <table class="table table-condensed">
+          <tbody>
+            <input type="text" name="commitMessage" placeholder="Commit message" class="span9" />
+          </tbody>
+        </table>
+        <table class="table table-striped">
+          <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody>
+        </table>
       </div>
       <div class="span3">
         <h3>File browser</h3>

@@ -35,7 +35,6 @@ object PushContents extends ScalaScript with Logging {
         case Some(path) => {
           val p = Path(path)
           try {
-            pushBinary(p)
             pushText(p)
             notify(success = true, msg = "Successfully saved.", head = getHead(p))
           } catch {
@@ -48,14 +47,6 @@ object PushContents extends ScalaScript with Logging {
         case None => notify(success = false, msg = "Not enough arguments!")
       }
     }
-  }
-
-  def pushBinary(path: Path) {
-    val ctx = PubletWebContext
-    Security.checkGitAction(GitAction.push)
-    ctx.uploads.foreach(fi => {
-      PubletWeb.publet.push(path, fi.getInputStream)
-    })
   }
 
   def delete(path: Path) {
