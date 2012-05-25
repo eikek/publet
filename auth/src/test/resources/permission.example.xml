@@ -33,7 +33,7 @@
   </permissions>
 
   <resourceConstraints>
-    <pattern name="/c/**" perm="anon"/>
-    <pattern name="/sec/**" perm="superperm"/>
+    <pattern name="/c/*" perm="anon"/>
+    <pattern name="/sec/*" perm="superperm"/>
   </resourceConstraints>
 </publetAuth>

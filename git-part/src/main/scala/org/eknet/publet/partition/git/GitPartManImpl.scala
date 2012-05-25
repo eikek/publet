@@ -88,14 +88,14 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     val nav =
       """- def urlOf(str: String) = PubletWebContext.urlOf(str)
         |- val path = PubletWebContext.getResourceUri
-        |- val loginUrl = urlOf("/publet/templates/login.html")
+        |- val loginUrl = urlOf("/publet/templates/login.html") + "?redirect="+ urlOf(PubletWebContext.applicationUri)
         |- val logoutUrl = urlOf("/publet/scripts/logout.json")+ "?redirect=" + urlOf("/")
         |- val editUrl = urlOf("/publet/webeditor/scripts/edit.html")+ "?resource="+path
         |a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
-        |a(class="brand" href="/") =Config("applicationName").getOrElse("Project")
+        |a(class="brand" href={ urlOf("/") }) =Config("applicationName").getOrElse("Project")
         |.nav-collapse
         |  ul.nav
         |    - if (isResourceEditable)

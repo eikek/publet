@@ -63,7 +63,7 @@ object PubletShiroFilter {
       val anon = tag == RepositoryTag.open && action.exists(_ == GitAction.pull)
 
       if (!anon && !PubletWebContext.isGitRequest) {
-        val constr = PubletWeb.authManager.getResourceConstraints(PubletWebContext.requestUri)
+        val constr = PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
         constr.find(_.perm.isAnon).isDefined
       } else {
         anon

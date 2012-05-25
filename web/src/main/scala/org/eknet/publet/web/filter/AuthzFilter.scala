@@ -24,7 +24,7 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
         repoModel.foreach { repo =>
           Security.checkGitAction(gitAction, repo)
         }
-        PubletWeb.authManager.getResourceConstraints(utils.requestUri)
+        PubletWeb.authManager.getResourceConstraints(utils.applicationUri)
           .filterNot(_.perm.isAnon)
           .foreach(rc => Security.checkPerm(rc.perm.permString))
       }
@@ -41,7 +41,7 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
         writeUnauthorizedError(resp)
       }
       case ue: UnauthenticatedException => {
-        info("Unauthenticated user for '"+req.getRequestURI+"'. Redirect to login")
+        info("Unauthenticated user for '"+utils.applicationUri+"'. Redirect to login")
         PubletWebContext.redirectToLoginPage()
       }
     }
