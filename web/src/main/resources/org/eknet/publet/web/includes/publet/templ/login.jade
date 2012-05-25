@@ -4,10 +4,10 @@
     form(method="post" class="well" action="/publet/scripts/login.json" id="loginForm")
       label
         | Username
-        input(name="username" type="text" size="20" required="required" id="from")
+        input(name="username" id="username" type="text" size="20" required="required")
       label
         | Password
-        input(name="password" type="password" required="required")
+        input(name="password" id="password" type="password" required="required")
       label.checkbox
         input(type="checkbox" name="rememberMe")/
         | Remember me
@@ -17,6 +17,7 @@
         | Login
 :javascript
   $(document).ready(function() {
+    $('#username').focus();
     var options = {
       success: function(data) {
         var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
