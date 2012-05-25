@@ -23,10 +23,11 @@ trait GitrTandem {
     val ws = clone(bare.name, split._2, false)
 
     //create some initial content
-    val writer = new FileWriter(new File(ws.getWorkTree, "_README.txt"))
+    val readmeFile = "_README.txt"
+    val writer = new FileWriter(new File(ws.getWorkTree, readmeFile))
     writer.write("Initial Readme")
     writer.close()
-    ws.git.add().addFilepattern("README").setUpdate(false).call()
+    ws.git.add().addFilepattern(readmeFile).setUpdate(false).call()
     ws.git.commit()
       .setAuthor("Publet Install", "none@none")
       .setMessage("Initial commit.")
