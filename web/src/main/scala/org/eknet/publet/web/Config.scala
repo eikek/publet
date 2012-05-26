@@ -53,6 +53,12 @@ object Config extends PropertiesMap with Logging {
     reload()
   }
 
+  /**The configuration directory of the application.
+   *
+   * @return
+   */
+  def configDirectory = directory
+
   /**
    * The directory content root.
    */

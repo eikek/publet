@@ -2,30 +2,34 @@
 -@ var title : String = "Welcome"
 -@ var head: String = null
 -@ var nav: String = null
+-@ var highlightTheme: String = PubletWeb.publetSettings("publet.highlightTheme").getOrElse("googlecode")
 -@ var footer: String = null
--@ var searchForSidebar: Boolean = true
--@ var searchForHeadIncludes: Boolean = true
--@ var highlightTheme: String = "googlecode"
+-@ var searchForSidebar: Boolean = PubletWeb.publetSettings("publet.searchForSidebar").getOrElse("true").toBoolean
+-@ var searchForHeadIncludes: Boolean = PubletWeb.publetSettings("publet.searchForHeadIncludes").getOrElse("true").toBoolean
+-@ var useHighlightJs: Boolean = PubletWeb.publetSettings("publet.useHighlightJs").getOrElse("true").toBoolean
 - val ctx = PubletWebContext
 - val home = ctx.urlOf("/")
 - val highlightCss = ctx.urlOf("/publet/highlightjs/styles/"+ highlightTheme +".css")
 - import org.eknet.publet.web.Config
 !!! 5
-html(lang="en")
+html
   head
     meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
     script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery-1.7.2.min.js") })
     script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery.form.js") })
+
     link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.min.css") } rel="stylesheet")
-    link(href={ highlightCss } rel="stylesheet")
     script(type="text/javascript" src={ ctx.urlOf("/publet/bootstrap/js/bootstrap.min.js") })
-    script(type="text/javascript" src={ ctx.urlOf("/publet/highlightjs/highlight.pack.js") })
-    script(type="text/javascript" src={ ctx.urlOf("/publet/js/publet.js") })
     link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.custom.css") } rel="stylesheet")
+
+    - if (useHighlightJs)
+      script(type="text/javascript" src={ ctx.urlOf("/publet/highlightjs/highlight.pack.js") })
+      link(href={ highlightCss } rel="stylesheet")
+      :javascript
+            hljs.initHighlightingOnLoad();
+    script(type="text/javascript" src={ ctx.urlOf("/publet/js/publet.js") })
     - if (searchForHeadIncludes)
       =loadHeadIncludes()
-    :javascript
-      hljs.initHighlightingOnLoad();
 
     - if (head!=null)
       !~~ head

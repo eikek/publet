@@ -31,6 +31,10 @@ object Templates {
     publetJs.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/js/publet.js"), ResourceName("publet.js")))
     publet.mountManager.mount(Path("/publet/js/"), publetJs)
 
+    val publetCss = new MapContainer()
+    publetCss.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/css/pygmentize.css"), ResourceName("pygmentize.css")))
+    publet.mountManager.mount(Path("/publet/css/"), publetCss)
+
     val publTempl = new MapContainer()
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/empty.ssp"), ResourceName("empty.ssp")))
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/login.jade"), ResourceName("login.jade")))
