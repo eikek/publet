@@ -19,12 +19,13 @@ import org.fusesource.scalate.Binding
 import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, DefaultPubletCompiler}
 import java.io.File
 import org.eknet.publet.vfs.util.MapContainer
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:02
  */
-object PubletWeb {
+object PubletWeb extends Logging {
 
   // initialized on context startup
   private var servletContextI: ServletContext = null

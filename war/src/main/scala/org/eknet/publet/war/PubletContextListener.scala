@@ -25,10 +25,21 @@ class PubletContextListener extends ServletContextListener with Logging {
   }
 
   def contextInitialized(sce: ServletContextEvent) {
+    info("""
+           |                   |      |        |
+           |     __ \   |   |  __ \   |   _ \  __|
+           |     |   |  |   |  |   |  |   __/  |
+           |     .__/  \__,_| _.__/  _| \___| \__|
+           |    _|
+           |
+           |    starting ...
+           |
+           |""".stripMargin)
     try {
       PubletWeb.initialize(sce.getServletContext)
       initLogging()
       loadExtensions().foreach(_.onStartup())
+      info(">>> publet initialized.\n")
     }
     catch {
       case e:Throwable => error("Error on startup!", e); throw e

@@ -43,8 +43,9 @@ object Config extends PropertiesMap with Logging {
 
   private var directory: File = null
   private[web] def setContextPath(str: String) {
-    if (!str.isEmpty)
-      this.directory = new File(rootDirectory, str.replace(File.separator, "-"))
+    val norm = if (str.startsWith(File.separator)) str.substring(1) else str
+    if (!norm.isEmpty)
+      this.directory = new File(rootDirectory, norm.replace(File.separator, "-"))
     else
       this.directory = new File(rootDirectory, "root")
 
