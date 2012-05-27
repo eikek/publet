@@ -3,6 +3,8 @@ package org.eknet.publet.gitr
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.api.Git
 import java.io.File
+import java.nio.file.Files
+import io.Source
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,6 +27,39 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
   def isTandem = {
     val cfg = self.getConfig
     cfg.getBoolean("gitr", null, "tandem", false)
+  }
+
+  /**
+   * Sets `str` in the description file. Only working
+   * for bare repositories!
+   *
+   * @param str
+   */
+  def setDescription(str: String) {
+    if (self.isBare) {
+      val descFile = new File(self.getDirectory, "description")
+      Files.write(descFile.toPath, str.getBytes)
+    } else {
+      sys.error("Not a bare repository! Cannot set description")
+    }
+  }
+
+  /**
+   * If this is a bare repository, looks for a `description`
+   * file and returns its contents. An exception is thrown
+   * if this is not a bare repository and [[scala.None]] is
+   * returned, if the file does not exist.
+   *
+   * @return
+   */
+  def getDescription: Option[String] = {
+    if (self.isBare) {
+      val descFile = new File(self.getDirectory, "description")
+      if (descFile.exists()) Some(Source.fromFile(descFile).mkString)
+      else None
+    } else {
+      sys.error("Not a bare repository! Cannot set description")
+    }
   }
 
   /**
