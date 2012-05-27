@@ -33,7 +33,7 @@ html
 
     - if (head!=null)
       !~~ head
-    title = Config("applicationName").map(_ + " - ").getOrElse("") + title
+    title = PubletWeb.publetSettings("applicationName").map(_ + " - ").getOrElse("") + title
   body
     #nav.navbar.navbar-fixed-top
       .navbar-inner

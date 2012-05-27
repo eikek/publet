@@ -289,6 +289,31 @@ tag. Internally the wildcard permission `pull:<repositoryname>` is created.
 You can define any permission you like using the `<grant/>` tag.
 
 
+# Settings
+
+An optional `settings.properties` can be created in the contentroot repository
+at `/.allIncludes/settings.properties`. This should hold web application specific
+information, like the global application name. The settings file is also honored
+by the default layout to retrieve default values.
+
+The settings file can be accessed in scripts and templates using `PubletWeb.publetSettings`
+variable which refers to an `o.e.p.web.util.PropertiesMap` class. String values can be retrieved by
+applying a string key, for example:
+
+    val stringValue: Option[String] = PubletWeb.publetSettings("applicationName")
+
+
+Note, the settings must be explcitely reloaded after making changes.
+
+The following properties are known to publet:
+
+* `applicationName` used sometimes to refer to the application.
+* `publet.useHighlightJs` whether to activate [HighlightJS](http://softwaremaniacs.org/soft/highlight/en/)
+* `publet.highlightTheme` the global [HighlightJS](http://softwaremaniacs.org/soft/highlight/en/) theme to use
+* `publet.searchForSidebar` whether to search the include directories for a `sidebar` file
+* `publet.searchForHeadIncludes` whether to search for addtional html head includes (like javascript and css files)
+
+
 
 # Controllers
 
@@ -393,3 +418,20 @@ be a short JSON response that the client will handle.
 
 Go to `/.allIncludes/config/admin.html` to reload something...
 
+
+## Mini projects
+
+Scala scripts can access all classes in the classpath of the web application. Often,
+one wants to define addtional objects and classes to share code between scripts. You
+can extend the source and classpath of Scala scripts to achieve it.
+
+Suppose there exists several scripts in `/apps/myapp/` that want to share code.
+You can create a _mini project_ by creating the following directory outline:
+
+    /apps/myapp/.includes/project/src/main/scala/
+    /apps/myapp/.includes/project/lib/
+
+The `project` folder contains the mini project files. The `lib` directory can contain jar
+files that are added to the classpath when compiling and the sourcce directory is also
+added to the compiler classpath. Note, since the mini project applies only to scripts in
+`/apps/myapp` and below, because it is defined in the `.includes` folder at that level.

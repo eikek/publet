@@ -4,7 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.ext.MailSupport._
 import org.eknet.publet.web.util.RenderUtils._
-import org.eknet.publet.web.{Config, PubletWebContext}
+import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -22,7 +22,7 @@ object MailContact extends ScalaScript {
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
       renderMessage("Mailer not configured", "Mailer not configured! Sorry, the contact form is not working.", "error")
     } else {
-      val appName = Config("applicationName").map("["+ _ +"] ").getOrElse("")
+      val appName = PubletWeb.publetSettings("applicationName").map("["+ _ +"] ").getOrElse("")
       val from = param("from")
       val msg = param("message")
       val invisible = param("text").exists(!_.isEmpty)

@@ -95,7 +95,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |  span(class="icon-bar")
         |  span(class="icon-bar")
         |  span(class="icon-bar")
-        |a(class="brand" href={ urlOf("/") }) =Config("applicationName").getOrElse("Project")
+        |a(class="brand" href={ urlOf("/") }) =PubletWeb.publetSettings("applicationName").getOrElse("Project")
         |.nav-collapse
         |  ul.nav
         |    - if (isResourceEditable)
