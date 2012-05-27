@@ -8,7 +8,7 @@ import scala.xml.Node
  * @since 24.05.12 17:13
  */
 case class ResourceConstraint(uriPattern: String, perm: Permission) {
-  def toXml = <resourceConstraint name={uriPattern} perm={perm.permString}/>
+  def toXml = <pattern name={uriPattern} perm={perm.permString}/>
 }
 
 object ResourceConstraint {

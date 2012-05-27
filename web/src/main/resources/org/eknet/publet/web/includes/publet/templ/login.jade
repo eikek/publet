@@ -12,7 +12,6 @@
       label.checkbox
         input(type="checkbox" name="rememberMe")/
         | Remember me
-      input(type="hidden" name="redirect" value={PubletWebContext.param("redirect").getOrElse("")})
       button(type="submit" class="btn btn-primary")
         i.icon-ok.icon-white
         | Login
@@ -23,8 +22,9 @@
       success: function(data) {
         var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
         if (data.success) {
-          if (data.redirect) {
-            window.location=data.redirect;
+          var redirect = getURLParameter("redirect")
+          if (redirect) {
+            window.location=redirect;
           } else {
             $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
           }

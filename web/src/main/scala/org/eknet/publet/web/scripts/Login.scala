@@ -16,7 +16,6 @@ object Login extends ScalaScript {
   def serve() = {
     val username = PubletWebContext.param("username")
     val password = PubletWebContext.param("password")
-    val redirectUri = PubletWebContext.param("redirect")
     val rememberMe = PubletWebContext.param("rememberMe")
     if (username.isDefined && password.isDefined) {
       val subject = Security.subject
@@ -24,11 +23,7 @@ object Login extends ScalaScript {
       token.setRememberMe(checkboxToBoolean(rememberMe))
       try {
         subject.login(token)
-        if (redirectUri.isDefined) {
-          makeJson(Map("success"->true, "message"->"Login successful.", "redirect"->redirectUri.get))
-        } else {
-          makeJson(Map("success"->true, "message"->"Login successful."))
-        }
+        makeJson(Map("success"->true, "message"->"Login successful."))
       } catch {
         case e:ShiroException => {
           makeJson(Map("success"->false, "message"->"Login failed."))

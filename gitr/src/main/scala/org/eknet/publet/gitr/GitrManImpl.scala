@@ -76,16 +76,18 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
 
   def getGitrRoot = root
 
-  private def isRepo(f: File) = Option(RepositoryCache.FileKey.resolve(f, FS.detect()))
-
-  private val dfilter = new FileFilter {
-    def accept(pathname: File) = pathname.getName != ".git" && pathname.isDirectory
-  }
 
   def allRepositories(f: (RepositoryName) => Boolean) = {
+    val dfilter = new FileFilter {
+      def accept(pathname: File) = {
+        pathname.isDirectory && pathname.getName != ".git"
+      }
+    }
+    def isRepo(f: File) = Option(RepositoryCache.FileKey.resolve(f, FS.detect()))
     def children(xf: File) = if (xf.isDirectory) xf.listFiles(dfilter) else Array[File]()
     def tree(xf: File): Seq[File] = Seq(xf) ++ children(xf).flatMap(c => tree(c))
-    tree(root).filter(isRepo(_).isDefined)
+
+    tree(root).filter(f => f.getName.endsWith(".git") && isRepo(f).isDefined)
       .map(dir => (RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length + 1)), dir))
       .filter(t => f(t._1))
       .map(t => GitrRepository(Git.open(t._2).getRepository, t._1))
