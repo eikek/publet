@@ -239,7 +239,7 @@ login and password. The password can be plain text or encrypted using one of
 JDK's supported algorithms. In the example file, I created a md5 encrypted
 password using the command
 
-    echo -n "test" | md5sun
+    echo -n "test" | md5sum
 
 The `<group/>` tag specified the roles or groups the user belongs to. Permissions
 can only be associated with groups.
