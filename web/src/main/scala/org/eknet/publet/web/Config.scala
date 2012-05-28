@@ -40,10 +40,10 @@ object Config extends PropertiesMap with Logging {
    *
    */
   val rootDirectory = {
-    var dir = Option(getProperty("publet.dir"))
+    var dir = Option(getProperty("publet.dir")).collect({ case a:String if (!a.trim.isEmpty) => a})
     if (!dir.isDefined) {
       info("System property 'publet.dir' not defined.")
-      dir = Option(getenv().get("PUBLET_DIR"))
+      dir = Option(getenv().get("PUBLET_DIR")).collect({ case a:String if (!a.trim.isEmpty) => a})
     }
     if (!dir.isDefined) {
       info("Environment variable 'PUBLET_DIR' not defined. Falling back to default.")
