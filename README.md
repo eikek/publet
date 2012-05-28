@@ -27,7 +27,7 @@ Publet uses [sbt](https://github.com/harrah/xsbt) as build tool. To compile used
 
 and to create a war file used
 
-   sbt package
+    sbt package
 
 The war is then available in `war/target/scala-2.9.1/sbt-0.11.2/`.
 
@@ -43,4 +43,4 @@ of the webapp (to have multiple wars on one container).
 
 ## More
 
-The full story can be viewed [here](http://eknet.org/main/projects/publet/index.html)
+The full story can be viewed [here](https://eknet.org/main/projects/publet/index.html)
