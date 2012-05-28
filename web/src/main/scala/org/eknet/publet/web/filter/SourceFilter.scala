@@ -18,33 +18,33 @@ package org.eknet.publet.web.filter
 
 import javax.servlet._
 import http.HttpServletResponse
-import org.eknet.publet.web.PubletWebContext
-import grizzled.slf4j.Logging
-import org.eknet.publet.web.util.RenderUtils
-
+import org.eknet.publet.vfs.{ContentResource, ContentType}
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 
 /**
- * Writes a 404 error into the response for resources
- * that start with a underscore or one of its parents
+ * Filter that returns the resource as is if it is found. No processing necessary.
  *
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 21.05.12 20:33
+ * @since 28.05.12 14:53
  */
-class BlacklistFilter extends Filter with HttpFilter with Logging with PageWriter {
+class SourceFilter extends Filter with HttpFilter with PageWriter {
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    if (!PubletWebContext.isGitRequest) {
-      val path = PubletWebContext.applicationPath
-      val underscoreSegment = path.segments.find(_.startsWith("_"))
-      if (underscoreSegment.isDefined) {
-        info("Blacklist-Filter wiping: "+ path.asString)
-        writeError(HttpServletResponse.SC_NOT_FOUND, response)
-        response.flushBuffer()
+    val path = PubletWebContext.applicationPath
+    PubletWeb.publet.rootContainer.lookup(path)
+      .collect({case c:ContentResource=>c}) match {
+        case Some(c) => {
+          response.setContentType(c.contentType.mimeString)
+          c.copyTo(response.getOutputStream)
+        }
+        case _=> {
+          if (!PubletWebContext.isGitRequest && path.name.targetType == ContentType.unknown) {
+            writeError(HttpServletResponse.SC_NOT_FOUND, response)
+          } else {
+            chain.doFilter(request, response)
+          }
       }
-    }
-    if (!response.isCommitted) {
-      chain.doFilter(request, response)
     }
   }
 

@@ -16,7 +16,6 @@
 
 package org.eknet.publet.war
 
-import scala.collection.JavaConversions._
 import javax.servlet.{ServletContextEvent, ServletContextListener}
 import org.eknet.publet.web.{Config, WebExtension, PubletWeb}
 import java.io.File
@@ -35,11 +34,6 @@ import grizzled.slf4j.Logging
  */
 class PubletContextListener extends ServletContextListener with Logging {
 
-  def loadExtensions(): List[WebExtension] = {
-    val loader = ServiceLoader.load(classOf[WebExtension])
-    loader.iterator().toList
-  }
-
   def contextInitialized(sce: ServletContextEvent) {
     info("""
            |                   |      |        |
@@ -52,9 +46,7 @@ class PubletContextListener extends ServletContextListener with Logging {
            |
            |""".stripMargin)
     try {
-      PubletWeb.initialize(sce.getServletContext)
-      initLogging()
-      loadExtensions().foreach(_.onStartup())
+      PubletWeb.initialize(sce.getServletContext, initLogging)
       info(">>> publet initialized.\n")
     }
     catch {

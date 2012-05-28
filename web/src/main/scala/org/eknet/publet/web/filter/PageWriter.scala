@@ -24,6 +24,9 @@ import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
 import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb, Config}
+import Path._
+import ResourceName._
+import org.eknet.publet.web.util.RenderUtils
 
 /**
  *
@@ -33,50 +36,59 @@ import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb, Config}
  */
 trait PageWriter extends Logging {
 
-  def writeUnauthorizedError(resp:HttpServletResponse) {
+  /**
+   * Gets the (processed) custom error page if available.
+   *
+   * @param code
+   * @return
+   */
+  def getCustomErrorPage(code: Int): Option[Content] = {
     val publet = PubletWeb.publet
-    val r401 = publet.process(Path(Config.mainMount+"/"+Publet.allIncludes+"401.html").toAbsolute)
-    if (r401.isDefined) {
-      val resource = new SimpleContentResource(ResourceName("401.html"), r401.get)
-      val result = PubletWeb.scalateEngine
-        .process(PubletWebContext.applicationPath, resource, ContentType.html)
-      writePage(result, resp)
-
-    } else {
-      ErrorResponse.unauthorized.send(resp)
-    }
+    val pageName = code.toString + ".html"
+    publet.process(Path(Config.mainMount +"/"+ Publet.allIncludes + pageName).toAbsolute)
   }
 
-  def writeInternalError(resp: HttpServletResponse) {
-    val publet = PubletWeb.publet
-    val path500 = Path(Config.mainMount+"/"+Publet.allIncludes+"500.html").toAbsolute
-    val r500 = publet.process(path500)
-    if (r500.isDefined) {
-      val resource = new SimpleContentResource(ResourceName("500.html"), r500.get)
-      val result = PubletWeb.scalateEngine
-        .process(PubletWebContext.applicationPath, resource, ContentType.html)
-      writePage(result, resp)
-    } else {
-      ErrorResponse.internalError.send(resp)
-    }
+  /**
+   * Writes the http error by either delegating to a custom error page
+   * or writing the error code into the response.
+   *
+   * @param code
+   * @param resp
+   */
+  def writeError(code: Int, resp: HttpServletResponse) {
+    writePage(Some(getCustomErrorPage(code).getOrElse(ErrorResponse(code))), resp)
   }
 
+  /**
+   * In development mode, writes the exception to the page. Otherwise
+   * delegates to `writeError` for rendering an error page.
+   * @param ex
+   * @param resp
+   */
   def writeError(ex: Throwable, resp: HttpServletResponse) {
     if (Config("publet.mode").getOrElse("development") == "development") {
       //print the exception in development mode
-      val sw = new StringWriter()
-      ex.printStackTrace(new PrintWriter(sw))
-      val content = Content("<h2>Exception</h2><pre class='stacktrace'>"+ sw.toString.replace("<", "&lt;").replace(">", "&gt;")+ "</pre>", ContentType.html)
-      val resource = new SimpleContentResource(PubletWebContext.applicationPath.name, content)
-      val result = PubletWeb.scalateEngine
-        .process(PubletWebContext.applicationPath, resource, ContentType.html)
-
-      writePage(result, resp)
+      try {
+        writePage(RenderUtils.renderException(ex), resp)
+      }
+      catch {
+        case e:Throwable => {
+          error("Error while writing application exception!", e)
+          writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp)
+        }
+      }
     } else {
-      writeInternalError(resp)
+      writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp)
     }
   }
 
+  /**
+   * Writes the content to the response if available. Delegates to
+   * `createNew` if `page` is [[scala.None]]
+   *
+   * @param page
+   * @param resp
+   */
   def writePage(page: Option[Content], resp: HttpServletResponse) {
     val out = resp.getOutputStream
     val path = PubletWebContext.applicationPath

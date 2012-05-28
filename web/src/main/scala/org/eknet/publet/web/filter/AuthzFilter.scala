@@ -18,6 +18,7 @@ package org.eknet.publet.web.filter
 
 import javax.servlet._
 import grizzled.slf4j.Logging
+import http.HttpServletResponse
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.web.{PubletWeb, GitAction, PubletWebContext}
@@ -50,11 +51,11 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
     } catch {
       case uae: UnauthorizedException => {
         error("Unauthorized: "+ uae.getLocalizedMessage)
-        writeUnauthorizedError(resp)
+        writeError(HttpServletResponse.SC_UNAUTHORIZED, resp)
       }
       case se: ServletException if (se.getCause.isInstanceOf[UnauthorizedException]) => {
         error("Unauthorized: "+ se.getCause.getLocalizedMessage)
-        writeUnauthorizedError(resp)
+        writeError(HttpServletResponse.SC_UNAUTHORIZED, resp)
       }
       case ue: UnauthenticatedException => {
         info("Unauthenticated user for '"+utils.applicationUri+"'. Redirect to login")

@@ -20,6 +20,7 @@ import javax.servlet._
 import http.{HttpServletRequest, HttpServletRequestWrapper}
 import org.eknet.publet.web.{Config, PubletWeb}
 import org.eknet.publet.vfs.Path
+import grizzled.slf4j.Logging
 
 /**
  * Does the routing of the request through a simple filter chain.
@@ -45,7 +46,9 @@ class RoutingFilter extends Filter with HttpFilter {
     new RedirectFilter,
     new BlacklistFilter,
     new PubletShiroFilter,
-    new AuthzFilter
+    new ExceptionFilter, //must be inside shiro
+    new AuthzFilter,
+    new SourceFilter
   )
 
   // the two main filters executed at the end
@@ -84,6 +87,23 @@ class RoutingFilter extends Filter with HttpFilter {
 
 }
 
+private class ExceptionFilter extends Filter with PageWriter with HttpFilter with Logging {
+  def init(filterConfig: FilterConfig) {}
+
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+    try {
+      chain.doFilter(request, response)
+    }
+    catch {
+      case e:Throwable => {
+        error("Application error", e)
+        writeError(e, response)
+      }
+    }
+  }
+
+  def destroy() {}
+}
 private class PathInfoServletReq(req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
 
   val gitMount = Config.gitMount

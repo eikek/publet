@@ -1,0 +1,11 @@
+---
+title: Internal Error
+
+--- name:content pipeline:jade
+-@ var exception: String = ""
+
+.alert.alert-error
+  | An error occured on the server.
+
+pre
+  !~~ exception

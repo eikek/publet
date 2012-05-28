@@ -30,7 +30,6 @@ import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 class ExtWebExtension extends WebExtension with Logging {
 
   def onStartup() {
-    info("Installing publet extensions...")
     ExtWebExtension.install(PubletWeb.publet)
   }
 

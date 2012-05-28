@@ -28,7 +28,6 @@ import grizzled.slf4j.Logging
 class BootstrapTemplate extends WebExtension with Logging {
 
   def onStartup() {
-    info("Installing bootstrap template")
     val publ = PubletWeb.publet
     Templates.mountJQuery(publ)
     Templates.mountHighlightJs(publ)

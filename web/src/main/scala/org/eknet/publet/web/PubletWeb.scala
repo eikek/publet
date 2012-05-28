@@ -16,7 +16,8 @@
 
 package org.eknet.publet.web
 
-import filter.NotFoundHandler
+import scala.concurrent.JavaConversions._
+import filter.{PageWriter, NotFoundHandler}
 import javax.servlet.ServletContext
 import scripts._
 import shiro.{UsersRealm, AuthManager}
@@ -36,6 +37,7 @@ import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, Default
 import java.io.File
 import org.eknet.publet.vfs.util.MapContainer
 import grizzled.slf4j.Logging
+import java.util.ServiceLoader
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -129,9 +131,9 @@ object PubletWeb extends Logging {
   def getLoginPath = publetSettings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
   lazy val notFoundHandlerKey = Key("notFoundHandler", {
-    case Context => new NotFoundHandler {
+    case Context => new NotFoundHandler with PageWriter {
       def resourceNotFound(path: Path, resp: HttpServletResponse) {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND)
+        writeError(HttpServletResponse.SC_NOT_FOUND, resp)
       }
     }
   })
@@ -140,10 +142,19 @@ object PubletWeb extends Logging {
 
   // ~~~ servlet context listener
 
-  def initialize(sc: ServletContext) {
+  /**
+   * Initializes the web app. the `loggerInit` function is invoked
+   * as early as possible, after the `Config` object is set up, so
+   * logging is available as soon as possible.
+   *
+   * @param sc
+   * @param loggerInit
+   */
+  def initialize(sc: ServletContext, loggerInit: ()=>Unit) {
     this.servletContextI = sc
     this.contextMapI = AttributeMap(servletContext)
     Config.setContextPath(servletContext.getContextPath)
+    loggerInit.apply()
 
     publet.engineManager.register("/*", scalateEngine)
 
@@ -157,6 +168,8 @@ object PubletWeb extends Logging {
 
     contextMap(publetKey).get
     initShiro()
+
+    WebExtensionLoader.installWebExtensions()
   }
 
   private def initShiro() {

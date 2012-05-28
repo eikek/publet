@@ -19,6 +19,7 @@ package org.eknet.publet.web.util
 import org.eknet.publet.vfs.Content
 import org.fusesource.scalate.TemplateSource
 import org.eknet.publet.web.PubletWeb
+import java.io.{PrintWriter, StringWriter}
 
 /**
  * Utility methods for [[org.eknet.publet.engine.scala.ScalaScript]]s
@@ -56,6 +57,19 @@ object RenderUtils {
     renderTemplate(messagePage, attr)
   }
 
+  /**
+   * Renders the exception.
+   *
+   * @param exc
+   * @return
+   */
+  def renderException(exc: Throwable) = {
+    val out = new StringWriter()
+    exc.printStackTrace(new PrintWriter(out))
+    val attr = Map("exception" -> out.toString)
+    renderTemplate(exceptionPage, attr)
+  }
+
   /**A template rendering a simple message. Supply the following parameters:
    *
    * * message:String the message to display
@@ -73,4 +87,10 @@ object RenderUtils {
    * * redirect: String - the uri to redirect after successful login
    */
   val loginPage = "/publet/templates/login.jade"
+
+  /**A template that for exception output. It expects a
+   * attribute of type [[java.lang.String]] and name `exception`
+   *
+   */
+  val exceptionPage = "/publet/templates/_exception.page"
 }

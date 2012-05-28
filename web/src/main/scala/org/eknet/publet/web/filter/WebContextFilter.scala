@@ -19,24 +19,28 @@ package org.eknet.publet.web.filter
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.PubletWebContext
 import javax.servlet._
+import http.HttpServletResponse
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 05:13
  */
-class WebContextFilter extends Filter with HttpFilter with PageWriter with Logging {
+class WebContextFilter extends Filter with HttpFilter with Logging {
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
+    val start = if (isDebugEnabled) Some(System.currentTimeMillis()) else None
     PubletWebContext.setup(req, resp)
     try {
       chain.doFilter(req, resp)
     } catch {
       case e: Throwable => {
+        //this is last resort. all exceptions should be properly handled in filters above
         error("Error during request: "+ req.getRequestURI, e)
-        writeError(e, resp)
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
       }
     } finally {
       PubletWebContext.clear()
+      start.foreach(s => debug("--- Request '"+req.getRequestURI+"': " + (System.currentTimeMillis()-s)+"ms"))
     }
   }
 

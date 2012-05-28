@@ -55,6 +55,7 @@ object Templates {
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/empty.ssp"), ResourceName("empty.ssp")))
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/login.jade"), ResourceName("login.jade")))
     publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/_messagepage.page"), ResourceName("_messagepage.page")))
+    publTempl.addResource(new UrlResource(classOf[RequestUrl].getResource("includes/publet/templ/_exception.page"), ResourceName("_exception.page")))
     publet.mountManager.mount(Path("/publet/templates/"), publTempl)
   }
 }
