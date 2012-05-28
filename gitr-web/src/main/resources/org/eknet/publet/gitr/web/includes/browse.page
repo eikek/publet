@@ -1,0 +1,15 @@
+---
+title: Browser
+
+--- name:head pipeline:jade
+script(src="gitr-browser.js" type="text/javascript")
+:javascript
+  $(function() {
+    $('#gitBrowser').gitrRepoBrowser();
+  });
+
+--- name:content pipeline:jade 
+.page-header
+  h1 contentroot.git
+
+#gitBrowser

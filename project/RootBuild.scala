@@ -43,7 +43,7 @@ object RootBuild extends Build {
     id = "root",
     base = file("."),
     settings = buildSettings
-  ) aggregate (Publet.module, Web.module, GitPart.module, Auth.module,
+  ) aggregate (Publet.module, Web.module, GitPart.module, GitrWeb.module, Auth.module,
     ScalateEngine.module, War.module, WebEditor.module, Ext.module, Doc.module)
 
   val globalScalaVersion = "2.9.1"
@@ -83,6 +83,23 @@ object Gitr extends Build {
   ) ++ osgiSettings
 
   lazy val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
+
+}
+
+object GitrWeb extends Build {
+
+  lazy val module = Project(
+    id = "gitr-web",
+    base = file("gitr-web"),
+    settings = buildSettings
+  ) dependsOn(Gitr.module, Web.module)
+
+  lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-gitr-web",
+    libraryDependencies ++= deps
+  ) ++ osgiSettings
+
+  lazy val deps = Seq(grizzledSlf4j, servletApi, scalaTest)
 
 }
 
@@ -174,8 +191,8 @@ object War extends Build {
     id = "war",
     base = file("war"),
     settings = buildProperties
-  ) dependsOn (Publet.module, GitPart.module, Web.module,
-    ScalateEngine.module, WebEditor.module, Ext.module, Doc.module)
+  ) dependsOn (Publet.module, GitPart.module, ScalateEngine.module, Web.module,
+    WebEditor.module, Ext.module, GitrWeb.module, Doc.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",

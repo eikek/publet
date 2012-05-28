@@ -1,0 +1,75 @@
+---
+title: Gitr Admin
+
+--- name:head pipeline:jade
+script(src="gitr-listing.js" type="text/javascript")
+:javascript
+  $(function() {
+    $('.nav-tabs').button();
+    $('.hover').popover();
+
+    var options = {
+      success: function(data) {
+        var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
+        if (data.success) {
+          $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
+          $('#createRepoForm').clearForm();
+        } else {
+          $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
+        }
+      },
+      dataType: 'json'
+    };
+    $('#createRepoForm').ajaxForm(options);
+  });
+
+:css
+  code.clone {
+    color: #000;
+  }
+
+--- name:content pipeline:jade
+
+.row
+  .span7
+    #response
+    form(action="gitrcreate.json" method="post" class="form-horizontal" id="createRepoForm")
+      fieldset
+        legend 
+          | Create a new personal git repository.
+        .control-group
+          label.control-label Repository name
+          .controls
+            input.span4(type="text" name="repositoryName" required="required")
+        .control-group
+          label.control-label
+          .controls
+            input(type="checkbox" name="closed")
+            i.icon-lock
+            | Closed Repository
+        .control-group
+          label.control-label Description (optional)
+          .controls
+            input.span4(type="text" name="description")
+        .control-group
+          button.btn.btn-primary(type="submit") Create repository
+          button.btn(type="reset") Reset
+  .span5
+    :markdown
+      ## Gitr - Repository Manager
+
+      You can create new git repositories. The name should be short and must not contain any weird characters. Allowed are letters, digits and hyphens only.
+
+      Push and Pull permissions can be associated as usual in `permissions.xml`. When creating a repository, the permissions are updated accordingly for you.
+hr/
+.row
+  .span3
+    .btn-group.nav-tabs(data-toggle="buttons-radio")
+      button.btn.active(id="mine") Mine
+      button.btn(id="closed") Mine closed
+      button.btn(id="all") All open
+  .span5
+    .input-append
+      input(type="text" id="repoNameInput")
+      button.btn.btn-primary(type="button" id="repoNameSearch") Search
+table.table.table-striped(id="repoListing")
