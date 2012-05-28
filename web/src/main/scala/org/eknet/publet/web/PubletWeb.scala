@@ -16,7 +16,6 @@
 
 package org.eknet.publet.web
 
-import scala.concurrent.JavaConversions._
 import filter.{PageWriter, NotFoundHandler}
 import javax.servlet.ServletContext
 import scripts._
@@ -37,7 +36,6 @@ import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, Default
 import java.io.File
 import org.eknet.publet.vfs.util.MapContainer
 import grizzled.slf4j.Logging
-import java.util.ServiceLoader
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
