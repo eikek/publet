@@ -21,7 +21,8 @@ JSON.
 
 ## Building
 
-Publet uses [sbt](https://github.com/harrah/xsbt) as build tool. To compile used
+Java 7 is required and Scala 2.9.1. [sbt](https://github.com/harrah/xsbt) is used
+as build tool. To compile type
 
     sbt compile
 

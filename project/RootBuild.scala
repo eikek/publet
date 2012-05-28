@@ -32,6 +32,7 @@ object Dependencies {
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % scalateVersion 
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % scalateVersion 
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion
+//  val scalateJRuby = "org.fusesource.scalate" % "scalate-jruby" % scalateVersion
 }
 
 // Root Module 
