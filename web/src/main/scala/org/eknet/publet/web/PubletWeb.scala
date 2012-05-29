@@ -154,7 +154,7 @@ object PubletWeb extends Logging {
     Config.setContextPath(servletContext.getContextPath)
     loggerInit.apply()
 
-    publet.engineManager.register("/*", scalateEngine)
+    publet.engineManager.register("/**", scalateEngine)
 
     val additionalImports = List(
       "org.eknet.publet.web.util.RenderUtils",

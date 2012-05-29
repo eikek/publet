@@ -21,8 +21,8 @@ import scala.xml.{PrettyPrinter, XML}
 import org.eknet.publet.vfs.{Writeable, ContentResource}
 import java.io.ByteArrayInputStream
 import org.eknet.publet.auth._
-import org.eknet.publet.engine.Glob
 import grizzled.slf4j.Logging
+import org.eknet.publet.Glob
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
