@@ -22,35 +22,31 @@ import collection.mutable.ListBuffer
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.gitr.{RepositoryName, GitrRepository}
 import org.eknet.publet.vfs.Path
-import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
+import org.eclipse.jgit.revwalk.RevCommit
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import ScalaScript._
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter
-//   repo = repository name
-//   ref  = ref spec (master, tag/bla, #34da3), defaults to 'master'
-//   path = path inside the tree, defaults to '/'
+//   r = repository name
+//   h  = ref spec (master, tag/bla, #34da3), defaults to 'master'
+//   p = path inside the tree, defaults to '/'
 
 class GitrView extends ScalaScript {
 
-  def getCommit(repo:GitrRepository, id: String): RevCommit = {
-    //todo test if repo is empty!
-    val objId = repo.resolve(id)
-    val walk = new RevWalk(repo)
-    val commit = walk.parseCommit(objId)
-    walk.dispose()
-    commit
-  }
+  val rParam = "r"
+  val hParam = "h"
+  val pParam = "p"
 
-  def getCommitFromRequest(repo:GitrRepository): RevCommit = {
-    val param = PubletWebContext.param("ref").collect({ case e if (!e.isEmpty) => e}).getOrElse("master")
-    getCommit(repo, param)
+
+  def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
+    val param = PubletWebContext.param(hParam).collect({ case e if (!e.isEmpty) => e}).getOrElse("master")
+    repo.getCommit(param)
   }
 
 
   def serve() = {
-    val cp = PubletWebContext.param("path").getOrElse("").replaceAll("/+", "/")
+    val cp = PubletWebContext.param(pParam).getOrElse("")
     val cpPath = {
       if (cp.isEmpty) Path.root
       else {
@@ -58,29 +54,33 @@ class GitrView extends ScalaScript {
       }
     }
 
-    PubletWebContext.param("repo") flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName))) match {
+    PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName))) match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))
       case Some(repo) => {
-        val commit = getCommitFromRequest(repo)
-        val treewalk = new TreeWalk(repo)
-        treewalk.addTree(commit.getTree)
-        if (!cp.isEmpty) treewalk.setFilter(PathFilter.create(cpPath.asString))
-        val result= new ListBuffer[CommitInfo]()
-        while (treewalk.next()) {
-          if (cpPath.prefixedBy(Path(treewalk.getPathString))) {
-            treewalk.enterSubtree()
-          } else {
-            result.append(new CommitInfo(treewalk, commit))
+        getCommitFromRequest(repo) map { commit =>
+          val treewalk = new TreeWalk(repo)
+          treewalk.addTree(commit.getTree)
+          if (!cp.isEmpty) treewalk.setFilter(PathFilter.create(cpPath.asString))
+          val result= new ListBuffer[CommitInfo]()
+          while (treewalk.next()) {
+            if (cpPath.prefixedBy(Path(treewalk.getPathString))) {
+              treewalk.enterSubtree()
+            } else {
+              val lastcommit = repo.getLastCommit(treewalk.getPathString).get
+              result.append(new CommitInfo(treewalk, lastcommit))
+            }
           }
-        }
-        makeJson {
-          Map(
-            "success"->true,
-            "files"-> result.sorted.map(_.toMap),
-            "parent" -> !cpPath.isRoot,
-            "parentPath"-> (if (cpPath.isRoot) "" else cpPath.parent.asString),
-            "containerPath"-> cpPath.asString
-          )
+          makeJson {
+            Map(
+              "success"->true,
+              "files"-> result.sorted.map(_.toMap),
+              "parent" -> !cpPath.isRoot,
+              "parentPath"-> (if (cpPath.isRoot) "" else cpPath.parent.asString),
+              "containerPath"-> Path(cpPath.segments, true, true).asString
+            )
+          }
+        } getOrElse {
+          makeJson(Map("success"->false, "message"->"Repository is empty."))
         }
       }
     }

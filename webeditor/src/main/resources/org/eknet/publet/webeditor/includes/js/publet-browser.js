@@ -25,12 +25,6 @@
             'fileClass'        : 'page'
         }, options);
 
-        var createHandler = function(pathname, file) {
-            return function() {
-                alert('click!!!');
-            }
-        };
-
         var createLocationBar = function(path) {
             return $('<'+settings.locationBarEl+'/>', {
                 id: settings.locationBarId,

@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.Git
 import java.io.File
 import java.nio.file.Files
 import io.Source
+import org.eclipse.jgit.revwalk.{RevWalk, RevCommit}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -108,6 +109,23 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
     prev
   }
 
+
+  def getCommit(id: String): Option[RevCommit] = {
+    Option(self.resolve(id)) map { objId =>
+      val walk = new RevWalk(self)
+      val commit = walk.parseCommit(objId)
+      walk.dispose()
+      commit
+    }
+  }
+
+  def getLastCommit(path: String): Option[RevCommit] = {
+    val iter = git.log().addPath(path).call().iterator()
+    if (iter.hasNext)
+      Some(iter.next())
+    else
+      None
+  }
 
 
   override def toString = self.toString

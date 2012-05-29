@@ -23,7 +23,7 @@ import ScalaScript._
 import org.eknet.publet.auth.RepositoryTag
 import org.eknet.publet.gitr.{RepositoryName, GitrRepository}
 
-class GitrList extends ScalaScript {
+class GitrRepoList extends ScalaScript {
   def serve() = {
 
     // by default returns users repositories

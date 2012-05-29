@@ -18,64 +18,99 @@
  * Repository browser jQuery plugin
  */
 
-(function( $ ) {
-  
-  $.fn.gitrRepoBrowser = function(options) {
-    
+(function ($) {
+
+  $.fn.gitrRepoBrowser = function (options) {
+
     //events: 'publetResourceClick'  on resource click
     //            arguments: e - event object
     //                       data - the complete json server response
     //                       i    - the index in the files array
     //                       el   - the `a` element
-    
+
+    var rParam = "r";
+    var hParam = "h";
+    var pParam = "p";
+
     var obj = this;
-    var settings = $.extend( {
-      'actionUrl'     : "gitrview.json",
-      'barElementId'  : "bar",
-      'repo'          : getURLParameter('repo') || "contentroot.git",
-      'ref'           : getURLParameter('ref') || "",
-      'path'          : getURLParameter('path') || ""
+    var settings = $.extend({
+      'actionUrl':"gitrview.json",
+      'barElementId':"bar",
+      'repo':getURLParameter(rParam) || "contentroot.git",
+      'ref':getURLParameter(hParam) || "",
+      'path':getURLParameter(pParam) || "",
+      'tableClass'  : 'table table-condensed table-striped'
     }, options);
-  
-    var _contents = function(repo, callback) {
-      $.getJSON(settings.actionUrl, { repo: repo, ref: settings.ref, path: settings.path }, function (data) {
+
+    var _contents = function (repo, head, path, callback) {
+      var params = {};
+      params[rParam] = repo;
+      params[hParam] = head;
+      params[pParam] = path;
+
+      $.getJSON(settings.actionUrl, params, function (data) {
         if (data.success) {
           var list = [];
           if (data.parent) {
-            list.push('<tr><td/><td><a href="?repo='+repo+'&ref='+settings.ref+'&path='+data.parentPath+'">..</a></td><td/><td/><tr>');
+            list.push('<tr><td/><td><a href="#">..</a></td><td/><td/><tr>');
           }
-          
+
           //normal resource list, already ordered
-          $.each(data.files, function(i, file) {
+          $.each(data.files, function (i, file) {
             var css = file.icon;
             var li = '<tr>';
-            var path = data.containerPath? data.containerPath +"/"+ file.name : file.name
-            li += '<td><i class="'+ css +'"></i></td><td><a href="?repo='+repo+'&ref='+settings.ref+'&path='+path+'">'+ file.name +'</a></td>';
+            var path = data.containerPath + file.name;
+            li += '<td><i class="' + css + '"></i></td><td><a href="#">' + file.name + '</a></td>';
             li += '<td>' + file.age + '</td>';
-            li += '<td>' + file.message + ' <span class="label">'+file.author+'</span></td>';
+            li += '<td>' + file.message + ' <span class="label">' + file.author + '</span></td>';
             list.push(li);
           });
-          
-          var el = $('<table/>', {
-            class: "table table-condensed table-striped",
-            html: '<thead><tr><th style="width:16px;"></th><th class="span6">name</th><th>age</th><th>message</th></tr></thead><tbody>'+list.join('\n')+'</tbody>'
+
+          var table = $('<table/>', {
+            class: settings.tableClass,
+            html:'<thead><tr><th style="width:16px;"></th>' +
+              '<th>name</th><th>age</th><th>message</th></tr></thead>' +
+              '<tbody>' + list.join('\n') + '</tbody>'
           });
-          callback(data, el);
+          callback(data, table);
         } else {
           callback(data)
         }
-        
+
       });
     };
-  
-    var addContents = function(repo) {
-      _contents(repo, function(data, list) {
-        list.appendTo(obj);
+
+    var addContents = function (repo, head, path) {
+      _contents(repo, head, path, function (data, table) {
+        if (data.success) {
+          table.appendTo(obj);
+          $('a', table).each(function(i, el) {
+            $(el).bind('click', function(e) {
+              obj.trigger('gitResourceClick', [data, i, el]);
+              if (e.target.text == "..") {
+                obj.empty();
+                addContents(repo, head, data.parentPath);
+              } else {
+                var offset = data.parent? 1 : 0;
+                var file = data.files[i - offset];
+                var path = data.containerPath + file.name;
+                if (file.container) {
+                  obj.empty();
+                  addContents(repo, head, path)
+                }
+              }
+
+            });
+          });
+        } else {
+          obj.empty();
+          $('<div class="alert alert-error">'+data.message+'</div>').appendTo(obj)
+        }
       });
     };
-  
-    return this.each(function() {
-      addContents(settings.repo);
+
+    return this.each(function () {
+      addContents(settings.repo, settings.ref, settings.path);
     });
   };
-})( jQuery );
+})(jQuery);

@@ -22,7 +22,7 @@ $(function() {
     if ($('#all').hasClass('active')) opts["all"] = true;
     opts["name"] = $('#repoNameInput').val();
     
-    $.getJSON("gitrlist.json", opts, function(data) {
+    $.getJSON("gitr-repolist.json", opts, function(data) {
       $.each(data, function(i, val) {
         var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">'+ val.name+'</td>';
         var icons = '<td>';

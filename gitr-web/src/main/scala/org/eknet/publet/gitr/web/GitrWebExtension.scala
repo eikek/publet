@@ -20,10 +20,9 @@ import org.eknet.publet.web.{PubletWeb, WebExtension}
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.scripts.WebScriptResource
-import scripts.{GitrView, GitrList, GitrCreate}
-import org.eknet.publet.vfs.util.{UrlResource, ClasspathContainer, MapContainer}
+import scripts.{GitrView, GitrRepoList, GitrCreate}
+import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 import java.net.URL
-import org.eknet.publet.vfs.{Path, MountManager, RootContainer}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,7 +38,7 @@ class GitrWebExtension extends WebExtension {
     pages.addResource(new UrlResource(toUrl("gitr-browser.js"), "gitr-browser.js".rn))
     pages.addResource(new UrlResource(toUrl("gitr-listing.js"), "gitr-listing.js".rn))
     pages.addResource(new WebScriptResource("gitrcreate.json".rn, new GitrCreate()))
-    pages.addResource(new WebScriptResource("gitrlist.json".rn, new GitrList()))
+    pages.addResource(new WebScriptResource("gitr-repolist.json".rn, new GitrRepoList()))
     pages.addResource(new WebScriptResource("gitrview.json".rn, new GitrView()))
     PubletWeb.publet.mountManager.mount("/gitr".p, pages)
   }
