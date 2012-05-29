@@ -18,7 +18,6 @@ object Dependencies {
   val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2" withSources()
-  val scalascriptengine = "com.googlecode.scalascriptengine" % "scalascriptengine" % "0.6.4" withSources()
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
   val squareMail = "org.eknet.squaremail" % "squaremail" % "1.0.0"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "1.3.0.201202151440-r" withSources()
