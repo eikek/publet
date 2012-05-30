@@ -24,7 +24,7 @@ $(function() {
     
     $.getJSON("gitr-repolist.json", opts, function(data) {
       $.each(data, function(i, val) {
-        var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">'+ val.name+'</td>';
+        var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'"><a href="?r='+val.fullName+'">'+ val.name+'</a></td>';
         var icons = '<td>';
         if (val.tag == "closed") 
           icons += '<i class="icon-lock"/>';

@@ -20,11 +20,12 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.treewalk.filter.PathFilter
 import collection.mutable.ListBuffer
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.gitr.{RepositoryName, GitrRepository}
+import org.eknet.publet.gitr.GitrRepository
 import org.eknet.publet.vfs.Path
 import org.eclipse.jgit.revwalk.RevCommit
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.PubletWebContext
 import ScalaScript._
+import GitrControl._
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter
@@ -33,10 +34,6 @@ import ScalaScript._
 //   p = path inside the tree, defaults to '/'
 
 class GitrView extends ScalaScript {
-
-  val rParam = "r"
-  val hParam = "h"
-  val pParam = "p"
 
 
   def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
@@ -54,7 +51,7 @@ class GitrView extends ScalaScript {
       }
     }
 
-    PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName))) match {
+    getRepositoryFromParam match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))
       case Some(repo) => {
         getCommitFromRequest(repo) map { commit =>
@@ -76,7 +73,8 @@ class GitrView extends ScalaScript {
               "files"-> result.sorted.map(_.toMap),
               "parent" -> !cpPath.isRoot,
               "parentPath"-> (if (cpPath.isRoot) "" else cpPath.parent.asString),
-              "containerPath"-> Path(cpPath.segments, true, true).asString
+              "containerPath"-> Path(cpPath.segments, true, true).asString,
+              "currentHead" -> (commit.getId.toString)
             )
           }
         } getOrElse {

@@ -12,16 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Many parts of the code are taken with much appreciation from the
+ * class `com.gitblit.utils.JGitUtils` of the gitblit project. Gitblit
+ * is licensed under the Apache License 2.0.
+ *
+ * Copyright 2011 gitblit.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.eknet.publet.gitr
 
-import org.eclipse.jgit.lib.Repository
+import collection.JavaConversions._
 import org.eclipse.jgit.api.Git
 import java.io.File
 import java.nio.file.Files
 import io.Source
-import org.eclipse.jgit.revwalk.{RevWalk, RevCommit}
+import org.eclipse.jgit.revwalk.{RevObject, RevWalk, RevCommit}
+import org.eclipse.jgit.lib.{Constants, Ref, Repository}
+import collection.mutable.ListBuffer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -127,8 +147,36 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
       None
   }
 
+  def hasCommits: Boolean = self.resolve(Constants.HEAD) != null
+
+  /**
+   * Get a list of refs in the repository.
+   *
+   * Adopted from gitblit.
+   *
+   * @param prefix the ref to get, like "refs/heads/", "refs/tags" etc, look at [[org.eclipse.jgit.lib.Constants]]
+   * @return
+   */
+  def getRefs(prefix: String): List[RefModel] = {
+    if (!hasCommits) List()
+    else {
+      val walk = new RevWalk(self)
+      val buffer = ListBuffer[RefModel]()
+      for (t <- self.getRefDatabase.getRefs(prefix)) {
+        buffer.append(RefModel(t._1, t._2, walk.parseAny(t._2.getObjectId)))
+      }
+      walk.dispose()
+      buffer.sorted.toList
+    }
+  }
+
+  def getLocalBranches:List[RefModel] = getRefs(Constants.R_HEADS)
 
   override def toString = self.toString
+}
+
+case class RefModel(name: String, ref: Ref, obj: RevObject) extends Ordered[RefModel] {
+  def compare(that: RefModel) = name.compare(that.name)
 }
 
 object GitrRepository {

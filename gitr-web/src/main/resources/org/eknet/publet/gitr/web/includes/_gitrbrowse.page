@@ -1,0 +1,61 @@
+---
+title: Gitr Admin
+
+--- name:head pipeline:jade
+script(src="gitr-browser.js" type="text/javascript")
+:javascript
+  $(function() {
+    $('#gitBrowser').gitrRepoBrowser();
+    $('#revnames').typeahead();
+    $('#searchRev').on('click', function(e) {
+      var rev = $('#revnames').val();
+      $('#gitBrowser').gitrRepoBrowser('load', null, rev);
+      $('#currentHead').text(rev);
+    });
+  });
+
+--- name:content pipeline:jade
+- import org.eknet.publet.auth.RepositoryModel
+- import org.eknet.publet.auth.RepositoryTag
+-@ val repositoryModel: Option[RepositoryModel] = None
+-@ val owner: String = ""
+-@ val revisions: String = ""
+-@ val currentHead: String = ""
+.page-header
+  h1 Gitr Web Admin
+
+- if (repositoryModel.isEmpty)
+  .div.alert.alert-error No repository found.
+- if (repositoryModel.isDefined)
+  .row
+    .span5
+      - if (repositoryModel.get.tag == RepositoryTag.open)
+        i.icon-star
+      - if (repositoryModel.get.tag == RepositoryTag.closed)
+        i.icon-lock
+      - if (owner == Security.username)
+        i.icon-user
+      - if (owner != Security.username)
+        span.label.label-info =owner
+      h2
+        =repositoryModel.get.name
+        | @
+        span#currentHead
+          =currentHead
+    .span7
+      ul.nav.nav-pills.pull-right
+        - if (owner == Security.username)
+          li
+            a(href="#") Admin
+  .btn-toolbar
+    form.form-inline
+      label Revision:
+      .input-append
+        input.input(type="text" id="revnames" data-provide="typeahead" data-source={ revisions })
+        a.add-on.btn#searchRev Go
+      ul.nav.nav-pills.pull-right
+        li
+          a(href="#") Log
+        li
+          a(href="./") Repositories
+  #gitBrowser

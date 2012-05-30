@@ -20,9 +20,9 @@ import org.eknet.publet.web.{PubletWeb, WebExtension}
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.scripts.WebScriptResource
-import scripts.{GitrView, GitrRepoList, GitrCreate}
 import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 import java.net.URL
+import scripts.{GitrControl, GitrView, GitrRepoList, GitrCreate}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,13 +33,14 @@ class GitrWebExtension extends WebExtension {
   def onStartup() {
 
     val pages = new MapContainer()
-    pages.addResource(new UrlResource(toUrl("browse.page"), "browse.page".rn))
-    pages.addResource(new UrlResource(toUrl("index.page"), "index.page".rn))
+    pages.addResource(new UrlResource(toUrl("_gitrbrowse.page"), "_gitrbrowse.page".rn))
     pages.addResource(new UrlResource(toUrl("gitr-browser.js"), "gitr-browser.js".rn))
     pages.addResource(new UrlResource(toUrl("gitr-listing.js"), "gitr-listing.js".rn))
+    pages.addResource(new UrlResource(toUrl("_gitradmin.page"), "_gitradmin.page".rn))
     pages.addResource(new WebScriptResource("gitrcreate.json".rn, new GitrCreate()))
     pages.addResource(new WebScriptResource("gitr-repolist.json".rn, new GitrRepoList()))
     pages.addResource(new WebScriptResource("gitrview.json".rn, new GitrView()))
+    pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
     PubletWeb.publet.mountManager.mount("/gitr".p, pages)
   }
 

@@ -21,7 +21,7 @@ import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import ScalaScript._
 import org.eknet.publet.auth.RepositoryTag
-import org.eknet.publet.gitr.{RepositoryName, GitrRepository}
+import org.eknet.publet.gitr.RepositoryName
 
 class GitrRepoList extends ScalaScript {
   def serve() = {
@@ -33,16 +33,6 @@ class GitrRepoList extends ScalaScript {
     val closed = PubletWebContext.param("closed").isDefined
     val name = PubletWebContext.param("name").getOrElse("")
 
-    def toMap(repo:GitrRepository, tag: RepositoryTag.Value): Map[String, Any] = {
-      Map(
-        "name" -> (repo.name.segments.last),
-        "giturl" -> PubletWebContext.urlOf("/git/"+ repo.name.name),
-        "owner" -> (repo.name.segments(0)),
-        "owned" -> (repo.name.segments(0) == Security.username),
-        "tag" -> tag.toString,
-        "description" -> repo.getDescription.getOrElse("")
-      )
-    }
     def getRepositoryTag(name: String) = {
       val n = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
       PubletWeb.authManager.getRepository(n).map(_.tag).getOrElse(RepositoryTag.open)
@@ -54,14 +44,14 @@ class GitrRepoList extends ScalaScript {
         .filter(_.tag == RepositoryTag.open)
         .flatMap(rm => gitr.get(RepositoryName(rm.name).toDotGit))
         .filter(_.name.segments.last.startsWith(name))
-        .map(r => toMap(r, RepositoryTag.open)))
+        .map(r => new RepositoryInfo(r, RepositoryTag.open).toMap))
     } else {
       val login = Security.username
       makeJson(gitr.allRepositories(_.name.startsWith(login +"/"))
         .filter(r => r.name.segments.last.startsWith(name))
         .map(r => (r, getRepositoryTag(r.name.name)))
         .filter(t => if (closed) t._2 == RepositoryTag.closed else true)
-        .map(t => toMap(t._1, t._2)))
+        .map(t => new RepositoryInfo(t._1, t._2).toMap))
     }
   }
 }
