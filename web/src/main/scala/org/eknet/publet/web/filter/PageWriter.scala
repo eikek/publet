@@ -17,16 +17,12 @@
 package org.eknet.publet.web.filter
 
 import javax.servlet.http.HttpServletResponse
-import java.io.{PrintWriter, StringWriter}
 import org.eknet.publet.vfs._
-import util.SimpleContentResource
 import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
-import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb, Config}
-import Path._
-import ResourceName._
 import org.eknet.publet.web.util.RenderUtils
+import org.eknet.publet.web._
 
 /**
  *
@@ -95,6 +91,9 @@ trait PageWriter extends Logging {
     page match {
       case None => createNew(path, resp)
       case Some(p:ErrorResponse) => {
+        p.send(resp)
+      }
+      case Some(p: StreamResponse) => {
         p.send(resp)
       }
       case Some(p) => {

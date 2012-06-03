@@ -30,8 +30,6 @@ script(src="gitr-listing.js" type="text/javascript")
   }
 
 --- name:content pipeline:jade
-.page-header
-  h1 Gitr Web Admin
 
 h2 Repository View
 .modal.fade#myModal

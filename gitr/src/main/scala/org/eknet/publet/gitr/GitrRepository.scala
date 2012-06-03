@@ -36,12 +36,16 @@ package org.eknet.publet.gitr
 
 import collection.JavaConversions._
 import org.eclipse.jgit.api.Git
-import java.io.File
 import java.nio.file.Files
 import io.Source
-import org.eclipse.jgit.revwalk.{RevObject, RevWalk, RevCommit}
-import org.eclipse.jgit.lib.{Constants, Ref, Repository}
 import collection.mutable.ListBuffer
+import org.eclipse.jgit.treewalk.TreeWalk
+import java.io.{OutputStream, InputStream, File}
+import java.nio.charset.Charset
+import org.eclipse.jgit.lib._
+import org.eclipse.jgit.revwalk._
+import java.util.Date
+import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, TreeFilter, PathFilter}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -95,7 +99,7 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
       if (descFile.exists()) Some(Source.fromFile(descFile).mkString)
       else None
     } else {
-      sys.error("Not a bare repository! Cannot set description")
+      sys.error("'"+ name.name+ "' is not a bare repository! Cannot get description")
     }
   }
 
@@ -139,12 +143,18 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
     }
   }
 
-  def getLastCommit(path: String): Option[RevCommit] = {
-    val iter = git.log().addPath(path).call().iterator()
-    if (iter.hasNext)
-      Some(iter.next())
-    else
-      None
+  def getLastCommit(branch: String, path: Option[String]): Option[RevCommit] = {
+    Option(self.resolve(branch)) map { objId =>
+      val walk = new RevWalk(self)
+      path.collect({case p if (!p.isEmpty && p != "/") => p })
+        .foreach(p => walk.setTreeFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, PathFilter.create(p))))
+      walk.sort(RevSort.COMMIT_TIME_DESC)
+      val head = walk.parseCommit(objId)
+      walk.markStart(head)
+      val commit = walk.next()
+      walk.dispose()
+      commit
+    }
   }
 
   def hasCommits: Boolean = self.resolve(Constants.HEAD) != null
@@ -171,12 +181,74 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
   }
 
   def getLocalBranches:List[RefModel] = getRefs(Constants.R_HEADS)
+  def getLocalTags:List[RefModel] = getRefs(Constants.R_TAGS)
+
+  /**
+   * Gets the byte contents of a file in the tree.
+   *
+   * This method is taken from gitblit projects JGitUtils class.
+   *
+   * @param tree
+   * @param path
+   * @return
+   */
+  def getObject(tree: RevTree, path: String): Option[InputStream] = {
+    getBlobLoader(tree, path) map { loader => loader.openStream() }
+  }
+
+  def getBlobLoader(tree: RevTree, path: String): Option[ObjectLoader] = {
+    val rw = new RevWalk(self)
+
+    def readBlob(walk: TreeWalk): Option[ObjectLoader] = {
+      if (walk.isSubtree && path != walk.getPathString) {
+        walk.enterSubtree()
+        if (walk.next()) readBlob(walk)
+        else None
+      } else {
+        val objid = walk.getObjectId(0)
+        val objmode = walk.getFileMode(0)
+        val ro = rw.lookupAny(objid, objmode.getObjectType)
+        rw.parseBody(ro)
+        Some(self.open(ro.getId, Constants.OBJ_BLOB))
+      }
+    }
+    val tw = new TreeWalk(self)
+    tw.setFilter(PathFilter.create(path))
+    tw.reset(tree)
+    if (tw.next()) readBlob(tw)
+    else None
+  }
+
+  def getStringContents(tree: RevTree, path: String): Option[String] = {
+    getBlobLoader(tree, path) map { c =>
+      new String(c.getCachedBytes, Charset.forName(Constants.CHARACTER_ENCODING))
+    }
+  }
+
+  def getDefaultBranch: Option[ObjectId] = {
+    Option(self.resolve(Constants.HEAD)) match {
+      case Some(h) => Some(h)
+      case None => {
+        getLocalBranches
+          .sortWith((rf1, rf2) => rf1.getDate.after(rf2.getDate))
+          .headOption.map(_.obj)
+      }
+    }
+  }
 
   override def toString = self.toString
 }
 
 case class RefModel(name: String, ref: Ref, obj: RevObject) extends Ordered[RefModel] {
   def compare(that: RefModel) = name.compare(that.name)
+  def getDate: Date = {
+    val dateOpt = obj match {
+      case c:RevCommit => Option(c.getCommitterIdent).map(_.getWhen)
+      case t:RevTag => Option(t.getTaggerIdent).map(_.getWhen)
+      case _ => None
+    }
+    dateOpt.getOrElse(new Date(0))
+  }
 }
 
 object GitrRepository {
@@ -185,4 +257,20 @@ object GitrRepository {
   implicit def repoToGitrRepo(repo: Repository, name: RepositoryName): GitrRepository = GitrRepository(repo, name)
   implicit def gitrRepoToRepo(grepo: GitrRepository): Repository = grepo.self
 
+  private def copy(in: InputStream, out: OutputStream, closeOut: Boolean = true, closeIn: Boolean = true) {
+    val buff = new Array[Byte](2048)
+    var len = 0
+    try {
+      while (len != -1) {
+        len = in.read(buff)
+        if (len != -1) {
+          out.write(buff, 0, len)
+        }
+      }
+      out.flush();
+    } finally {
+      if (closeOut) out.close()
+      if (closeIn) in.close()
+    }
+  }
 }

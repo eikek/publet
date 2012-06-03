@@ -82,20 +82,6 @@ object Content {
     def inputStream = new ByteArrayInputStream(in)
   }
 
-//  def apply(url: URL): Content = {
-//    val ct = Path(url.getFile).fileName.targetType.get
-//    Content(url, ct)
-//  }
-//
-//  def apply(url: URL, ct: ContentType): Content = new Content {
-//    val contentType = ct;
-//    def lastModification = url.openConnection().getLastModified match {
-//      case 0 => None
-//      case x => Some(x)
-//    }
-//    def inputStream = url.openStream()
-//  }
-
   protected[publet] def copy(in: InputStream, out: OutputStream, closeOut: Boolean = true, closeIn: Boolean = true) {
     val buff = new Array[Byte](2048)
     var len = 0

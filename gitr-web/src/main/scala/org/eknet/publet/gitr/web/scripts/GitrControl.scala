@@ -19,10 +19,11 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import GitrControl._
-import org.eknet.publet.vfs.Content
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
-import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.com.twitter.json.Json
+import org.eknet.publet.vfs.{Path, Content}
+import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
+import org.eclipse.jgit.revwalk.RevCommit
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,12 +33,9 @@ class GitrControl extends ScalaScript {
   def serve() = {
     getReponame match {
       case None => repositoryListing
-      case Some(name) => {
-        if (getAction == "log") {
-          logView
-        } else {
-          sourceView
-        }
+      case Some(name) => getAction match {
+        case "log" => logView
+        case _ => sourceView
       }
     }
   }
@@ -49,19 +47,19 @@ class GitrControl extends ScalaScript {
   def sourceView: Option[Content] = {
     val repo = getRepositoryFromParam
     val revisions = getRepositoryFromParam
-      .map(_.getLocalBranches)
+      .map(r => r.getLocalBranches ::: r.getLocalTags)
       .map(_.map(_.name))
       .map(names => Json.build(names).toString)
       .getOrElse("")
     val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
     val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
-    val currentHead = repo flatMap { r => Option(r.getBranch) } getOrElse ("")
+    val currentHead = getRev
     renderTemplate(gitrsourceTemplate, Map(
       "revisions" -> revisions,
       "repositoryModel" -> model,
       "owner" -> owner,
       "currentHead" -> currentHead,
-      "path" -> getPath)
+      "path" -> (getPath.asString))
     )
   }
 
@@ -80,10 +78,21 @@ object GitrControl {
   val doParam = "do" // log|source, default = source
 
   def getReponame = PubletWebContext.param(rParam)
-  def getRev = PubletWebContext.param(hParam).getOrElse("master")
-  def getPath = PubletWebContext.param(pParam).getOrElse("/")
+  def getRev = PubletWebContext.param(hParam).collect({ case e if (!e.isEmpty) => e}).getOrElse("master")
+  def getPath = {
+    val cp = PubletWebContext.param(pParam).getOrElse("")
+    if (cp.isEmpty) Path.root
+    else {
+      Path(Path(cp).segments, false, false)
+    }
+  }
   def getAction = PubletWebContext.param(doParam).getOrElse("source")
 
   def getRepositoryFromParam = PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName)))
   def getRepositoryModelFromParam = getRepositoryFromParam.flatMap(r=>PubletWeb.authManager.getRepository(r.name.name))
+
+  def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
+    val param = getRev
+    repo.getCommit(param)
+  }
 }

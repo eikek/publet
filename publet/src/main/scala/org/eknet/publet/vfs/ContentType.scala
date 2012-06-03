@@ -18,6 +18,8 @@ package org.eknet.publet.vfs
 
 import java.io.File
 import org.eknet.publet.impl.Conversions._
+import eu.medsea.mimeutil.{MimeUtil2, MimeUtil}
+import eu.medsea.mimeutil.detector.{MagicMimeMimeDetector, ExtensionMimeDetector}
 
 /**
  *
@@ -30,6 +32,8 @@ case class ContentType(typeName: Symbol, extensions: Set[String], mime: (String,
 }
 
 object ContentType {
+  MimeUtil.registerMimeDetector(classOf[ExtensionMimeDetector].getName)
+  MimeUtil.registerMimeDetector(classOf[MagicMimeMimeDetector].getName)
 
   val scal = ContentType('scala, Set("scala"), ("text", "scala"))
   val text = ContentType('text, Set("txt", "text", "cfg", "properties"), ("text", "plain"))
@@ -81,4 +85,13 @@ object ContentType {
 
   def forMimeBase(t: ContentType): Seq[ContentType] = all.toSeq.filter(_.mime._1 == t.mime._1)
 
+  def getMimeType(filename: String): String = {
+    val t = ContentType(MimeUtil.getExtension(filename))
+    if (t == ContentType.unknown) {
+      import collection.JavaConversions._
+      MimeUtil.getMimeTypes(filename).headOption.getOrElse(MimeUtil2.UNKNOWN_MIME_TYPE).toString
+    } else {
+      t.mimeString
+    }
+  }
 }

@@ -1,5 +1,6 @@
 ---
-title: Gitr Admin
+title: Gitr Web
+highlightTheme: magula
 
 --- name:head pipeline:jade
 script(src="gitr-browser.js" type="text/javascript")
@@ -13,6 +14,10 @@ script(src="gitr-browser.js" type="text/javascript")
       $('#currentHead').text(rev);
     });
   });
+:css
+  .gitbrowser pre, .gitbrowser pre code {
+    background-color: inherit;
+  }
 
 --- name:content pipeline:jade
 - import org.eknet.publet.auth.RepositoryModel
@@ -21,8 +26,6 @@ script(src="gitr-browser.js" type="text/javascript")
 -@ val owner: String = ""
 -@ val revisions: String = ""
 -@ val currentHead: String = ""
-.page-header
-  h1 Gitr Web Admin
 
 - if (repositoryModel.isEmpty)
   .div.alert.alert-error No repository found.
@@ -49,13 +52,12 @@ script(src="gitr-browser.js" type="text/javascript")
             a(href="#") Admin
   .btn-toolbar
     form.form-inline
-      label Revision:
       .input-append
-        input.input(type="text" id="revnames" data-provide="typeahead" data-source={ revisions })
+        input.input.span5(type="text" id="revnames" placeholder="Revision" data-provide="typeahead" data-source={revisions})
         a.add-on.btn#searchRev Go
       ul.nav.nav-pills.pull-right
         li
           a(href="#") Log
         li
           a(href="./") Repositories
-  #gitBrowser
+.gitbrowser#gitBrowser

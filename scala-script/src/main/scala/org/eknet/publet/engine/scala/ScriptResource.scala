@@ -17,7 +17,7 @@
 package org.eknet.publet.engine.scala
 
 import java.io.OutputStream
-import org.eknet.publet.vfs.{ResourceName, ContentResource}
+import org.eknet.publet.vfs.{ContentType, Content, ResourceName, ContentResource}
 
 /**A resource that executes the given script on each access.
  *
@@ -31,7 +31,7 @@ import org.eknet.publet.vfs.{ResourceName, ContentResource}
  */
 abstract class ScriptResource(val name: ResourceName, val script: ScalaScript) extends ContentResource {
 
-  protected def evaluate = script.serve().get
+  protected def evaluate = script.serve().getOrElse(Content.empty(ContentType.html))
 
   override def lastModification = evaluate.lastModification
 
