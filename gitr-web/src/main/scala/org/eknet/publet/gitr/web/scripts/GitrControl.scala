@@ -24,6 +24,7 @@ import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs.{Path, Content}
 import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
 import org.eclipse.jgit.revwalk.RevCommit
+import collection.mutable.ListBuffer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -46,7 +47,7 @@ class GitrControl extends ScalaScript {
 
   def sourceView: Option[Content] = {
     val repo = getRepositoryFromParam
-    val revisions = getRepositoryFromParam
+    val revisions = repo
       .map(r => r.getLocalBranches ::: r.getLocalTags)
       .map(_.map(_.name))
       .map(names => Json.build(names).toString)
@@ -64,13 +65,50 @@ class GitrControl extends ScalaScript {
   }
 
   def logView: Option[Content] = {
-    sys.error("not implemented")
+    import collection.JavaConversions._
+
+    val repo = getRepositoryFromParam
+    val revisions = repo
+      .map(r => r.getLocalBranches ::: r.getLocalTags)
+      .map(_.map(_.name))
+      .map(names => Json.build(names).toString)
+      .getOrElse("")
+    val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
+    val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
+    val currentHead = getRev
+    getRepositoryFromParam flatMap ( repo => {
+      val log = repo.git.log()
+      val path = getPath
+      if (!path.isRoot) {
+        log.addPath(path.toRelative.asString)
+      }
+      repo.getCommit(getRev).foreach(c => log.add(c.getId))
+
+      val commits = ListBuffer[RevCommit]()
+      def collectCommits(iter:Iterator[RevCommit], cur: Int, max: Int) {
+        if (cur < max && iter.hasNext) {
+          commits.append(iter.next())
+          collectCommits(iter, cur+1, max)
+        }
+      }
+      collectCommits(log.call().iterator(), 0, 35)
+      val commitInfos = commits.map(c => CommitInfo("", "", false, c, PubletWebContext.getLocale)).toList
+      renderTemplate(gitrlogTemplate, Map("revisions" -> revisions,
+        "repositoryModel" -> model,
+        "owner" -> owner,
+        "currentHead" -> currentHead,
+        "path" -> (getPath.asString),
+        "commits" -> commitInfos))
+    })
   }
 }
+
 object GitrControl {
 
   val gitradminTemplate = "/gitr/_gitradmin.page"
   val gitrsourceTemplate = "/gitr/_gitrbrowse.page"
+  val gitrlogTemplate = "/gitr/_gitrlog.page"
+  val gitrheaderTemplate = "/gitr/_gitrpagehead.page"
 
   val rParam = "r"   // repo name, default = "None"
   val hParam = "h"   // revision, default = "master"

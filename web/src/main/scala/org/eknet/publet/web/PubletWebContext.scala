@@ -77,4 +77,5 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
    */
   def getMethod: Method.Value = Method.withName(req.getMethod.toUpperCase(Locale.ROOT))
 
+  def getLocale = req.getLocale
 }

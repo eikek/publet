@@ -4,22 +4,38 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.revwalk.RevCommit
 import java.util.concurrent.TimeUnit
 import org.eclipse.jgit.lib.PersonIdent
+import java.text.DateFormat
+import java.util.{Locale, Date}
 
-case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String) extends Ordered[CommitInfo] {
+case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String, loc: Locale) extends Ordered[CommitInfo] {
 
   def toMap: Map[String, Any] = Map(
     "name" -> name,
     "container" -> container,
+
     "author" -> author.getName,
     "authorEmail" -> author.getEmailAddress,
     "message" -> CommitInfo.getShortMessage(fullMessage),
     "fullMessage" -> fullMessage,
-    "age" -> (Duration(TimeUnit.SECONDS.toMillis(commitTime)).distanceAgo),
+    "age" -> getAge,
     "icon" -> (if (container) "icon-folder-close" else "icon-file"),
-    "gravatar" -> Gravatar.imageUrl(author.getEmailAddress).toString,
-    "id" -> id.substring(0, 8),
+    "gravatar" -> gravatarUrl,
+    "id" -> shortId,
     "fullId" -> id
   )
+
+  lazy val shortId = id.substring(0, 8)
+
+  def gravatarUrl = Gravatar.imageUrl(author.getEmailAddress).toString
+
+  def getAge = (Duration(TimeUnit.SECONDS.toMillis(commitTime)).distanceAgo)
+
+  def getCommitDate = new Date(TimeUnit.SECONDS.toMillis(commitTime))
+
+  def getCommitDateAsString = {
+    val df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, loc)
+    df.format(getCommitDate)
+  }
 
   def compare(that: CommitInfo) = {
     if (container == that.container) {
@@ -41,23 +57,25 @@ object CommitInfo {
     else line
   }
 
-  def apply(tree: TreeWalk, commit: RevCommit): CommitInfo = {
+  def apply(tree: TreeWalk, commit: RevCommit, loc: Locale): CommitInfo = {
     CommitInfo(tree.getNameString,
       tree.getPathString,
       tree.isSubtree,
       commit.getAuthorIdent,
       commit.getFullMessage,
       commit.getCommitTime,
-      commit.getId.getName)
+      commit.getId.getName,
+      loc)
   }
 
-  def apply(name: String, path: String, container: Boolean, commit: RevCommit): CommitInfo = {
+  def apply(name: String, path: String, container: Boolean, commit: RevCommit, loc: Locale): CommitInfo = {
     CommitInfo(name,
       path,
       container,
       commit.getAuthorIdent,
       commit.getFullMessage,
       commit.getCommitTime,
-      commit.getId.getName)
+      commit.getId.getName,
+      loc)
   }
 }

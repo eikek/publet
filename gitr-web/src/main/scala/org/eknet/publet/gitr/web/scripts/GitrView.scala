@@ -47,7 +47,9 @@ class GitrView extends ScalaScript {
   def directoryContents(repo: GitrRepository) : Option[Content] = {
     val cpPath = getPath
     getCommitFromRequest(repo) map { commit =>
-      val lastCommit = repo.getLastCommit(commit.getId.name(), Some(cpPath.toRelative.asString)) map { c => CommitInfo(cpPath.name.fullName, cpPath.asString, false, c)}
+      val lastCommit = repo.getLastCommit(commit.getId.name(), Some(cpPath.toRelative.asString)) map { c =>
+        CommitInfo(cpPath.name.fullName, cpPath.asString, false, c, PubletWebContext.getLocale)
+      }
       val treewalk = new TreeWalk(repo)
       treewalk.addTree(commit.getTree)
       if (!cpPath.isRoot) treewalk.setFilter(PathFilter.create(cpPath.asString))
@@ -57,7 +59,7 @@ class GitrView extends ScalaScript {
           treewalk.enterSubtree()
         } else {
           repo.getLastCommit(commit.getId.name(), Some(treewalk.getPathString)) map { lastCommit =>
-            result.append(CommitInfo(treewalk, lastCommit))
+            result.append(CommitInfo(treewalk, lastCommit, PubletWebContext.getLocale))
           }
         }
       }
@@ -80,7 +82,9 @@ class GitrView extends ScalaScript {
   def blobContents(repo: GitrRepository):Option[Content] = {
     val file = getPath
     getCommitFromRequest(repo) map { commit =>
-      val lastCommit = repo.getLastCommit(commit.getId.name(), Some(file.toRelative.asString)) map { c => CommitInfo(file.name.fullName, file.asString, false, c)}
+      val lastCommit = repo.getLastCommit(commit.getId.name(), Some(file.toRelative.asString)) map { c =>
+        CommitInfo(file.name.fullName, file.asString, false, c, PubletWebContext.getLocale)
+      }
       val resultBase = Map(
         "success"->true,
         "parent" -> !file.isRoot,

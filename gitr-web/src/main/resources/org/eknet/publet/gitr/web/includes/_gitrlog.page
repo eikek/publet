@@ -1,0 +1,45 @@
+---
+title: Gitr Web
+highlightTheme: magula
+
+--- name:head pipeline:jade
+:css
+  .commitInfo {
+
+  }
+:javascript
+  $(function() {
+    $('#revnames').typeahead();
+    $('#searchRev').on('click', function(e) {
+      var rev = $('#revnames').val();
+      if (rev) {
+        var repo = getURLParameter("r");
+        window.location=window.location.origin+ window.location.pathname+"?r="+repo+"&h="+rev+"&do=log";
+      }
+    });
+  });
+
+--- name:content pipeline:jade
+- import org.eknet.publet.gitr.web.scripts.CommitInfo
+-@ val commits: List[CommitInfo] = List()
+=include("_gitrpagehead.jade")
+
+.row
+  .span12
+    - for (c <- commits) {
+      .commitInfo.alert.alert-info
+        h4.alert-heading
+          img(src={c.gravatarUrl + "?d=mm&s=50"})
+          =c.author.getName + ", " + c.getAge
+          small
+            | --
+            =c.getCommitDateAsString
+            | --
+          span.pull-right
+            a(href="#")
+              | [
+              =c.shortId
+              | ]
+        pre<>
+          !~~c.fullMessage
+      - }
