@@ -5,7 +5,19 @@ highlightTheme: magula
 --- name:head pipeline:jade
 :css
   .commitInfo {
-
+    background-color: inherit;
+  }
+  /* copy from bootstrap.css alert-info style */
+  div.commitInfo {
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 18px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid #bce8f1;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background-color: #d9edf7;
+    color: #3a87ad;
   }
 :javascript
   $(function() {
@@ -27,7 +39,7 @@ highlightTheme: magula
 .row
   .span12
     - for (c <- commits) {
-      .commitInfo.alert.alert-info
+      .commitInfo
         h4.alert-heading
           img(src={c.gravatarUrl + "?d=mm&s=50"})
           =c.author.getName + ", " + c.getAge
@@ -40,6 +52,6 @@ highlightTheme: magula
               | [
               =c.shortId
               | ]
-        pre<>
+        pre.commitInfo<>
           !~~c.fullMessage
       - }

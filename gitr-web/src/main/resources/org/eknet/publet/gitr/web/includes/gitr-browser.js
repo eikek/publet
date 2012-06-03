@@ -47,10 +47,10 @@
     if (data.lastCommit) {
       var c = data.lastCommit;
       lastCommit = $('<div/>', {
-        class: "alert alert-info",
+        class: "commitInfo",
         html: '<h4 class="alert-heading"><img src="'+c.gravatar+'?s=35&d='+settings.gravatarTheme+'"/> '+c.author +', '+ c.age +
           '<a class="pull-right" href="#">['+ c.id +']</a></h4>' +
-          '<pre>'+ c.fullMessage +'</pre>'
+          '<pre class="commitInfo">'+ c.fullMessage +'</pre>'
       });
     }
     return lastCommit;
@@ -68,7 +68,7 @@
         $('table', obj).remove();
         _getLastCommitHtml(data).appendTo(obj);
         if (data.contents) {
-          var cont = $('<pre><code>'+data.contents+'</code></pre>')
+          var cont = $('<pre class="commitInfo"><code class="commitInfo">'+data.contents+'</code></pre>')
           cont.appendTo(obj);
           if (hljs) {
             cont.each(function(i, e) {hljs.highlightBlock(e)});
