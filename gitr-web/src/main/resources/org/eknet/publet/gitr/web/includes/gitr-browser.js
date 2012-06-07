@@ -72,12 +72,29 @@
       if (data.success) {
         $('table', obj).prev().remove();
         $('table', obj).remove();
+        $('.readme-head').remove();
+        $('.readme').remove();
         _getLastCommitHtml(data).appendTo(obj);
         if (data.contents) {
-          var cont = $('<pre class="commitInfo"><code class="commitInfo">'+data.contents+'</code></pre>')
-          cont.appendTo(obj);
-          if (hljs) {
-            cont.each(function(i, e) {hljs.highlightBlock(e)});
+          if (data.processed) {
+            $('<h3/>', {
+              class: "readme-head",
+              html: data.fileName
+            }).appendTo(obj);
+            var readme = $('<div/>', {
+              class: "readme",
+              html: data.contents
+            });
+            readme.appendTo(obj);
+            if (hljs) {
+              $('code', readme).each(function(i, e) { hljs.highlightBlock(e); });
+            }
+          } else {
+            var cont = $('<div class="commitInfo"><pre><code>'+data.contents+'</code></pre></div>');
+            cont.appendTo(obj);
+            if (hljs) {
+              $('code', cont).each(function(i, e) { hljs.highlightBlock(e); });
+            }
           }
         } else {
           if (data.mimeType && data.mimeType.indexOf("image") == 0) {
@@ -152,6 +169,18 @@
           table[1].appendTo(obj);
         }
         table[2].appendTo(obj); // tree
+        if (data.readme) { // readme file
+          $('<h3 class="readme-head">'+data.readmeFile+'</h3>\n').appendTo(obj);
+          var readme = $('<div/>', {
+            class: "readme",
+            html: data.readme
+          });
+          readme.appendTo(obj);
+          if (hljs) {
+            $('code', readme).each(function(i, e) { hljs.highlightBlock(e); })
+          }
+        }
+        //register click listener for tree entry
         $('a', table[2]).each(function(i, el) {
           $(el).bind('click', function(e) {
             obj.trigger('gitResourceClick', [data, i, el]);

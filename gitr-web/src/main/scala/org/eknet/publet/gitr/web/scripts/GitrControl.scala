@@ -24,6 +24,7 @@ import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs.{Path, Content}
 import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
 import org.eclipse.jgit.revwalk.RevCommit
+import org.fusesource.scalate.TemplateEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -152,5 +153,11 @@ object GitrControl {
   def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
     val param = getRev
     repo.getCommit(param)
+  }
+
+  lazy val nocachingTemplateEngine = {
+    val templ = new TemplateEngine()
+    templ.allowCaching = false
+    templ
   }
 }

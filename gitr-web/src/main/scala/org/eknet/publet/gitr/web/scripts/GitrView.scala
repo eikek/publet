@@ -21,10 +21,12 @@ import org.eclipse.jgit.treewalk.filter.PathFilter
 import collection.mutable.ListBuffer
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.gitr.GitrRepository
-import org.eknet.publet.web.PubletWebContext
 import ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.{ContentType, Content, Path}
+import org.eknet.publet.web.PubletWebContext
+import org.eclipse.jgit.revwalk.RevCommit
+import org.fusesource.scalate.support.StringTemplateSource
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter
@@ -41,6 +43,29 @@ class GitrView extends ScalaScript {
         case "blob" => blobContents(repo)
         case _ => directoryContents(repo)
       }
+    }
+  }
+
+
+  def getReadmeHtml(commit: RevCommit, repo: GitrRepository, base:Path, extensions: List[String]): Option[(String, String)] = {
+    extensions match {
+      case e::es => {
+        val filename = "README." +e
+        repo.getStringContents(commit.getTree, (base/filename).toRelative.asString) match {
+          case Some(readme) => {
+            if (GitrControl.nocachingTemplateEngine.extensions.contains(e)) {
+              val source = new StringTemplateSource("readme-"+commit.getId.name()+"."+e, readme) {
+                override def lastModified = commit.getCommitTime * 1000
+              }
+              Some(filename, GitrControl.nocachingTemplateEngine.layout(source, Map("layout" -> "")))
+            } else {
+              Some(filename, "<pre>"+readme+"</pre>")
+            }
+          }
+          case _ => getReadmeHtml(commit, repo, base, extensions.tail)
+        }
+      }
+      case Nil => None
     }
   }
 
@@ -63,6 +88,8 @@ class GitrView extends ScalaScript {
           }
         }
       }
+      var readmeHtml = getReadmeHtml(commit, repo, cpPath, List("md", "markdown", "textile"))
+
       makeJson {
         Map(
           "success"->true,
@@ -71,7 +98,9 @@ class GitrView extends ScalaScript {
           "parentPath"-> (if (cpPath.isRoot) "" else cpPath.parent.asString),
           "containerPath"-> Path(cpPath.segments, true, true).asString,
           "currentHead" -> (commit.getId.toString),
-          "lastCommit" -> (lastCommit.map(_.toMap).getOrElse(Map()))
+          "lastCommit" -> (lastCommit.map(_.toMap).getOrElse(Map())),
+          "readmeFile" -> (readmeHtml.map(_._1).getOrElse("")),
+          "readme" -> (readmeHtml.map(_._2).getOrElse(""))
         )
       }
     } getOrElse {
@@ -87,6 +116,7 @@ class GitrView extends ScalaScript {
       }
       val resultBase = Map(
         "success"->true,
+        "fileName" -> file.name.fullName,
         "parent" -> !file.isRoot,
         "parentPath"-> (if (file.isRoot) "" else file.parent.asString),
         "containerPath"-> Path(file.segments, true, true).asString,
@@ -97,8 +127,15 @@ class GitrView extends ScalaScript {
       if (mimetype.startsWith("text")) {
         //show text contents
         val content = repo.getStringContents(commit.getTree, file.asString).getOrElse("")
-        makeJson {
-          resultBase ++ Seq("contents" -> (xml.Utility.escape(content)), "mimeType" -> mimetype)
+        if (Set("md", "markdown", "textile").contains(file.name.ext)) {
+          val source = new StringTemplateSource(commit.getId.name()+"."+file.name.fullName, content) {
+            override def lastModified = commit.getCommitTime * 1000
+          }
+          makeJson(resultBase ++ Seq("processed"->true, "source"-> content, "contents" -> GitrControl.nocachingTemplateEngine.layout(source, Map("layout"->""))))
+        } else {
+          makeJson {
+            resultBase ++ Seq("processed"->false, "contents" -> (xml.Utility.escape(content)), "mimeType" -> mimetype)
+          }
         }
       } else {
         //provide download link or show image
