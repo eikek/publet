@@ -134,9 +134,12 @@
   };
 
   var _addDirectoryContents = function (repo, head, path) {
+    obj.empty();
+    obj.attr("class", "loading");
     _directoryContents(repo, head, path, function (data, table) {
       if (data.success) {
         obj.empty();
+        obj.removeAttr("class");
         table[0].appendTo(obj);
         if (table[1]) {
           table[1].appendTo(obj);

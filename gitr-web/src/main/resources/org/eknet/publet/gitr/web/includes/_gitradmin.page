@@ -2,6 +2,7 @@
 title: Gitr Admin
 
 --- name:head pipeline:jade
+link(rel="stylesheet" href="gitr.css")
 script(src="gitr-listing.js" type="text/javascript")
 :javascript
   $(function() {

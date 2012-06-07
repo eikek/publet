@@ -13,23 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.eknet.publet.gitr
-
-/**
- * A name of a repository. Can be a simple name
- * or a path, where segments must be separated
- * by a dash `/`
- *
- * @param name
- */
-case class RepositoryName(name: String) {
-
-  if (!name.matches("[\\w\\._/\\-]+")) sys.error("invalid repository name:" + name)
-
-  val segments = name.split("/")
-
-  val isDotGit = name.endsWith(".git")
-
-  def toDotGit = if (isDotGit) this else RepositoryName(name+".git")
+.loading {
+    position: relative;
+    left: 45%;
+    width: 128px;
+    height: 128px;
+    background: url(loading.gif) center no-repeat;
 }

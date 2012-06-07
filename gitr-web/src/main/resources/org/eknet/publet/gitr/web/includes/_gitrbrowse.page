@@ -3,6 +3,7 @@ title: Gitr Web
 highlightTheme: magula
 
 --- name:head pipeline:jade
+link(rel="stylesheet" href="gitr.css")
 script(src="gitr-browser.js" type="text/javascript")
 :javascript
   $(function() {
