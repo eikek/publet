@@ -62,25 +62,28 @@
     return lastCommit;
   };
 
-  var _addFileContents = function(repo, head, path, callback) {
+  var _addFileContents = function(repo, head, path, el) {
     var params = {};
     params[rParam] = repo;
     params[hParam] = head;
     params[pParam] = path;
     params[doParam] = "blob";
+
+    $('<img/>', { src: "loading.gif", height: "16px", width: "16px"}).prependTo($(el));
     $.getJSON(settings.actionUrl, params, function(data) {
+      obj.removeAttr("class");
       if (data.success) {
         $('table', obj).prev().remove();
         $('table', obj).remove();
         $('.readme-head').remove();
         $('.readme').remove();
         _getLastCommitHtml(data).appendTo(obj);
+        $('<h3/>', {
+          class: "readme-head",
+          html: data.fileName
+        }).appendTo(obj);
         if (data.contents) {
           if (data.processed) {
-            $('<h3/>', {
-              class: "readme-head",
-              html: data.fileName
-            }).appendTo(obj);
             var readme = $('<div/>', {
               class: "readme",
               html: data.contents
@@ -90,7 +93,7 @@
               $('code', readme).each(function(i, e) { hljs.highlightBlock(e); });
             }
           } else {
-            var cont = $('<div class="commitInfo"><pre><code>'+data.contents+'</code></pre></div>');
+            var cont = $('<div class="readme"><pre class="plainPre"><code>'+data.contents+'</code></pre></div>');
             cont.appendTo(obj);
             if (hljs) {
               $('code', cont).each(function(i, e) { hljs.highlightBlock(e); });
@@ -100,15 +103,15 @@
           if (data.mimeType && data.mimeType.indexOf("image") == 0) {
             var img = $('<img/>', {
               class: 'blobImage',
-              style: 'max-width: 400px;',
               src: data.url,
               alt: path
             });
-            $('<pre/>', {
+            $('<div/>', {
+              class: "readme",
               html: img
             }).appendTo(obj);
           } else {
-            var u = '<pre><a href="'+data.url+'">Download</a></pre>';
+            var u = '<div class="readme"><a href="'+data.url+'">Download</a></div>';
             $(u).appendTo(obj);
           }
         }
@@ -122,7 +125,9 @@
     params[hParam] = head;
     params[pParam] = path;
 
+    obj.attr("class", "loading");
     $.getJSON(settings.actionUrl, params, function (data) {
+      obj.removeAttr("class");
       if (data.success) {
         var list = [];
         if (data.parent) {
@@ -158,11 +163,9 @@
 
   var _addDirectoryContents = function (repo, head, path) {
     obj.empty();
-    obj.attr("class", "loading");
     _directoryContents(repo, head, path, function (data, table) {
       if (data.success) {
         obj.empty();
-        obj.removeAttr("class");
         table[0].appendTo(obj); //breadcrumbs
         if (table[1]) { //lastCommit
           $('<h3 class="commit-group-head">Last commit</h3>').appendTo(obj);
@@ -193,7 +196,7 @@
               if (file.container) {
                 _addDirectoryContents(repo, head, path);
               } else {
-                _addFileContents(repo, head, path, null);
+                _addFileContents(repo, head, path, el);
               }
             }
           });

@@ -64,13 +64,14 @@
     background: #FAF8EE;
 }
 
-.commitInfo {
-    background-color: inherit;
-    border: 1px solid #CCC;
-    border-radius: 4px;
+img.blobImage {
+    max-width: 400px;
+    padding: 15px;
 }
-.commitInfo pre, .commitInfo pre code {
+
+.plainPre, .plainPre code {
     background-color: inherit;
+    padding: 0;
     border: none;
 }
 
