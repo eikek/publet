@@ -32,7 +32,8 @@ object Dependencies {
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % scalateVersion 
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % scalateVersion 
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion
-//  val scalateJRuby = "org.fusesource.scalate" % "scalate-jruby" % scalateVersion
+
+  val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % "2.1.3" intransitive()
 }
 
 // Root Module 
@@ -118,7 +119,7 @@ object Publet extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
   
-  lazy val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
+  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
 
 }
 
