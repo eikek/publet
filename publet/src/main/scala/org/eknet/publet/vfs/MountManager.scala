@@ -17,7 +17,6 @@
 package org.eknet.publet.vfs
 
 import collection.mutable
-import org.eknet.publet.impl.Conversions._
 
 /**
  *
@@ -31,8 +30,11 @@ trait MountManager {
   def mount(path: Path, part: Container) {
     Predef.ensuring(path != null, "null")
     Predef.ensuring(part != null, "null")
-    if (mountNode(path).isDefined) throwException("Path already mounted")
-
+    mountNode(path) match {
+      case Some(n) if (n.container.isDefined) =>
+        sys.error("Path '"+path.asString+"' already mounted to container '"+n.container.get+"'!")
+      case _ =>
+    }
     if (!path.isRoot) tree.add(path, part)
   }
 
