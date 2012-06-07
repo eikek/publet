@@ -8,11 +8,10 @@ script(src="gitr-browser.js" type="text/javascript")
 :javascript
   $(function() {
     $('#gitBrowser').gitrRepoBrowser();
-    $('#revnames').typeahead();
     $('#searchRev').on('click', function(e) {
       var rev = $('#revnames').val();
       $('#gitBrowser').gitrRepoBrowser('load', null, rev);
-      $('#currentHead').text(rev);
+      return false;
     });
   });
 :css

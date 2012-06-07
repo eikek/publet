@@ -6,14 +6,15 @@ highlightTheme: magula
 link(rel="stylesheet" href="gitr.css")
 :javascript
   $(function() {
-    $('#revnames').typeahead();
     $('#searchRev').on('click', function(e) {
       var rev = $('#revnames').val();
       if (rev) {
         var repo = getURLParameter("r");
         window.location=window.location.origin+ window.location.pathname+"?r="+repo+"&h="+rev+"&do=log";
       }
+      return false;
     });
+
     $("button.toggle").on('click', function(e) {
       $(this).button("toggle");
     });
