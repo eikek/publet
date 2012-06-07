@@ -12,10 +12,10 @@ case class CommitInfo(name: String, path: String, container: Boolean, author: Pe
   def toMap: Map[String, Any] = Map(
     "name" -> name,
     "container" -> container,
-
+    "commitDate" -> getCommitDateAsString,
     "author" -> author.getName,
     "authorEmail" -> author.getEmailAddress,
-    "message" -> CommitInfo.getShortMessage(fullMessage),
+    "message" -> getShortMessage,
     "fullMessage" -> fullMessage,
     "age" -> getAge,
     "icon" -> (if (container) "icon-folder-close" else "icon-file"),
@@ -31,6 +31,9 @@ case class CommitInfo(name: String, path: String, container: Boolean, author: Pe
   def getAge = (Duration(TimeUnit.SECONDS.toMillis(commitTime)).distanceAgo)
 
   def getCommitDate = new Date(TimeUnit.SECONDS.toMillis(commitTime))
+
+  def getShortMessage = CommitInfo.getShortMessage(fullMessage)
+  def getLongMessage = CommitInfo.getLongMessage(fullMessage)
 
   def getCommitDateAsString = {
     val df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, loc)
@@ -53,8 +56,14 @@ object CommitInfo {
 
   private def getShortMessage(msg: String): String = {
     val line = msg.split("\n")(0)
-    if (line.length > 70) line.substring(0, 70) + "..."
+    if (line.length > 80) line.substring(0, 77) + "..."
     else line
+  }
+
+  private def getLongMessage(msg: String): String = {
+    val idx = msg.indexOf('\n')
+    if (idx > 0) msg.substring(idx +1).trim
+    else msg.trim
   }
 
   def apply(tree: TreeWalk, commit: RevCommit, loc: Locale): CommitInfo = {

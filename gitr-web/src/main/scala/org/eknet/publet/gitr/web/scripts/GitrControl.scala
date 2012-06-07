@@ -24,7 +24,6 @@ import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.vfs.{Path, Content}
 import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
 import org.eclipse.jgit.revwalk.RevCommit
-import collection.mutable.ListBuffer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -84,20 +83,39 @@ class GitrControl extends ScalaScript {
       }
       repo.getCommit(getRev).foreach(c => log.add(c.getId))
 
-      val commits = ListBuffer[RevCommit]()
-      def collectCommits(iter:Iterator[RevCommit], cur: Int, max: Int) {
-        if (cur < max && iter.hasNext) {
-          commits.append(iter.next())
-          collectCommits(iter, cur+1, max)
+      val pageSize = PubletWeb.publetSettings("gitrweb.pageSize").getOrElse("25").toInt
+      val page = getPage
+
+      val commits = CommitGroup.newBuilder
+      def collectCommits(iter:Iterator[RevCommit], cur: Int) {
+        if (cur < (pageSize*page) && iter.hasNext) {
+          val revCommit = iter.next()
+          if (cur >= (pageSize*(page-1))) {
+            commits.addByDay(CommitInfo("", "", false, revCommit, PubletWebContext.getLocale))
+          }
+          collectCommits(iter, cur+1)
         }
       }
-      collectCommits(log.call().iterator(), 0, 35)
-      val commitInfos = commits.map(c => CommitInfo("", "", false, c, PubletWebContext.getLocale)).toList
+      val commitIter = log.call().iterator()
+      val nextPage = if (commitIter.hasNext) {
+        Some("?r="+getReponame.get+ "&page="+(page+1)+"&do=log&rev="+getRev)
+      } else {
+        None
+      }
+      val prevPage = if (page>1) {
+        Some("?r="+getReponame.get+ "&page="+(page-1)+"&do=log&rev="+getRev)
+      } else {
+        None
+      }
+      collectCommits(commitIter, 0)
+      val commitInfos = commits.build
       renderTemplate(gitrlogTemplate, Map("revisions" -> revisions,
         "repositoryModel" -> model,
         "owner" -> owner,
         "currentHead" -> currentHead,
         "path" -> (getPath.asString),
+        "prevPage" -> prevPage,
+        "nextPage" -> nextPage,
         "commits" -> commitInfos))
     })
   }
@@ -114,7 +132,9 @@ object GitrControl {
   val hParam = "h"   // revision, default = "master"
   val pParam = "p"   // pathname, default = "/"
   val doParam = "do" // log|source, default = source
+  val pageParam = "page" // the page to display
 
+  def getPage = PubletWebContext.param(pageParam).getOrElse("1").toInt
   def getReponame = PubletWebContext.param(rParam)
   def getRev = PubletWebContext.param(hParam).collect({ case e if (!e.isEmpty) => e}).getOrElse("master")
   def getPath = {

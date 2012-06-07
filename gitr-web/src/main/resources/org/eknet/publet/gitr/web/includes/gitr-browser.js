@@ -46,11 +46,17 @@
     var lastCommit = "";
     if (data.lastCommit) {
       var c = data.lastCommit;
-      lastCommit = $('<div/>', {
-        class: "commitInfo",
-        html: '<h4 class="alert-heading"><img src="'+c.gravatar+'?s=35&d='+settings.gravatarTheme+'"/> '+c.author +', '+ c.age +
-          '<a class="pull-right" href="#">['+ c.id +']</a></h4>' +
-          '<pre class="commitInfo">'+ c.fullMessage +'</pre>'
+      lastCommit = $('<ol/>', {
+        class: "commit-group",
+        html: '<li class="commit-group-item">' +
+          '<img class="gravatar" src="'+c.gravatar+'?s=35&d='+settings.gravatarTheme+'"/> ' +
+          '<p class="commit-title">' +
+          '<span title="'+ c.authorEmail +'">'+c.author +', '+ c.age +'</span> ' +
+          '<small>-- '+ c.commitDate +' --</small>' +
+          '<span class="pull-right"><a href="#">['+ c.id+']</a></span> ' +
+          '<br>' +
+          '<span class="shortMessage">'+ c.message +'</span> '+
+          '</p></li>'
       });
     }
     return lastCommit;
@@ -140,11 +146,12 @@
       if (data.success) {
         obj.empty();
         obj.removeAttr("class");
-        table[0].appendTo(obj);
-        if (table[1]) {
+        table[0].appendTo(obj); //breadcrumbs
+        if (table[1]) { //lastCommit
+          $('<h3 class="commit-group-head">Last commit</h3>').appendTo(obj);
           table[1].appendTo(obj);
         }
-        table[2].appendTo(obj);
+        table[2].appendTo(obj); // tree
         $('a', table[2]).each(function(i, el) {
           $(el).bind('click', function(e) {
             obj.trigger('gitResourceClick', [data, i, el]);
@@ -198,7 +205,7 @@
         'ref':getURLParameter(hParam) || "",
         'path':getURLParameter(pParam) || "",
         'tableClass'  : 'table table-condensed table-striped',
-        'gravatarTheme' : 'mm'
+        'gravatarTheme' : 'identicon'
       }, options);
 
       _addDirectoryContents(settings.repo, settings.ref, settings.path);

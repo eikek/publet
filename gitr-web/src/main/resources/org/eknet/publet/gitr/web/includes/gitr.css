@@ -20,3 +20,46 @@
     height: 128px;
     background: url(loading.gif) center no-repeat;
 }
+
+
+/*
+ "lavender" theme for commits. see http://www.computerhope.com/htmcolor.htm
+*/
+
+.commit-group {
+    list-style-type: none;
+    margin-bottom: 15px;
+    margin-left: 0;
+    border: 1px solid #e3e4fa;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: #f7f8ff;
+}
+.commit-group-head {
+    padding: 5px 8px;
+    border: 1px solid #e3e4fa;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    background-color: #c5c6dc;
+}
+.commit-group-item {
+    position: relative;
+    padding: 8px 8px 8px 52px;
+    border-top: 1px solid #E2EAEE;
+}
+.commit-group-item .gravatar {
+    float: left;
+    margin-left: -48px;
+    border-radius: 4px;
+}
+.commit-title {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 8px;
+}
+.commit-title span.shortMessage {
+    font-weight: bold;
+}
+.commit-message pre {
+    background: #FAF8EE;
+}
