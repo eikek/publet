@@ -199,6 +199,7 @@
                 _addFileContents(repo, head, path, el);
               }
             }
+            return false;
           });
         });
         $('a', table[0]).each(function(i, el) {
