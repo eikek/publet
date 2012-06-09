@@ -25,9 +25,17 @@ import xml.PermissionModel
 trait PubletAuth {
 
   def getAllRepositories: Seq[RepositoryModel]
-  def getRepository(repository: String): Option[RepositoryModel] = {
+
+  /**
+   * Finds a repository model as specified in the database
+   * or returns a default model with tag=open if not found.
+   *
+   * @param repository
+   * @return
+   */
+  def getRepository(repository: String): RepositoryModel = {
     val name = if (repository.endsWith(".git")) repository.substring(0, repository.length-4) else repository
-    getAllRepositories.find(t => t.name==name)
+    getAllRepositories.find(t => t.name==name) getOrElse RepositoryModel(name, RepositoryTag.open)
   }
 
   def getAllUser: Seq[User]
