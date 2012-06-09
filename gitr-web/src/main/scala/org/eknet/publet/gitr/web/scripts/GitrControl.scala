@@ -25,6 +25,7 @@ import org.eknet.publet.vfs.{Path, Content}
 import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
 import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.TemplateEngine
+import org.eknet.publet.web.util.RenderUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,6 +37,7 @@ class GitrControl extends ScalaScript {
       case None => repositoryListing
       case Some(name) => getAction match {
         case "log" => logView
+        case "diff" => commitContents
         case _ => sourceView
       }
     }
@@ -120,6 +122,37 @@ class GitrControl extends ScalaScript {
         "commits" -> commitInfos))
     })
   }
+
+
+  def commitContents() = {
+    val repo = getRepositoryFromParam
+    val revisions = repo
+      .map(r => r.getLocalBranches ::: r.getLocalTags)
+      .map(_.map(_.name))
+      .map(names => Json.build(names).toString)
+      .getOrElse("")
+    val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
+    val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
+    val currentHead = getRev
+    repo map ( repo => {
+      getCommitFromRequest(repo) flatMap ( commit => {
+        val files = repo.getFilesInCommit(commit)
+        val parent = repo.getParentCommit(commit).orNull
+        val attrs = Map("revisions" -> revisions,
+          "repositoryModel" -> model,
+          "owner" -> owner,
+          "currentHead" -> currentHead,
+          "path" -> (getPath.asString),
+          "commit" -> commit,
+          "changedFiles" -> files,
+          "parent" -> parent)
+        RenderUtils.renderTemplate(gitrcommitTemplate, attrs)
+      })
+    }) getOrElse {
+      import ScalaScript._
+      makeJson(Map("success"->false, "message"->"No repository found."))
+    }
+  }
 }
 
 object GitrControl {
@@ -128,6 +161,7 @@ object GitrControl {
   val gitrsourceTemplate = "/gitr/_gitrbrowse.page"
   val gitrlogTemplate = "/gitr/_gitrlog.page"
   val gitrheaderTemplate = "/gitr/_gitrpagehead.page"
+  val gitrcommitTemplate = "/gitr/_gitrcommit.page"
 
   val rParam = "r"   // repo name, default = "None"
   val hParam = "h"   // revision, default = "master"

@@ -40,12 +40,16 @@ import java.nio.file.Files
 import io.Source
 import collection.mutable.ListBuffer
 import org.eclipse.jgit.treewalk.TreeWalk
-import java.io.{OutputStream, InputStream, File}
 import java.nio.charset.Charset
 import org.eclipse.jgit.lib._
 import org.eclipse.jgit.revwalk._
 import java.util.Date
 import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, TreeFilter, PathFilter}
+import org.eclipse.jgit.diff.{DiffFormatter, RawTextComparator}
+import java.io.{ByteArrayOutputStream, OutputStream, InputStream, File}
+import org.eclipse.jgit.diff.DiffEntry.ChangeType
+import GitrRepository._
+import org.eclipse.jgit.util.io.DisabledOutputStream
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -236,6 +240,143 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
     }
   }
 
+  /**
+   * Creates a diff between two commits.
+   *
+   * @param base
+   * @param commit
+   * @param path
+   */
+  def getDiff(base: Option[RevCommit], commit: RevCommit, path: Option[String]) = {
+    val baos = new ByteArrayOutputStream()
+    val df = new DiffFormatter(baos)
+    formatDiff(commit, df, base, path)
+    val diff = baos.toString
+    df.flush()
+    diff
+  }
+
+  /**
+   * Formats a diff between two commits using the supplied [[org.eclipse.jgit.diff.DiffFormatter]]
+   *
+   * This method was originally found at gitblit project (http://gitblit.com/) in `DiffUtils`
+   * and changed to scala code.
+   *
+   * @param commit
+   * @param formatter
+   * @param base
+   * @param path
+   */
+  def formatDiff(commit: RevCommit, formatter: DiffFormatter, base: Option[RevCommit], path: Option[String]) {
+    val cmp = RawTextComparator.DEFAULT
+    formatter.setRepository(self)
+    formatter.setDiffComparator(cmp)
+    formatter.setDetectRenames(true)
+
+    val commitTree = commit.getTree
+    val baseTree = base.map(_.getTree).getOrElse {
+      if (commit.getParentCount > 0) {
+        val rw = new RevWalk(self)
+        val par = rw.parseCommit(commit.getParent(0).getId)
+        rw.dispose()
+        par.getTree
+      } else {
+        commitTree
+      }
+    }
+
+    val diffEntries = formatter.scan(baseTree, commitTree)
+    path.collect({case s if (!s.isEmpty)=>s}) match {
+      case Some(p) => diffEntries.find(_.getNewPath == p).map(formatter.format(_))
+      case _ => formatter.format(diffEntries)
+    }
+  }
+
+  /**
+   * Returns the lines of the specified source file annotated with
+   * the author information.
+   *
+   * This method was originally found in the gitblit project (http://gitblit.com)
+   * and formatted to scala code.
+   *
+   * @param path
+   * @param objectId
+   * @return
+   */
+  def getBlame(path: String, objectId: String): Seq[AnnotatedLine] = {
+    val result = git.blame()
+      .setFilePath(path)
+      .setStartCommit(self.resolve(objectId))
+      .call()
+
+    val rawText = result.getResultContents
+    for (i <- 0 to rawText.size()-1) yield {
+      new AnnotatedLine(result.getSourceCommit(i), i+1, rawText.toString)
+    }
+  }
+
+  /**
+   * Returns a list of files that changed in the given commit.
+   *
+   * This method was found at the gitblit project (http://gitblit.com) in
+   * `JGitUtils` class.
+   *
+   * @param commit
+   * @return
+   */
+  def getFilesInCommit(commit: RevCommit): List[PathModel] = {
+    if (!hasCommits) {
+      List()
+    } else {
+      if (commit.getParentCount == 0) {
+        val tw = new TreeWalk(self)
+        tw.reset()
+        tw.setRecursive(true)
+        tw.addTree(commit.getTree)
+        val models = withTreeWalk(tw) { t =>
+          PathModel(t.getPathString, t.getPathString, 0, t.getRawMode(0), commit.getId.getName, Some(ChangeType.ADD))
+        }
+        tw.release()
+        models
+      } else {
+        val parent = getParentCommit(commit).get
+        val df = new DiffFormatter(DisabledOutputStream.INSTANCE)
+        df.setRepository(self)
+        df.setDiffComparator(RawTextComparator.DEFAULT)
+        df.setDetectRenames(true)
+        val entries = df.scan(parent.getTree, commit.getTree)
+        val models = for (entry <- entries) yield {
+          entry.getChangeType match {
+            case ChangeType.DELETE => PathModel(entry.getOldPath,
+              entry.getOldPath, 0, entry.getNewMode.getBits,
+              commit.getId.getName, Some(entry.getChangeType))
+            case ChangeType.RENAME => PathModel(entry.getOldPath,
+              entry.getNewPath, 0, entry.getNewMode.getBits,
+              commit.getId.getName, Some(entry.getChangeType))
+            case _ => PathModel(entry.getNewPath,
+              entry.getNewPath, 0, entry.getNewMode.getBits,
+              commit.getId.getName, Some(entry.getChangeType))
+          }
+        }
+        models.toList
+      }
+    }
+  }
+
+  def getParentCommit(commit: RevCommit): Option[RevCommit] = {
+    if (commit.getParentCount > 0) {
+      val rw = new RevWalk(self)
+      try {
+        Some(rw.parseCommit(commit.getParent(0).getId))
+      }
+      finally {
+        rw.dispose()
+      }
+    } else {
+      None
+    }
+  }
+
   override def toString = self.toString
 }
 
@@ -251,26 +392,27 @@ case class RefModel(name: String, ref: Ref, obj: RevObject) extends Ordered[RefM
   }
 }
 
+case class AnnotatedLine(commitId: String, author: String, when: Date, line: Int, data: String) {
+  def this(commit: RevCommit, line: Int, data: String) = this(commit.getName,
+    commit.getAuthorIdent.getName, commit.getAuthorIdent.getWhen, line, data)
+}
+
+case class PathModel(name: String,
+                     path: String,
+                     size: Long,
+                     mode: Int,
+                     commitId: String,
+                     changeType: Option[ChangeType] = None)
+
+
 object GitrRepository {
 
   def apply(repo: Repository, name: RepositoryName) = new GitrRepository(repo, name)
   implicit def repoToGitrRepo(repo: Repository, name: RepositoryName): GitrRepository = GitrRepository(repo, name)
   implicit def gitrRepoToRepo(grepo: GitrRepository): Repository = grepo.self
 
-  private def copy(in: InputStream, out: OutputStream, closeOut: Boolean = true, closeIn: Boolean = true) {
-    val buff = new Array[Byte](2048)
-    var len = 0
-    try {
-      while (len != -1) {
-        len = in.read(buff)
-        if (len != -1) {
-          out.write(buff, 0, len)
-        }
-      }
-      out.flush();
-    } finally {
-      if (closeOut) out.close()
-      if (closeIn) in.close()
-    }
+  def withTreeWalk[A](tw: TreeWalk)(f: TreeWalk=>A): List[A] = {
+    if (tw.next()) f(tw) :: withTreeWalk(tw)(f)
+    else Nil
   }
 }

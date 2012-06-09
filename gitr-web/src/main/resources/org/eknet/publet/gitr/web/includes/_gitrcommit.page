@@ -1,0 +1,75 @@
+---
+title: Gitr Web
+
+--- name:head pipeline:jade
+link(rel="stylesheet" href="gitr.css")
+script(src="gitr-browser.js" type="text/javascript")
+
+--- name:content pipeline:jade
+- import org.eknet.publet.gitr._
+- import java.text.DateFormat
+- import org.eclipse.jgit.revwalk.RevCommit
+-@ val commit: RevCommit = null
+-@ val parent: RevCommit = null
+-@ val changedFiles: List[PathModel] = List()
+- val dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, PubletWebContext.getLocale)
+=include("_gitrpagehead.jade")
+table.plain
+  tbody
+    tr
+      td
+        span.monospace
+          b authored
+      td
+        span.monospace
+          =dateFormat.format(commit.getAuthorIdent.getWhen)
+          | by
+          =commit.getAuthorIdent.getName
+    tr
+      td
+        span.monospace
+          b committed
+      td
+        span.monospace
+          =dateFormat.format(commit.getCommitterIdent.getWhen)
+          | by
+          =commit.getCommitterIdent.getName
+
+    tr
+      td
+        span.monospace
+          b sha1
+      td
+        span.monospace
+          =commit.getId.getName
+    -if (parent != null) {
+      tr
+        td
+          span.monospace
+            b parent-sha1
+        td
+          span.monospace
+            =parent.getId.getName
+    - }
+    tr
+      td(colspan=2)
+        hr/
+        span.monospace
+          =commit.getShortMessage
+br/
+h3.readme-head
+  i.icon-file
+  | Changed files
+  =" ("+ changedFiles.size +")"
+table.table.table-condensed.table-striped
+  tbody
+    - for (pm <- changedFiles) {
+      tr
+        td.changeType
+          div(class={pm.changeType.get.name} title={pm.changeType.get.name})
+        td.path
+          =pm.path
+        td.actions
+          a(href="#" title="diff")
+            i.icon-plus
+    - }
