@@ -55,7 +55,7 @@ class GitrControl extends ScalaScript {
       .map(names => Json.build(names).toString)
       .getOrElse("")
     val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
-    val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
+    val model = repo.map(r => PubletWeb.authManager.getRepository(r.name.name))
     val currentHead = getRev
     renderTemplate(gitrsourceTemplate, Map(
       "revisions" -> revisions,
@@ -76,7 +76,7 @@ class GitrControl extends ScalaScript {
       .map(names => Json.build(names).toString)
       .getOrElse("")
     val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
-    val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
+    val model = repo.map(r => PubletWeb.authManager.getRepository(r.name.name))
     val currentHead = getRev
     getRepositoryFromParam flatMap ( repo => {
       val log = repo.git.log()
@@ -132,7 +132,7 @@ class GitrControl extends ScalaScript {
       .map(names => Json.build(names).toString)
       .getOrElse("")
     val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
-    val model = repo.flatMap(r => PubletWeb.authManager.getRepository(r.name.name))
+    val model = repo.map(r => PubletWeb.authManager.getRepository(r.name.name))
     val currentHead = getRev
     repo map ( repo => {
       getCommitFromRequest(repo) flatMap ( commit => {
@@ -182,7 +182,7 @@ object GitrControl {
   def getAction = PubletWebContext.param(doParam).getOrElse("source")
 
   def getRepositoryFromParam = PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName)))
-  def getRepositoryModelFromParam = getRepositoryFromParam.flatMap(r=>PubletWeb.authManager.getRepository(r.name.name))
+  def getRepositoryModelFromParam = getRepositoryFromParam.map(r=>PubletWeb.authManager.getRepository(r.name.name))
 
   def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
     val param = getRev

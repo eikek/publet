@@ -35,7 +35,7 @@ class GitrRepoList extends ScalaScript {
 
     def getRepositoryTag(name: String) = {
       val n = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
-      PubletWeb.authManager.getRepository(n).map(_.tag).getOrElse(RepositoryTag.open)
+      PubletWeb.authManager.getRepository(n).tag
     }
 
     val gitr = PubletWeb.gitr
