@@ -108,10 +108,10 @@ table td.actions {
     width: 20px;
 }
 
-div.MODIFY, div.DELETE, div.ADD {
+div.MODIFY, div.DELETE, div.ADD, div.COPY, div.RENAME {
     width: 0.6em;
     height: 0.6em;
-    border: 1px solid #a9a9a9;
+    border: 1px solid #aaa;
 }
 div.MODIFY {
     background-color: orange;
@@ -121,6 +121,12 @@ div.ADD {
 }
 div.DELETE {
     background-color: red;
+}
+div.COPY {
+    background-color: #0480be;
+}
+div.RENAME {
+    background-color: #ee82ee;
 }
 
 .monospace {

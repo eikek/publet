@@ -53,7 +53,7 @@
           '<p class="commit-title">' +
           '<span title="'+ c.authorEmail +'">'+c.author +', '+ c.age +'</span> ' +
           '<small>-- '+ c.commitDate +' --</small>' +
-          '<span class="pull-right"><a href="#">['+ c.id+']</a></span> ' +
+          '<span class="pull-right"><a href="?r='+settings.repo+'&do=commit&h='+ c.fullId +'">['+ c.id+']</a></span> ' +
           '<br>' +
           '<span class="shortMessage">'+ c.message +'</span> '+
           '</p></li>'

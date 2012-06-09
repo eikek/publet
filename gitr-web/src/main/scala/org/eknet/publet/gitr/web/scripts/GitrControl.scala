@@ -37,7 +37,7 @@ class GitrControl extends ScalaScript {
       case None => repositoryListing
       case Some(name) => getAction match {
         case "log" => logView
-        case "diff" => commitContents
+        case "commit" => commitContents
         case _ => sourceView
       }
     }
@@ -124,7 +124,7 @@ class GitrControl extends ScalaScript {
   }
 
 
-  def commitContents() = {
+  def commitContents = {
     val repo = getRepositoryFromParam
     val revisions = repo
       .map(r => r.getLocalBranches ::: r.getLocalTags)

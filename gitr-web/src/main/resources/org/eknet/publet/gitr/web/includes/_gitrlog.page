@@ -23,6 +23,7 @@ link(rel="stylesheet" href="gitr.css")
 --- name:content pipeline:jade
 - import org.eknet.publet.gitr.web.scripts.CommitInfo
 - import org.eknet.publet.gitr.web.scripts.CommitGroup
+- import org.eknet.publet.gitr.web.scripts.GitrControl._
 -@ val commits: List[CommitGroup] = List()
 -@ val nextPage: Option[String] = None
 -@ val prevPage: Option[String] = None
@@ -46,7 +47,7 @@ link(rel="stylesheet" href="gitr.css")
                 =c.getCommitDateAsString
                 | --
               span.pull-right
-                a(href="#")
+                a(href={"?r=" + getReponame.getOrElse("") + "&do=commit&h="+ c.id })
                   | [
                   =c.shortId
                   | ]

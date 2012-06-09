@@ -4,7 +4,17 @@ title: Gitr Web
 --- name:head pipeline:jade
 link(rel="stylesheet" href="gitr.css")
 script(src="gitr-browser.js" type="text/javascript")
-
+:javascript
+  $(function() {
+    $('#searchRev').on('click', function(e) {
+      var rev = $('#revnames').val();
+      if (rev) {
+        var repo = getURLParameter("r");
+        window.location=window.location.origin+ window.location.pathname+"?r="+repo+"&h="+rev+"&do=commit";
+      }
+      return false;
+    });
+  });
 --- name:content pipeline:jade
 - import org.eknet.publet.gitr._
 - import java.text.DateFormat
@@ -13,6 +23,15 @@ script(src="gitr-browser.js" type="text/javascript")
 -@ val parent: RevCommit = null
 -@ val changedFiles: List[PathModel] = List()
 - val dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, PubletWebContext.getLocale)
+-
+  def stripLongPath(p: String): (String, String) = {
+    val len = p.length
+    if (len > 110) {
+      ("..." + p.substring(len-110), p.substring(0, len-110)+"...")
+    } else {
+      (p, "")
+    }
+  }
 =include("_gitrpagehead.jade")
 table.plain
   tbody
@@ -57,7 +76,7 @@ table.plain
         span.monospace
           =commit.getShortMessage
 br/
-h3.readme-head
+h3.commit-group-head
   i.icon-file
   | Changed files
   =" ("+ changedFiles.size +")"
@@ -68,7 +87,9 @@ table.table.table-condensed.table-striped
         td.changeType
           div(class={pm.changeType.get.name} title={pm.changeType.get.name})
         td.path
-          =pm.path
+          - val t = stripLongPath(pm.path)
+          span(title={ t._2 })
+            =t._1
         td.actions
           a(href="#" title="diff")
             i.icon-plus
