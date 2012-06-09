@@ -70,7 +70,10 @@ object ContentType {
 
   def apply(ext: String): ContentType = {
     all.find(_.extensions.contains(ext.toLowerCase))
-      .getOrElse(unknown)
+      .getOrElse {
+      if (markdownExtensions.contains(ext)) ContentType.markdown
+      else unknown
+    }
   }
 
   def apply(name: Symbol): ContentType = {
@@ -94,4 +97,8 @@ object ContentType {
       t.mimeString
     }
   }
+
+  /** All those are also markdown files. Scalate only knows markdown and md; it throws
+   * an exception for those extensions */
+  val markdownExtensions = Set("mdown", "mkdn", "mkd", "mdwn", "mdtxt", "mdtext")
 }
