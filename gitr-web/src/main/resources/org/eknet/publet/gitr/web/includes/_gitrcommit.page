@@ -19,13 +19,13 @@ script(src="gitr-browser.js" type="text/javascript")
       var li = $(e.target).parents("li");
       var a = $(e.target).parents("a");
       var pre = $("pre", li);
+
       if (pre.length == 1) {
-        if (pre.attr("style")) {
+        var state = $("div.collapse", li).collapse("toggle").hasClass("in")
+        if (state) {
           a.html('<i class="icon-minus"></i>');
-          pre.removeAttr("style");
         } else {
           a.html('<i class="icon-plus"></i>');
-          pre.attr("style", "display:none;");
         }
       } else {
         var params = {
@@ -36,7 +36,11 @@ script(src="gitr-browser.js" type="text/javascript")
         a.html('<img src="loading.gif" width="15px">');
         $.get('gitrdiff.html', params, function(data) {
           a.html('<i class="icon-minus"></i>');
-          $('<pre class="commitDiff"><table width="100%"><tbody><tr><td colspan="3">'+data+'</td></tr></tbody></table></pre>').appendTo(li);
+          a.attr("data-toggle", "collapse");
+          var id = params.p.replace(/[\/\.]/g, "")
+          a.attr("data-target", "#"+id);
+          $('<div id="'+id+'" class="collapse"><pre class="commitDiff"><table width="100%"><tbody><tr><td colspan="3">'+data+'</td></tr></tbody></table></pre></div>').appendTo(li);
+          $("#"+id).collapse("toggle");
         });
       }
       return false;
