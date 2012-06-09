@@ -45,6 +45,7 @@ class GitrWebExtension extends WebExtension {
     pages.addResource(new WebScriptResource("gitrcreate.json".rn, new GitrCreate()))
     pages.addResource(new WebScriptResource("gitr-repolist.json".rn, new GitrRepoList()))
     pages.addResource(new WebScriptResource("gitrview.json".rn, new GitrView()))
+    pages.addResource(new WebScriptResource("gitrdiff.html".rn, new GitrDiff()))
     pages.addResource(new WebScriptResource("gitrblob".rn, new GitrBlob()))
     pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
     PubletWeb.publet.mountManager.mount("/gitr".p, pages)

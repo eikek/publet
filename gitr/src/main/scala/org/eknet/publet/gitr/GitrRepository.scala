@@ -365,12 +365,8 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
 
   def getParentCommit(commit: RevCommit): Option[RevCommit] = {
     if (commit.getParentCount > 0) {
-      val rw = new RevWalk(self)
-      try {
+      withRevWalk { rw =>
         Some(rw.parseCommit(commit.getParent(0).getId))
-      }
-      finally {
-        rw.dispose()
       }
     } else {
       None
@@ -378,6 +374,15 @@ class GitrRepository(val self: Repository, val name: RepositoryName) {
   }
 
   override def toString = self.toString
+
+  def withRevWalk[A](f: RevWalk => A) = {
+    val rw = new RevWalk(self)
+    try {
+      f(rw)
+    } finally {
+      rw.dispose()
+    }
+  }
 }
 
 case class RefModel(name: String, ref: Ref, obj: RevObject) extends Ordered[RefModel] {
