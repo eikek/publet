@@ -62,18 +62,21 @@ h2 Repository View
           button.btn(type="reset") Reset
 
 .row
-  .span3
-    .btn-group.nav-tabs(data-toggle="buttons-radio")
-      button.btn.active(id="mine") Mine
-      button.btn(id="closed") Mine closed
-      button.btn(id="all") All open
+  - if (Security.isAuthenticated) {
+    .span3
+      .btn-group.nav-tabs(data-toggle="buttons-radio")
+        button.btn(id="mine") Mine
+        button.btn(id="closed") Mine closed
+        button.btn.active(id="all") All open
+  - }
   .span5
     .input-append
       input(type="text" id="repoNameInput")
       button.btn.btn-primary(type="button" id="repoNameSearch") Search
   .span4
     ul.nav.nav-pills.pull-right
-      li
-        a(href="#myModal" data-toggle="modal") New repository
+      - if (Security.isAuthenticated)
+        li
+          a(href="#myModal" data-toggle="modal") New repository
 
 table.table.table-striped(id="repoListing")

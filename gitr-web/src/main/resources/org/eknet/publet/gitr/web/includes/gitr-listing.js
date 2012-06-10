@@ -15,9 +15,30 @@
  */
 
 $(function() {
+  // if the quick search buttons are clicked,
+  // trigger a search. have to do it _after_
+  // the boostrap plugin set the active class
+  $('#mine').on('click', function(e) {
+    setTimeout(function() {
+      $('#repoNameSearch').trigger('click');
+    }, 5);
+  });
+  $('#closed').on('click', function(e) {
+    setTimeout(function() {
+      $('#repoNameSearch').trigger('click');
+    }, 5);
+  });
+  $('#all').on('click', function(e) {
+    setTimeout(function() {
+      $('#repoNameSearch').trigger('click');
+    }, 5);
+  });
+
+  //perform search
   $('#repoNameSearch').click(function() {
     $('#repoListing').empty();
     var opts = {};
+    if ($('#mine').hasClass('active')) opts["mine"] = true;
     if ($('#closed').hasClass('active')) opts["closed"] = true;
     if ($('#all').hasClass('active')) opts["all"] = true;
     opts["name"] = $('#repoNameInput').val();

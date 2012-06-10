@@ -105,7 +105,7 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
 
     tree(root).filter(f => f.getName.endsWith(".git") && isRepo(f).isDefined)
       .map(dir => (RepositoryName(dir.getAbsolutePath.substring(root.getAbsolutePath.length + 1)), dir))
-      .filter(t => f(t._1))
+      .withFilter(t => f(t._1))
       .map(t => GitrRepository(Git.open(t._2).getRepository, t._1))
   }
 

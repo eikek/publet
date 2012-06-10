@@ -18,40 +18,52 @@ package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import ScalaScript._
 import org.eknet.publet.auth.RepositoryTag
-import org.eknet.publet.gitr.RepositoryName
+import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
+import org.eknet.publet.web.{GitAction, PubletWebContext, PubletWeb}
 
 class GitrRepoList extends ScalaScript {
   def serve() = {
 
-    // by default returns users repositories
-    // if param `all` is present, returns all open repositories
+    // by default returns all open repositories
+    // that are repostories either defined as public
+    // in permission database or are not defined at all
+
+    // if 'mine' is present, only current user's repositories are returned
+    val mine = PubletWebContext.param("mine").isDefined
+
     // if param `closed` is present, returns only users closed repositories
-    val all = PubletWebContext.param("all").isDefined
     val closed = PubletWebContext.param("closed").isDefined
+
+    // the first part of the name of the repository
     val name = PubletWebContext.param("name").getOrElse("")
+    val login = Security.username
 
+    val authM = PubletWeb.authManager
     def getRepositoryTag(name: String) = {
-      val n = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
-      PubletWeb.authManager.getRepository(n).tag
+      authM.getRepository(name).tag
     }
 
-    val gitr = PubletWeb.gitr
-    if (all) {
-      makeJson(PubletWeb.authManager.getAllRepositories
-        .filter(_.tag == RepositoryTag.open)
-        .flatMap(rm => gitr.get(RepositoryName(rm.name).toDotGit))
-        .filter(_.name.segments.last.startsWith(name))
-        .map(r => new RepositoryInfo(r, RepositoryTag.open).toMap))
-    } else {
-      val login = Security.username
-      makeJson(gitr.allRepositories(_.name.startsWith(login +"/"))
-        .filter(r => r.name.segments.last.startsWith(name))
-        .map(r => (r, getRepositoryTag(r.name.name)))
-        .filter(t => if (closed) t._2 == RepositoryTag.closed else true)
-        .map(t => new RepositoryInfo(t._1, t._2).toMap))
+    def repoFilter = (r:RepositoryName) => {
+      val tag = getRepositoryTag(r.name)
+      if (!Security.isAuthenticated || !(mine || closed)) {
+        tag == RepositoryTag.open && r.segments.last.startsWith(name)
+      } else {
+        val prefix = if (mine || closed) login+"/"+name else name
+        if (closed) {
+          tag == RepositoryTag.closed && r.name.startsWith(prefix)
+        } else {
+          //all repos with read access
+          (tag == RepositoryTag.open ||
+            Security.hasGitAction(GitAction.pull, authM.getRepository(r.name))) && r.name.startsWith(prefix)
+        }
+      }
     }
+
+    makeJson(PubletWeb.gitr.allRepositories(repoFilter)
+      .map(r => (r, getRepositoryTag(r.name.name)))
+      .map(t => new RepositoryInfo(t._1, t._2).toMap))
   }
+
 }
