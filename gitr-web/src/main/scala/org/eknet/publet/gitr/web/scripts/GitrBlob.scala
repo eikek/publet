@@ -20,7 +20,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.engine.scala.ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.ContentType
-import org.eknet.publet.web.StreamResponse
+import org.eknet.publet.web.{ErrorResponse, StreamResponse}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -40,7 +40,7 @@ class GitrBlob extends ScalaScript {
             Some(StreamResponse(in, mime, Some(len), file.name.fullName))
           })
         } getOrElse {
-          makeJson(Map("success"->false, "message"->"Repository is empty."))
+          Some(ErrorResponse.notFound)
         }
       }
     }
