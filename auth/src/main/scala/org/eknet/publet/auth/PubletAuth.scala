@@ -41,10 +41,19 @@ trait PubletAuth {
   def getAllUser: Seq[User]
   def findUser(login: String): Option[User]
 
+  def getAllPermissions: Set[PermissionModel]
   def getPolicy(login: String): Policy
   def getPolicy(user: User): Policy
 
   def updateUser(user: User)
+
+  /**
+   * Replaces any existing model with the given model, if
+   * the repository name matches. If no such repository model
+   * exists yet, it is added.
+   *
+   * @param repo
+   */
   def updateRepository(repo: RepositoryModel)
   def updatePermission(perm: PermissionModel)
   def removePermission(group: String, perm: Permission)
@@ -59,6 +68,7 @@ object PubletAuth {
     def findUser(login: String) = None
     def getPolicy(login: String) = Policy.Empty
     def getPolicy(user: User) = Policy.Empty
+    def getAllPermissions = Set.empty
     def getAllUser = Seq[User]()
     def getAllRepositories = Seq[RepositoryModel]()
     def updateUser(user: User) {}
