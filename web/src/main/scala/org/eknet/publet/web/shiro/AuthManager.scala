@@ -63,6 +63,7 @@ class AuthManager extends PubletAuth with Logging {
   def getResourceConstraints(uri: String) = delegate.getResourceConstraints(uri)
   def getAllRepositories = delegate.getAllRepositories
   def getAllUser = delegate.getAllUser
+  def getAllGroups = delegate.getAllGroups
   def findUser(login: String) = delegate.findUser(login)
   def getAllPermissions = delegate.getAllPermissions
   def getPolicy(login: String) = delegate.getPolicy(login)
@@ -95,6 +96,7 @@ private object SuperUserAuth extends PubletAuth {
   def getResourceConstraints(uri: String) = None
   def getAllRepositories = List()
   def getAllUser = List(superuser)
+  def getAllGroups = superuser.groups
   def findUser(login: String) = getAllUser.find(_.login==login)
   def getAllPermissions = Set(PermissionModel("*", List(), List()))
   def getPolicy(login: String) = findUser(login).map(getPolicy).getOrElse(Policy.Empty)

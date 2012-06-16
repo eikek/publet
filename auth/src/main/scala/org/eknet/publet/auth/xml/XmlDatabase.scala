@@ -152,6 +152,12 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
   def getAllPermissions = permissions
 
+  def getAllGroups = {
+    val permGroups = permissions flatMap (_.roles)
+    val userGroups = users flatMap (_.groups)
+    userGroups ++ permGroups
+  }
+
   def getPolicy(login: String) = {
     val user = findUser(login).get
     getPolicy(user)

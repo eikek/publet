@@ -42,6 +42,13 @@ trait PubletAuth {
   def findUser(login: String): Option[User]
 
   def getAllPermissions: Set[PermissionModel]
+
+  /**
+   * Returns all groups that are defined.
+   *
+   * @return
+   */
+  def getAllGroups: Set[String]
   def getPolicy(login: String): Policy
   def getPolicy(user: User): Policy
 
@@ -71,6 +78,7 @@ object PubletAuth {
     def getAllPermissions = Set.empty
     def getAllUser = Seq[User]()
     def getAllRepositories = Seq[RepositoryModel]()
+    def getAllGroups = Set()
     def updateUser(user: User) {}
     def updateRepository(repo: RepositoryModel) {}
     def updatePermission(perm: PermissionModel) {}
