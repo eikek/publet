@@ -114,6 +114,17 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     }
   }
 
+  def removePermission(group: String, perm: Permission) {
+    synchronized {
+      def groupPermFilter(pm:PermissionModel) = pm.perm == perm.perm && pm.roles.contains(group)
+
+      val transformed = permissions.withFilter(groupPermFilter)
+        .map(pm => PermissionModel(pm.perm, pm.repository, pm.roles.filterNot(_ == group)))
+      val newlist = permissions.filterNot(groupPermFilter) ++ transformed
+      this.permissions = newlist
+      write()
+    }
+  }
 
   def addResourceConstraint(rc: ResourceConstraint) {
     synchronized {
