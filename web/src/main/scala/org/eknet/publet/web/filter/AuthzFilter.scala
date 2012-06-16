@@ -21,7 +21,8 @@ import grizzled.slf4j.Logging
 import http.HttpServletResponse
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
-import org.eknet.publet.web.{PubletWeb, GitAction, PubletWebContext}
+import org.eknet.publet.auth.GitAction
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 
 /**
  * Does default authorization checks.

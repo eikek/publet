@@ -17,7 +17,7 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.gitr.GitrRepository
-import org.eknet.publet.auth.RepositoryTag
+import org.eknet.publet.auth.{RepositoryModel, RepositoryTag}
 import org.eknet.publet.web.PubletWebContext
 import org.eknet.publet.web.shiro.Security
 
@@ -25,12 +25,11 @@ import org.eknet.publet.web.shiro.Security
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.05.12 20:24
  */
-class RepositoryInfo(repo:GitrRepository, val tag: RepositoryTag.Value) {
+class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
 
   val name = repo.name
   val gitUrl = PubletWebContext.urlOf("/git/"+ repo.name.name)
-  val owner = repo.name.segments(0)
-  val owned = repo.name.segments(0) == Security.username
+  val owner = model.owner
   val description = repo.getDescription.getOrElse("")
 
   lazy val toMap: Map[String, Any] = {
@@ -38,9 +37,9 @@ class RepositoryInfo(repo:GitrRepository, val tag: RepositoryTag.Value) {
       "name" -> (name.segments.last),
       "fullName" -> name.name,
       "giturl" -> gitUrl,
-      "owner" -> name.segments(0),
-      "owned" -> owned,
-      "tag" -> tag.toString,
+      "owner" -> owner,
+      "owned" -> (owner == Security.username),
+      "tag" -> (model.tag.toString),
       "description" -> description
     )
   }

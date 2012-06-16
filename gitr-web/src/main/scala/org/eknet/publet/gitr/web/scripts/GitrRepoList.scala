@@ -19,9 +19,9 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import ScalaScript._
-import org.eknet.publet.auth.RepositoryTag
-import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
-import org.eknet.publet.web.{GitAction, PubletWebContext, PubletWeb}
+import org.eknet.publet.auth.{GitAction, RepositoryTag}
+import org.eknet.publet.gitr.RepositoryName
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 
 class GitrRepoList extends ScalaScript {
   def serve() = {
@@ -41,12 +41,13 @@ class GitrRepoList extends ScalaScript {
     val login = Security.username
 
     val authM = PubletWeb.authManager
-    def getRepositoryTag(name: String) = {
-      authM.getRepository(name).tag
+
+    def getRepositoryModel(name: String) = {
+      authM.getRepository(name)
     }
 
     def repoFilter = (r:RepositoryName) => {
-      val tag = getRepositoryTag(r.name)
+      val tag = getRepositoryModel(r.name).tag
       if (!Security.isAuthenticated || !(mine || closed)) {
         tag == RepositoryTag.open && r.segments.last.startsWith(name)
       } else {
@@ -62,7 +63,7 @@ class GitrRepoList extends ScalaScript {
     }
 
     makeJson(PubletWeb.gitr.allRepositories(repoFilter)
-      .map(r => (r, getRepositoryTag(r.name.name)))
+      .map(r => (r, getRepositoryModel(r.name.name)))
       .map(t => new RepositoryInfo(t._1, t._2).toMap))
   }
 

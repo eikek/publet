@@ -19,7 +19,8 @@ package org.eknet.publet.web.shiro
 import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
-import org.eknet.publet.web.{PubletWebContext, GitAction}
+import org.eknet.publet.auth.GitAction
+import org.eknet.publet.web.PubletWebContext
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel, User}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.web.filter.PubletShiroFilter

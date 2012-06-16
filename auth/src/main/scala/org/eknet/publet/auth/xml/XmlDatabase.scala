@@ -148,11 +148,20 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
   def getPolicy(user: User) = new Policy {
     def getRoles = user.groups
-    def getPermissions = permissions
+    def getPermissions = (standardPermissions ++ repositoryOwnerPerms)
+      .map(_.permString)
+      .toSet
+
+    private def repositoryOwnerPerms = getAllRepositories
+      .filter(_.owner == user.login)
+      .map(rm => Permission(GitAction.push.toString, Some(rm.name)))
+      .toSet
+
+    private def standardPermissions = permissions
       .filter(!_.roles.toSet.intersect(user.groups).isEmpty)
       .flatMap(_.toPermissions.values)
       .flatten
-      .map(_.permString)
-      .toSet
+
+    override def toString = "Policy{user="+user.login+"}"
   }
 }

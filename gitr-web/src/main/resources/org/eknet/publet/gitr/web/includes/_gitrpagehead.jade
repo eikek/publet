@@ -1,13 +1,13 @@
 - import org.eknet.publet.auth.RepositoryModel
 - import org.eknet.publet.auth.RepositoryTag
 -@ val repositoryModel: Option[RepositoryModel] = None
--@ val owner: String = ""
 -@ val revisions: String = ""
 -@ val currentHead: String = ""
 
 - if (repositoryModel.isEmpty)
   .div.alert.alert-error No repository found.
 - if (repositoryModel.isDefined)
+  - val owner = repositoryModel.get.owner
   .row
     .span5
       - if (repositoryModel.get.tag == RepositoryTag.open)

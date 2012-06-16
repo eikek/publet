@@ -18,7 +18,8 @@ package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletWeb, PubletWebContext, GitAction}
+import org.eknet.publet.auth.GitAction
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import ScalaScript._
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.auth.{RepositoryModel, RepositoryTag}
@@ -43,7 +44,7 @@ class GitrCreate extends ScalaScript {
           PubletWebContext.param("description")
             .collect({case d if (!d.isEmpty) => d})
             .foreach(desc => newRepo.setDescription(desc))
-          PubletWeb.authManager.updateRepository(RepositoryModel(normName, tag))
+          PubletWeb.authManager.updateRepository(RepositoryModel(normName, tag, login))
           PubletWeb.authManager.updatePermission(PermissionModel(GitAction.push.toString, List(normName), List(login)))
           PubletWeb.authManager.reload()
           makeJson(Map(

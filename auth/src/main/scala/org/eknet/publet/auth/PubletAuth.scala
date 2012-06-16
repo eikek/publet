@@ -35,7 +35,7 @@ trait PubletAuth {
    */
   def getRepository(repository: String): RepositoryModel = {
     val name = if (repository.endsWith(".git")) repository.substring(0, repository.length-4) else repository
-    getAllRepositories.find(t => t.name==name) getOrElse RepositoryModel(name, RepositoryTag.open)
+    getAllRepositories.find(t => t.name==name) getOrElse RepositoryModel(name, RepositoryTag.open, "")
   }
 
   def getAllUser: Seq[User]

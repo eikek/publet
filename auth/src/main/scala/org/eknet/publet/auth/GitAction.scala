@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web
+package org.eknet.publet.auth
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

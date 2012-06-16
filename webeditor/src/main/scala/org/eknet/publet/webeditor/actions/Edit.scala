@@ -21,7 +21,8 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import xml.{Null, Text, Attribute}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{GitAction, PubletWeb, PubletWebContext}
+import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
@@ -64,10 +65,7 @@ class Edit extends ScalaScript {
       .collect({ case t: GitPartition => t })
       .map(_.tandem.name)
     gitrepo.map { name =>
-      PubletWeb.authManager
-        .getAllRepositories
-        .find(_.name == name.name)
-        .getOrElse(RepositoryModel(name.name, RepositoryTag.open))
+      PubletWeb.authManager.getRepository(name.name)
     }
   }
 

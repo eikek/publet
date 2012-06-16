@@ -20,8 +20,8 @@ import org.apache.shiro.web.servlet.AbstractShiroFilter
 import org.apache.shiro.web.env.WebEnvironment
 import org.apache.shiro.web.util.WebUtils
 import org.apache.shiro.web.filter.mgt.FilterChainResolver
-import org.eknet.publet.auth.RepositoryTag
-import org.eknet.publet.web.{PubletWebContext, GitAction, PubletWeb}
+import org.eknet.publet.auth.{GitAction, RepositoryTag}
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import org.eknet.publet.web.util.{Key, Request}
 import javax.servlet.{ServletResponse, ServletRequest}
 

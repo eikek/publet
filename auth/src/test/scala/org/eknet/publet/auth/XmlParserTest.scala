@@ -24,6 +24,7 @@ object XmlParserTest {
     val policy = pa.getPolicy("jdoe")
     println(policy.getPermissions)
     println(policy.getRoles)
+    println(pa.getAllRepositories)
     println(pa.getPolicy("jdoe"))
     println("---------------")
     println(pp.format(pa.findUser("jdoe").get.toXml))

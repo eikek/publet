@@ -15,7 +15,8 @@
 
   <!-- Defines repository states, default is `closed` -->
   <repositories>
-    <repository name="wikis/mywiki" tag="open"/>
+    <repository name="jdoe/dotfiles" tag="closed" owner="jdoe"/>
+    <repository name="wikis/mywiki" tag="open" owner="jdoe"/>
     <repository name="contentroot" tag="closed"/>
   </repositories>
 
@@ -25,7 +26,6 @@
     <grant name="PULL">
       <on>contentroot</on>
       <on>wikis/mywiki</on>
-      <on>wikis/yourwiki</on>
       <to>manager</to>
       <to>editor</to>
       <to>coders</to>
@@ -33,7 +33,7 @@
   </permissions>
 
   <resourceConstraints>
-    <pattern name="/c/*" perm="anon"/>
-    <pattern name="/sec/*" perm="superperm"/>
+    <pattern name="/c/**" perm="anon"/>
+    <pattern name="/sec/**" perm="superperm"/>
   </resourceConstraints>
 </publetAuth>

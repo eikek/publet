@@ -24,11 +24,13 @@ import scala.xml.Node
  * @since 11.05.12 11:18
  */
 
-case class RepositoryModel(name: String, tag: RepositoryTag.Value) {
+case class RepositoryModel(name: String, tag: RepositoryTag.Value, owner: String) {
 
   def toXml = {
-    <repository name={name} tag={tag.toString}/>
+    <repository name={name} tag={tag.toString} owner={owner}/>
   }
+
+  def hasOwner = !owner.isEmpty
 }
 
 object RepositoryModel {
@@ -36,6 +38,7 @@ object RepositoryModel {
   def apply(repoNode: Node): RepositoryModel = {
     val name = (repoNode \ "@name").text
     val tag = RepositoryTag.withName((repoNode \ "@tag").toString())
-    RepositoryModel(name, tag)
+    val owner = (repoNode \ "@owner").text
+    RepositoryModel(name, tag, owner)
   }
 }

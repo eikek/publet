@@ -21,7 +21,7 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
+import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -70,10 +70,7 @@ trait RepositoryNameResolver {
 
   private val repositoryModelKey = Key("requestRepositoryModel", {
     case Request => getRepositoryName.map { name =>
-      PubletWeb.authManager
-        .getAllRepositories
-        .find(_.name == name.name)
-        .getOrElse(RepositoryModel(name.name, RepositoryTag.open))
+      PubletWeb.authManager.getRepository(name.name)
     }
   })
 
