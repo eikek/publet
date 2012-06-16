@@ -1,0 +1,154 @@
+---
+title: Gitr Repository Admin
+
+--- name:head pipeline:jade
+:javascript
+  $(function() {
+    // initialize repo-state form
+    $.getJSON("gitrRepoModel.json", { r: getURLParameter("r") }, function(data) {
+      var state = data.tag;
+      $("#repoStateForm").find("[value='"+state+"']").attr("checked", "checked");
+      if (state == "closed") {
+        $('#colaboratorsOpenRepoWarning').remove();
+      }
+    });
+    // initialize collaborators form
+    $.getJSON("gitrGroupInfo.json", {r: getURLParameter("r") }, function(data) {
+      var rows = [];
+      data.collaborators.forEach(function(el, i) {
+        var iconClass = el.permission == "push" ? 'icon-pencil' : 'icon-eye-open';
+        var labelClass = el.permission == "push" ? 'label-warning' : 'label-info';
+        rows.push('<tr><td width="20px"><i class="'+iconClass+'"></i></td>'+
+          '<td>'+el.group+' <span class="label '+labelClass+'">'+el.permission+'</span></td>'+
+          '<td><span class="pull-right">'+
+            '<button class="btn btn-primary btn-mini removePermButton" data-login="'+el.group+'">Remove</button></span>'+
+            '</td></tr>');
+      });
+      $(rows.join("")).appendTo($('#repoPermTableBody'))
+      $('#repoPermTableBody').find('.removePermButton').on('click', function(e) {
+        var login = $(e.target).attr('data-login');
+      });
+    });
+    $.getJSON("gitrGroupInfo.json", function(data) {
+      $('#groupInput').typeahead({ source: data });
+    });
+    $.getJSON("getLogins.json", function(data) {
+      $('#ownerInput').typeahead({ source: data });
+    });
+    $('.ajaxForm').ajaxForm({
+      success: function(e) {
+        var cont = $('#messageContainer');
+        cont.empty();
+        $('<div/>', {
+          class: 'alert alert-' + (e.success? 'success' : 'error'),
+          html: '<button class="close" data-dismiss="alert">&times;</button>'+e.message
+        }).appendTo(cont);
+      },
+      error: function(e) {
+        var cont = $('#messageContainer');
+        cont.empty();
+        $('<div/>', {
+          class: 'alert alert-error',
+          html: '<button class="close" data-dismiss="alert">&times;</button>' +(e.statusText? e.statusText : e)
+        }).appendTo(cont);
+       }
+    });
+
+  });
+--- name:content pipeline:jade
+- import org.eknet.publet.auth.RepositoryModel
+- import org.eknet.publet.auth.RepositoryTag
+-@ val repositoryModel: Option[RepositoryModel] = None
+
+=include("_repoHead.jade")
+hr/
+.row
+  .span3
+    ul.nav.nav-tabs.nav-stacked
+      li.active
+        a(href="#stateTab" data-toggle="tab") Repository State
+      li
+        a(href="#ownerTab" data-toggle="tab") Ownership
+      li
+        a(href="#collaboratorTab" data-toggle="tab") Collaborators
+    ul.nav.nav-pills.nav-stacked
+      li
+        h4 Back Links
+      li
+        a(href={"?r="+repositoryModel.map(_.name +".git").getOrElse("")}) Sources
+      li
+        a(href=".") Repositories
+  .span9
+    #messageContainer
+    .tab-content
+      #stateTab.tab-pane.active
+        h2 Repository State
+        :markdown
+          You may switch your repository to be _open_ or _closed_. Open repositories can
+          be cloned by everyone. But write access is always only possible to authorized users.
+        form.ajaxForm.form-horizontal#repoStateForm(action="updateRepository.json" method="post")
+          fieldset
+            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+            .control-group
+              .controls
+                label.radio
+                  input.radio(type="radio" name="repoState" value="closed")
+                  i.icon-lock
+                  | Closed Repository
+                label.radio
+                  input.radio(type="radio" name="repoState" value="open")
+                  i.icon-star
+                  | Open Repository
+            .form-actions
+              button.btn.btn-primary Save
+      #ownerTab.tab-pane
+        h2 Ownership
+        p
+          | The owner of a repository has always push rights and is also able to administrate
+          | the repository. This page is only visible to owners.
+        .alert.alert-error
+          :markdown
+            **Big warning:** If you transfer ownership to another user, you are no longer able
+            to administrate this repository!
+
+            If the repository is located below a username (like `jdoe/myrepo.git`), the
+            repository is moved to a new location -- using the new owner's login. You
+            then need to update your local repositories with the new location!
+        br/
+        form.ajaxForm.form-horizontal(action="" method="post")
+          fieldset
+            .control-group
+              label.control-label New owner
+              .controls
+                input(type="text" name="owner" id="ownerInput")
+            .form-actions
+              button.btn.btn-primary I understand, Submit!
+      #collaboratorTab.tab-pane
+        h2 Collaborators
+        p
+          | You can grant other groups pull or push rights to your repository.
+          | Just start typing in the user-field to start searching.
+        .alert.alert-warning.alert-block#colaboratorsOpenRepoWarning
+          :markdown
+            **Warning:** Explicitely given _pull_ rights have no effect. Your
+            repository is _open_, that means **everyone** can pull from it,
+            regardless of any _pull_ rights!
+        .span3
+          form.ajaxForm(action="" method="post")
+            fieldset
+              .control-group
+                label.control-label Group
+                .controls
+                  input#groupInput(type="text" placeholder="group name")
+              .control-group
+                label.control-label Permission
+                .controls
+                  select
+                    option Push
+                    option Pull
+              .form-actions
+                button.btn.btn-primary Add
+                button.btn(type="reset") Reset
+        .span5
+          table.table.table-striped.table-condensed
+            tbody(id="repoPermTableBody")
