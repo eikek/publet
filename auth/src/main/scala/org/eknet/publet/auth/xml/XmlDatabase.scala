@@ -100,7 +100,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
   def updateRepository(repo: RepositoryModel) {
     synchronized {
-      val newList = (repositories - repo) + repo
+      val newList = repositories.filter(_.name != repo.name) + repo
       this.repositories = newList
       write()
     }
