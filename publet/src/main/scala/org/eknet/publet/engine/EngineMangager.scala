@@ -16,8 +16,9 @@
 
 package org.eknet.publet.engine
 
-import scala.collection._
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.Glob
+import collection.mutable
 
 /**
  *
