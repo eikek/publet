@@ -173,7 +173,8 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
     private def repositoryOwnerPerms = getAllRepositories
       .filter(_.owner == user.login)
-      .map(rm => Permission(GitAction.push.toString, Some(rm.name)))
+      .flatMap(rm => List(Permission(GitAction.push.toString, Some(rm.name)),
+          Permission(GitAction.gitadmin.toString, Some(rm.name))))
       .toSet
 
     private def standardPermissions = permissions

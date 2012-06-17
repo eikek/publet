@@ -85,14 +85,38 @@ object Security extends Logging {
   }
 
   def checkGitAction(action: GitAction.Value, model: RepositoryModel) {
-    if (model.tag == RepositoryTag.closed || action == GitAction.push) {
-      val push= GitAction.push.toString +":"+ model.name
-      if (!hasPerm(push)) {
+    if (model.tag != RepositoryTag.open || action != GitAction.pull) {
+      //not checking pull, if push is granted: TODO use implies relation on Permission!
+      if (action != GitAction.pull || !hasGitAction(GitAction.push, model)) {
         val perm = action.toString +":"+ model.name
         checkPerm(perm)
       }
     }
   }
+
+  def hasGitAction(action: GitAction.Value, model: RepositoryModel): Boolean = {
+    if (model.tag == RepositoryTag.open && action == GitAction.pull)
+      true
+    else {
+      //not checking pull, if push is granted: TODO use implies relation on Permission!
+      if (action != GitAction.pull || !hasGitAction(GitAction.push, model)) {
+        val perm = action.toString +":"+ model.name
+        hasPerm(perm)
+      } else {
+        true
+      }
+    }
+  }
+
+  def hasGitAction(action: GitAction.Value): Boolean = {
+    val repoModel = PubletWebContext.getRepositoryModel
+    if (repoModel.isDefined) {
+      hasGitAction(action, repoModel.get)
+    } else {
+      true
+    }
+  }
+
   def checkGitAction(action: GitAction.Value) {
     val repoModel = PubletWebContext.getRepositoryModel
     if (repoModel.isDefined) {
@@ -108,22 +132,4 @@ object Security extends Logging {
     hasPerm(pathPermission(action, path))
   }
 
-  def hasGitAction(action: GitAction.Value, model: RepositoryModel) = {
-    val perm = action.toString +":"+ model.name
-    hasPerm(perm)
-  }
-
-  def hasGitAction(action: GitAction.Value) = {
-    val repoModel = PubletWebContext.getRepositoryModel
-    if (repoModel.isDefined) {
-      if (repoModel.get.tag == RepositoryTag.closed || action == GitAction.push) {
-        val perm = action.toString +":"+ PubletWebContext.getRepositoryModel.map(_.name).get
-        hasPerm(perm)
-      } else {
-        true
-      }
-    } else {
-      true
-    }
-  }
 }

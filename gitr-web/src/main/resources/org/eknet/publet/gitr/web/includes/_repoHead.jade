@@ -1,5 +1,6 @@
 - import org.eknet.publet.auth.RepositoryModel
 - import org.eknet.publet.auth.RepositoryTag
+- import org.eknet.publet.auth.GitAction
 -@ val repositoryModel: Option[RepositoryModel] = None
 -@ val currentHead: String = ""
 
@@ -24,6 +25,6 @@
           =currentHead
     .span7
       ul.nav.nav-pills.pull-right
-        - if (owner == Security.username)
+        - if (Security.hasGitAction(GitAction.gitadmin, repositoryModel.get))
           li
             a(href={"?r=" +repositoryModel.get.name+ ".git&do=admin"}) Admin

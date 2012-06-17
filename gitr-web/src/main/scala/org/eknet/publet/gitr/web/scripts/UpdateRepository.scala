@@ -4,7 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import GitrControl._
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
-import org.eknet.publet.auth.{RepositoryTag, RepositoryModel}
+import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.UnauthorizedException
 
@@ -16,6 +16,7 @@ class UpdateRepository extends ScalaScript {
 
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
+      Security.checkGitAction(GitAction.gitadmin, rm)
       if (Security.username != rm.owner) {
         throw new UnauthorizedException("Only owners can alter repository state.")
       }

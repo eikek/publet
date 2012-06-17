@@ -6,6 +6,7 @@ import GitrControl._
 import org.eknet.publet.web.{ErrorResponse, PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.xml.PermissionModel
 import org.eknet.publet.auth.{Permission, GitAction}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,6 +16,7 @@ class UpdateCollaborator extends ScalaScript {
 
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
+      Security.checkGitAction(GitAction.gitadmin, rm)
       PubletWebContext.param("groupName") flatMap ( gn => {
         PubletWebContext.param("permissionName") flatMap (pm => {
           val authm = PubletWeb.authManager

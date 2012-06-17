@@ -2,6 +2,7 @@ package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -10,6 +11,7 @@ import org.eknet.publet.web.PubletWeb
 class GetGroupInfo extends ScalaScript {
 
   def serve() = {
+    Security.checkAuthenticated()
     val allGroups = PubletWeb.authManager.getAllGroups
     val repoGroups = GitrControl.getRepositoryModelFromParam map { r =>
       PubletWeb.authManager

@@ -29,6 +29,8 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.support.StringTemplateSource
 import eu.medsea.mimeutil.MimeUtil
 import ContentType._
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.auth.GitAction
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter
@@ -39,6 +41,7 @@ import ContentType._
 class GitrView extends ScalaScript {
 
   def serve() = {
+    getRepositoryModelFromParam.map(Security.checkGitAction(GitAction.pull, _))
     getRepositoryFromParam match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))
       case Some(repo) => getAction match {

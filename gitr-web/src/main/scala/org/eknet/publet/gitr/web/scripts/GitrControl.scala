@@ -26,20 +26,35 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.web.util.RenderUtils
 import org.eknet.publet.vfs.{ContentType, Path, Content}
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.auth.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.05.12 19:25
  */
 class GitrControl extends ScalaScript {
+
   def serve() = {
-    getReponame match {
+    getRepositoryModelFromParam match {
       case None => repositoryListing
-      case Some(name) => getAction match {
-        case "log" => logView
-        case "commit" => commitContents
-        case "admin" => repositoryAdmin
-        case _ => sourceView
+      case Some(model) => getAction match {
+        case "log" => {
+          Security.checkGitAction(GitAction.pull, model)
+          logView
+        }
+        case "commit" => {
+          Security.checkGitAction(GitAction.pull, model)
+          commitContents
+        }
+        case "admin" => {
+          Security.checkGitAction(GitAction.gitadmin, model)
+          repositoryAdmin
+        }
+        case _ => {
+          Security.checkGitAction(GitAction.pull, model)
+          sourceView
+        }
       }
     }
   }
@@ -164,6 +179,12 @@ class GitrControl extends ScalaScript {
 }
 
 object GitrControl {
+
+  /** Permission granted to administrate the repository (incl. delete) */
+  val adminPerm = GitAction.gitadmin.toString
+
+  /** Permission granted to allow creation of new repositories. */
+  val createPerm = GitAction.gitcreate.toString
 
   val gitradminTemplate = "/gitr/_gitradmin.page"
   val gitrrepoAdminTemplate = "/gitr/_repoadmin.page"

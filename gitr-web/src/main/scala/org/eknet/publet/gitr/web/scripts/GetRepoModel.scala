@@ -1,6 +1,7 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -11,6 +12,7 @@ class GetRepoModel extends ScalaScript {
     import GitrControl._
     import ScalaScript._
 
+    Security.checkAuthenticated()
     getRepositoryModelFromParam flatMap { r =>
       makeJson(Map("success"->true, "name"->r.name, "tag"->(r.tag.toString), "owner"->r.owner))
     } orElse {

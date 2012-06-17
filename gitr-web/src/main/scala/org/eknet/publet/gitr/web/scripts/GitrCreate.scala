@@ -33,9 +33,9 @@ class GitrCreate extends ScalaScript {
       case _ => RepositoryTag.open
     }
     PubletWebContext.param("repositoryName") match {
-
       case Some(r) => {
         val login = Security.username
+        Security.checkGitAction(GitAction.gitcreate, RepositoryModel(r, RepositoryTag.open, login))
         val normName = login +"/"+ r
         val repoName = RepositoryName(normName).toDotGit
         PubletWeb.gitr.get(repoName).map(x=> json(false, "Repository already exists"))

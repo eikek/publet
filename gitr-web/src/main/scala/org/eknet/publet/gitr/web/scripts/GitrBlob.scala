@@ -21,6 +21,8 @@ import org.eknet.publet.engine.scala.ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.ContentType
 import org.eknet.publet.web.{ErrorResponse, StreamResponse}
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.auth.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -31,6 +33,7 @@ class GitrBlob extends ScalaScript {
     getRepositoryFromParam match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))
       case Some(repo) => {
+        getRepositoryModelFromParam.map(Security.checkGitAction(GitAction.pull, _))
         getCommitFromRequest(repo) flatMap { commit =>
           val file = getPath
           repo.getBlobLoader(commit.getTree, file.asString) map (loader => {

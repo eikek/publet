@@ -163,11 +163,11 @@ hr/
         p
           | You can grant other groups pull or push rights to your repository.
           | Just start typing in the user-field to start searching.
-        .alert.alert-warning.alert-block#colaboratorsOpenRepoWarning
+        .alert.alert-info#colaboratorsOpenRepoWarning
           :markdown
-            **Warning:** Explicitely given _pull_ rights have no effect. Your
-            repository is _open_, that means **everyone** can pull from it,
-            regardless of any _pull_ rights!
+            Note: Explicitely given _pull_ rights have no effect, since your
+            repository is _open_. So **everyone** can pull from it, regardless
+            of any _pull_ rights!
         .span3
           form.ajaxForm(action="updateCollaborator.json" method="post")
             input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
