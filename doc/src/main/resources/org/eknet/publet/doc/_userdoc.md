@@ -192,41 +192,44 @@ all privileges.
 Here is an example `permissions.xml` file explained:
 
     <publetAuth>
+      <!-- user database
+       -
+       - users are filtered on login property. This must be unique
+       - any duplicates are ignored, the first entry wins.
+      -->
       <users>
         <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5">
           <fullName>John Doe</fullName>
-          <email>email@host.com</email>
-          <group>admin</group>
-          <group>moderator</group>
+          <email>jdoe@mail.com</email>
+          <group>wikiuser</group>
+          <group>editor</group>
         </user>
       </users>
 
+      <!-- Defines repository states, default is `closed` -->
       <repositories>
+        <repository name="jdoe/dotfiles" tag="closed" owner="jdoe"/>
+        <repository name="wikis/mywiki" tag="open" owner="jdoe"/>
         <repository name="contentroot" tag="closed"/>
       </repositories>
 
-      <resourceConstraints>
-        <pattern name="/main/.allIncludes/config/*" perm="configure"/>
-        <pattern name="/main/projects/*" perm="moderate"/>
-        <pattern name="/main/slides/*" perm="moderate"/>
-        <pattern name="/main/*" perm="anon"/>
-        <pattern name="/publet/doc/*" perm="moderate"/>
-      </resourceConstraints>
-
+      <!-- Defines permissions and associates them to roles -->
       <permissions>
-        <grant name="PUSH">
+        <!-- allows many on and to tags -->
+        <grant name="PULL">
           <on>contentroot</on>
-          <to>admin</to>
-        </grant>
-        <grant name="moderate">
-          <to>moderator</to>
-        </grant>
-        <grant name="configure">
-          <to>admin</to>
+          <on>wikis/mywiki</on>
+          <to>manager</to>
+          <to>editor</to>
+          <to>coders</to>
         </grant>
       </permissions>
-    </publetAuth>
 
+      <resourceConstraints>
+        <pattern name="/c/**" perm="anon"/>
+        <pattern name="/sec/**" perm="superperm"/>
+      </resourceConstraints>
+    </publetAuth>
 
 Note, the file is inside the repository, so you can edit it like any
 other resource. But modifications are not reflected until a manual
@@ -252,6 +255,9 @@ repository not listed is always an _open_ repository. In the example the
 `contentroot` is defined to be a closed repository. Access to a closed repository
 will always be checked. That means that no anonymous user could now browse
 a page anymore.
+
+Additionally (and optional), an owner can be specified. This should be a
+login of an registered user.
 
 ## Resource constraints
 
