@@ -120,7 +120,9 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
       val transformed = permissions.withFilter(groupPermFilter)
         .map(pm => PermissionModel(pm.perm, pm.repository, pm.roles.filterNot(_ == group)))
-      val newlist = permissions.filterNot(groupPermFilter) ++ transformed
+        .filterNot(_.roles.isEmpty)
+
+      val newlist =  permissions.filterNot(groupPermFilter) ++ transformed
       this.permissions = newlist
       write()
     }
