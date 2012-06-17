@@ -2,33 +2,60 @@
 title: Gitr Repository Admin
 
 --- name:head pipeline:jade
+link(rel="stylesheet" href="gitr.css")
 :javascript
   $(function() {
     // initialize repo-state form
+    $('.loading').removeClass('invisible');
     $.getJSON("gitrRepoModel.json", { r: getURLParameter("r") }, function(data) {
       var state = data.tag;
       $("#repoStateForm").find("[value='"+state+"']").attr("checked", "checked");
       if (state == "closed") {
         $('#colaboratorsOpenRepoWarning').remove();
       }
+      $('.loading').addClass('invisible');
     });
     // initialize collaborators form
-    $.getJSON("gitrGroupInfo.json", {r: getURLParameter("r") }, function(data) {
-      var rows = [];
-      data.collaborators.forEach(function(el, i) {
-        var iconClass = el.permission == "push" ? 'icon-pencil' : 'icon-eye-open';
-        var labelClass = el.permission == "push" ? 'label-warning' : 'label-info';
-        rows.push('<tr><td width="20px"><i class="'+iconClass+'"></i></td>'+
-          '<td>'+el.group+' <span class="label '+labelClass+'">'+el.permission+'</span></td>'+
-          '<td><span class="pull-right">'+
-            '<button class="btn btn-primary btn-mini removePermButton" data-login="'+el.group+'">Remove</button></span>'+
-            '</td></tr>');
+    var updateCollaboratorTable = function() {
+      $('.loading').removeClass('invisible');
+      $.getJSON("gitrGroupInfo.json", {r: getURLParameter("r") }, function(data) {
+        var rows = [];
+        data.collaborators.forEach(function(el, i) {
+          var iconClass = el.permission == "push" ? 'icon-pencil' : 'icon-eye-open';
+          var labelClass = el.permission == "push" ? 'label-warning' : 'label-info';
+          rows.push('<tr><td width="20px"><i class="'+iconClass+'"></i></td>'+
+            '<td>'+el.group+' <span class="label '+labelClass+'">'+el.permission+'</span></td>'+
+            '<td><span class="pull-right">'+
+              '<button class="btn btn-primary btn-mini removePermButton" data-perm="'+el.permission+'" data-group="'+el.group+'">Remove</button></span>'+
+              '</td></tr>');
+        });
+        var tableBody = $('#repoPermTableBody');
+        tableBody.empty();
+        $(rows.join("")).appendTo(tableBody);
+        $('.loading').addClass('invisible');
+
+        //bind remove buttons
+        $('#repoPermTableBody').find('.removePermButton').on('click', function(e) {
+          var group = $(e.target).attr('data-group');
+          var perm = $(e.target).attr('data-perm');
+          var params = { "r": getURLParameter("r"), "groupName": group, "permissionName": perm, "do":"remove" };
+          $('.loading').removeClass('invisible');
+          $.getJSON("updateCollaborator.json", params, function(data) {
+            updateCollaboratorTable();
+            $('.loading').addClass('invisible');
+          }).error(function(e) {
+              var cont = $('#messageContainer');
+              cont.empty();
+              $('<div/>', {
+                class: 'alert alert-error',
+                html: '<button class="close" data-dismiss="alert">&times;</button>' +(e.statusText? e.statusText : e)
+              }).appendTo(cont);
+          });
+        });
       });
-      $(rows.join("")).appendTo($('#repoPermTableBody'))
-      $('#repoPermTableBody').find('.removePermButton').on('click', function(e) {
-        var login = $(e.target).attr('data-login');
-      });
-    });
+    };
+    updateCollaboratorTable();
+
     $.getJSON("gitrGroupInfo.json", function(data) {
       $('#groupInput').typeahead({ source: data });
     });
@@ -36,6 +63,9 @@ title: Gitr Repository Admin
       $('#ownerInput').typeahead({ source: data });
     });
     $('.ajaxForm').ajaxForm({
+      beforeSubmit: function() {
+        $('.loading').removeClass('invisible');
+      },
       success: function(e) {
         var cont = $('#messageContainer');
         cont.empty();
@@ -43,6 +73,8 @@ title: Gitr Repository Admin
           class: 'alert alert-' + (e.success? 'success' : 'error'),
           html: '<button class="close" data-dismiss="alert">&times;</button>'+e.message
         }).appendTo(cont);
+        updateCollaboratorTable();
+        $('.loading').addClass('invisible');
       },
       error: function(e) {
         var cont = $('#messageContainer');
@@ -51,6 +83,7 @@ title: Gitr Repository Admin
           class: 'alert alert-error',
           html: '<button class="close" data-dismiss="alert">&times;</button>' +(e.statusText? e.statusText : e)
         }).appendTo(cont);
+        $('.loading').addClass('invisible');
        }
     });
 
@@ -80,6 +113,7 @@ hr/
         a(href=".") Repositories
   .span9
     #messageContainer
+    .loading.invisible
     .tab-content
       #stateTab.tab-pane.active
         h2 Repository State
@@ -117,6 +151,7 @@ hr/
         br/
         form.ajaxForm.form-horizontal(action="" method="post")
           fieldset
+            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
             .control-group
               label.control-label New owner
               .controls
@@ -134,18 +169,19 @@ hr/
             repository is _open_, that means **everyone** can pull from it,
             regardless of any _pull_ rights!
         .span3
-          form.ajaxForm(action="" method="post")
+          form.ajaxForm(action="updateCollaborator.json" method="post")
+            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
             fieldset
               .control-group
                 label.control-label Group
                 .controls
-                  input#groupInput(type="text" placeholder="group name")
+                  input#groupInput(type="text" name="groupName" placeholder="group name")
               .control-group
                 label.control-label Permission
                 .controls
-                  select
-                    option Push
+                  select(name="permissionName")
                     option Pull
+                    option Push
               .form-actions
                 button.btn.btn-primary Add
                 button.btn(type="reset") Reset

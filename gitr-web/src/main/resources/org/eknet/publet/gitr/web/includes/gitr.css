@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 .loading {
-    position: relative;
-    left: 45%;
+    position: absolute;
+    top: 30%;
+    left: 50%;
     width: 128px;
     height: 128px;
     background: url(loading.gif) center no-repeat;
 }
 
+.invisible {
+    display:none;
+}
 
 /*
  "lavender" theme for commits. see http://www.computerhope.com/htmcolor.htm
