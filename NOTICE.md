@@ -164,3 +164,14 @@ highlightjs, licensed under a BSD license
 > SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <http://softwaremaniacs.org/soft/highlight/en/> 
+
+
+### Gitblit
+
+gitblit, licensed under
+Apache Software License, Version 2.0.
+
+Some parts of the source code regarding jgit was copied from gitblit's
+utility classes and formatted to scala.
+
+<http://www.gitblit.com>
