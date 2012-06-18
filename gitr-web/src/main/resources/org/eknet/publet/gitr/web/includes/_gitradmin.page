@@ -20,6 +20,11 @@ script(src="gitr-listing.js" type="text/javascript")
           $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
         }
       },
+      error: function(data, e) {
+        var closeIcon = '<a class="close" data-dismiss="alert" href="#">&times;</a>';
+        var msg = data.statusText? data.statusText : data;
+        $('#response').html('<div class="alert alert-error">' + msg + closeIcon + '</div>');
+      },
       dataType: 'json'
     };
     $('#createRepoForm').ajaxForm(options);

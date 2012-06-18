@@ -28,7 +28,7 @@ import org.eknet.publet.web.shiro.Security
 class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
 
   val name = repo.name
-  val gitUrl = PubletWebContext.urlOf("/git/"+ repo.name.name)
+  val gitUrl = GitrControl.getCloneUrl(repo.name.name)
   val owner = model.owner
   val description = repo.getDescription.getOrElse("")
 

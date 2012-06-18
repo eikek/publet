@@ -1,0 +1,57 @@
+---
+title: Gitr Web
+highlightTheme: magula
+
+--- name:head pipeline:jade
+link(rel="stylesheet" href="gitr.css")
+
+--- name:content pipeline:jade
+=include("_gitrpagehead.jade")
+
+- import org.eknet.publet.gitr.web.scripts.GitrControl
+- import org.eknet.publet.auth.RepositoryModel
+-@ val repositoryModel: Option[RepositoryModel] = None
+-@ val repoName: String = ""
+h2 This repository is empty
+- if (repositoryModel.isDefined)
+  :markdown
+    Follow these steps to create initial content:
+
+    ### Clone this repository
+
+    If you already have an existing repository, skip this step. Otherwise you
+    may clone this (empty) repository to your local disk:
+
+  pre<>
+    !~~"$ git clone " + GitrControl.getCloneUrl(repositoryModel.get.name)
+    !~~"$ cd " + repoName
+  :markdown
+
+    ### Existing repository
+
+    If you have an existing repository which you want to use, add this location
+    as a _remote_.
+
+  pre<>
+    !~~"$ git remote add origin " + GitrControl.getCloneUrl(repositoryModel.get.name)
+  :markdown
+
+    Just replace `origin` with another name, if it is already in use.
+
+    ### Create new content and commit the change
+
+    If you start with an empty repository (you just cloned one), create some initial
+    content.
+
+    <pre>
+    $ echo "Initial Readme." > readme.txt
+    $ git add readme.txt
+    $ git commit -am "initial readme file"
+    </pre>
+
+    ### Push local changes up here
+
+    Whether you created a new repository or are using an existing one, the following
+    command tranfers all changes up here:
+
+        $ git push origin -u master

@@ -27,7 +27,9 @@ import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.web.util.RenderUtils
 import org.eknet.publet.vfs.{ContentType, Path, Content}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
+import org.eknet.publet.auth.{RepositoryModel, GitAction}
+import org.eknet.publet.gitr.RepositoryName
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -59,13 +61,36 @@ class GitrControl extends ScalaScript {
     }
   }
 
-  def repositoryAdmin: Option[Content] = {
+  def renderEmptyRepoPage(): Option[Content] = {
+    val repo = getRepositoryFromParam.map(r => {
+      val last = r.name.segments.last
+      last.substring(0, last.length-4) //without .git
+    })
+    renderTemplate(gitremptyRepoTemplate, repoHeadMap ++ Map("repoName"->(repo.getOrElse(""))))
+  }
+
+  def repoHeadMap: Map[String, Any] = {
     val repo = getRepositoryModelFromParam
     val currentHead = getRev
-    renderTemplate(gitrrepoAdminTemplate, Map(
+    Map(
       "repositoryModel" -> repo,
       "currentHead" -> currentHead
-    ))
+    )
+  }
+
+  def pageHeaderMap: Map[String, Any] = {
+    val base = repoHeadMap
+    val repo = getRepositoryFromParam
+    val revisions = repo
+      .map(r => r.getLocalBranches ::: r.getLocalTags)
+      .map(_.map(_.name))
+      .map(names => Json.build(names).toString)
+      .getOrElse("")
+    base ++ Map("repository"->repo, "revisions" -> revisions)
+  }
+
+  def repositoryAdmin: Option[Content] = {
+    renderTemplate(gitrrepoAdminTemplate, repoHeadMap)
   }
 
   def repositoryListing: Option[Content] = {
@@ -73,98 +98,69 @@ class GitrControl extends ScalaScript {
   }
 
   def sourceView: Option[Content] = {
-    val repo = getRepositoryFromParam
-    val revisions = repo
-      .map(r => r.getLocalBranches ::: r.getLocalTags)
-      .map(_.map(_.name))
-      .map(names => Json.build(names).toString)
-      .getOrElse("")
-    val model = getRepositoryModelFromParam
-    val currentHead = getRev
-    renderTemplate(gitrsourceTemplate, Map(
-      "revisions" -> revisions,
-      "repositoryModel" -> model,
-      "currentHead" -> currentHead,
-      "path" -> (getPath.asString))
-    )
+    val c = getRepositoryFromParam.flatMap(getCommitFromRequest)
+    if (c.isEmpty) {
+      renderEmptyRepoPage()
+    } else {
+      val params = pageHeaderMap ++ Map("path" -> (getPath.asString))
+      renderTemplate(gitrsourceTemplate, params)
+    }
   }
 
   def logView: Option[Content] = {
     import collection.JavaConversions._
 
-    val repo = getRepositoryFromParam
-    val revisions = repo
-      .map(r => r.getLocalBranches ::: r.getLocalTags)
-      .map(_.map(_.name))
-      .map(names => Json.build(names).toString)
-      .getOrElse("")
-    val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
-    val model = repo.map(r => PubletWeb.authManager.getRepository(r.name.name))
-    val currentHead = getRev
     getRepositoryFromParam flatMap ( repo => {
-      val log = repo.git.log()
-      val path = getPath
-      if (!path.isRoot) {
-        log.addPath(path.toRelative.asString)
-      }
-      repo.getCommit(getRev).foreach(c => log.add(c.getId))
-
-      val pageSize = PubletWeb.publetSettings("gitrweb.pageSize").getOrElse("25").toInt
-      val page = getPage
-
-      val commits = CommitGroup.newBuilder
-      def collectCommits(iter:Iterator[RevCommit], cur: Int) {
-        if (cur < (pageSize*page) && iter.hasNext) {
-          val revCommit = iter.next()
-          if (cur >= (pageSize*(page-1))) {
-            commits.addByDay(CommitInfo("", "", false, revCommit, PubletWebContext.getLocale))
-          }
-          collectCommits(iter, cur+1)
+      repo.getCommit(getRev) flatMap ( commit => {
+        val log = repo.git.log()
+        val path = getPath
+        if (!path.isRoot) {
+          log.addPath(path.toRelative.asString)
         }
-      }
-      val commitIter = log.call().iterator()
-      val nextPage = if (commitIter.hasNext) {
-        Some("?r="+getReponame.get+ "&page="+(page+1)+"&do=log&rev="+getRev)
-      } else {
-        None
-      }
-      val prevPage = if (page>1) {
-        Some("?r="+getReponame.get+ "&page="+(page-1)+"&do=log&rev="+getRev)
-      } else {
-        None
-      }
-      collectCommits(commitIter, 0)
-      val commitInfos = commits.build
-      renderTemplate(gitrlogTemplate, Map("revisions" -> revisions,
-        "repositoryModel" -> model,
-        "owner" -> owner,
-        "currentHead" -> currentHead,
-        "path" -> (getPath.asString),
-        "prevPage" -> prevPage,
-        "nextPage" -> nextPage,
-        "commits" -> commitInfos))
-    })
+        log.add(commit.getId)
+        val pageSize = PubletWeb.publetSettings("gitrweb.pageSize").getOrElse("25").toInt
+        val page = getPage
+
+        val commits = CommitGroup.newBuilder
+        def collectCommits(iter:Iterator[RevCommit], cur: Int) {
+          if (cur < (pageSize*page) && iter.hasNext) {
+            val revCommit = iter.next()
+            if (cur >= (pageSize*(page-1))) {
+              commits.addByDay(CommitInfo("", "", false, revCommit, PubletWebContext.getLocale))
+            }
+            collectCommits(iter, cur+1)
+          }
+        }
+        val commitIter = log.call().iterator()
+        val nextPage = if (commitIter.hasNext) {
+          Some("?r="+getReponame.get+ "&page="+(page+1)+"&do=log&rev="+getRev)
+        } else {
+          None
+        }
+        val prevPage = if (page>1) {
+          Some("?r="+getReponame.get+ "&page="+(page-1)+"&do=log&rev="+getRev)
+        } else {
+          None
+        }
+        collectCommits(commitIter, 0)
+        val commitInfos = commits.build
+        val paramMap = pageHeaderMap ++ Map("path" -> (getPath.asString),
+          "prevPage" -> prevPage,
+          "nextPage" -> nextPage,
+          "commits" -> commitInfos)
+        renderTemplate(gitrlogTemplate, paramMap)
+
+      }) orElse(renderEmptyRepoPage())
+    }) orElse(RenderUtils.renderMessage("No repository!", "No repository specified.", "error"))
   }
 
 
   def commitContents = {
-    val repo = getRepositoryFromParam
-    val revisions = repo
-      .map(r => r.getLocalBranches ::: r.getLocalTags)
-      .map(_.map(_.name))
-      .map(names => Json.build(names).toString)
-      .getOrElse("")
-    val owner = repo map { r => if (r.name.segments.length > 1) r.name.segments(0) else "" } getOrElse ("")
-    val model = repo.map(r => PubletWeb.authManager.getRepository(r.name.name))
-    val currentHead = getRev
-    repo map ( repo => {
+    getRepositoryFromParam map ( repo => {
       getCommitFromRequest(repo) flatMap ( commit => {
         val files = repo.getFilesInCommit(commit)
         val parent = repo.getParentCommit(commit).orNull
-        val attrs = Map("revisions" -> revisions,
-          "repositoryModel" -> model,
-          "owner" -> owner,
-          "currentHead" -> currentHead,
+        val attrs = pageHeaderMap ++ Map(
           "path" -> (getPath.asString),
           "commit" -> commit,
           "changedFiles" -> files,
@@ -192,6 +188,7 @@ object GitrControl {
   val gitrlogTemplate = "/gitr/_gitrlog.page"
   val gitrheaderTemplate = "/gitr/_gitrpagehead.page"
   val gitrcommitTemplate = "/gitr/_gitrcommit.page"
+  val gitremptyRepoTemplate = "/gitr/_emptyrepo.page"
 
   val rParam = "r"   // repo name, default = "None"
   val hParam = "h"   // revision, default = "master"
@@ -226,4 +223,8 @@ object GitrControl {
   }
   lazy val wikiExtensions = ContentType.markdown.extensions ++ ContentType.textile.extensions
 
+  def getCloneUrl(repoName: String) = {
+    val name = if (repoName.endsWith(".git")) repoName else repoName+".git"
+    PubletWebContext.urlOf("/git/"+ name)
+  }
 }

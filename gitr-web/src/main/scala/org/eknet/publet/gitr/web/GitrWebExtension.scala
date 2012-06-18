@@ -44,6 +44,7 @@ class GitrWebExtension extends WebExtension {
     pages.addResource(new UrlResource(toUrl("_gitrcommit.page"), "_gitrcommit.page".rn))
     pages.addResource(new UrlResource(toUrl("_gitrlog.page"), "_gitrlog.page".rn))
     pages.addResource(new UrlResource(toUrl("_gitrpagehead.jade"), "_gitrpagehead.jade".rn))
+    pages.addResource(new UrlResource(toUrl("_emptyrepo.page"), "_emptyrepo.page".rn))
     pages.addResource(new WebScriptResource("gitrcreate.json".rn, new GitrCreate()))
     pages.addResource(new WebScriptResource("gitr-repolist.json".rn, new GitrRepoList()))
     pages.addResource(new WebScriptResource("gitrview.json".rn, new GitrView()))
