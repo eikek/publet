@@ -163,7 +163,7 @@ hr/
             repository is moved to a new location -- using the new owner's login. You
             then need to update your local repositories with the new location!
         br/
-        form.ajaxForm.form-horizontal(action="" method="post")
+        form.ajaxForm.form-horizontal(action="transferOwnership.json" method="post")
           fieldset
             input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
             .control-group

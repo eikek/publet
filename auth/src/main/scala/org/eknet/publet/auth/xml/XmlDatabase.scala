@@ -106,6 +106,15 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     }
   }
 
+
+  def removeRepository(repo: RepositoryModel) {
+    synchronized {
+      val newList = repositories - repo
+      this.repositories = newList
+      write()
+    }
+  }
+
   def updatePermission(perm: PermissionModel) {
     synchronized {
       val newList = permissions + perm

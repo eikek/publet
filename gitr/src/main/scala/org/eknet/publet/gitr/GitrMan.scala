@@ -72,6 +72,16 @@ trait GitrMan extends GitrTandem with GitrManListenerSupport {
   def delete(name: RepositoryName)
 
   /**
+   * Renames the repository with `oldName` to the given `newName`.
+   * If the `oldName` repository does not exists, an exception
+   * is thrown.
+   *
+   * @param oldName
+   * @param newName
+   */
+  def rename(oldName: RepositoryName, newName: RepositoryName)
+
+  /**
    * Clones the repository `source` into the repository `target`.
    * The source repository must exist, or an exception is thrown.
    *

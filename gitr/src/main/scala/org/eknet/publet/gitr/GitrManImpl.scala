@@ -21,6 +21,7 @@ import grizzled.slf4j.Logging
 import org.eclipse.jgit.util.FS
 import java.io.{FileFilter, File}
 import org.eclipse.jgit.lib.RepositoryCache
+import java.nio.file.{Paths, StandardCopyOption, CopyOption, Files}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -73,6 +74,28 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
       removeDir(repoFile(td.workTree.name))
     } else {
       removeDir(repoFile(name))
+    }
+  }
+
+  def rename(oldName: RepositoryName, newName: RepositoryName) {
+    def moveRepo(repo: GitrRepository, name: RepositoryName) {
+      val source = repoFile(repo.name)
+      val target = repoFile(name)
+      Files.move(source.toPath, target.toPath, StandardCopyOption.ATOMIC_MOVE)
+    }
+    val old = get(oldName).getOrElse(sys.error("Repository '"+oldName+"' does not exist"))
+    if (get(newName).isDefined) sys.error("Target repository '"+ newName +"' already exists")
+
+    if (oldName != newName) {
+      if (old.isTandem) {
+        //must move both directories and update the remote
+        //I'll go for moving the bare and creating a new working copy
+        val td = getTandem(oldName).get
+        moveRepo(td.bare, newName)
+        createTandemFromBare(get(newName).get, td.branch)
+      } else {
+        moveRepo(old, newName)
+      }
     }
   }
 

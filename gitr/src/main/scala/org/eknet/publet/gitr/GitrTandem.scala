@@ -34,7 +34,7 @@ trait GitrTandem {
   }
 
   def createTandemFromBare(bare: GitrRepository, branch: String = "master"): Tandem = {
-    if (!bare.isBare) sys.error("Cannot createa  tandem from a non-bare repository: "+ bare.name)
+    if (!bare.isBare) sys.error("Cannot create a tandem from a non-bare repository: "+ bare.name)
     val split = splitName(bare.name)
     val ws = clone(bare.name, split._2, false)
 

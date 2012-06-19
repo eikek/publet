@@ -31,5 +31,13 @@ case class RepositoryName(name: String) {
 
   val isDotGit = name.endsWith(".git")
 
+  /** Converts this to a new repository name with the `.git` extension */
   def toDotGit = if (isDotGit) this else RepositoryName(name+".git")
+
+  /** Converts this to a new [[org.eknet.publet.gitr.RepositoryName]] without the `.git` extension. */
+  def strip = if (isDotGit) RepositoryName(name.substring(0, name.length-4)) else this
+}
+
+object RepositoryName {
+  def apply(segments: Traversable[String]):RepositoryName = RepositoryName(segments.mkString("/"))
 }
