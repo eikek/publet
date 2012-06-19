@@ -67,14 +67,18 @@ link(rel="stylesheet" href="gitr.css")
         $('.loading').removeClass('invisible');
       },
       success: function(e) {
-        var cont = $('#messageContainer');
-        cont.empty();
-        $('<div/>', {
-          class: 'alert alert-' + (e.success? 'success' : 'error'),
-          html: '<button class="close" data-dismiss="alert">&times;</button>'+e.message
-        }).appendTo(cont);
-        updateCollaboratorTable();
-        $('.loading').addClass('invisible');
+        if (e.redirect) {
+          window.location = e.redirect;
+        } else {
+          var cont = $('#messageContainer');
+          cont.empty();
+          $('<div/>', {
+            class: 'alert alert-' + (e.success? 'success' : 'error'),
+            html: '<button class="close" data-dismiss="alert">&times;</button>'+e.message
+          }).appendTo(cont);
+          updateCollaboratorTable();
+          $('.loading').addClass('invisible');
+        }
       },
       error: function(e) {
         var cont = $('#messageContainer');
@@ -87,6 +91,14 @@ link(rel="stylesheet" href="gitr.css")
        }
     });
 
+    $('#checkDelete').on('click', function(e) {
+      var cb = $(e.target);
+      if (cb.attr('checked')) {
+        $('#deleteRepoButton').removeAttr("disabled");
+      } else {
+        $('#deleteRepoButton').attr("disabled", "disabled");
+      }
+    });
   });
 --- name:content pipeline:jade
 - import org.eknet.publet.auth.RepositoryModel
@@ -101,9 +113,11 @@ hr/
       li.active
         a(href="#stateTab" data-toggle="tab") Repository State
       li
+        a(href="#collaboratorTab" data-toggle="tab") Collaborators
+      li
         a(href="#ownerTab" data-toggle="tab") Ownership
       li
-        a(href="#collaboratorTab" data-toggle="tab") Collaborators
+        a(href="#deleteRepoTab" data-toggle="tab") Delete
     ul.nav.nav-pills.nav-stacked
       li
         h4 Back Links
@@ -188,3 +202,18 @@ hr/
         .span5
           table.table.table-striped.table-condensed
             tbody(id="repoPermTableBody")
+      #deleteRepoTab.tab-pane
+        h2 Delete Repository
+        p
+          | Deleting the repository permanently removes all contents.
+          | This action is not recoverable!
+        br/
+        form.ajaxForm.form-horizontal(action="destroyRepo.json" method="post")
+          input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+          fieldset
+            .control-group
+              .controls
+                label.checkbox
+                  input(type="checkbox" id="checkDelete") I confirm, please delete.
+            .form-actions
+              button.btn.btn-large.btn-danger#deleteRepoButton(disabled="disabled") Permanently delete repository

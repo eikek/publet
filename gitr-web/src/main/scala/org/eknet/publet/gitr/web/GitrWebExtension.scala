@@ -55,6 +55,7 @@ class GitrWebExtension extends WebExtension {
     pages.addResource(new WebScriptResource("updateRepository.json".rn, new UpdateRepository()))
     pages.addResource(new WebScriptResource("updateCollaborator.json".rn, new UpdateCollaborator()))
     pages.addResource(new WebScriptResource("getLogins.json".rn, new GetLogins()))
+    pages.addResource(new WebScriptResource("destroyRepo.json".rn, new DestroyRepo()))
     pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
     PubletWeb.publet.mountManager.mount("/gitr".p, pages)
   }

@@ -19,7 +19,7 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import GitrControl._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{ErrorResponse, PubletWeb, PubletWebContext}
 import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.gitr.{GitrRepository, RepositoryName}
 import org.eclipse.jgit.revwalk.RevCommit
@@ -98,12 +98,17 @@ class GitrControl extends ScalaScript {
   }
 
   def sourceView: Option[Content] = {
-    val c = getRepositoryFromParam.flatMap(getCommitFromRequest)
-    if (c.isEmpty) {
-      renderEmptyRepoPage()
+    val repo = getRepositoryFromParam
+    if (repo.isEmpty) {
+      RenderUtils.renderMessage("No repository!", "Repository not found.", "error")
     } else {
-      val params = pageHeaderMap ++ Map("path" -> (getPath.asString))
-      renderTemplate(gitrsourceTemplate, params)
+      val c = getCommitFromRequest(repo.get)
+      if (c.isEmpty) {
+        renderEmptyRepoPage()
+      } else {
+        val params = pageHeaderMap ++ Map("path" -> (getPath.asString))
+        renderTemplate(gitrsourceTemplate, params)
+      }
     }
   }
 
@@ -151,7 +156,7 @@ class GitrControl extends ScalaScript {
         renderTemplate(gitrlogTemplate, paramMap)
 
       }) orElse(renderEmptyRepoPage())
-    }) orElse(RenderUtils.renderMessage("No repository!", "No repository specified.", "error"))
+    }) orElse(RenderUtils.renderMessage("No repository!", "Repository not found.", "error"))
   }
 
 
@@ -169,7 +174,7 @@ class GitrControl extends ScalaScript {
       })
     }) getOrElse {
       import ScalaScript._
-      makeJson(Map("success"->false, "message"->"No repository found."))
+      makeJson(Map("success"->false, "message"->"Repository not found."))
     }
   }
 }
