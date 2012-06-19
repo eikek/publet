@@ -27,6 +27,8 @@ import org.eknet.publet.auth.xml.PermissionModel
 
 class GitrCreate extends ScalaScript {
 
+  def checkName(repoName: String): Boolean = repoName.matches("[\\w_\\-]+")
+
   def serve() = {
     val tag = PubletWebContext.param("closed") match {
       case Some("on") => RepositoryTag.closed
@@ -34,23 +36,27 @@ class GitrCreate extends ScalaScript {
     }
     PubletWebContext.param("repositoryName") match {
       case Some(r) => {
-        val login = Security.username
-        Security.checkGitAction(GitAction.gitcreate, RepositoryModel(r, RepositoryTag.open, login))
-        val normName = login +"/"+ r
-        val repoName = RepositoryName(normName).toDotGit
-        PubletWeb.gitr.get(repoName).map(x=> json(false, "Repository already exists"))
-          .getOrElse {
-          val newRepo = PubletWeb.gitr.create(repoName, true)
-          PubletWebContext.param("description")
-            .collect({case d if (!d.isEmpty) => d})
-            .foreach(desc => newRepo.setDescription(desc))
-          PubletWeb.authManager.updateRepository(RepositoryModel(normName, tag, login))
-          PubletWeb.authManager.reload()
-          makeJson(Map(
-            "success" -> true,
-            "message" -> "Repository successfully created.",
-            "giturl" -> PubletWebContext.urlOf("/git/"+ repoName.name)
-          ))
+        if (!checkName(r)) {
+          makeJson(Map("success"->false, "message"->"Invalid repository name!"))
+        } else {
+          val login = Security.username
+          Security.checkGitAction(GitAction.gitcreate, RepositoryModel(r, RepositoryTag.open, login))
+          val normName = login +"/"+ r
+          val repoName = RepositoryName(normName).toDotGit
+          PubletWeb.gitr.get(repoName).map(x=> json(false, "Repository already exists"))
+            .getOrElse {
+            val newRepo = PubletWeb.gitr.create(repoName, true)
+            PubletWebContext.param("description")
+              .collect({case d if (!d.isEmpty) => d})
+              .foreach(desc => newRepo.setDescription(desc))
+            PubletWeb.authManager.updateRepository(RepositoryModel(normName, tag, login))
+            PubletWeb.authManager.reload()
+            makeJson(Map(
+              "success" -> true,
+              "message" -> "Repository successfully created.",
+              "giturl" -> PubletWebContext.urlOf("/git/"+ repoName.name)
+            ))
+          }
         }
       }
       case _ => {

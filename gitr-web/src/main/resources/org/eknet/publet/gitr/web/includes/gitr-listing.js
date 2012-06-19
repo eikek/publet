@@ -37,7 +37,9 @@ $(function() {
     
     $.getJSON("gitr-repolist.json", opts, function(data) {
       $.each(data, function(i, val) {
-        var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'"><a href="?r='+val.fullName+'">'+ val.name+'</a></td>';
+        var pushIcon = val.push ? ' <i class="icon-pencil"></i>' : '';
+        var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +
+            '<a href="?r='+val.fullName+'">'+ val.name+ pushIcon+ '</a></td>';
         var icons = '<td>';
         if (val.tag == "closed") 
           icons += '<i class="icon-lock"/>';
@@ -46,7 +48,7 @@ $(function() {
         
         if (val.owned) 
           icons += '<i class="icon-user"/>';
-        else
+        else if (val.owner)
           icons += '<span class="label label-info">'+ val.owner+'</span>';
         
         icons += '</td>';

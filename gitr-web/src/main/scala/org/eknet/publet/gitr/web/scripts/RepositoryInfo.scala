@@ -17,8 +17,8 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.gitr.GitrRepository
-import org.eknet.publet.auth.{RepositoryModel, RepositoryTag}
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.auth.{GitAction, RepositoryModel, RepositoryTag}
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
 
 /**
@@ -40,7 +40,8 @@ class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
       "owner" -> owner,
       "owned" -> (owner == Security.username),
       "tag" -> (model.tag.toString),
-      "description" -> description
+      "description" -> description,
+      "push" -> (Security.hasGitAction(GitAction.push, model))
     )
   }
 }

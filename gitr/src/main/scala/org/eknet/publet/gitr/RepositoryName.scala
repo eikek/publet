@@ -25,7 +25,7 @@ package org.eknet.publet.gitr
  */
 case class RepositoryName(name: String) {
 
-  if (!name.matches("[\\w\\._/\\-]+")) sys.error("invalid repository name:" + name)
+  if (!RepositoryName.checkName(name)) sys.error("invalid repository name:" + name)
 
   val segments = name.split("/")
 
@@ -40,4 +40,6 @@ case class RepositoryName(name: String) {
 
 object RepositoryName {
   def apply(segments: Traversable[String]):RepositoryName = RepositoryName(segments.mkString("/"))
+
+  def checkName(repoName: String): Boolean = repoName.matches("[\\w\\._/\\-]+")
 }
