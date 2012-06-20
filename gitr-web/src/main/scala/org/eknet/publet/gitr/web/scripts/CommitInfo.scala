@@ -5,9 +5,10 @@ import org.eclipse.jgit.revwalk.RevCommit
 import java.util.concurrent.TimeUnit
 import org.eclipse.jgit.lib.PersonIdent
 import java.text.DateFormat
-import java.util.{Locale, Date}
+import java.util.{Locale => JLocale, Date => JDate}
+import org.eknet.publet.web.PubletWebContext
 
-case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String, loc: Locale) extends Ordered[CommitInfo] {
+case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String, loc: JLocale) extends Ordered[CommitInfo] {
 
   def toMap: Map[String, Any] = Map(
     "name" -> name,
@@ -26,11 +27,11 @@ case class CommitInfo(name: String, path: String, container: Boolean, author: Pe
 
   lazy val shortId = id.substring(0, 8)
 
-  def gravatarUrl = Gravatar.imageUrl(author.getEmailAddress).toString
+  def gravatarUrl = Gravatar.imageUrl(PubletWebContext.urlBase.startsWith("https"))(author.getEmailAddress).toString
 
   def getAge = (Duration(TimeUnit.SECONDS.toMillis(commitTime)).distanceAgo)
 
-  def getCommitDate = new Date(TimeUnit.SECONDS.toMillis(commitTime))
+  def getCommitDate = new JDate(TimeUnit.SECONDS.toMillis(commitTime))
 
   def getShortMessage = CommitInfo.getShortMessage(fullMessage)
   def getLongMessage = CommitInfo.getLongMessage(fullMessage)
@@ -66,7 +67,7 @@ object CommitInfo {
     else msg.trim
   }
 
-  def apply(tree: TreeWalk, commit: RevCommit, loc: Locale): CommitInfo = {
+  def apply(tree: TreeWalk, commit: RevCommit, loc: JLocale): CommitInfo = {
     CommitInfo(tree.getNameString,
       tree.getPathString,
       tree.isSubtree,
@@ -77,7 +78,7 @@ object CommitInfo {
       loc)
   }
 
-  def apply(name: String, path: String, container: Boolean, commit: RevCommit, loc: Locale): CommitInfo = {
+  def apply(name: String, path: String, container: Boolean, commit: RevCommit, loc: JLocale): CommitInfo = {
     CommitInfo(name,
       path,
       container,

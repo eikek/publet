@@ -26,14 +26,16 @@ import org.apache.shiro.crypto.hash.Md5Hash
 object Gravatar {
 
   private val urlBase = "http://www.gravatar.com/avatar/"
+  private val secureBase = "https://secure.gravatar.com/avatar/"
 
-  def imageUrl(email: String, extension: Option[String] = None, size: Option[Int] = None, default: Option[Defaults.Value] = None): URL = {
+  def imageUrl(secure: Boolean)(email: String, extension: Option[String] = None, size: Option[Int] = None, default: Option[Defaults.Value] = None): URL = {
     val md5 = new Md5Hash(email.trim.toLowerCase).toHex
     val s = size map  { s => "s="+s }
     val d = default map { d => "d="+d.toString }
     val opts = List(s, d) collect ({ case o if (o.isDefined) => o.get.toString }) mkString ("&")
     val ext = extension.getOrElse("jpg")
-    new URL(urlBase+ md5 +"."+ ext + (if (opts.isEmpty) "" else "?"+opts))
+    val base = if (secure) secureBase else urlBase
+    new URL(base+ md5 +"."+ ext + (if (opts.isEmpty) "" else "?"+opts))
   }
 
   object Defaults extends Enumeration {
