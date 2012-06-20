@@ -35,4 +35,17 @@ trait WebExtension {
 
   def onShutdown()
 
+  def onBeginRequest()
+
+  def onEndRequest()
+
+}
+
+trait EmptyExtension extends WebExtension {
+
+  def onStartup() {}
+  def onShutdown() {}
+  def onBeginRequest() {}
+  def onEndRequest() {}
+
 }

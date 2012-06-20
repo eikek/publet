@@ -17,7 +17,7 @@
 package org.eknet.publet.web.template
 
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
 import org.eknet.publet.vfs.util.ClasspathContainer
 import grizzled.slf4j.Logging
 
@@ -25,9 +25,9 @@ import grizzled.slf4j.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 18:25
  */
-class BootstrapTemplate extends WebExtension with Logging {
+class BootstrapTemplate extends EmptyExtension with Logging {
 
-  def onStartup() {
+  override def onStartup() {
     val publ = PubletWeb.publet
     Templates.mountJQuery(publ)
     Templates.mountHighlightJs(publ)
@@ -37,7 +37,4 @@ class BootstrapTemplate extends WebExtension with Logging {
     PubletWeb.scalateEngine.setDefaultLayoutUri("/publet/bootstrap/bootstrap.single.jade")
   }
 
-  def onShutdown() {
-
-  }
 }

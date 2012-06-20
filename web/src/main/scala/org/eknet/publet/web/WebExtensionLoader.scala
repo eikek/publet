@@ -35,7 +35,7 @@ object WebExtensionLoader extends Logging {
    * file contains an entry of the complete class name and a value of `false`
    */
   def installWebExtensions() {
-    for (ext <- loadExtensions()) {
+    for (ext <- loadExtensions) {
       val name = ext.getClass.getName
       if (Config(name).getOrElse("true").toBoolean) {
         info("Installing extension: "+ name)
@@ -46,9 +46,30 @@ object WebExtensionLoader extends Logging {
     }
   }
 
-  private def loadExtensions(): List[WebExtension] = {
+  private lazy val loadExtensions: List[WebExtension] = {
     val loader = ServiceLoader.load(classOf[WebExtension])
     loader.iterator().toList
   }
 
+  def executeBeginRequest() {
+    for (ext <- loadExtensions) {
+      try {
+        ext.onBeginRequest()
+      }
+      catch {
+        case e:Exception => error("Exception invoking onBeginRequest of extension '{}'!", ext, e)
+      }
+    }
+  }
+
+  def executeEndRequest() {
+    for (ext <- loadExtensions) {
+      try {
+        ext.onEndRequest()
+      }
+      catch {
+        case e:Exception => error("Exception invoking onEndRequest of extension '{}'!", ext, e)
+      }
+    }
+  }
 }

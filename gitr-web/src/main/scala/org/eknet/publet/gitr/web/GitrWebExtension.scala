@@ -16,7 +16,7 @@
 
 package org.eknet.publet.gitr.web
 
-import org.eknet.publet.web.{PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.scripts.WebScriptResource
@@ -28,9 +28,9 @@ import scripts._
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.05.12 20:34
  */
-class GitrWebExtension extends WebExtension {
+class GitrWebExtension extends EmptyExtension {
 
-  def onStartup() {
+  override def onStartup() {
 
     val pages = new MapContainer()
     pages.addResource(new UrlResource(toUrl("loading.gif"), "loading.gif".rn))
@@ -65,6 +65,4 @@ class GitrWebExtension extends WebExtension {
     classOf[GitrWebExtension].getResource("/org/eknet/publet/gitr/web/includes/"+ name)
   }
 
-  def onShutdown() {}
-  
 }

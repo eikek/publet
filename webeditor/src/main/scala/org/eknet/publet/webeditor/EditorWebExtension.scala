@@ -22,20 +22,19 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import grizzled.slf4j.Logging
 import org.eknet.publet.engine.scalate.ScalateEngine
-import org.eknet.publet.web.{PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 16:16
  */
-class EditorWebExtension extends WebExtension with Logging {
+class EditorWebExtension extends EmptyExtension with Logging {
 
-  def onStartup() {
+  override def onStartup() {
     EditorWebExtension.setup(PubletWeb.publet, PubletWeb.scalateEngine)
     PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
   }
 
-  def onShutdown() {}
 }
 
 object EditorWebExtension {

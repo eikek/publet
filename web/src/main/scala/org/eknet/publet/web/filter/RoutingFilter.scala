@@ -48,6 +48,7 @@ class RoutingFilter extends Filter with HttpFilter {
     new PubletShiroFilter,
     new ExceptionFilter, //must be inside shiro
     new AuthzFilter,
+    new ExtensionRequestFilter,
     new SourceFilter
   )
 

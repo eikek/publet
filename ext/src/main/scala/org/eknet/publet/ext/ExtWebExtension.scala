@@ -19,7 +19,7 @@ package org.eknet.publet.ext
 import org.eknet.publet.Publet
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWebContext, PubletWeb, WebExtension}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 
@@ -27,14 +27,12 @@ import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:17
  */
-class ExtWebExtension extends WebExtension with Logging {
+class ExtWebExtension extends EmptyExtension with Logging {
 
-  def onStartup() {
+  override def onStartup() {
     ExtWebExtension.install(PubletWeb.publet)
   }
 
-  def onShutdown() {
-  }
 }
 
 object ExtWebExtension {

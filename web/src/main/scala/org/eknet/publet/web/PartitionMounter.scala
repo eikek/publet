@@ -22,9 +22,9 @@ import grizzled.slf4j.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.05.12 20:30
  */
-class PartitionMounter extends WebExtension with Logging {
+class PartitionMounter extends EmptyExtension with Logging {
 
-  def onStartup() {
+  override def onStartup() {
     val publet = PubletWeb.publet
     val partman = PubletWeb.gitpartman
     partman.getAllPartitions
@@ -35,5 +35,4 @@ class PartitionMounter extends WebExtension with Logging {
     })
   }
 
-  def onShutdown() {}
 }
