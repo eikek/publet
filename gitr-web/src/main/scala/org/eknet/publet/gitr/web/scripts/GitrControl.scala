@@ -181,19 +181,21 @@ class GitrControl extends ScalaScript {
 
 object GitrControl {
 
+  lazy val mountPoint = PubletWeb.publetSettings("gitr.mountpoint").getOrElse("/gitr")
+
   /** Permission granted to administrate the repository (incl. delete) */
   val adminPerm = GitAction.gitadmin.toString
 
   /** Permission granted to allow creation of new repositories. */
   val createPerm = GitAction.gitcreate.toString
 
-  val gitradminTemplate = "/gitr/_gitradmin.page"
-  val gitrrepoAdminTemplate = "/gitr/_repoadmin.page"
-  val gitrsourceTemplate = "/gitr/_gitrbrowse.page"
-  val gitrlogTemplate = "/gitr/_gitrlog.page"
-  val gitrheaderTemplate = "/gitr/_gitrpagehead.page"
-  val gitrcommitTemplate = "/gitr/_gitrcommit.page"
-  val gitremptyRepoTemplate = "/gitr/_emptyrepo.page"
+  val gitradminTemplate = mountPoint+"/_gitradmin.page"
+  val gitrrepoAdminTemplate = mountPoint+"/_repoadmin.page"
+  val gitrsourceTemplate = mountPoint+"/_gitrbrowse.page"
+  val gitrlogTemplate = mountPoint+"/_gitrlog.page"
+  val gitrheaderTemplate = mountPoint+"/_gitrpagehead.page"
+  val gitrcommitTemplate = mountPoint+"/_gitrcommit.page"
+  val gitremptyRepoTemplate = mountPoint+"/_emptyrepo.page"
 
   val rParam = "r"   // repo name, default = "None"
   val hParam = "h"   // revision, default = "master"

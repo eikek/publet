@@ -24,7 +24,7 @@ class DestroyRepo extends ScalaScript with Logging {
         info("Successfully destroyed repository: "+ repo.name)
         makeJson(Map("success"->true,
           "message"->"Successfully destroyed the repository.",
-          "redirect"->PubletWebContext.urlOf("/gitr/")))
+          "redirect"->PubletWebContext.urlOf(GitrControl.mountPoint+"/")))
       }
       catch {
         case e:Exception => {

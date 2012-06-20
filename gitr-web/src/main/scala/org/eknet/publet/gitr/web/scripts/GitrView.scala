@@ -146,7 +146,8 @@ class GitrView extends ScalaScript {
           val source = new StringTemplateSource(commit.getId.name()+"."+name, content) {
             override def lastModified = commit.getCommitTime * 1000
           }
-          makeJson(resultBase ++ Seq("processed"->true, "source"-> content, "contents" -> GitrControl.nocachingTemplateEngine.layout(source, Map("layout"->""))))
+          makeJson(resultBase ++ Seq("processed"->true, "source"-> content,
+            "contents" -> GitrControl.nocachingTemplateEngine.layout(source, Map("layout"->""))))
         } else {
           makeJson {
             resultBase ++ Seq("processed"->false, "contents" -> (scala.xml.Utility.escape(content)), "mimeType" -> mimetype)
@@ -154,7 +155,8 @@ class GitrView extends ScalaScript {
         }
       } else {
         //provide download link or show image
-        val url = PubletWebContext.urlOf("/gitr/gitrblob?"+rParam+"="+repo.name.name+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
+        val url = PubletWebContext.urlOf(GitrControl.mountPoint+"/gitrblob?"+ rParam +
+          "="+repo.name.name+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
         makeJson {
           resultBase ++ Seq("mimeType" -> mimetype, "url"->url)
         }

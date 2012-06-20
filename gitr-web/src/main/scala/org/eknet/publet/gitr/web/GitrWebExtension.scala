@@ -58,7 +58,7 @@ class GitrWebExtension extends WebExtension {
     pages.addResource(new WebScriptResource("destroyRepo.json".rn, new DestroyRepo()))
     pages.addResource(new WebScriptResource("transferOwnership.json".rn, new TransferOwner()))
     pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
-    PubletWeb.publet.mountManager.mount("/gitr".p, pages)
+    PubletWeb.publet.mountManager.mount(GitrControl.mountPoint.p, pages)
   }
 
   private def toUrl(name: String): URL = {

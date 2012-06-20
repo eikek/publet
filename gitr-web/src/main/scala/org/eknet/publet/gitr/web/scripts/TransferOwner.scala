@@ -37,7 +37,7 @@ class TransferOwner extends ScalaScript {
 
             makeJson(Map("success" -> true,
               "message" -> "Successfully moved ownership!",
-              "redirect" -> PubletWebContext.urlOf("/gitr/")))
+              "redirect" -> PubletWebContext.urlOf(GitrControl.mountPoint+ "/")))
           }
         }
       }) orElse(makeJson(Map("success"->false, "message"->"No owner specified.")))
