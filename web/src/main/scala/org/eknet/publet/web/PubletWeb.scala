@@ -115,7 +115,7 @@ object PubletWeb extends Logging {
   lazy val authManager = contextMap(authManagerKey).get
   lazy val publetSettings = new PropertiesMap {
     reload()
-    override def file = contentRoot.lookup(Path(Publet.allIncludes+"settings.properties"))
+    override def file = contentRoot.lookup(Path(Publet.allIncludes+"config/settings.properties"))
       .collect({case cc: ContentResource => cc})
       .map(_.inputStream)
   }
