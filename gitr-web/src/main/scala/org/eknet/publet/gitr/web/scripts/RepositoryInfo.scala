@@ -34,7 +34,7 @@ class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
 
   lazy val toMap: Map[String, Any] = {
     Map(
-      "name" -> (name.segments.last),
+      "name" -> (name.strip.segments.last),
       "fullName" -> name.name,
       "giturl" -> gitUrl,
       "owner" -> owner,
