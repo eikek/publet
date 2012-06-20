@@ -17,6 +17,9 @@
 package org.eknet.publet.web
 
 import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.fs.FilesystemPartition
+import java.io.File
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,7 +28,10 @@ import grizzled.slf4j.Logging
 class PartitionMounter extends EmptyExtension with Logging {
 
   override def onStartup() {
+    import Path._
     val publet = PubletWeb.publet
+
+    // git partitions
     val partman = PubletWeb.gitpartman
     partman.getAllPartitions
       .collect({ case p if (p.getMountPoint.isDefined)=>p})
@@ -33,6 +39,26 @@ class PartitionMounter extends EmptyExtension with Logging {
       info("Mounting repository '"+ part.tandem.name.name +"' to '"+ part.getMountPoint.get.asString+"'...")
       publet.mountManager.mount(part.getMountPoint.get, part)
     })
+
+    // fs partitions
+    val fsKey = "partition.fs."
+    val settings = PubletWeb.publetSettings
+    def mountFs(num:Int): Int = {
+      val dir = settings(fsKey + num +".dir")
+      val mount = settings(fsKey + num +".mount")
+      if (dir.isDefined && mount.isDefined) {
+        val pdir = new File(Config.configDirectory, dir.get)
+        info("Mounting fs directory '"+ dir.get+ "' to '"+ mount.get+"'")
+        publet.mountManager.mount(mount.get.p, new FilesystemPartition(pdir, true))
+        1+ mountFs(num +1)
+      } else {
+        0
+      }
+    }
+    val partCount = mountFs(0)
+    info("Mounted "+ partCount +" filesystem partition(s)")
   }
+
+
 
 }
