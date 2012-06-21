@@ -44,61 +44,61 @@ object CaptchaScript extends ScalaScript {
   }
 
   def createCaptcha(): (String, Array[Byte]) = {
-    val width = 140;
-    val height = 50;
+    val width = 140
+    val height = 50
 
     val data = captchaStrings(4, 6, 5)
 
     val bufferedImage = new BufferedImage(width, height,
-      BufferedImage.TYPE_INT_RGB);
+      BufferedImage.TYPE_INT_RGB)
 
-    val g2d = bufferedImage.createGraphics();
+    val g2d = bufferedImage.createGraphics()
 
-    val font = new Font("Georgia", Font.BOLD, 18);
-    g2d.setFont(font);
+    val font = new Font("Georgia", Font.BOLD, 18)
+    g2d.setFont(font)
 
     val rh = new RenderingHints(
       RenderingHints.KEY_ANTIALIASING,
-      RenderingHints.VALUE_ANTIALIAS_ON);
+      RenderingHints.VALUE_ANTIALIAS_ON)
 
     rh.put(RenderingHints.KEY_RENDERING,
-      RenderingHints.VALUE_RENDER_QUALITY);
+      RenderingHints.VALUE_RENDER_QUALITY)
 
-    g2d.setRenderingHints(rh);
+    g2d.setRenderingHints(rh)
 
     val gcol1 = "#" + PubletWebContext.param("col1").getOrElse("ffffff")
     val gcol2 = "#" + PubletWebContext.param("col2").getOrElse("0000ff")
     val gp = new GradientPaint(0, 0,
-      Color.decode(gcol1), 0, height / 2, Color.decode(gcol2), true);
+      Color.decode(gcol1), 0, height / 2, Color.decode(gcol2), true)
 
-    g2d.setPaint(gp);
-    g2d.fillRect(0, 0, width, height);
+    g2d.setPaint(gp)
+    g2d.fillRect(0, 0, width, height)
 
     val frameCol = "#" + PubletWebContext.param("frcol").getOrElse("000000")
     g2d.setColor(Color.decode(frameCol))
     g2d.drawRect(0, 0, width - 1, height - 1)
 
     val fgcol = "#" + PubletWebContext.param("fgcol").getOrElse("ff0f00")
-    g2d.setColor(Color.decode(fgcol));
+    g2d.setColor(Color.decode(fgcol))
 
-    val r = new Random();
-    val index = scala.math.abs(r.nextInt()) % data.length;
+    val r = new Random()
+    val index = scala.math.abs(r.nextInt()) % data.length
 
-    val captcha = String.copyValueOf(data(index));
+    val captcha = String.copyValueOf(data(index))
 
-    var x = 0;
-    var y = 0;
+    var x = 0
+    var y = 0
 
     for (i <- 0 to data(index).length - 1) {
-      x += 10 + (scala.math.abs(r.nextInt()) % 15);
-      y = 20 + scala.math.abs(r.nextInt()) % 20;
-      g2d.drawChars(data(index), i, 1, x, y);
+      x += 10 + (scala.math.abs(r.nextInt()) % 15)
+      y = 20 + scala.math.abs(r.nextInt()) % 20
+      g2d.drawChars(data(index), i, 1, x, y)
     }
 
-    g2d.dispose();
+    g2d.dispose()
 
     val baos = new ByteArrayOutputStream()
-    ImageIO.write(bufferedImage, "png", baos);
+    ImageIO.write(bufferedImage, "png", baos)
 
     (captcha, baos.toByteArray)
   }
@@ -111,7 +111,7 @@ object CaptchaScript extends ScalaScript {
     val captchaKey = Key(param("captchaParam").getOrElse("captchaString"), {
       case Session => captchaData._1
     })
-    ctx.attr(captchaKey);
+    ctx.attr(captchaKey)
 
     makePng(captchaData._2)
   }
