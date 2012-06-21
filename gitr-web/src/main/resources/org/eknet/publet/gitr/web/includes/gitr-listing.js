@@ -26,7 +26,6 @@ $(function() {
 
   //perform search
   $('#repoNameSearch').click(function() {
-    $('#repoListing').empty();
     var opts = {};
     $(".repoFilter").each(function(i, el) {
       if ($(el).hasClass("active")) {
@@ -34,8 +33,12 @@ $(function() {
       }
     });
     opts["name"] = $('#repoNameInput').val();
-    
+
+    var contentEl = $('#repoListing');
+    contentEl.empty();
+    contentEl.addClass("loading");
     $.getJSON("gitr-repolist.json", opts, function(data) {
+      contentEl.removeClass("loading");
       $.each(data, function(i, val) {
         var pushIcon = val.push ? ' <i class="icon-pencil"></i>' : '';
         var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +
@@ -52,9 +55,9 @@ $(function() {
           icons += '<span class="label label-info">'+ val.owner+'</span>';
         
         icons += '</td>';
-        $('<tr>'+icons+name+'<td><code class="clone">'+val.giturl+'</code></td></tr>').appendTo($('#repoListing'));
+        $('<tr>'+icons+name+'<td><code class="clone">'+val.giturl+'</code></td></tr>').appendTo(contentEl);
       });
-        $('.hover').popover();
+      $('.hover').popover();
     });
   });
   $('#repoNameSearch').trigger('click');
