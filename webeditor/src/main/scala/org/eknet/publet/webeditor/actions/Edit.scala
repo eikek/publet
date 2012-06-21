@@ -40,9 +40,7 @@ class Edit extends ScalaScript {
     if (resourcePath.isEmpty) {
       renderErrorMessage("No resource specified.")
     } else {
-      getRepositoryModel(resourcePath.get).foreach { model =>
-        Security.checkGitAction(GitAction.push, model)
-      }
+      Security.checkWritePermission(resourcePath.get)
       val resource = PubletWeb.publet.rootContainer.lookup(resourcePath.get)
         .collect({ case c: ContentResource => c })
       resource map { r =>
@@ -59,15 +57,7 @@ class Edit extends ScalaScript {
     }
   }
 
-  def getRepositoryModel(path: Path): Option[RepositoryModel] = {
-    val gitrepo = PubletWeb.publet.mountManager.resolveMount(path)
-      .map(_._2)
-      .collect({ case t: GitPartition => t })
-      .map(_.tandem.name)
-    gitrepo.map { name =>
-      PubletWeb.authManager.getRepository(name.name)
-    }
-  }
+
 
   def handleTextContent(resourcePath: Path, data: ContentResource) = {
     val attr = mutable.Map[String, Any]()

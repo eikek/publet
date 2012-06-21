@@ -25,7 +25,6 @@ import org.eknet.publet.web.util.RenderUtils
 import org.eknet.publet.webeditor.EditorPaths
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web._
-import org.eknet.publet.auth.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -51,9 +50,9 @@ object FileUploadHandler extends ScalaScript with Logging {
         val files = PubletWebContext.uploads
         val container = PubletWebContext.param("container").map(Path(_))
         val commitMsg = PubletWebContext.param("commitMessage").filter(!_.isEmpty)
-        Security.checkGitAction(GitAction.push)
         val out = files.map( fi => {
           val path = container.get / fi.getName
+          Security.checkWritePermission(path)
           info("Uploading to "+ path.asString)
           (path, PubletWeb.publet.push(path, fi.getInputStream, commitMsg))
         }).map(t => toMap(t._1, t._2))

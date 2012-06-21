@@ -20,10 +20,11 @@ import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eknet.publet.auth.GitAction
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel, User}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.web.filter.PubletShiroFilter
+import org.eknet.publet.partition.git.GitPartition
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -130,6 +131,43 @@ object Security extends Logging {
 
   def hasPerm(action: String, path: Path): Boolean = {
     hasPerm(pathPermission(action, path))
+  }
+
+  /**
+   * Checks whether the current user has write permission to the
+   * resource at the specified path.
+   *
+   * If the path points to a resource in a git repository, this
+   * will check whether `push` permission to the repository is granted
+   * to the current user. If the resource is not inside a git repository
+   * a generated permission `write:[ppath]` is checked, where `ppath` is
+   * the `resourcePath` where each path delimiter `/` is replaced by a
+   * colon.
+   *
+   * @param resourcePath
+   */
+  def hasWritePermission(resourcePath: Path): Boolean = {
+    writePermissionCheck(resourcePath)(hasGitAction, hasPerm)
+  }
+
+  /**
+   * Same as [[.hasWritePermission]] but throws an exception instead
+   * of returning a boolean.
+   *
+   * @param resourcePath
+   */
+  def checkWritePermission(resourcePath: Path) {
+    writePermissionCheck(resourcePath)(checkGitAction, checkPerm)
+  }
+
+  private def writePermissionCheck[A](resource:Path)(gf:(GitAction.Value, RepositoryModel)=>A, rf:String=>A): A = {
+    val gp = PubletWeb.getRepositoryModel(resource) map { model =>
+      gf(GitAction.push, model)
+    }
+    gp getOrElse {
+      val perm = "write:"+ resource.segments.mkString(":")
+      rf(perm)
+    }
   }
 
 }
