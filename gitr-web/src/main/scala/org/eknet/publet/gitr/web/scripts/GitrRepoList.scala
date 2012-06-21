@@ -96,7 +96,9 @@ class GitrRepoList extends ScalaScript {
 
     makeJson(PubletWeb.gitr.allRepositories(repoFilter)
       .map(r => (r, getRepositoryModel(r.name.name)))
-      .map(t => new RepositoryInfo(t._1, t._2).toMap))
+      .map(t => new RepositoryInfo(t._1, t._2))
+      .toList.sorted
+      .map(_.toMap))
   }
 
 }

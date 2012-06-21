@@ -67,7 +67,7 @@ object PushContents extends ScalaScript with Logging {
   }
 
   def delete(path: Path) {
-    Security.checkGitAction(GitAction.push)
+    Security.checkWritePermission(path)
     info("Deleting now: "+ path.asString)
     PubletWeb.publet.delete(path)
   }
@@ -78,7 +78,7 @@ object PushContents extends ScalaScript with Logging {
     ctx.param("page") match {
       case None =>
       case Some(body) => {
-        Security.checkGitAction(GitAction.push)
+        Security.checkWritePermission(path)
         val target = ctx.param("extension").getOrElse("md")
         val commitMsg = ctx.param("commitMessage").filter(!_.isEmpty)
         val oldhead = ctx.param("head").getOrElse("")

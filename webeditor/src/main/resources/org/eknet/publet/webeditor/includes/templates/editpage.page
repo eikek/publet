@@ -8,7 +8,7 @@ script(type="text/javascript" src={ urlOf("/publet/webeditor/scripts/browser.js"
 link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 
 --- name:content pipeline:jade
-
+- import org.eknet.publet.vfs.Path
 - val ctx = PubletWebContext
 -@ val actionPath: String = ""
 -@ val contentAsString: String = ""
@@ -30,6 +30,9 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
         a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={ ctx.urlOf(actionPath)+"?delete="+viewResource})
           i.icon-trash.icon-white
           | Delete
+        a.btn.btn-info.pull-right(href={"?resource="+ (Path(resourcePath).parent.asString) })
+          i.icon-file.icon-white
+          | Upload Files
       label
         | Extensions
         select(name="extension" class="span8")

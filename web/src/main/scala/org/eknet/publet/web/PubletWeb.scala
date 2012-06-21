@@ -20,7 +20,7 @@ import filter.{PageWriter, NotFoundHandler}
 import javax.servlet.ServletContext
 import scripts._
 import shiro.{UsersRealm, AuthManager}
-import org.eknet.publet.partition.git.{GitPartMan, GitPartManImpl}
+import org.eknet.publet.partition.git.{GitPartition, GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
@@ -36,6 +36,8 @@ import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, Default
 import java.io.File
 import org.eknet.publet.vfs.util.MapContainer
 import grizzled.slf4j.Logging
+import org.eknet.publet.auth.RepositoryModel
+import org.apache.shiro.cache.MemoryConstrainedCacheManager
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -138,6 +140,25 @@ object PubletWeb extends Logging {
 
   def notFoundHandler = contextMap(notFoundHandlerKey).get
 
+  /**
+   * Returns the [[org.eknet.publet.auth.RepositoryModel]] of the
+   * repository which contains the resource of the given path. If
+   * the resource is not within a git repository, [[scala.None]]
+   * is returned.
+   *
+   * @param path
+   * @return
+   */
+  def getRepositoryModel(path: Path): Option[RepositoryModel] = {
+    val gitrepo = publet.mountManager.resolveMount(path)
+      .map(_._2)
+      .collect({ case t: GitPartition => t })
+      .map(_.tandem.name)
+    gitrepo.map { name =>
+      authManager.getRepository(name.name)
+    }
+  }
+
   // ~~~ servlet context listener
 
   /**
@@ -176,6 +197,7 @@ object PubletWeb extends Logging {
 
     val sm = new DefaultWebSecurityManager()
     sm.setRealm(new UsersRealm(authManager))
+    sm.setCacheManager(new MemoryConstrainedCacheManager)
     webenv.setSecurityManager(sm)
 
     val resolver = new PathMatchingFilterChainResolver()
