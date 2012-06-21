@@ -20,17 +20,28 @@ import org.eknet.publet.gitr.GitrRepository
 import org.eknet.publet.auth.{GitAction, RepositoryModel, RepositoryTag}
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
+import org.eclipse.jgit.lib.Constants
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.05.12 20:24
  */
-class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
+class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) extends Ordered[RepositoryInfo] {
 
   val name = repo.name
   val gitUrl = GitrControl.getCloneUrl(repo.name.name)
   val owner = model.owner
   val description = repo.getDescription.getOrElse("")
+  private val lastCommitDate = {
+    if (repo.hasCommits) {
+      repo.getLastCommit(Constants.HEAD, None) match {
+        case Some(c) => c.getCommitTime
+        case _ => 0
+      }
+    } else {
+      0
+    }
+  }
 
   lazy val toMap: Map[String, Any] = {
     Map(
@@ -44,4 +55,6 @@ class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) {
       "push" -> (Security.hasGitAction(GitAction.push, model))
     )
   }
+
+  def compare(that: RepositoryInfo) = that.lastCommitDate - this.lastCommitDate
 }
