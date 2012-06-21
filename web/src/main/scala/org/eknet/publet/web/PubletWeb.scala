@@ -37,6 +37,7 @@ import java.io.File
 import org.eknet.publet.vfs.util.MapContainer
 import grizzled.slf4j.Logging
 import org.eknet.publet.auth.RepositoryModel
+import org.apache.shiro.cache.MemoryConstrainedCacheManager
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -196,6 +197,7 @@ object PubletWeb extends Logging {
 
     val sm = new DefaultWebSecurityManager()
     sm.setRealm(new UsersRealm(authManager))
+    sm.setCacheManager(new MemoryConstrainedCacheManager)
     webenv.setSecurityManager(sm)
 
     val resolver = new PathMatchingFilterChainResolver()
