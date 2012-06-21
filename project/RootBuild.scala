@@ -33,6 +33,11 @@ object Dependencies {
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % scalateVersion
 
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % "2.1.3" intransitive()
+
+  val orientdbCore = "com.orientechnologies" % "orientdb-core" % "1.0.1" withSources()
+  val orientCommons = "com.orientechnologies" % "orient-commons" % "1.0.1" withSources()
+  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % "2.0.0" withSources() intransitive()
+  val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % "2.0.0" withSources() intransitive() //uses orientdb 1.0.1
 }
 
 // Root Module 
@@ -252,7 +257,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
 
-  val deps = Seq(squareMail, servletApi, grizzledSlf4j, scalaTest)
+  val deps = Seq(squareMail, servletApi, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.ext")
 }
