@@ -57,7 +57,7 @@ object WebExtensionLoader extends Logging {
         ext.onBeginRequest()
       }
       catch {
-        case e:Exception => error("Exception invoking onBeginRequest of extension '{}'!", ext, e)
+        case e:Exception => error("Exception invoking onBeginRequest of extension '"+ ext +"'!", e)
       }
     }
   }
@@ -68,7 +68,7 @@ object WebExtensionLoader extends Logging {
         ext.onEndRequest()
       }
       catch {
-        case e:Exception => error("Exception invoking onEndRequest of extension '{}'!", ext, e)
+        case e:Exception => error("Exception invoking onEndRequest of extension '"+ ext +"'!", e)
       }
     }
   }

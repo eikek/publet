@@ -1,0 +1,5 @@
+- import org.eknet.publet.ext.counter.CounterExtension
+- val pageCounter = CounterExtension.service
+- val uri = PubletWebContext.fullUrl
+- val locale = PubletWebContext.getLocale
+=pageCounter.getPageCount(uri) + "; last at " + pageCounter.getLastAccessString(uri, Some(locale))

@@ -17,7 +17,7 @@
 package org.eknet.publet.web
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import util.{Key, AttributeMap}
+import util.{Request, Key, AttributeMap}
 import java.util.Locale
 
 
@@ -78,4 +78,9 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
   def getMethod: Method.Value = Method.withName(req.getMethod.toUpperCase(Locale.ROOT))
 
   def getLocale = req.getLocale
+
+  def getClientInfo = attr(clientInfoKey).get
+  private val clientInfoKey = Key("clientInfo", {
+    case Request => ClientInfo(req)
+  })
 }
