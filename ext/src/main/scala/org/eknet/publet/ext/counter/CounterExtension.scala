@@ -52,4 +52,5 @@ object CounterExtension {
    */
   def service = PubletWeb.contextMap.get(serviceKey).get
 
+  def serviceOption = PubletWeb.contextMap.get(serviceKey)
 }
