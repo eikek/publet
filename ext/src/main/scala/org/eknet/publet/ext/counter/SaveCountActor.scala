@@ -9,7 +9,7 @@ import org.fusesource.scalate.util.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.06.12 00:03
  */
-class SaveCountActor extends Actor with Logging {
+private[counter] class SaveCountActor extends Actor with Logging {
 
   private val cache = collection.mutable.Map[String, Long]()
 
@@ -59,6 +59,6 @@ class SaveCountActor extends Actor with Logging {
   }
 }
 
-case class Message(uri: String, info: ClientInfo)
+private[counter] case class Message(uri: String, info: ClientInfo)
 
-case object StopMessage
+private[counter] case object StopMessage
