@@ -6,6 +6,7 @@ import org.eknet.publet.vfs.Path
 import java.text.DateFormat
 import java.util
 import org.eknet.publet.partition.git.GitFile
+import org.eknet.publet.auth.UserProperty
 
 /**
  * A helper class that defines method for retrieving information to
@@ -161,4 +162,34 @@ object ResourceInfo {
    */
   def getLastAuthor: Option[String] = getLastAuthor(PubletWebContext.applicationUri)
 
+  /**
+   * Returns the login of the person who last authored the resource at the given uri.
+   * This is only possible for resources backed by a git repository. The email of the
+   * author is used to lookup the user in the user database.
+   *
+   * @param uri
+   * @return
+   */
+  def getLastAuthorLogin(uri: String): Option[String] = {
+    val email = findSource(Path(uri))
+      .collect({ case r: GitFile => r})
+      .flatMap(_.lastAuthor.map(_.getEmailAddress))
+
+    email.flatMap (mail => {
+      PubletWeb.authManager
+        .getAllUser
+        .find(_.getProperty(UserProperty.email).exists(_ == mail))}
+    ).map(_.login)
+  }
+
+  /**
+   * Returns the login of the person who last authored the resource the current request
+   * points to.
+   *
+   * This is only possible for resources backed by a git repository. The email of the
+   * author is used to lookup the user in the user database.
+   *
+   * @return
+   */
+  def getLastAuthorLogin: Option[String] = getLastAuthorLogin(PubletWebContext.applicationUri)
 }
