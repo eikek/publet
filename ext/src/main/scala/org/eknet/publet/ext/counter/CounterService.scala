@@ -4,6 +4,9 @@ import java.text.DateFormat
 import java.util
 import org.eknet.publet.web.util.{Context, Key}
 import org.eknet.publet.web.{PubletWeb, ClientInfo, PubletWebContext}
+import org.eknet.publet.ext.orient.OrientDb
+import org.eknet.publet.ext.ExtDb
+import com.tinkerpop.blueprints.Vertex
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -47,21 +50,14 @@ trait CounterService {
   }
 
   /**
-   * "Collect" the page uri and client info. This maintains
-   * the page counter.
+   * "Collect" the page uri and client info. This increments
+   * the page counter and sets a new last-access timestamp.
    *
    * @param uriPath
    * @param info
    */
   def collect(uriPath: String, info: ClientInfo)
 
-  /**
-   * Completely shuts down the underlying database which
-   * renders this instance unusable. Any calls to this
-   * instance are illegal after this method returns.
-   *
-   */
-  def shutdown()
 }
 
 object CounterService {
@@ -77,42 +73,47 @@ object CounterService {
   def apply(): CounterService = new Impl
 
   private class Impl extends CounterService {
-
     import collection.JavaConversions._
 
-    val db = new CounterDb
+    private val db = ExtDb
 
-    def shutdown() {
-      db.shutdown()
-    }
+    /** The label of the edge from the reference node to each uri node */
+    val pageEdgeLabel = "page"
+
+    /** The property key of the uri value */
+    val pagePathKey = "page_pagePath"
+    db.graph.createKeyIndex(pagePathKey, classOf[Vertex])
+
+    /** The property key of the count value */
+    val pageCountKey = "page_accessCount"
+
+    /** The property key of the last access time value */
+    val pageLastAccessKey = "page_lastAccess"
 
     def getPageCount(uriPath: String) = {
-      db.withTx(graph => {
-        val vertices = graph.getVertices(db.pagePathKey, uriPath)
+      db.withTx {
+        val vertices = db.graph.getVertices(pagePathKey, uriPath)
         Option(vertices)
           .flatMap(_.headOption)
-          .map(_.getProperty(db.pageCountKey).asInstanceOf[Long])
+          .map(_.getProperty(pageCountKey).asInstanceOf[Long])
           .getOrElse(0L)
-      })
+      }
     }
 
     def getLastAccess(uriPath: String) = {
-      db.withTx(graph => {
-        val vertices = graph.getVertices(db.pagePathKey, uriPath)
+      db.withTx{
+        val vertices = db.graph.getVertices(pagePathKey, uriPath)
         Option(vertices)
           .flatMap(_.headOption)
-          .map(_.getProperty(db.pageLastAccessKey).asInstanceOf[Long])
+          .map(_.getProperty(pageLastAccessKey).asInstanceOf[Long])
           .getOrElse(0L)
-      })
+      }
     }
 
     def collect(uriPath: String, info: ClientInfo) {
-      import db._
-      import collection.JavaConversions._
-
-      withTx(graph => {
-        val pageVertex = graph.getVertices(pagePathKey, uriPath).headOption getOrElse {
-          val pv = graph.addVertex()
+      db.withTx {
+        val pageVertex = db.graph.getVertices(pagePathKey, uriPath).headOption getOrElse {
+          val pv = db.graph.addVertex()
           pv.setProperty(pagePathKey, uriPath)
           pv.setProperty(pageCountKey, 0L)
           pv
@@ -121,8 +122,8 @@ object CounterService {
         val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
         pageVertex.setProperty(pageCountKey, (count +1))
         pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
-        graph.addEdge(null, referenceNode, pageVertex, pageEdgeLabel)
-      })
+        db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+      }
     }
 
   }

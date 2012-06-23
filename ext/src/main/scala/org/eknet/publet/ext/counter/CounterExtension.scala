@@ -7,6 +7,9 @@ import com.orientechnologies.orient.core.Orient
 import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 
 /**
+ * Installs the [[org.eknet.publet.ext.counter.CounterService]] and a thread that
+ * is collecting access information for resources.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.06.12 21:49
  */
@@ -22,12 +25,7 @@ class CounterExtension extends WebExtension{
   }
 
   def onShutdown() {
-    service.shutdown()
     counterThread ! StopMessage
-    //this really shuts down the database(s)
-    //normally, this is called within a jvm shutdown hook. but that
-    //prevents reloading webapps without server restart
-    Orient.instance.shutdown()
   }
 
   def onBeginRequest() {
