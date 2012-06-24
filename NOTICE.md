@@ -221,3 +221,10 @@ blueprints, from tinkerpop stack, licensed under a BSD license
 > SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <https://github.com/tinkerpop/blueprints/wiki/>
+
+
+### OpenClipart
+
+openclipart, licensed under Public Domain.
+
+<http://openclipart.org>
