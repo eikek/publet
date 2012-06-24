@@ -30,24 +30,9 @@ import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
 trait RepositoryNameResolver {
   this: RequestUrl =>
 
-
-  private val gitReceivePack = "/" + GitSmartHttpTools.RECEIVE_PACK
-  private val gitUploadPack = "/" + GitSmartHttpTools.UPLOAD_PACK
-  private val gitSuffixes = List(gitReceivePack, gitUploadPack, "/info/refs", "/HEAD", "/objects")
-
   private val gitRepositoryNameKey = Key("gitRepositoryName", {
     case Request => {
-      if (isGitRequest) {
-        val uri = applicationPath.strip(Path(Config.gitMount)).toRelative
-        val name = stripGitSuffixes(uri.asString, gitSuffixes)
-        val rname = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
-        Some(RepositoryName(rname))
-      } else {
-        PubletWeb.publet.mountManager.resolveMount(applicationPath)
-          .map(_._2)
-          .collect({ case t: GitPartition => t })
-          .map(_.tandem.name)
-      }
+      RepositoryNameResolver.getRepositoryName(applicationPath, isGitRequest)
     }
   })
 
@@ -56,17 +41,6 @@ trait RepositoryNameResolver {
    * @return
    */
   def getRepositoryName = PubletWebContext.attr(gitRepositoryNameKey).get
-
-  private def stripGitSuffixes(url: String, suffixes: List[String]): String = {
-    suffixes match {
-      case c::cs => {
-        val idx = url.indexOf(c)
-        if (idx > -1) stripGitSuffixes(url.substring(0, idx), cs)
-        else stripGitSuffixes(url, cs)
-      }
-      case Nil => url
-    }
-  }
 
   private val repositoryModelKey = Key("requestRepositoryModel", {
     case Request => getRepositoryName.map { name =>
@@ -86,17 +60,7 @@ trait RepositoryNameResolver {
   private val gitActionKey = Key("gitrequestAction", {
     case Request => {
       if (isGitRequest) {
-        val gitp = fullUrl.substring(Config.gitMount.length)
-        if (gitp.endsWith(gitReceivePack))
-          Some(GitAction.push)
-        else if (gitp.endsWith(gitUploadPack))
-          Some(GitAction.pull)
-        else if (gitp.contains("?service=git-receive-pack"))
-          Some(GitAction.push)
-        else if (gitp.contains("?service=git-upload-pack"))
-          Some(GitAction.pull)
-        else
-          Some(GitAction.pull)
+        Some(RepositoryNameResolver.getGitRequestAction(fullUrl))
       } else {
         None
       }
@@ -127,4 +91,71 @@ trait RepositoryNameResolver {
    */
   def containerRequestUri = PubletWebContext.attr(containerRequestUriKey).get
 
+}
+
+object RepositoryNameResolver {
+
+  private val gitReceivePack = "/" + GitSmartHttpTools.RECEIVE_PACK
+  private val gitUploadPack = "/" + GitSmartHttpTools.UPLOAD_PACK
+  private val gitSuffixes = List(gitReceivePack, gitUploadPack, "/info/refs", "/HEAD", "/objects")
+
+  /**
+   * Returns either `GitAction.pull` or `GitAction.push` depending on the request uri. This
+   * is only valid for request pointing to the git repository managed by JGit's filter.
+   *
+   * @param fullUrl an url string with request parameters
+   * @return
+   */
+  def getGitRequestAction(fullUrl: String): GitAction.Value = {
+    val gitp = fullUrl.substring(Config.gitMount.length)
+    if (gitp.endsWith(gitReceivePack))
+      GitAction.push
+    else if (gitp.endsWith(gitUploadPack))
+      GitAction.pull
+    else if (gitp.contains("?service=git-receive-pack"))
+      GitAction.push
+    else if (gitp.contains("?service=git-upload-pack"))
+      GitAction.pull
+    else
+      GitAction.pull
+  }
+
+  /**
+   * Returns the repository name of the resource specified by `applicationPath`.
+   * If `isGitRequest` is `true`, the `applicationPath` is considered a request
+   * path to the git servlet and the repository name is encoded in the url.
+   *
+   * Otherwise, the repository is determined by resolving the `applicationPath`
+   * to a partition. If the partition is a `GitPartition`, the name of its
+   * repository is returned. If the resource does not belong to a `GitPartition`
+   * [[scala.None]] is returned.
+   *
+   * @param requestPath
+   * @param isGitRequest
+   * @return
+   */
+  def getRepositoryName(requestPath: Path, isGitRequest: Boolean): Option[RepositoryName] = {
+    if (isGitRequest) {
+      val uri = requestPath.strip(Path(Config.gitMount)).toRelative
+      val name = stripGitSuffixes(uri.asString, gitSuffixes)
+      val rname = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
+      Some(RepositoryName(rname))
+    } else {
+      PubletWeb.publet.mountManager.resolveMount(requestPath)
+        .map(_._2)
+        .collect({ case t: GitPartition => t })
+        .map(_.tandem.name)
+    }
+  }
+
+  private def stripGitSuffixes(url: String, suffixes: List[String]): String = {
+    suffixes match {
+      case c::cs => {
+        val idx = url.indexOf(c)
+        if (idx > -1) stripGitSuffixes(url.substring(0, idx), cs)
+        else stripGitSuffixes(url, cs)
+      }
+      case Nil => url
+    }
+  }
 }

@@ -22,7 +22,8 @@ import http.HttpServletResponse
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.auth.GitAction
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{RepositoryNameResolver, PubletWeb, PubletWebContext}
+import org.eknet.publet.vfs.Path
 
 /**
  * Does default authorization checks.
@@ -35,18 +36,8 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     val utils = getRequestUtils(req)
     try {
-      if (!PubletShiroFilter.anonRequestAllowed) {
-        val repoModel = utils.getRepositoryModel
-        val gitAction = utils.getGitAction.getOrElse(GitAction.pull)
 
-        repoModel.foreach { repo =>
-          Security.checkGitAction(gitAction, repo)
-        }
-        PubletWeb.authManager.getResourceConstraints(utils.applicationUri)
-          .filterNot(_.perm.isAnon)
-          .foreach(rc => Security.checkPerm(rc.perm.permString))
-      }
-
+      AuthzFilter.checkAccessToCurrentResource()
       chain.doFilter(req, resp)
 
     } catch {
@@ -68,4 +59,63 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
   def init(filterConfig: FilterConfig) {}
 
   def destroy() {}
+}
+
+object AuthzFilter {
+
+  /**
+   * Checks if the current request is allowed to access the resource.
+   * Throws an [[org.apache.shiro.authz.UnauthorizedException]] if it
+   * fails.
+   *
+   */
+  def checkAccessToCurrentResource() {
+    if (!PubletShiroFilter.anonRequestAllowed) {
+      val repoModel = PubletWebContext.getRepositoryModel
+      val gitAction = PubletWebContext.getGitAction.getOrElse(GitAction.pull)
+
+      repoModel.foreach { repo =>
+        Security.checkGitAction(gitAction, repo)
+      }
+      PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
+        .filterNot(_.perm.isAnon)
+        .foreach(rc => Security.checkPerm(rc.perm.permString))
+    }
+  }
+
+  /**
+   * Returns whether the current request can access the resource at
+   * the specified uri.
+   *
+   * The request is allowed, if the resource is explicitely marked
+   * with an `anon` permission. If it is marked with another permission,
+   * it checks the permission against the principal of the current request.
+   *
+   * If no permission is specified, it is checked whether the resource
+   * belongs to a git repository. If it is an open git repository, access
+   * is granted. Otherwise `pull` permission is checked.
+   *
+   * If the resource it not marked with an explicit permission and neither
+   * belongs to a git repository, it is considered an open resource and
+   * any request may access it.
+   *
+   * @param applicationUri
+   * @return
+   */
+  def hasAccessToResource(applicationUri: String): Boolean = {
+    lazy val repoModel = RepositoryNameResolver
+      .getRepositoryName(Path(applicationUri), isGitRequest = false)
+      .map(name => PubletWeb.authManager.getRepository(name.name))
+
+    lazy val hasPull = repoModel map { repoModel =>
+      Security.hasGitAction(GitAction.pull, repoModel)
+    }
+
+    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {
+      if (rc.perm.isAnon) true
+      else Security.hasPerm(rc.perm.permString)
+    }) getOrElse {
+      hasPull getOrElse (true)
+    }
+  }
 }

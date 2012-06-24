@@ -23,8 +23,7 @@ import org.eknet.publet.auth.GitAction
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.{RepositoryTag, RepositoryModel, User}
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.web.filter.PubletShiroFilter
-import org.eknet.publet.partition.git.GitPartition
+import org.eknet.publet.web.filter.{AuthzFilter, PubletShiroFilter}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -168,6 +167,10 @@ object Security extends Logging {
       val perm = "write:"+ resource.segments.mkString(":")
       rf(perm)
     }
+  }
+
+  def hasReadPermission(appUri: String): Boolean = {
+    AuthzFilter.hasAccessToResource(appUri)
   }
 
 }

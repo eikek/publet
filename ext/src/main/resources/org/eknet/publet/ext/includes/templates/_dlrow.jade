@@ -1,0 +1,16 @@
+- import org.eknet.publet.ext.{ResourceInfo => ri}
+- import org.eknet.publet.vfs.Resource
+-@ val resource: Resource
+-@ val uri: String
+tr
+  td
+    a(href={ PubletWebContext.urlOf(uri) })
+      =resource.name.fullName
+    small(style="color:#444; font-size: 12px;")
+      ="(" +ri.getSizeString(uri).getOrElse("") + ")"
+  td
+    =ri.getLastModifiedString
+  td 
+    =ri.getChecksum(uri).getOrElse("")
+  td 
+    =ri.getAccessCount(uri)   

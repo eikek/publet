@@ -7,6 +7,7 @@ import java.text.DateFormat
 import java.util
 import org.eknet.publet.partition.git.GitFile
 import org.eknet.publet.auth.UserProperty
+import org.eknet.publet.vfs.util.ByteSize
 
 /**
  * A helper class that defines method for retrieving information to
@@ -192,4 +193,32 @@ object ResourceInfo {
    * @return
    */
   def getLastAuthorLogin: Option[String] = getLastAuthorLogin(PubletWebContext.applicationUri)
+
+  /**
+   * Returns the md5 checksum of the resource contents at the specified uri.
+   *
+   * @param uri
+   * @return
+   */
+  def getChecksum(uri: String): Option[String] = {
+    CounterExtension.serviceOption flatMap (_.getMd5(uri))
+  }
+
+  /**
+   * Returns the md5 checksum of the resource content of the resource the
+   * current request points to.
+   *
+   * @return
+   */
+  def getChecksum: Option[String] = getChecksum(PubletWebContext.applicationUri)
+
+  def getSize(uri: String): Option[Long] = {
+    findSource(Path(uri)) flatMap (_.length)
+  }
+
+  def getSize:Option[Long] = getSize(PubletWebContext.applicationUri)
+
+  def getSizeString(uri: String): Option[String] = {
+    getSize(uri) map { sz => ByteSize.bytes.normalizeString(sz.toDouble) }
+  }
 }

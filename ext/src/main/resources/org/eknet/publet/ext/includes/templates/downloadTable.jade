@@ -1,0 +1,62 @@
+- import org.eknet.publet.ext.{ResourceInfo => ri}
+- import org.eknet.publet.ext.{TreeInfo => ti}
+- import org.eknet.publet.vfs.Resource
+- import org.eknet.publet.vfs.Path
+-@ val rootDir: String = PubletWebContext.applicationPath.parent.asString
+-@ val folderImagePath: String = "/publet/ext/includes/img/folder_blue.png"
+-@ val exclExtensions: Seq[String] = Seq("html", "jade", "md", "markdown", "page", "ssp")
+- val dir = Path(rootDir)
+-
+  def toPath(r: Resource) = dir.child(r.name.fullName)
+
+- val folders = ti.folders(dir)
+- if (!folders.isEmpty)
+  .subnav
+    ul.nav.nav-pills
+      - for (d <- folders) {
+        - val name = d.name.name.takeWhile(_ != '/')
+        li
+          a(href={ "#"+ name })
+            =name
+      - }
+br/
+- for (d <- folders) {
+  - val dPath = toPath(d)
+  - val name = d.name.name.takeWhile(_ != '/')
+  h2(id={ name })
+    img(src={ folderImagePath } height="30px")
+    =name
+    
+  table.table
+    thead
+      th
+      th uploaded
+      th md5
+      th clicks
+    tbody
+      - for (r <- ti.filesWithoutExtensions(dPath, exclExtensions)) {
+        - val uri = (dPath / r).asString
+        - setAttribute("resource", Some(r))
+        - setAttribute("uri", Some(uri))
+        =include("_dlrow.jade")
+      - }
+- }
+
+- if (!folders.isEmpty)
+  hr/
+  h2 /
+- val rootfiles = ti.filesWithoutExtensions(dir, exclExtensions)
+- if (!rootfiles.isEmpty) 
+  table.table.table-striped
+    thead
+      th 
+      th uploaded
+      th md5
+      th clicks
+    tbody
+    - for (r <- rootfiles) {
+      - val uri = (dir / r).asString
+      - setAttribute("resource", Some(r))
+      - setAttribute("uri", Some(uri))
+      =include("_dlrow.jade")
+    - }

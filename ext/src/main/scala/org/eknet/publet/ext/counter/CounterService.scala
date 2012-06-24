@@ -6,7 +6,7 @@ import org.eknet.publet.web.{PubletWeb, ClientInfo}
 import org.eknet.publet.ext.ExtDb
 import com.tinkerpop.blueprints.Vertex
 import org.apache.shiro.crypto.hash.Md5Hash
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.{ContentResource, Resource, Path}
 import org.apache.shiro.util.ByteSource
 import org.apache.shiro.crypto.hash.format.{HexFormat, DefaultHashFormatFactory, HashFormat}
 
@@ -61,7 +61,8 @@ trait CounterService {
   def collect(uriPath: String, info: ClientInfo)
 
   /**
-   * Returns the md5 has of the resource at the specified uri.
+   * Returns the md5 has of the resource at the specified uri. If no resource
+   * is found, [[scala.None]] is returned.
    *
    * @param uriPath
    * @return
@@ -131,38 +132,38 @@ object CounterService {
     }
 
     def getMd5(uri: String): Option[String] = {
+      //property for storing the last mod date in order to update the checksum if necessary
       val lastmod = "__page_lastmod"
+      //normalize uri, it is saved without a starting `/` in the graph
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
 
-      def createChecksum(): Option[(String, Long)] = {
-        PubletWeb.publet.findSources(Path(uriPath))
-          .headOption
-          .map(res => {
-            val source = ByteSource.Util.bytes(res.inputStream)
-            val md5 = new Md5Hash(source, null)
-            val format = new HexFormat
-            (format.format(md5), res.lastModification.getOrElse(0L))
-        })
+      /** Create a checksum of the inputstream of the resource */
+      def createChecksum(res: ContentResource): (String, Long) = {
+        val source = ByteSource.Util.bytes(res.inputStream)
+        val md5 = new Md5Hash(source, null)
+        val format = new HexFormat
+        (format.format(md5), res.lastModification.getOrElse(0L))
       }
 
-      def updateChecksum(pv: Vertex): Option[String] = {
-        val cs = createChecksum()
-        cs.foreach(c => {
-          pv.setProperty(pageMd5Checksum, c._1)
-          pv.setProperty(lastmod, c._2)
-        })
-        cs.map(_._1)
+      /** Updates the checksum property with a new checksum of the given resource */
+      def updateChecksum(pv: Vertex, res: ContentResource): String = {
+        val cs = createChecksum(res)
+        pv.setProperty(pageMd5Checksum, cs._1)
+        pv.setProperty(lastmod, cs._2)
+        cs._1
       }
 
-      db.withTx {
-        val pv = getOrCreatePageVertex(uriPath)
-        Option(pv.getProperty(pageMd5Checksum)).flatMap(cs => {
-          val mod = Option(pv.getProperty(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
-          val cur = PubletWeb.publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
-          if (cur > mod) updateChecksum(pv)
-          else Some(cs.asInstanceOf[String])
-        }) orElse {
-          updateChecksum(pv)
+      PubletWeb.publet.findSources(Path(uriPath)).headOption map { res =>
+        db.withTx {
+          val pv = getOrCreatePageVertex(uriPath)
+          Option(pv.getProperty(pageMd5Checksum)).map(cs => {
+            val mod = Option(pv.getProperty(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
+            val cur = PubletWeb.publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
+            if (cur > mod) updateChecksum(pv, res)
+            else cs.asInstanceOf[String]
+          }) getOrElse {
+            updateChecksum(pv, res)
+          }
         }
       }
     }
