@@ -26,7 +26,7 @@ import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.04.12 23:16
  */
-object MailContact extends ScalaScript {
+class MailContact extends ScalaScript {
 
   lazy val formTemplate = "/publet/ext/includes/templates/_contact.jade"
   lazy val actionUrl = "/publet/ext/scripts/contact.json"

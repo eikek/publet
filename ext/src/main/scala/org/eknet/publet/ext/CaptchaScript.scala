@@ -32,7 +32,7 @@ import org.eknet.publet.web.PubletWebContext
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.04.12 15:09
  */
-object CaptchaScript extends ScalaScript {
+class CaptchaScript extends ScalaScript {
 
   def captchaStrings(min: Int, max: Int, count: Int): Array[Array[Char]] = {
     val validchars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')

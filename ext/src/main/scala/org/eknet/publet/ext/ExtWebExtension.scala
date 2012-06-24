@@ -42,8 +42,8 @@ object ExtWebExtension {
   def install(publet: Publet) {
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
-    muc.addResource(new WebScriptResource("captcha.png".rn, CaptchaScript))
-    muc.addResource(new WebScriptResource("contact.html".rn, MailContact))
+    muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
+    muc.addResource(new WebScriptResource("contact.html".rn, new MailContact))
     publet.mountManager.mount(extScriptPath, muc)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
