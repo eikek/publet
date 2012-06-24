@@ -1,6 +1,6 @@
 ## publet
 
-Copyright 2011 eknet.org
+Copyright 2012 eknet.org
 
 This product includes software developed at
 The Apache Software Foundation (<http://www.apache.org/>).
@@ -200,6 +200,7 @@ blueprints, from tinkerpop stack, licensed under a BSD license
 >
 > Redistribution and use in source and binary forms, with or without
 > modification, are permitted provided that the following conditions are met:
+>
 >     * Redistributions of source code must retain the above copyright
 >       notice, this list of conditions and the following disclaimer.
 >     * Redistributions in binary form must reproduce the above copyright
