@@ -2,11 +2,13 @@ package org.eknet.publet.ext.counter
 
 import java.text.DateFormat
 import java.util
-import org.eknet.publet.web.util.{Context, Key}
-import org.eknet.publet.web.{PubletWeb, ClientInfo, PubletWebContext}
-import org.eknet.publet.ext.orient.OrientDb
+import org.eknet.publet.web.{PubletWeb, ClientInfo}
 import org.eknet.publet.ext.ExtDb
 import com.tinkerpop.blueprints.Vertex
+import org.apache.shiro.crypto.hash.Md5Hash
+import org.eknet.publet.vfs.Path
+import org.apache.shiro.util.ByteSource
+import org.apache.shiro.crypto.hash.format.{HexFormat, DefaultHashFormatFactory, HashFormat}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -58,6 +60,13 @@ trait CounterService {
    */
   def collect(uriPath: String, info: ClientInfo)
 
+  /**
+   * Returns the md5 has of the resource at the specified uri.
+   *
+   * @param uriPath
+   * @return
+   */
+  def getMd5(uriPath: String): Option[String]
 }
 
 object CounterService {
@@ -74,23 +83,12 @@ object CounterService {
 
   private class Impl extends CounterService {
     import collection.JavaConversions._
+    import ExtDb.Property._
 
     private val db = ExtDb
 
-    /** The label of the edge from the reference node to each uri node */
-    val pageEdgeLabel = "page"
-
-    /** The property key of the uri value */
-    val pagePathKey = "page_pagePath"
-    db.graph.createKeyIndex(pagePathKey, classOf[Vertex])
-
-    /** The property key of the count value */
-    val pageCountKey = "page_accessCount"
-
-    /** The property key of the last access time value */
-    val pageLastAccessKey = "page_lastAccess"
-
-    def getPageCount(uriPath: String) = {
+    def getPageCount(uri: String) = {
+      val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx {
         val vertices = db.graph.getVertices(pagePathKey, uriPath)
         Option(vertices)
@@ -100,7 +98,8 @@ object CounterService {
       }
     }
 
-    def getLastAccess(uriPath: String) = {
+    def getLastAccess(uri: String) = {
+      val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx{
         val vertices = db.graph.getVertices(pagePathKey, uriPath)
         Option(vertices)
@@ -110,21 +109,62 @@ object CounterService {
       }
     }
 
-    def collect(uriPath: String, info: ClientInfo) {
-      db.withTx {
-        val pageVertex = db.graph.getVertices(pagePathKey, uriPath).headOption getOrElse {
-          val pv = db.graph.addVertex()
-          pv.setProperty(pagePathKey, uriPath)
-          pv.setProperty(pageCountKey, 0L)
-          pv
-        }
+    private def getOrCreatePageVertex(uriPath: String) = db.graph.getVertices(pagePathKey, uriPath).headOption getOrElse {
+      val pv = db.graph.addVertex()
+      pv.setProperty(pagePathKey, uriPath)
+      pv.setProperty(pageCountKey, 0L)
+      pv
+    }
 
-        val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
-        pageVertex.setProperty(pageCountKey, (count +1))
-        pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
-        db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+    def collect(uri: String, info: ClientInfo) {
+      if (!info.agent.exists(_.contains("bot")) && !info.agent.exists(_.contains("spider"))) {
+        val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
+        db.withTx {
+          val pageVertex = getOrCreatePageVertex(uriPath)
+          import ExtDb.Label._
+          val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
+          pageVertex.setProperty(pageCountKey, (count +1))
+          pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
+          db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+        }
       }
     }
 
+    def getMd5(uri: String): Option[String] = {
+      val lastmod = "__page_lastmod"
+      val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
+
+      def createChecksum(): Option[(String, Long)] = {
+        PubletWeb.publet.findSources(Path(uriPath))
+          .headOption
+          .map(res => {
+            val source = ByteSource.Util.bytes(res.inputStream)
+            val md5 = new Md5Hash(source, null)
+            val format = new HexFormat
+            (format.format(md5), res.lastModification.getOrElse(0L))
+        })
+      }
+
+      def updateChecksum(pv: Vertex): Option[String] = {
+        val cs = createChecksum()
+        cs.foreach(c => {
+          pv.setProperty(pageMd5Checksum, c._1)
+          pv.setProperty(lastmod, c._2)
+        })
+        cs.map(_._1)
+      }
+
+      db.withTx {
+        val pv = getOrCreatePageVertex(uriPath)
+        Option(pv.getProperty(pageMd5Checksum)).flatMap(cs => {
+          val mod = Option(pv.getProperty(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
+          val cur = PubletWeb.publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
+          if (cur > mod) updateChecksum(pv)
+          else Some(cs.asInstanceOf[String])
+        }) orElse {
+          updateChecksum(pv)
+        }
+      }
+    }
   }
 }
