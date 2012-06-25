@@ -117,10 +117,12 @@ object Publet extends Build {
     settings = buildSettings
   )
   
-  lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
+  lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
     name := "publet",
     OsgiKeys.exportPackage := Seq("org.eknet.publet"),
-    libraryDependencies ++= deps
+    libraryDependencies ++= deps,
+    ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
+    sourceGenerators in Compile <+= ReflectPlugin.reflect
   ) ++ osgiSettings
   
   lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
