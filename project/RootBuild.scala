@@ -6,7 +6,7 @@ import com.typesafe.sbtosgi.OsgiPlugin._
 object Resolvers {
   
   val eknet = "eknet.org" at "http://maven.eknet.org/repo"
-  
+  val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
 }
 
 object Dependencies {
@@ -38,6 +38,15 @@ object Dependencies {
   val orientCommons = "com.orientechnologies" % "orient-commons" % "1.0.1" withSources()
   val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % "2.0.0" withSources() intransitive()
   val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % "2.0.0" withSources() intransitive() //uses orientdb 1.0.1
+
+  val miltonApi = "com.ettrema" % "milton-api" % "1.8.0.1" withSources() intransitive()
+  val miltonApiDeps = Seq(
+    "commons-io" % "commons-io" % "1.4" withSources(),
+    "commons-codec" % "commons-codec" % "1.4" withSources(),
+    "org.jdom" % "jdom" % "1.1"
+  )
+  val miltonServlet = "com.ettrema" % "milton-servlet" % "1.8.0.1" withSources() intransitive()
+
 }
 
 // Root Module 
@@ -63,7 +72,7 @@ object RootBuild extends Build {
     scalaVersion := globalScalaVersion,
     sbtPlugin := true,
     exportJars := true,
-    resolvers := Seq(Resolvers.eknet),
+    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema),
     scalacOptions ++= Seq("-unchecked", "-deprecation")
   )
 
@@ -187,7 +196,8 @@ object Web extends Build {
        commonsIo, 
        jgitHttpServer,
        shiro, shiroWeb,
-       scalaTest)
+       miltonApi, miltonServlet,
+       scalaTest) ++ miltonApiDeps
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.web")
 }
