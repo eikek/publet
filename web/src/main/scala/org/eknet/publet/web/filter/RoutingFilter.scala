@@ -21,6 +21,7 @@ import http.{HttpServletRequest, HttpServletRequestWrapper}
 import org.eknet.publet.web.{Config, PubletWeb}
 import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
+import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * Does the routing of the request through a simple filter chain.
@@ -49,6 +50,7 @@ class RoutingFilter extends Filter with HttpFilter {
     new ExceptionFilter, //must be inside shiro
     new AuthzFilter,
     new ExtensionRequestFilter,
+    new WebdavFilter,
     new SourceFilter
   )
 

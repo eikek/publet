@@ -28,7 +28,7 @@ import java.io.File
 class PartitionMounter extends EmptyExtension with Logging {
 
   override def onStartup() {
-    import Path._
+
     val publet = PubletWeb.publet
 
     // git partitions
@@ -41,24 +41,43 @@ class PartitionMounter extends EmptyExtension with Logging {
     })
 
     // fs partitions
-    val fsKey = "partition.fs."
+    val partCount = PartitionMounter.applyMounts("fs", (pdir, mountp) => {
+      info("Mounting fs directory '"+ pdir+ "' to '"+ mountp.asString+"'")
+      publet.mountManager.mount(mountp, new FilesystemPartition(pdir, true))
+    })
+    info("Mounted "+ partCount +" filesystem partition(s)")
+
+    //webdav partitions (are fs partitions that are available via webdav)
+    val webdavCount = PartitionMounter.applyMounts("webdav", (pdir, mountp) => {
+      info("Mounting webdav directory '"+ pdir+ "' to '"+ mountp.asString +"'")
+      publet.mountManager.mount(mountp, new FilesystemPartition(pdir, true))
+    })
+    info("Mounted "+ webdavCount +" webdav partitions")
+  }
+}
+
+object PartitionMounter {
+
+  private[web] def applyMounts(partType: String, f:(File, Path) => Unit): Int = {
+    import Path._
+
+    val fsKey = "partition."+partType+"."
     val settings = PubletWeb.publetSettings
+
     def mountFs(num:Int): Int = {
       val dir = settings(fsKey + num +".dir")
       val mount = settings(fsKey + num +".mount")
       if (dir.isDefined && mount.isDefined) {
         val pdir = new File(Config.configDirectory, dir.get)
-        info("Mounting fs directory '"+ dir.get+ "' to '"+ mount.get+"'")
-        publet.mountManager.mount(mount.get.p, new FilesystemPartition(pdir, true))
+        val mountp = mount.get.p
+
+        f(pdir, mountp)
+
         1+ mountFs(num +1)
       } else {
         0
       }
     }
-    val partCount = mountFs(0)
-    info("Mounted "+ partCount +" filesystem partition(s)")
+    mountFs(0)
   }
-
-
-
 }
