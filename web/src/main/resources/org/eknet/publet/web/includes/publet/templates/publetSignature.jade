@@ -1,0 +1,8 @@
+- import org.eknet.publet.web.util.AppSignature
+- val logoUrl = PubletWebContext.urlOf("/publet/doc/publet_deepskyblue4.png")
+div(style="font-size:11px; color:#888; width:45px; margin:auto; text-align:center;")
+  | driven by
+  a(href="https://github.com/eikek/publet" target="_new")
+    img(src={ logoUrl } width="45px" alt="publet logo" title={AppSignature.toString})
+  - if (!AppSignature.version.endsWith("SNAPSHOT"))
+    ="v"+AppSignature.version
