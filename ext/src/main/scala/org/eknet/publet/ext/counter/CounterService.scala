@@ -119,14 +119,17 @@ object CounterService {
 
     def collect(uri: String, info: ClientInfo) {
       if (!info.agent.exists(_.contains("bot")) && !info.agent.exists(_.contains("spider"))) {
-        val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
-        db.withTx {
-          val pageVertex = getOrCreatePageVertex(uriPath)
-          import ExtDb.Label._
-          val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
-          pageVertex.setProperty(pageCountKey, (count +1))
-          pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
-          db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+        val blacklisted = PubletWeb.publetSettings("ext.counter.blacklist."+ info.ip).map(_.toBoolean).getOrElse(false)
+        if (!blacklisted) {
+          val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
+          db.withTx {
+            val pageVertex = getOrCreatePageVertex(uriPath)
+            import ExtDb.Label._
+            val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
+            pageVertex.setProperty(pageCountKey, (count +1))
+            pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
+            db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+          }
         }
       }
     }
