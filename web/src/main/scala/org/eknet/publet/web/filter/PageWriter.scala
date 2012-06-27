@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web.filter
 
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eknet.publet.vfs._
 import scala.Some
 import grizzled.slf4j.Logging
@@ -51,8 +51,8 @@ trait PageWriter extends Logging {
    * @param code
    * @param resp
    */
-  def writeError(code: Int, resp: HttpServletResponse) {
-    writePage(Some(getCustomErrorPage(code).getOrElse(ErrorResponse(code))), resp)
+  def writeError(code: Int, req: HttpServletRequest, resp: HttpServletResponse) {
+    writePage(Some(getCustomErrorPage(code).getOrElse(ErrorResponse(code))), req, resp)
   }
 
   /**
@@ -61,20 +61,20 @@ trait PageWriter extends Logging {
    * @param ex
    * @param resp
    */
-  def writeError(ex: Throwable, resp: HttpServletResponse) {
+  def writeError(ex: Throwable, req: HttpServletRequest, resp: HttpServletResponse) {
     if (Config("publet.mode").getOrElse("development") == "development") {
       //print the exception in development mode
       try {
-        writePage(RenderUtils.renderException(ex), resp)
+        writePage(RenderUtils.renderException(ex), req, resp)
       }
       catch {
         case e:Throwable => {
           error("Error while writing application exception!", e)
-          writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp)
+          writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, req, resp)
         }
       }
     } else {
-      writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp)
+      writeError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, req, resp)
     }
   }
 
@@ -85,13 +85,13 @@ trait PageWriter extends Logging {
    * @param page
    * @param resp
    */
-  def writePage(page: Option[Content], resp: HttpServletResponse) {
+  def writePage(page: Option[Content], req: HttpServletRequest, resp: HttpServletResponse) {
     val out = resp.getOutputStream
     val path = PubletWebContext.applicationPath
     page match {
-      case None => createNew(path, resp)
+      case None => createNew(path, req, resp)
       case Some(p:ErrorResponse) => {
-        p.send(resp)
+        p.send(req, resp)
       }
       case Some(p: StreamResponse) => {
         p.send(resp)
@@ -103,8 +103,8 @@ trait PageWriter extends Logging {
     }
   }
 
-  def createNew(path: Path, resp: HttpServletResponse) {
-    PubletWeb.notFoundHandler.resourceNotFound(path, resp)
+  def createNew(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
+    PubletWeb.notFoundHandler.resourceNotFound(path, req, resp)
   }
 
 }

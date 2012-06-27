@@ -22,7 +22,7 @@ import http.HttpServletResponse
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.auth.GitAction
-import org.eknet.publet.web.{RepositoryNameResolver, PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{ErrorResponse, RepositoryNameResolver, PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.Path
 
 /**
@@ -43,11 +43,11 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
     } catch {
       case uae: UnauthorizedException => {
         error("Unauthorized: "+ uae.getLocalizedMessage)
-        writeError(HttpServletResponse.SC_UNAUTHORIZED, resp)
+        writeError(HttpServletResponse.SC_UNAUTHORIZED, req, resp)
       }
       case se: ServletException if (se.getCause.isInstanceOf[UnauthorizedException]) => {
         error("Unauthorized: "+ se.getCause.getLocalizedMessage)
-        writeError(HttpServletResponse.SC_UNAUTHORIZED, resp)
+        writeError(HttpServletResponse.SC_UNAUTHORIZED, req, resp)
       }
       case ue: UnauthenticatedException => {
         info("Unauthenticated user for '"+utils.applicationUri+"'. Redirect to login")

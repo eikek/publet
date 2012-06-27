@@ -32,9 +32,11 @@ class CounterExtension extends WebExtension{
   }
 
   def onEndRequest() {
-    val uri = PubletWebContext.fullUrl
-    val cinfo = PubletWebContext.getClientInfo
-    counterThread ! Message(uri, cinfo)
+    if (PubletWebContext.getErrorResponse.isEmpty) {
+      val uri = PubletWebContext.fullUrl
+      val cinfo = PubletWebContext.getClientInfo
+      counterThread ! Message(uri, cinfo)
+    }
   }
 }
 

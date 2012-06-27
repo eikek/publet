@@ -17,7 +17,7 @@
 package org.eknet.publet.web.filter
 
 import org.eknet.publet.vfs.Path
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,6 +25,6 @@ import javax.servlet.http.HttpServletResponse
  */
 trait NotFoundHandler {
 
-  def resourceNotFound(path: Path, resp: HttpServletResponse)
+  def resourceNotFound(path: Path, req: HttpServletRequest, resp: HttpServletResponse)
 
 }

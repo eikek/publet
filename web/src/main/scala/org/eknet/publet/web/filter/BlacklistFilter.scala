@@ -39,7 +39,7 @@ class BlacklistFilter extends Filter with HttpFilter with Logging with PageWrite
       val underscoreSegment = path.segments.find(_.startsWith("_"))
       if (underscoreSegment.isDefined) {
         info("Blacklist-Filter wiping: "+ path.asString)
-        writeError(HttpServletResponse.SC_NOT_FOUND, response)
+        writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
         response.flushBuffer()
       }
     }
