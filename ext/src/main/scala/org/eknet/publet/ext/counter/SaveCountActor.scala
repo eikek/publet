@@ -55,7 +55,12 @@ private[counter] class SaveCountActor extends Actor with Logging {
   }
 
   private def countAccess(uri:String, info: ClientInfo) {
-    CounterExtension.service.collect(uri, info)
+    try {
+      CounterExtension.service.collect(uri, info)
+    }
+    catch {
+      case e: Exception => error("Exception while counting!", e)
+    }
   }
 }
 
