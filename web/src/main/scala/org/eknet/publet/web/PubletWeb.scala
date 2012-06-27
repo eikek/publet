@@ -30,7 +30,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
 import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
 import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.fusesource.scalate.Binding
 import org.eknet.publet.engine.scala.{ScriptCompiler, ScalaScriptEngine, DefaultPubletCompiler}
 import java.io.File
@@ -132,8 +132,8 @@ object PubletWeb extends Logging {
 
   lazy val notFoundHandlerKey = Key("notFoundHandler", {
     case Context => new NotFoundHandler with PageWriter {
-      def resourceNotFound(path: Path, resp: HttpServletResponse) {
-        writeError(HttpServletResponse.SC_NOT_FOUND, resp)
+      def resourceNotFound(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
+        writeError(HttpServletResponse.SC_NOT_FOUND, req, resp)
       }
     }
   })

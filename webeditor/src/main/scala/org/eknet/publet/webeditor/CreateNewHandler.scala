@@ -16,7 +16,7 @@
 
 package org.eknet.publet.webeditor
 
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
 import org.eknet.publet.vfs._
 import grizzled.slf4j.Logging
@@ -27,7 +27,8 @@ import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb}
  * @since 26.04.12 16:14
  */
 class CreateNewHandler extends NotFoundHandler with PageWriter with Logging {
-  def resourceNotFound(path: Path, resp: HttpServletResponse) {
+
+  def resourceNotFound(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
     val targetType = path.name.targetType
     val publet = PubletWeb.publet
     publet.mountManager.resolveMount(path) map { x=>
@@ -42,11 +43,12 @@ class CreateNewHandler extends NotFoundHandler with PageWriter with Logging {
         publet.engineManager.getEngine('edit).get
           .process(path, res, targetType)
       }
-      writePage(Some(c.get), resp)
+      writePage(Some(c.get), req, resp)
 
     } getOrElse {
       error("Path not mounted: "+ path.asString)
-      ErrorResponse.notFound.send(resp)
+      ErrorResponse.notFound.send(req, resp)
     }
   }
+
 }

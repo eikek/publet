@@ -100,7 +100,7 @@ private class ExceptionFilter extends Filter with PageWriter with HttpFilter wit
     catch {
       case e:Throwable => {
         error("Application error", e)
-        writeError(e, response)
+        writeError(e, request, response)
       }
     }
   }

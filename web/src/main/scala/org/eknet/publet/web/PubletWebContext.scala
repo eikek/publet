@@ -83,4 +83,14 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
   private val clientInfoKey = Key("clientInfo", {
     case Request => ClientInfo(req)
   })
+
+  /**
+   * Returns the [[org.eknet.publet.web.ErrorResponse]] that has been
+   * written into the response (if so).
+   * Meant as a place for filters to know whether the request has been
+   * led to an error.
+   *
+   * @return
+   */
+  def getErrorResponse = ErrorResponse.errorWritten(req)
 }

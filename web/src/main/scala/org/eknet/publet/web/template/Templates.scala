@@ -37,11 +37,6 @@ object Templates {
       new ClasspathContainer(base = "/org/eknet/publet/web/includes/highlight"))
   }
 
-  def mountSticky(publet: Publet) {
-    publet.mountManager.mount("/publet/sticky/".p,
-      new ClasspathContainer(base = "/org/eknet/publet/web/includes/sticky"))
-  }
-
   def mountPubletResources(publet: Publet) {
     val includes = new ClasspathContainer(base = "/org/eknet/publet/web/includes/publet")
     publet.mountManager.mount("/publet/".p, includes)

@@ -40,7 +40,7 @@ class SourceFilter extends Filter with HttpFilter with PageWriter {
         }
         case _=> {
           if (!PubletWebContext.isGitRequest && path.name.targetType == ContentType.unknown) {
-            writeError(HttpServletResponse.SC_NOT_FOUND, response)
+            writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
           } else {
             chain.doFilter(request, response)
           }

@@ -17,7 +17,7 @@
 package org.eknet.publet.web
 
 import org.eknet.publet.vfs.{ContentType, Content}
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 
 /**
@@ -28,11 +28,17 @@ case class ErrorResponse(code: Int) extends Content {
   def contentType = ContentType.unknown
   def inputStream = null
 
-  def send(resp: HttpServletResponse) {
+  def send(req: HttpServletRequest, resp: HttpServletResponse) {
     resp.sendError(code)
+    req.setAttribute(ErrorResponse.reqKey, this)
   }
 }
 object ErrorResponse {
+  private val reqKey = ErrorResponse.toString
+
+  def errorWritten(req: HttpServletRequest): Option[ErrorResponse] = {
+    Option(req.getAttribute(reqKey)).map(_.asInstanceOf[ErrorResponse])
+  }
 
   /** HTTP 405 "Method not allowed */
   val methodNotAllowed = ErrorResponse(HttpServletResponse.SC_METHOD_NOT_ALLOWED)

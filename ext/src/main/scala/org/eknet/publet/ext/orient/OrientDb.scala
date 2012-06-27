@@ -4,12 +4,14 @@ import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
 import com.tinkerpop.blueprints.{Edge, Vertex}
 import java.io.File
 import org.eknet.publet.web.Config
+import com.orientechnologies.orient.core.exception.OConcurrentModificationException
+import org.fusesource.scalate.util.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.06.12 16:19
  */
-class OrientDb(val graph: OrientGraph) {
+class OrientDb(val graph: OrientGraph) extends Logging {
 
   private val txthread = new ThreadLocal[Boolean]() {
     override def initialValue() = false
@@ -17,14 +19,33 @@ class OrientDb(val graph: OrientGraph) {
 
   /**
    * Wraps the function in a transaction. Supports
-   * nested blocks, but only starts a transaction if
+   * nested blocks, by only starting a transaction if
    * none exists on the current thread.
+   *
+   * It retries a few times on concurrent modification
+   * errors.
    *
    * @param f
    * @tparam A
    * @return
    */
   def withTx[A](f: => A):A = {
+    def executeOpt(count: Int, max: Int): A = {
+      if (count >= max) sys.error("Too many ("+max+") concurrent modifications.")
+      try {
+        executeTx(f)
+      }
+      catch {
+        case e: OConcurrentModificationException => {
+          error("Concurrent modification error. Try again.")
+          executeOpt(count +1, max)
+        }
+      }
+    }
+    executeOpt(0, 5)
+  }
+
+  private def executeTx[A](f: => A): A = {
     if (!txthread.get()) {
       graph.startTransaction()
       txthread.set(true)

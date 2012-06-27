@@ -80,7 +80,7 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
 
   def findSources(path: Path): Iterable[ContentResource] = {
     Predef.ensuring(path != null, "null is illegal")
-    if (path.directory || path.name.targetType==ContentType.unknown) Seq()
+    if (path.directory) Seq()
     else {
       // at first try by listing all children in the container
       // if that results in an empty list, try looking up files

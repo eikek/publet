@@ -38,7 +38,7 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     PubletWebContext.param("a") match {
-      case Some(engine) => processEngine(req, resp, engine);
+      case Some(engine) => processEngine(req, resp, engine)
       case _ => processDefault(req, resp)
     }
   }
@@ -51,7 +51,7 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
     val targetType = path.name.targetType
     val someEngine = Some(publet.engineManager.getEngine(engineId).getOrElse(sys.error("No engine '"+engineId+"' available")))
     val html = publet.process(path, targetType, someEngine)
-    writePage(html, resp)
+    writePage(html, req, resp)
   }
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
@@ -60,6 +60,6 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
 
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
     val html = publet.process(path, tt)
-    writePage(html, resp)
+    writePage(html, req, resp)
   }
 }

@@ -118,7 +118,19 @@ object CounterService {
     }
 
     def collect(uri: String, info: ClientInfo) {
-      if (!info.agent.exists(_.contains("bot")) && !info.agent.exists(_.contains("spider"))) {
+      def isBlacklisted: Boolean = {
+        //dont count spiders...
+        val bot = info.agent.map(_.toLowerCase)
+          .exists(agent => agent.contains("spider") || agent.contains("bot"))
+
+        //honor blacklist in settings
+        lazy val bl = PubletWeb
+          .publetSettings("ext.counter.blacklist."+ info.ip)
+          .map(_.toBoolean).getOrElse(false)
+
+        bot || bl
+      }
+      if (!isBlacklisted) {
         val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
         db.withTx {
           val pageVertex = getOrCreatePageVertex(uriPath)
