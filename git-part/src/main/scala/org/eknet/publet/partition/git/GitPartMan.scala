@@ -37,4 +37,4 @@ trait GitPartMan {
   def getAllPartitions: Iterable[GitPartition]
 }
 
-case class Config(initial: Option[Map[Path, Content]] = None, branch: String = "master", mountPoint: Option[Path] = None)
+case class Config(initial: Option[Map[Path, Content]] = None, branch: String = "master")

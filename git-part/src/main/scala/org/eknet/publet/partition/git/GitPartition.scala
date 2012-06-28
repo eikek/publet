@@ -33,18 +33,6 @@ class GitPartition (val tandem: Tandem)
     result.isSuccessful
   }
 
-  def getMountPoint: Option[Path] = {
-    val config = tandem.workTree.getConfig
-    Option(config.getString("publet", null, GitPartition.mountPointProperty))
-      .map(Path(_))
-  }
-
-  private[git] def setMountPoint(mountPoint: Path) {
-    val conf = tandem.workTree.getConfig
-    conf.setString("publet", null, GitPartition.mountPointProperty, mountPoint.toAbsolute.asString)
-    conf.save()
-  }
-
   private def getCurrentUser = {
     try {
       Option(SecurityUtils.getSubject.getPrincipal) flatMap { p =>

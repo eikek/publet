@@ -51,7 +51,6 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     gitconf.save()
 
     val gitp = new GitPartition(tandem)
-    config.mountPoint.foreach(gitp.setMountPoint)
     gitp
   }
 

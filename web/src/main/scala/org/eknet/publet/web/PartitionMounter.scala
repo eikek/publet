@@ -31,15 +31,6 @@ class PartitionMounter extends EmptyExtension with Logging {
 
     val publet = PubletWeb.publet
 
-    // git partitions
-    val partman = PubletWeb.gitpartman
-    partman.getAllPartitions
-      .collect({ case p if (p.getMountPoint.isDefined)=>p})
-      .foreach(part => {
-      info("Mounting repository '"+ part.tandem.name.name +"' to '"+ part.getMountPoint.get.asString+"'...")
-      publet.mountManager.mount(part.getMountPoint.get, part)
-    })
-
     // fs partitions
     val partCount = PartitionMounter.applyMounts("fs", (pdir, mountp) => {
       info("Mounting fs directory '"+ pdir+ "' to '"+ mountp.asString+"'")
