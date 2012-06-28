@@ -13,7 +13,6 @@ import com.bradmcevoy.http.exceptions.BadRequestException
 class WebdavResourceFactory extends ResourceFactory with Logging {
 
   def getResource(host: String, path: String) = {
-
     PubletWeb.publet.rootContainer.lookup(Path(path)) match {
       case Some(r) => WebdavResource(r)
       case None => null

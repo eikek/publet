@@ -24,6 +24,7 @@ import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.auth.GitAction
 import org.eknet.publet.web.{ErrorResponse, RepositoryNameResolver, PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * Does default authorization checks.
@@ -37,7 +38,12 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
     val utils = getRequestUtils(req)
     try {
 
-      AuthzFilter.checkAccessToCurrentResource()
+      // Webdav filter handles that itself. Initiates BASIC
+      // auth challenges on UnauthenticatedException, for example
+      if (!WebdavFilter.isDavRequest) {
+        AuthzFilter.checkAccessToCurrentResource()
+      }
+
       chain.doFilter(req, resp)
 
     } catch {

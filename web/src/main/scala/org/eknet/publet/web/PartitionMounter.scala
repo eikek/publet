@@ -20,8 +20,13 @@ import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
+import util.PropertiesMap
+import org.eknet.publet.partition.git.GitPartition
+import org.eknet.publet.partition.git
 
 /**
+ * Checks the `Config` and/or `Settings` file for listed partitions to mount.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.05.12 20:30
  */
@@ -30,45 +35,94 @@ class PartitionMounter extends EmptyExtension with Logging {
   override def onStartup() {
 
     val publet = PubletWeb.publet
+    //by default partitions are read from settings. this can be overridden
+    //in the config file so that all definitions from settings are ignored
+    val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
+      readPartitionConfig(PubletWeb.publetSettings)
+    } else {
+      readPartitionConfig(Config)
+    }
 
-    // fs partitions
-    val partCount = PartitionMounter.applyMounts("fs", (pdir, mountp) => {
-      info("Mounting fs directory '"+ pdir+ "' to '"+ mountp.asString+"'")
-      publet.mountManager.mount(mountp, new FilesystemPartition(pdir, true))
-    })
-    info("Mounted "+ partCount +" filesystem partition(s)")
-
-    //webdav partitions (are fs partitions that are available via webdav)
-    val webdavCount = PartitionMounter.applyMounts("webdav", (pdir, mountp) => {
-      info("Mounting webdav directory '"+ pdir+ "' to '"+ mountp.asString +"'")
-      publet.mountManager.mount(mountp, new FilesystemPartition(pdir, true))
-    })
-    info("Mounted "+ webdavCount +" webdav partitions")
-  }
-}
-
-object PartitionMounter {
-
-  private[web] def applyMounts(partType: String, f:(File, Path) => Unit): Int = {
-    import Path._
-
-    val fsKey = "partition."+partType+"."
-    val settings = PubletWeb.publetSettings
-
-    def mountFs(num:Int): Int = {
-      val dir = settings(fsKey + num +".dir")
-      val mount = settings(fsKey + num +".mount")
-      if (dir.isDefined && mount.isDefined) {
-        val pdir = new File(Config.configDirectory, dir.get)
-        val mountp = mount.get.p
-
-        f(pdir, mountp)
-
-        1+ mountFs(num +1)
-      } else {
+    def mount(cfg: PartitionConfig): Int = cfg match {
+      case PartitionConfig("fs", dir, mounts) => {
+        info("Mounting fs directory '"+ dir+ "' to '"+ mounts.map(_.asString)+"'")
+        val pdir = new File(Config.configDirectory, dir)
+        val fsp = new FilesystemPartition(pdir, true)
+        for (m <- mounts) publet.mountManager.mount(m, fsp)
+        1
+      }
+      case PartitionConfig("git", dir, mounts) => {
+        info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
+        val gitp = PubletWeb.gitpartman.getOrCreate(Path(dir), git.Config())
+        for (m <- mounts) publet.mountManager.mount(m, gitp)
+        1
+      }
+      case PartitionConfig(kind, _, _) => {
+        error("Uknown partition type '"+ kind +"' !")
         0
       }
     }
-    mountFs(0)
+
+    val count = configs.map(mount).reduceLeft(_ + _)
+    info("Mounted "+ count +" partition(s)")
+
   }
+
+
+  /**
+   * Extracts the partition configuration from a properties file. The configuration
+   * has the following structure:
+   *
+   * {{{
+   *   partition.0.type=fs
+   *   partition.0.dir=parts/files
+   *   partition.0.mount=/files , /dav/files
+   *
+   *   partition.1.type=gitr
+   *   partition.1.dir=wiki/eike
+   *   partition.1.mount=/wikis/eike  /dav/wikis/eike
+   *
+   *   partition.2.type=fs
+   *   partition.2.dir=artifacts/maven2
+   *   partition.2.mount=/maven2
+   * }}}
+   *
+   * A list of mount points can be specified by separating the path entries
+   * by comma, semi-colon or whitespace.
+   *
+   * @param config
+   * @return
+   */
+  def readPartitionConfig(config: PropertiesMap): List[PartitionConfig] = {
+
+    def recurseRead(num: Int): List[PartitionConfig] = {
+
+      def key(name:String) = "partition."+num+"."+name
+
+      config(key("type")) match {
+        case Some(kind) => {
+          val mounts = config(key("mounts")) match {
+            case None => List[Path]()
+            case Some(s) => s.split("[\\s,;]").withFilter(_.nonEmpty).map(Path(_)).toList
+          }
+          val cdir = config(key("dir"))
+          if (cdir.getOrElse("").isEmpty) {
+            error("A mount configuration has been provided without configuring the directory! See '"+ key("dir")+"' key.")
+            recurseRead(num +1)
+          } else if (mounts.isEmpty) {
+            error("A mount configuration has been provided without a mount point! See '"+ key("mounts")+"' key.")
+            recurseRead(num +1)
+          } else {
+            val part = PartitionConfig(kind, cdir.get, mounts)
+            part :: recurseRead(num +1)
+          }
+        }
+        case None => Nil
+      }
+    }
+
+    recurseRead(0)
+  }
+
+  case class PartitionConfig(kind: String, directory: String, mounts: List[Path])
 }

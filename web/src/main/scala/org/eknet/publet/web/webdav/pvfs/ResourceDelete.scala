@@ -1,15 +1,15 @@
-package org.eknet.publet.web.webdav
+package org.eknet.publet.web.webdav.pvfs
 
 import com.bradmcevoy.http.DeletableResource
-import org.eknet.publet.vfs.Modifyable
+import org.eknet.publet.vfs.{Modifyable, Resource}
 import com.bradmcevoy.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 25.06.12 22:59
+ * @since 27.06.12 23:13
  */
-trait DavDelResource extends DeletableResource {
-  this: DavResource =>
+trait ResourceDelete extends DeletableResource {
+  this: DelegateResource[Resource] =>
 
   def delete() {
     resource match {
@@ -17,4 +17,5 @@ trait DavDelResource extends DeletableResource {
       case _ => throw new BadRequestException("Resource not writeable: "+ resource)
     }
   }
+
 }

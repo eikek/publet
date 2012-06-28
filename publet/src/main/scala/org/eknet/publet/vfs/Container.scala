@@ -77,6 +77,14 @@ trait Container {
     }
   }
 
+  /**
+   * Travels down the resource tree and applies the given
+   * function to each found resource.
+   *
+   * @param path
+   * @param f
+   * @param maxDepth
+   */
   def foreach(path: Path, f:(Path, Resource)=>Unit, maxDepth:Int = -1) {
     def eachChild(path: Path, cr: ContainerResource, curDepth: Int) {
       if (maxDepth < 0 || curDepth < maxDepth) {
