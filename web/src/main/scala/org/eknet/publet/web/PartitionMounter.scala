@@ -63,7 +63,7 @@ class PartitionMounter extends EmptyExtension with Logging {
       }
     }
 
-    val count = configs.map(mount).reduceLeft(_ + _)
+    val count = if (configs.isEmpty) 0 else configs.map(mount).reduceLeft(_ + _)
     info("Mounted "+ count +" partition(s)")
 
   }
