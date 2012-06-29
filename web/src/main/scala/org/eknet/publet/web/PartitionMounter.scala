@@ -76,15 +76,15 @@ class PartitionMounter extends EmptyExtension with Logging {
    * {{{
    *   partition.0.type=fs
    *   partition.0.dir=parts/files
-   *   partition.0.mount=/files , /dav/files
+   *   partition.0.mounts=/files , /dav/files
    *
    *   partition.1.type=gitr
    *   partition.1.dir=wiki/eike
-   *   partition.1.mount=/wikis/eike  /dav/wikis/eike
+   *   partition.1.mounts=/wikis/eike  /dav/wikis/eike
    *
    *   partition.2.type=fs
    *   partition.2.dir=artifacts/maven2
-   *   partition.2.mount=/maven2
+   *   partition.2.mounts=/maven2
    * }}}
    *
    * A list of mount points can be specified by separating the path entries
