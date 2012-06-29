@@ -2,6 +2,8 @@ import sbt._
 import Keys._
 import Dependencies._
 import com.typesafe.sbtosgi.OsgiPlugin._
+import com.github.siasia._
+import WebappPlugin.webappSettings
 
 object Resolvers {
   
@@ -15,7 +17,7 @@ object Dependencies {
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.4"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.1" withSources()
   val servletApi = "javax.servlet" % "servlet-api" % "2.5" % "provided" withSources()
-  val jettyContainer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "container" withSources()
+  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % "1.2.2"
   val commonsIo = "commons-io" % "commons-io" % "2.2" withSources()
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
@@ -52,6 +54,7 @@ object Dependencies {
 // Root Module 
 
 object RootBuild extends Build {
+  lazy val container = Container("container")
 
   lazy val root = Project(
     id = "root",
@@ -65,7 +68,7 @@ object RootBuild extends Build {
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-parent",
     libraryDependencies ++= deps
-  ) 
+  ) ++ container.deploy("/publet" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.0.0-SNAPSHOT",
@@ -76,7 +79,7 @@ object RootBuild extends Build {
     scalacOptions ++= Seq("-unchecked", "-deprecation")
   )
 
-  lazy val deps = Seq()
+  lazy val deps = Seq(jettyContainer)
 
 }
 
@@ -211,7 +214,7 @@ object War extends Build {
   ) dependsOn (Publet.module, GitPart.module, ScalateEngine.module, Web.module,
     WebEditor.module, Ext.module, GitrWeb.module, Doc.module)
 
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+  val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
     libraryDependencies ++= deps
   )
