@@ -138,7 +138,19 @@ class GitrView extends ScalaScript {
         }
         case a@_ => a
       }
-      if (mimetype.startsWith("text")) {
+
+      val nonText = repo.getBlobLoader(commit.getTree, file.asString).map(ol => {
+        ol.isLarge || ol.getCachedBytes(100).exists(_ == 0)
+      }).getOrElse(false)
+
+      if (nonText || mimetype.startsWith("image")) {
+        //provide download link or show image
+        val url = PubletWebContext.urlOf(GitrControl.mountPoint+"/gitrblob?"+ rParam +
+          "="+repo.name.name+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
+        makeJson {
+          resultBase ++ Seq("mimeType" -> mimetype, "url"->url)
+        }
+      } else {
         //show text contents
         val content = repo.getStringContents(commit.getTree, file.asString).getOrElse("")
         if (wikiExtensions.contains(file.name.ext) || markdownExtensions.contains(file.name.ext)) {
@@ -152,13 +164,6 @@ class GitrView extends ScalaScript {
           makeJson {
             resultBase ++ Seq("processed"->false, "contents" -> (scala.xml.Utility.escape(content)), "mimeType" -> mimetype)
           }
-        }
-      } else {
-        //provide download link or show image
-        val url = PubletWebContext.urlOf(GitrControl.mountPoint+"/gitrblob?"+ rParam +
-          "="+repo.name.name+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
-        makeJson {
-          resultBase ++ Seq("mimeType" -> mimetype, "url"->url)
         }
       }
     } getOrElse {

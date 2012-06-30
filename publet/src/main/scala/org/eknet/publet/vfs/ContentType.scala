@@ -18,7 +18,7 @@ package org.eknet.publet.vfs
 
 import java.io.File
 import org.eknet.publet.impl.Conversions._
-import eu.medsea.mimeutil.{MimeUtil2, MimeUtil}
+import eu.medsea.mimeutil.{MimeType, MimeUtil2, MimeUtil}
 import eu.medsea.mimeutil.detector.{MagicMimeMimeDetector, ExtensionMimeDetector}
 
 /**
@@ -95,6 +95,17 @@ object ContentType {
       MimeUtil.getMimeTypes(filename).headOption.getOrElse(MimeUtil2.UNKNOWN_MIME_TYPE).toString
     } else {
       t.mimeString
+    }
+  }
+
+  def isTextType(filename: String): Boolean = {
+    val t = ContentType(MimeUtil.getExtension(filename))
+    if (t == ContentType.unknown) {
+      import collection.JavaConversions._
+      val types = MimeUtil.getMimeTypes(filename).collect({case m:MimeType=>m})
+      types.exists(mt => MimeUtil2.isTextMimeType(mt))
+    } else {
+      t.mime._1 == "text"
     }
   }
 
