@@ -1,6 +1,6 @@
 package org.eknet.publet.ext.counter
 
-import actors.Actor
+import actors.{DaemonActor, Actor}
 import org.eknet.publet.web.ClientInfo
 import java.util.concurrent.TimeUnit
 import org.fusesource.scalate.util.Logging
@@ -9,7 +9,7 @@ import org.fusesource.scalate.util.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.06.12 00:03
  */
-private[counter] class SaveCountActor extends Actor with Logging {
+private[counter] class SaveCountActor extends DaemonActor with Logging {
 
   private val cache = collection.mutable.Map[String, Long]()
 

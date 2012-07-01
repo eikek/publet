@@ -2,14 +2,12 @@ import sbt._
 import Keys._
 import Dependencies._
 import com.typesafe.sbtosgi.OsgiPlugin._
-import com.github.siasia._
-import WebappPlugin.webappSettings
 
 object Version {
   val osgi = "4.3"
   val slf4j = "1.6.4"
   val logback = "1.0.1"
-  val servlet = "2.5"
+  val servlet = "3.0.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
   val squaremail = "1.0.0"
@@ -24,6 +22,7 @@ object Version {
   val milton = "1.8.0.1"
   val ccodec = "1.4"
   val jdom = "1.1"
+  val jetty = "8.1.4.v20120524"
 }
 
 object Dependencies {
@@ -31,7 +30,8 @@ object Dependencies {
   val osgiCore = "org.osgi" % "org.osgi.core" % Version.osgi withSources()
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
-  val servletApi = "javax.servlet" % "servlet-api" % Version.servlet % "provided" withSources()
+  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
+  val servletApiProvided = servletApi % "provided"
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
   val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
@@ -62,11 +62,14 @@ object Dependencies {
   )
   val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive() from("http://www.ettrema.com/maven2")
 
+  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
 }
 
 // Root Module 
 
 object RootBuild extends Build {
+  import com.github.siasia._
+
   lazy val container = Container("container")
 
   lazy val root = Project(
@@ -83,6 +86,7 @@ object RootBuild extends Build {
       War.module,
       WebEditor.module,
       Ext.module,
+      Server.module,
       Doc.module
     )
 
@@ -98,7 +102,11 @@ object RootBuild extends Build {
     scalaVersion := globalScalaVersion,
     sbtPlugin := true,
     exportJars := true,
-    scalacOptions ++= Seq("-unchecked", "-deprecation")
+    scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    // see https://jira.codehaus.org/browse/JETTY-1493
+    ivyXML := <dependency org="org.eclipse.jetty.orbit" name="javax.servlet" rev="3.0.0.v201112011016">
+        <artifact name="javax.servlet" type="orbit" ext="jar"/>
+    </dependency>
   )
 
   lazy val deps = Seq(jettyContainer)
@@ -138,7 +146,7 @@ object GitrWeb extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
 
-  lazy val deps = Seq(grizzledSlf4j, servletApi, scalaTest)
+  lazy val deps = Seq(grizzledSlf4j, servletApiProvided, scalaTest)
 
 }
 
@@ -215,7 +223,7 @@ object Web extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
 
-  val deps = Seq(servletApi, 
+  val deps = Seq(servletApiProvided,
        slf4jApi, grizzledSlf4j,
        commonsFileUpload,
        commonsIo, 
@@ -229,6 +237,9 @@ object Web extends Build {
 
 object War extends Build {
 
+  import com.github.siasia._
+  import WebappPlugin.webappSettings
+
   lazy val module = Project(
     id = "war",
     base = file("war"),
@@ -241,7 +252,7 @@ object War extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(servletApi, logbackClassic)
+  val deps = Seq(servletApiProvided, logbackClassic)
 }
 
 object Auth extends Build {
@@ -276,7 +287,7 @@ object WebEditor extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
 
-  val deps = Seq(servletApi, grizzledSlf4j, scalaTest)
+  val deps = Seq(servletApiProvided, grizzledSlf4j, scalaTest)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.webeditor")
 } 
@@ -294,7 +305,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings
 
-  val deps = Seq(squareMail, servletApi, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons)
+  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.ext")
 }
@@ -329,4 +340,54 @@ object Doc extends Build {
   ) ++ osgiSettings
 
   val deps = Seq(grizzledSlf4j)
+}
+
+object Server extends Build {
+  import sbtassembly.Plugin._
+  import com.github.siasia._
+
+  val serverDist = TaskKey[File]("server-dist", "Creates a distributable zip file containing the publet standalone server.")
+
+  lazy val module = Project(
+    id = "server",
+    base = file("server"),
+    settings = buildProperties
+  )
+
+  val buildProperties = Project.defaultSettings ++ assemblySettings ++ Seq[Project.Setting[_]](
+    name := "publet-server",
+    serverDist <<= (AssemblyKeys.assembly, PluginKeys.packageWar.in(War.module).in(Compile), Keys.target, Keys.name, Keys.version, Keys.sourceDirectory) map { (server:File, war:File, target:File, name:String, version:String, sourceDir: File) =>
+      val distdir = target / (name +"-"+ version)
+      val zipFile = target / (name +"-"+ version +".zip")
+      IO.delete(zipFile)
+      IO.delete(distdir)
+
+      val etc = distdir / "etc"
+      val bin = distdir / "bin"
+      val vardir = distdir / "var"
+      val webapp = distdir / "webapp"
+      val logs = distdir / "log"
+      IO.createDirectories(Seq(distdir, etc, bin, vardir, logs, webapp))
+
+      IO.unzip(war, webapp)
+      //remove logging dependencies, it's included in publet-server.jar
+      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("logback*")).map(IO.delete)
+      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("slf4j*")).map(IO.delete)
+
+      //copy some resources
+      val distResources = sourceDir / "dist"
+      IO.listFiles(distResources / "bin").map(f => IO.copyFile(f, bin / f.getName))
+      IO.listFiles(distResources / "etc").map(f => IO.copyFile(f, etc / f.getName))
+
+      val serverFile = bin / "publet-server.jar"
+      IO.copyFile(server, serverFile)
+
+      def entries(f: File):List[File] = f :: (if (f.isDirectory) IO.listFiles(f).toList.flatMap(entries(_)) else Nil)
+      IO.zip(entries(distdir).map(d => (d, d.getAbsolutePath.substring(distdir.getParent.length))), zipFile)
+      zipFile
+    },
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(grizzledSlf4j, servletApi, jettyServer, logbackClassic)
 }

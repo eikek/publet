@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# start/stop init script for publet.
+#
+# tested on debian, but should work on other platforms
+#
+
+# configure the publet working dir
+PUBLET_DIR=/data/home/devel/workspace/projects/publet/server/target/publet-server-1.0.0-SNAPSHOT
+# the user used to run the server
+PUBLET_USER=www-data
+
+
+# ---------------------------------------
+
+START_CMD="sh $PUBLET_DIR/bin/start.sh 2>&1 > /dev/null &"
+STOP_CMD="sh $PUBLET_DIR/bin/stop.sh"
+
+case "$1" in
+  start)
+    echo -n "Starting publet ..."
+    su $PUBLET_USER -c "$START_CMD"
+    if [ $? -eq 0 ]; then
+      pgrep -f "publet-server.jar" > $PUBLET_DIR/var/publet.pid
+      echo "Done."
+    else
+      echo "Failed."
+    fi
+  ;;
+  stop)
+    echo "Stopping publet..."
+    $STOP_CMD
+    if [ $? -eq 0 ]; then
+      PID=`pgrep -F $PUBLET_DIR/var/publet.pid`
+      while test -n "$PID"; do
+        echo "> waiting for process to die ..."
+        sleep 3
+        PID=`pgrep -F $PUBLET_DIR/var/publet.pid`
+        if [ -z "$PID" ]; then
+          rm $PUBLET_DIR/var/publet.pid
+          echo "Done."
+          exit 0
+        fi
+      done
+    else
+      echo "Failed."
+    fi
+   ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+  ;;
+esac
