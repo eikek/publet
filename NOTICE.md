@@ -179,7 +179,8 @@ gitblit, licensed under
 Apache Software License, Version 2.0.
 
 Some parts of the source code regarding jgit was copied from gitblit's
-utility classes and formatted to scala.
+utility classes and formatted to scala. Also the `MakeCertificate` class
+is taken from gitblit with great thanks.
 
 <http://www.gitblit.com>
 
@@ -251,3 +252,10 @@ Apache Software License, Version 2.0.
 Jetty, released under the Apache Software License, Version 2.0.
 
 <http://eclipse.org/jetty>
+
+
+### BouncyCastle
+
+BouncyCastle, released under the MIT/X11 License.
+
+<http://www.bouncycastle.org>

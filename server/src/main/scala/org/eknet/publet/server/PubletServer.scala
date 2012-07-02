@@ -19,13 +19,12 @@ package org.eknet.publet.server
 import org.eclipse.jetty.server.{Connector, Server}
 import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.webapp.WebAppContext
-import actors.Actor
 import grizzled.slf4j.Logging
 import java.io.{FileFilter, File}
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
-import sbt.IO
+import org.eclipse.jetty.ajp.Ajp13SocketConnector
 
 /**
  * Works for the following directory structure
@@ -62,19 +61,15 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   server setSendDateHeader true
   server setStopAtShutdown true
 
-  config.port map (port => {
-    val connector = createConnector(port)
-    server addConnector (connector)
-  })
-
+  config.port map (port => { server addConnector (createConnector(port)) })
   config.securePort map (port => {
     val conn = createSslConnector(port, config.keystorePath, config.keystorePassword)
     server.addConnector(conn)
   })
-
+  config.ajpPort map (port => server.addConnector(createAjpConnector(port)))
 
   val webapp = new WebAppContext
-  webapp setContextPath ("/")
+  webapp setContextPath (config.contextPath)
   webapp.setServer(server)
   webapp.setTempDirectory(new File(new File("temp"), "jetty"))
   webapp setWar("webapp")
@@ -98,19 +93,29 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
 
 
   def createConnector(port: Int): Connector = {
-    info(">>> Creating http connector for port "+ port)
+    info(">>> Creating http connector for port "+ port+"; bind="+config.bindAddress)
     val conn = new SelectChannelConnector
     conn.setSoLingerTime(-1)
     conn.setThreadPool(new QueuedThreadPool(20))
     conn.setPort(port)
     conn.setMaxIdleTime(30000)
+    config.bindAddress map (conn.setHost(_))
     conn
   }
 
   def createSslConnector(port: Int, keystorePath: String, password: String): Connector = {
-    info(">>> Creating ssl connector for port "+ port + "; keystore="+keystorePath)
+    info(">>> Creating ssl connector for port "+ port + "; keystore="+keystorePath+"; bind="+config.sslBindAddress)
     val fac = new SslContextFactory
-    fac.setKeyStorePath(keystorePath)
+    val etcStore = new File(new File("etc"), "keystore.ks")
+    if (keystorePath.isEmpty) {
+      fac.setKeyStorePath(etcStore.getAbsolutePath)
+      if (!etcStore.exists()) {
+        info(">>> Generating self-signed certificate for localhost...")
+        MakeCertificate.generateSelfSignedCertificate("localhost", etcStore, password)
+      }
+    } else {
+      fac.setKeyStorePath(keystorePath)
+    }
     fac.setKeyStorePassword(password)
     fac.setAllowRenegotiate(true) //currently publet required java 1.7
 
@@ -118,6 +123,14 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
     conn.setSoLingerTime(-1)
     conn.setThreadPool(new QueuedThreadPool(20))
     conn.setMaxIdleTime(30000)
+    conn.setPort(port)
+    config.sslBindAddress map (conn.setHost(_))
+    conn
+  }
+
+  def createAjpConnector(port: Int): Connector = {
+    info(">>> Creating AJP connector for port: "+ port)
+    val conn = new Ajp13SocketConnector
     conn.setPort(port)
     conn
   }

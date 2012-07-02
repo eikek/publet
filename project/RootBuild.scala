@@ -23,6 +23,7 @@ object Version {
   val ccodec = "1.4"
   val jdom = "1.1"
   val jetty = "8.1.4.v20120524"
+  val bouncyCastle = "1.46"
 }
 
 object Dependencies {
@@ -61,8 +62,10 @@ object Dependencies {
     "org.jdom" % "jdom" % Version.jdom
   )
   val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive() from("http://www.ettrema.com/maven2")
-
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
+  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
+  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
+  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
 }
 
 // Root Module 
@@ -390,5 +393,5 @@ object Server extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(grizzledSlf4j, servletApi, jettyServer, logbackClassic)
+  val deps = Seq(grizzledSlf4j, servletApi, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
 }

@@ -38,6 +38,14 @@ trait ServerConfig {
   def securePort: Option[Int]
 
   /**
+   * The port for the AJP connector. If not specified, no
+   * ajp connector is started.
+   *
+   * @return
+   */
+  def ajpPort: Option[Int]
+
+  /**
    * The path to the keystore.
    *
    * @return
@@ -59,6 +67,27 @@ trait ServerConfig {
    *@return
    */
   def shutdownPort: Int
+
+  /**
+   * The address to bind the ssl connector to. Default is 0.0.0.0
+   * @return
+   */
+  def sslBindAddress: Option[String]
+
+  /**
+   * The address to bind the http connector to. Default is 0.0.0.0
+   *
+   * @return
+   */
+  def bindAddress: Option[String]
+
+  /**
+   * The context path to deploy the publet webapp. Default is the root
+   * path `/`
+   *
+   * @return
+   */
+  def contextPath: String
 }
 
 object ServerConfig {
@@ -67,6 +96,10 @@ object ServerConfig {
   val propertyKeystorePath = "publet.server.keystorePath"
   val propertyKeystorePassword = "publet.server.keystorePassword"
   val propertyShutdownPort = "publet.server.shutdownPort"
+  val propertyAjpPort = "publet.server.ajpPort"
+  val propertyBindAddress = "publet.server.bindAddress"
+  val propertySslBindAddress = "publet.server.secureBindAddress"
+  val propertyContextPath = "publet.server.contextPath"
 }
 
 class DefaultConfig extends ServerConfig {
@@ -75,6 +108,10 @@ class DefaultConfig extends ServerConfig {
   def keystorePath:String = ""
   def keystorePassword:String = ""
   def shutdownPort:Int = 8099
+  def ajpPort:Option[Int] = None
+  def sslBindAddress:Option[String] = None
+  def bindAddress:Option[String] = None
+  def contextPath = "/"
 }
 
 /**
@@ -92,6 +129,10 @@ trait SyspropConfig extends ServerConfig {
   abstract override def keystorePath = sysprop(propertyKeystorePath) getOrElse (super.keystorePath)
   abstract override def keystorePassword = sysprop(propertyKeystorePassword) getOrElse (super.keystorePassword)
   abstract override def shutdownPort = syspropInt(propertyShutdownPort) getOrElse (super.shutdownPort)
+  abstract override def ajpPort = syspropInt(propertyAjpPort) orElse (super.ajpPort)
+  abstract override def sslBindAddress = sysprop(propertySslBindAddress) orElse (super.sslBindAddress)
+  abstract override def bindAddress = sysprop(propertyBindAddress) orElse (super.bindAddress)
+  abstract override def contextPath = sysprop(propertyContextPath) getOrElse(super.contextPath)
 
   private def sysprop(name: String): Option[String] = Option(System.getProperty(name))
   private def syspropInt(name: String): Option[Int] = sysprop(name).map(_.toInt)
@@ -116,4 +157,8 @@ trait PropertiesConfig extends ServerConfig {
   abstract override def keystorePath = property(propertyKeystorePath) getOrElse(super.keystorePath)
   abstract override def keystorePassword = property(propertyKeystorePassword) getOrElse(super.keystorePassword)
   abstract override def shutdownPort:Int = intProperty(propertyShutdownPort) getOrElse(super.shutdownPort)
+  abstract override def ajpPort = intProperty(propertyAjpPort) orElse (super.ajpPort)
+  abstract override def sslBindAddress = property(propertySslBindAddress) orElse (super.sslBindAddress)
+  abstract override def bindAddress = property(propertyBindAddress) orElse (super.bindAddress)
+  abstract override def contextPath = property(propertyContextPath) getOrElse(super.contextPath)
 }
