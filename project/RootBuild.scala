@@ -364,15 +364,16 @@ object Server extends Build {
 
       val etc = distdir / "etc"
       val bin = distdir / "bin"
-      val vardir = distdir / "var"
       val webapp = distdir / "webapp"
-      val logs = distdir / "log"
-      IO.createDirectories(Seq(distdir, etc, bin, vardir, logs, webapp))
+      IO.createDirectories(Seq(distdir, etc, bin, webapp))
 
       IO.unzip(war, webapp)
       //remove logging dependencies, it's included in publet-server.jar
       IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("logback*")).map(IO.delete)
       IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("slf4j*")).map(IO.delete)
+      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("grizzled-slf4*")).map(IO.delete)
+      //remove scala library
+      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("scala-library*")).map(IO.delete)
 
       //copy some resources
       val distResources = sourceDir / "dist"
@@ -383,7 +384,7 @@ object Server extends Build {
       IO.copyFile(server, serverFile)
 
       def entries(f: File):List[File] = f :: (if (f.isDirectory) IO.listFiles(f).toList.flatMap(entries(_)) else Nil)
-      IO.zip(entries(distdir).map(d => (d, d.getAbsolutePath.substring(distdir.getParent.length))), zipFile)
+      IO.zip(entries(distdir).map(d => (d, d.getAbsolutePath.substring(distdir.getParent.length +1))), zipFile)
       zipFile
     },
     libraryDependencies ++= deps
