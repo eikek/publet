@@ -29,7 +29,7 @@ object Main extends App with Logging {
 
   val etc = new File("etc")
 
-  lazy val config = new DefaultConfig with SyspropConfig with PropertiesConfig {
+  lazy val config = new DefaultConfig with PropertiesConfig with SyspropConfig {
     val props = new util.Properties
 
     new File(etc, "server.properties") match {
