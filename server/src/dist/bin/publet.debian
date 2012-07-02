@@ -6,7 +6,7 @@
 #
 
 # configure the publet working dir
-PUBLET_DIR=/data/home/devel/workspace/projects/publet/server/target/publet-server-1.0.0-SNAPSHOT
+PUBLET_DIR=/opt/publet
 # the user used to run the server
 PUBLET_USER=www-data
 
@@ -15,13 +15,14 @@ PUBLET_USER=www-data
 
 START_CMD="sh $PUBLET_DIR/bin/start.sh 2>&1 > /dev/null &"
 STOP_CMD="sh $PUBLET_DIR/bin/stop.sh"
+PID_FILE=$PUBLET_DIR/var/publet.pid
 
 case "$1" in
   start)
     echo -n "Starting publet ..."
     su $PUBLET_USER -c "$START_CMD"
     if [ $? -eq 0 ]; then
-      pgrep -f "publet-server.jar" > $PUBLET_DIR/var/publet.pid
+      pgrep -f "publet-server.jar" > $PID_FILE
       echo "Done."
     else
       echo "Failed."
@@ -31,13 +32,13 @@ case "$1" in
     echo "Stopping publet..."
     $STOP_CMD
     if [ $? -eq 0 ]; then
-      PID=`pgrep -F $PUBLET_DIR/var/publet.pid`
+      PID=`pgrep -F $PID_FILE`
       while test -n "$PID"; do
         echo "> waiting for process to die ..."
         sleep 3
-        PID=`pgrep -F $PUBLET_DIR/var/publet.pid`
+        PID=`pgrep -F $PID_FILE`
         if [ -z "$PID" ]; then
-          rm $PUBLET_DIR/var/publet.pid
+          rm $PID_FILE
           echo "Done."
           exit 0
         fi
@@ -46,7 +47,13 @@ case "$1" in
       echo "Failed."
     fi
    ;;
+  restart)
+    $0 stop
+    if [ $? -eq 0 ]; then
+      $0 start
+    fi 
+  ;;
   *)
-    echo "Usage: $0 {start|stop}"
+    echo "Usage: $0 {start|stop|restart}"
   ;;
 esac
