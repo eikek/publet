@@ -20,6 +20,7 @@ import java.io.{FileInputStream, File}
 import System._
 import util.PropertiesMap
 import grizzled.slf4j.Logging
+import java.nio.file.Files
 
 /** Configuration file, is picked up from the configured publet directory. This is
  * either given as system property `publet.dir`, as environment variable `PUBLET_DIR`
@@ -50,8 +51,8 @@ object Config extends PropertiesMap with Logging {
       dir = Option(getProperty("user.home")+ File.separator +".publet")
     }
 
-    info("Using publet directory: "+ dir.get)
     val d = new File(dir.get)
+    info("Using publet directory: "+ d.getAbsolutePath)
     if (!d.exists()) if (!d.mkdirs()) throw new RuntimeException("unable to create config dir: "+ d)
     if (!d.isDirectory) throw new RuntimeException("Config dir is not a directory: "+d)
     d
@@ -65,7 +66,7 @@ object Config extends PropertiesMap with Logging {
     else
       this.directory = new File(rootDirectory, "root")
 
-    info("Loading configuration file: "+ configfile)
+    info("Loading publet.properties file from: "+ configfile.getAbsolutePath)
     reload()
   }
 
@@ -84,7 +85,34 @@ object Config extends PropertiesMap with Logging {
    * publet global configuration file `publet.properties`
    *
    */
-  def configfile = new File(directory, "publet.properties")
+  lazy val configfile = {
+    if (System.getProperty("publet.standalone") != null) {
+      new File(new File("etc"), "publet.properties")
+    } else {
+      new File(directory, "publet.properties")
+    }
+  }
+
+  private lazy val tempRoot = {
+    val dir = if (System.getProperty("publet.standalone") != null) {
+      new File("temp")
+    } else {
+      new File(directory, "temp")
+    }
+    if (!dir.exists()) if (!dir.mkdirs()) sys.error("Cannot create temp directory: "+ dir.getAbsolutePath)
+    if (!dir.isDirectory) sys.error("Temp directory is not a directory:" + dir.getAbsolutePath)
+    info("Using temporary directory root to: "+ dir.getAbsolutePath)
+    dir
+  }
+
+  /**
+   * Creates a new temporary directory. The directory is newly created.
+   * The directory is not removed automatically.
+   *
+   * @param name
+   * @return
+   */
+  def newTempDir(name: String = "publet"): File = Files.createTempDirectory(tempRoot.toPath, name).toFile
 
   /**
    * Returns the configured string to use as prefix for
@@ -110,12 +138,16 @@ object Config extends PropertiesMap with Logging {
    */
   def getFile(name: String) = new File(directory, name)
 
-  protected def file = if (configfile.exists()) Some(new FileInputStream(configfile)) else None
+  protected def file = {
+    if (configfile.exists()) {
+      Some(new FileInputStream(configfile))
+    } else None
+  }
 
   private def subdir(name: String) = {
     val d = new File(directory, name)
-    if (!d.exists()) if (!d.mkdirs()) throw new RuntimeException("unable to create dir: "+ d)
-    if (!d.isDirectory) throw new RuntimeException("Not a directory: "+ d)
+    if (!d.exists()) if (!d.mkdirs()) sys.error("unable to create dir: "+ d)
+    if (!d.isDirectory) sys.error("Not a directory: "+ d)
     d
   }
 }

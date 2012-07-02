@@ -53,6 +53,7 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   }
 
   System.setProperty("publet.dir", "var")
+  System.setProperty("publet.standalone", "true")
 
   val server = new Server
 
@@ -90,7 +91,6 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
     info(">>> Shutting down publet server ...")
     server.stop()
   }
-
 
   def createConnector(port: Int): Connector = {
     info(">>> Creating http connector for port "+ port+"; bind="+config.bindAddress)
@@ -131,6 +131,7 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   def createAjpConnector(port: Int): Connector = {
     info(">>> Creating AJP connector for port: "+ port)
     val conn = new Ajp13SocketConnector
+    conn.setThreadPool(new QueuedThreadPool(20))
     conn.setPort(port)
     conn
   }

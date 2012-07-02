@@ -20,6 +20,7 @@ import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.scalate.{VfsResourceLoader, ScalateEngine}
 import scalate.Boot
+import org.eknet.publet.web.Config
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,6 +40,7 @@ object ConfiguredScalateEngine {
 
   private def createEngine() = {
     val engine = new TemplateEngine()
+    engine.workingDirectory = Config.newTempDir("scalate")
     new Boot(engine).run()
     engine
   }
