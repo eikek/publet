@@ -45,7 +45,11 @@ object Main extends App with Logging {
 
 
   def startup() {
-    new File("log").ensuring(f => f.canWrite, "Cannot write to working dir: " + new File("").getAbsolutePath)
+    val varDir = new File("var")
+    if (!varDir.exists) {
+      if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
+    }
+    varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + new File("").getAbsolutePath)
     etc.ensuring(f => f.exists() && f.isDirectory, "Cannot find `etc` directory: "+ etc)
     new File("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
 

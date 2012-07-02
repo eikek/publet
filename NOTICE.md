@@ -33,7 +33,7 @@ CDDL-1.0, BSD, GPL-2.0, GNU-Classpath.
 
 <http://kenai.com/projects/javamail>
 
-###Glyphicons
+### Glyphicons
 
 GLPYHICONS, released under the
 Creative Commons CC-BY License.
@@ -132,6 +132,13 @@ jquery, released under the MIT license
 jquery.forms, licensed under the MIT license
 
 <http://malsup.com/jquery/form/>
+
+
+### JQuery Fileupload Plugin
+
+jQuery File Upload Plugin, licensed under the MIT license
+
+<http://blueimp.github.com/jQuery-File-Upload/>
 
 
 ### HighlightJS
@@ -237,3 +244,10 @@ milton, licensed under
 Apache Software License, Version 2.0.
 
 <http://milton.io/>
+
+
+### Jetty
+
+Jetty, released under the Apache Software License, Version 2.0.
+
+<http://eclipse.org/jetty>
