@@ -21,7 +21,7 @@ class WebdavFilter extends Filter with HttpFilter {
 
   lazy val httpManager = {
     import collection.JavaConversions._
-    new HttpManager(new WebdavResourceFactory, new AuthenticationService(List(new WebdavAuthHandler)))
+    new HttpManager(new WebdavResourceFactory)
   }
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {

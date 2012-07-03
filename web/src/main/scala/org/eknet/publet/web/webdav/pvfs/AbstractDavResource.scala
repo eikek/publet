@@ -4,6 +4,10 @@ import com.bradmcevoy.http.{PropFindableResource, Auth, Request, Resource}
 import com.bradmcevoy.http.Request.Method
 import java.util
 import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authc.{CredentialsException, UsernamePasswordToken}
+import org.eknet.publet.web.filter.AuthzFilter
 
 /**
  * Implements the milton `Resource` interface based on nothing.
@@ -17,9 +21,7 @@ abstract class AbstractDavResource extends Resource with PropFindableResource wi
 
   def getName: String = ""
 
-  def authenticate(user: String, password: String): AnyRef = null
-
-  def getRealm: String = ""
+  def getRealm: String = PubletWeb.publetSettings("webdav.realmName").getOrElse("WebDav Area")
 
   def getModifiedDate: util.Date = null
 
