@@ -3,6 +3,11 @@ import Keys._
 import Dependencies._
 import com.typesafe.sbtosgi.OsgiPlugin._
 
+object Resolvers {
+  val sonatype = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
+  val eknet = "eknet.org" at "https://eknet.org/maven2"
+  val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
+}
 object Version {
   val osgi = "4.3"
   val slf4j = "1.6.4"
@@ -10,7 +15,7 @@ object Version {
   val servlet = "3.0.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
-  val squaremail = "1.0.0"
+  val squaremail = "1.0.1"
   val jgit = "1.3.0.201202151440-r"
   val shiro = "1.2.0"
   val scalaTest = "1.8"
@@ -28,44 +33,40 @@ object Version {
 
 object Dependencies {
 
-  val osgiCore = "org.osgi" % "org.osgi.core" % Version.osgi withSources()
-  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
-  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
-  val servletApiProvided = servletApi % "provided"
-  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
   val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
+  val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive() //uses orientdb 1.0.1
+  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
+  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
+  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() //scala 2.9.1 only
+  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
+  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
+  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
-  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources()
-  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources()
-  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() //scala 2.9.1 only
-
-  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate
-  val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate
-  val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate
-
-  val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
-
-  val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
-  val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()
-  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
-  val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive() //uses orientdb 1.0.1
-
-  val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive() from("http://www.ettrema.com/maven2")
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
+  val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
     "commons-codec" % "commons-codec" % Version.ccodec withSources(),
     "org.jdom" % "jdom" % Version.jdom
   )
-  val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive() from("http://www.ettrema.com/maven2")
-  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
-  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
-  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
-  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
+  val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive()
+  val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
+  val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
+  val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()
+  val osgiCore = "org.osgi" % "org.osgi.core" % Version.osgi withSources()
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
+  val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate
+  val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate
+  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate
+  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
+  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
+  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources()
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources()
+  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
+  val servletApiProvided = servletApi % "provided"
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail withSources()
 }
 
 // Root Module 
@@ -106,6 +107,15 @@ object RootBuild extends Build {
     sbtPlugin := true,
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    resolvers := Seq(Resolvers.sonatype, Resolvers.eknet, Resolvers.ettrema),
+    pomExtra := <licenses>
+      <license>
+        <name>Apache 2</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>,
+
     // see https://jira.codehaus.org/browse/JETTY-1493
     ivyXML := <dependency org="org.eclipse.jetty.orbit" name="javax.servlet" rev="3.0.0.v201112011016">
         <artifact name="javax.servlet" type="orbit" ext="jar"/>
