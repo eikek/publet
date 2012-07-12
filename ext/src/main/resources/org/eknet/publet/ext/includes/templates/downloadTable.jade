@@ -42,11 +42,11 @@ br/
       - }
 - }
 
-- if (!folders.isEmpty)
-  hr/
-  h2 /
 - val rootfiles = ti.filesWithoutExtensions(dir, exclExtensions)
-- if (!rootfiles.isEmpty) 
+- if (!rootfiles.isEmpty)
+  - if (!folders.isEmpty)
+    hr/
+    h2 /
   table.table.table-striped
     thead
       th 
