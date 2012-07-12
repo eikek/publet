@@ -45,8 +45,8 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
   }
 
   def doGetAuthorizationInfo(principals: PrincipalCollection) = {
-    val p = principals.getPrimaryPrincipal.asInstanceOf[User]
-    new PolicyAuthInfo(p)
+    val login = principals.getPrimaryPrincipal.toString
+    new PolicyAuthInfo(db.findUser(login).get)
   }
 
   class PolicyAuthInfo(user: User) extends AuthorizationInfo {
@@ -66,7 +66,7 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
   }
 
   class UserAuthInfo(user: User) extends AuthenticationInfo {
-    def getPrincipals = new SimplePrincipalCollection(user, "Publet Protected")
+    def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
     def getCredentials = user.password
     def algorithm = user.algorithm
   }

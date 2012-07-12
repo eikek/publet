@@ -58,7 +58,7 @@ object Security extends Logging {
    *
    * @return
    */
-  def user = if (!isAuthenticated) None else Option(subject.getPrincipal).map(_.asInstanceOf[User])
+  def user = if (!isAuthenticated) None else Option(subject.getPrincipal).collect({case login:String=>login}).flatMap(PubletWeb.authManager.findUser)
 
   /**
    * Returns the username of the currently logged in user
