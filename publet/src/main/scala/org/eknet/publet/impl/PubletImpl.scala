@@ -51,10 +51,10 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
     }
   }
 
-  def push(path: Path, content: InputStream, message: Option[String] = None) = {
+  def push(path: Path, content: InputStream, changeInfo: Option[ChangeInfo] = None) = {
     def copy(ext: Option[String]) = {
       createResource(path, ext) match {
-        case cr: Writeable => cr.writeFrom(content, message); cr.asInstanceOf[ContentResource]
+        case cr: Writeable => cr.writeFrom(content, changeInfo); cr.asInstanceOf[ContentResource]
         case r@_ => sys.error("Cannot create content for resource: "+ r)
       }
     }

@@ -16,14 +16,14 @@
 
 package org.eknet.publet.web.shiro
 
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.{ChangeInfo, Path}
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
-import org.eknet.publet.auth.GitAction
+import org.eknet.publet.auth._
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
-import org.eknet.publet.auth.{RepositoryTag, RepositoryModel, User}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.web.filter.{AuthzFilter, PubletShiroFilter}
+import org.eknet.publet.vfs.ChangeInfo
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -59,6 +59,17 @@ object Security extends Logging {
    * @return
    */
   def user = if (!isAuthenticated) None else Option(subject.getPrincipal).collect({case login:String=>login}).flatMap(PubletWeb.authManager.findUser)
+
+  /**
+   * Returns a [[org.eknet.publet.vfs.ChangeInfo]] object populated with data
+   * from the current user.
+   *
+   * @param message
+   * @return
+   */
+  def changeInfo(message: String) = user.map( u=> {
+    new ChangeInfo(u.getProperty(UserProperty.fullName), u.getProperty(UserProperty.email), message)
+  })
 
   /**
    * Returns the username of the currently logged in user

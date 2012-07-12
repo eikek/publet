@@ -49,12 +49,12 @@ object FileUploadHandler extends ScalaScript with Logging {
       case Method.post => {
         val files = PubletWebContext.uploads
         val container = PubletWebContext.param("container").map(Path(_))
-        val commitMsg = PubletWebContext.param("commitMessage").filter(!_.isEmpty)
+        val commitMsg = PubletWebContext.param("commitMessage").getOrElse("")
         val out = files.map( fi => {
           val path = container.get / fi.getName
           Security.checkWritePermission(path)
           info("Uploading to "+ path.asString)
-          (path, PubletWeb.publet.push(path, fi.getInputStream, commitMsg))
+          (path, PubletWeb.publet.push(path, fi.getInputStream, Security.changeInfo(commitMsg)))
         }).map(t => toMap(t._1, t._2))
         render(out)
       }

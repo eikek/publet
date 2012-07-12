@@ -7,6 +7,7 @@ import java.lang.Long
 import com.bradmcevoy.http.exceptions.BadRequestException
 import org.eknet.publet.web.webdav.WebdavResource
 import javax.management.remote.rmi._RMIConnection_Stub
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,7 +26,7 @@ trait MakeContent extends PutableResource {
     }
 
     content match {
-      case wc: Writeable => wc.writeFrom(inputStream, Some("webdav upload"))
+      case wc: Writeable => wc.writeFrom(inputStream, Security.changeInfo("webdav upload"))
       case r@_ => throw new BadRequestException("Resource is not writeable: " +r)
     }
     WebdavResource(content)

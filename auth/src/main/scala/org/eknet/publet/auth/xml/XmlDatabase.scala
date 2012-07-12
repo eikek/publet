@@ -18,11 +18,12 @@ package org.eknet.publet.auth.xml
 
 
 import scala.xml.{PrettyPrinter, XML}
-import org.eknet.publet.vfs.{Writeable, ContentResource}
+import org.eknet.publet.vfs.{ChangeInfo, Writeable, ContentResource}
 import java.io.ByteArrayInputStream
 import org.eknet.publet.auth._
 import grizzled.slf4j.Logging
 import org.eknet.publet.Glob
+import org.apache.shiro.{ShiroException, SecurityUtils}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -55,12 +56,14 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     }
   }
 
-  private def write() {
+  private def write(message: String) {
     source match {
       case ws: Writeable => synchronized {
         load()
         val bin = new ByteArrayInputStream(prettyPrinter.format(toXml).getBytes("UTF-8"))
-        ws.writeFrom(bin, Some("Permission update"))
+        val user = getCurrentUser.map { u =>
+          new ChangeInfo(u.getProperty(UserProperty.fullName), u.getProperty(UserProperty.email), message) }
+        ws.writeFrom(bin, user)
         lastLoaded = source.lastModification.getOrElse(-1L)
       }
       case _ =>
@@ -84,6 +87,17 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     </publetAuth>
   }
 
+  private def getCurrentUser = {
+    try {
+      Option(SecurityUtils.getSubject.getPrincipal) flatMap { p =>
+        if (p != null) findUser(p.toString)
+        else None
+      }
+    } catch {
+      case e: ShiroException => None
+    }
+  }
+
   /**
    * Either replaces any existing user (with same login)
    * with the given one, or adds it to the list of users.
@@ -94,7 +108,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     synchronized {
       val newList = (users - user) + user
       this.users = newList
-      write()
+      write("Permission: update user "+ user.login)
     }
   }
 
@@ -102,7 +116,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     synchronized {
       val newList = repositories.filter(_.name != repo.name) + repo
       this.repositories = newList
-      write()
+      write("Permission: Update repository " +repo.name)
     }
   }
 
@@ -111,7 +125,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     synchronized {
       val newList = repositories - repo
       this.repositories = newList
-      write()
+      write("Permission: Remove repository "+ repo.name)
     }
   }
 
@@ -119,7 +133,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     synchronized {
       val newList = permissions + perm
       this.permissions = newList
-      write()
+      write("Permission: Update permission model: "+ perm)
     }
   }
 
@@ -133,7 +147,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
 
       val newlist =  permissions.filterNot(groupPermFilter) ++ transformed
       this.permissions = newlist
-      write()
+      write("Permission: Remove permission '"+perm+"' for group '"+group+"'")
     }
   }
 
@@ -141,7 +155,7 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
     synchronized {
       val newList = rc :: resourceConstraints
       this.resourceConstraints = newList
-      write()
+      write("Permission: Add resource constraint: "+ rc)
     }
   }
 

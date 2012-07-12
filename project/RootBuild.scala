@@ -198,7 +198,7 @@ object GitPart extends Build {
     libraryDependencies ++= deps
   ) ++ osgiSettings 
 
-  val deps = Seq(slf4jApi, shiro, grizzledSlf4j, scalaTest)
+  val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.gitr", "org.eknet.publet.partition.git")
 }
@@ -241,7 +241,7 @@ object Web extends Build {
        commonsFileUpload,
        commonsIo, 
        jgitHttpServer,
-       shiro, shiroWeb,
+       shiroWeb,
        miltonApi, miltonServlet,
        scalaTest) ++ miltonApiDeps
 
@@ -284,7 +284,7 @@ object Auth extends Build {
 
   OsgiKeys.exportPackage := Seq("org.eknet.publet.auth")
 
-  val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
+  val deps = Seq(slf4jApi, grizzledSlf4j, shiro, scalaTest)
 }
 
 object WebEditor extends Build {

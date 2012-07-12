@@ -80,14 +80,14 @@ object PushContents extends ScalaScript with Logging {
       case Some(body) => {
         Security.checkWritePermission(path)
         val target = ctx.param("extension").getOrElse("md")
-        val commitMsg = ctx.param("commitMessage").filter(!_.isEmpty)
+        val commitMsg = ctx.param("commitMessage").getOrElse("")
         val oldhead = ctx.param("head").getOrElse("")
         val newhead = getHead(path).getOrElse("")
         if (oldhead != newhead) {
           sys.error("The repository has changed since you started editing!")
         }
         debug("Write "+target+" file")
-        publet.push(path.withExt(target), new ByteArrayInputStream(body.getBytes("UTF-8")), commitMsg)
+        publet.push(path.withExt(target), new ByteArrayInputStream(body.getBytes("UTF-8")), Security.changeInfo(commitMsg))
       }
     }
   }

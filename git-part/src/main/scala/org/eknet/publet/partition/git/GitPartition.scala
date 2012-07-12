@@ -33,24 +33,17 @@ class GitPartition (val tandem: Tandem)
     true
   }
 
-  private def getCurrentUser = {
-    try {
-      Option(SecurityUtils.getSubject.getPrincipal) flatMap { p =>
-        if (p.isInstanceOf[User]) Some(p.asInstanceOf[User])
-        else None
-      }
-    } catch {
-      case e: ShiroException => None
-    }
-  }
-
   private def git = tandem.workTree.git
 
-  private def commit(c: GitFile, action:String) {
-    val user = getCurrentUser
-    val name = user.flatMap(_.getProperty(UserProperty.fullName)).getOrElse("Publet Git")
-    val email = user.flatMap(_.getProperty(UserProperty.email)).getOrElse("no@none.com")
-    val message = action +"\n\nresource: "+ c.name.fullName+"\nsubject: "+user.map(_.login).getOrElse("anonymous")
+  private def commit(c: GitFile, changeInfo: Option[ChangeInfo], action:String) {
+    val login = Option(SecurityUtils.getSubject.getPrincipal).map(_.toString).getOrElse("anonymous")
+    val name = changeInfo.flatMap(_.name).getOrElse("Publet Git")
+    val email = changeInfo.flatMap(_.email).getOrElse("no@none.com")
+    val message = (changeInfo.map(_.message) match {
+      case Some(m) if (!m.isEmpty) => m
+      case _ => action
+    }) + "\n\nresource: "+ c.name.fullName+"\nsubject: "+ login
+
     git.commit()
       .setMessage(message)
       .setAuthor(name, email)
@@ -58,7 +51,7 @@ class GitPartition (val tandem: Tandem)
       .call()
   }
 
-  protected[git] def commitWrite(c: GitFile, message: Option[String] = None) {
+  protected[git] def commitWrite(c: GitFile, changeInfo: Option[ChangeInfo] = None) {
     val path = Path(c.file).strip(c.rootPath)
     git.add()
       .addFilepattern(path.toRelative.asString)
@@ -68,7 +61,7 @@ class GitPartition (val tandem: Tandem)
     if (!git.status().call().isClean) {
       info("commit: "+ path.toRelative.asString)
 
-      commit(c, message.getOrElse("Update"))
+      commit(c, changeInfo, "Update")
       tandem.pushToBare()
     }
   }
@@ -78,7 +71,7 @@ class GitPartition (val tandem: Tandem)
     git.rm()
       .addFilepattern(path.toRelative.asString)
       .call()
-    commit(c, "Delete")
+    commit(c, None, "Delete")
     tandem.pushToBare()
   }
 
@@ -90,8 +83,6 @@ class GitPartition (val tandem: Tandem)
 }
 
 object GitPartition {
-
-  private val mountPointProperty = "publetMountPoint"
 
   def newDirectory(f: File, root: Path, gp: GitPartition) = new GitDirectory(f, root, gp)
   def newFile(f: File, root: Path, gp: GitPartition) = new GitFile(f, root, gp)

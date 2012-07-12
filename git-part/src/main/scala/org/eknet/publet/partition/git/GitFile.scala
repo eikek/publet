@@ -19,7 +19,8 @@ package org.eknet.publet.partition.git
 import org.eknet.publet.vfs.fs.FileResource
 import java.io.{OutputStream, InputStream, File}
 import scala.Option
-import org.eknet.publet.vfs.{Content, Path}
+import org.eknet.publet.vfs.{ChangeInfo, Content, Path}
+import org.eknet.publet.auth.User
 
 class GitFile(f: File,
               rootPath: Path,
@@ -32,8 +33,8 @@ class GitFile(f: File,
 
   protected def root = gp
 
-  override def writeFrom(in: InputStream, message: Option[String] = None) {
-    Content.copy(in, new OutStream(super.outputStream, message), closeIn = false)
+  override def writeFrom(in: InputStream, changeInfo: Option[ChangeInfo] = None) {
+    Content.copy(in, new OutStream(super.outputStream, changeInfo), closeIn = false)
   }
 
   override def outputStream: OutputStream = {
@@ -49,7 +50,7 @@ class GitFile(f: File,
     commit map (_.getAuthorIdent)
   }
 
-  private class OutStream(out:OutputStream, message:Option[String] = None) extends OutputStream {
+  private class OutStream(out:OutputStream, changeInfo: Option[ChangeInfo] = None) extends OutputStream {
 
     def write(b: Int) {
       out.write(b)
@@ -65,7 +66,7 @@ class GitFile(f: File,
 
     override def close() {
       out.close()
-      gp.commitWrite(GitFile.this, message)
+      gp.commitWrite(GitFile.this, changeInfo)
     }
 
     override def flush() {
