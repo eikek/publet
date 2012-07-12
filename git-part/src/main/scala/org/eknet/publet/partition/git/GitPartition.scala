@@ -29,8 +29,8 @@ class GitPartition (val tandem: Tandem)
   extends FilesystemPartition(tandem.workTree.getWorkTree, false) with Logging {
 
   def updateWorkspace():Boolean = {
-    val result = tandem.updateWorkTree()
-    result.isSuccessful
+    tandem.updateWorkTree()
+    true
   }
 
   private def getCurrentUser = {

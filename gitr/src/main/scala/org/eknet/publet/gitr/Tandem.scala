@@ -16,16 +16,24 @@
 
 package org.eknet.publet.gitr
 
+import org.eclipse.jgit.api.ResetCommand
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 10.05.12 00:59
  */
 case class Tandem(name: RepositoryName, bare: GitrRepository, workTree: GitrRepository) {
 
-  //todo check for force-update
-  def updateWorkTree() = workTree.git.pull().call()
+  def updateWorkTree() = {
+    synchronized {
+      workTree.git.fetch().call()
+      workTree.git.reset().setMode(ResetCommand.ResetType.HARD).setRef("origin/"+branch).call()
+    }
+  }
 
-  def pushToBare() = workTree.git.push().call()
+  def pushToBare() = synchronized {
+    workTree.git.push().call()
+  }
 
   def branch = workTree.getBranch
 
