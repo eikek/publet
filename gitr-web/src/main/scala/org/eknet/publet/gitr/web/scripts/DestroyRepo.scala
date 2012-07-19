@@ -4,7 +4,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
+import org.eknet.publet.auth.{RepositoryModel, GitAction}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -21,6 +21,8 @@ class DestroyRepo extends ScalaScript with Logging {
       Security.checkGitAction(GitAction.gitadmin, model)
       try {
         PubletWeb.gitr.delete(repo.name)
+        PubletWeb.authManager.removeRepository(repo.name.name)
+        PubletWeb.authManager.reload()
         info("Successfully destroyed repository: "+ repo.name)
         makeJson(Map("success"->true,
           "message"->"Successfully destroyed the repository.",

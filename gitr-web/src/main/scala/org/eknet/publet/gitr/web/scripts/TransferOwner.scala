@@ -30,7 +30,7 @@ class TransferOwner extends ScalaScript {
             PubletWeb.gitr.rename(repo.name, newName)
 
             // need to change owner permission
-            PubletWeb.authManager.removeRepository(model)
+            PubletWeb.authManager.removeRepository(model.name)
 
             val newmodel = RepositoryModel(newName.strip.name, model.tag, newOwner)
             PubletWeb.authManager.updateRepository(newmodel)

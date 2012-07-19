@@ -74,14 +74,14 @@ class AuthManager extends PubletAuth with Logging {
   def updateRepository(repo: RepositoryModel) {
     delegate.updateRepository(repo)
   }
-  def removeRepository(repo: RepositoryModel) {
-    delegate.removeRepository(repo)
+  def removeRepository(repoName: String) {
+    delegate.removeRepository(repoName)
   }
   def updatePermission(perm: PermissionModel) {
     delegate.updatePermission(perm)
   }
   def removePermission(group: String, perm: Permission) {
-    delegate.removePermission(group, perm);
+    delegate.removePermission(group, perm)
   }
   def addResourceConstraint(rc: ResourceConstraint) {
     delegate.addResourceConstraint(rc)
@@ -109,7 +109,7 @@ private object SuperUserAuth extends PubletAuth {
   }
   def updateUser(user: User) {}
   def updateRepository(repo: RepositoryModel) {}
-  def removeRepository(repo: RepositoryModel) {}
+  def removeRepository(repoName: String) {}
   def updatePermission(perm: PermissionModel) {}
   def removePermission(group: String, perm: Permission) {}
   def addResourceConstraint(rc: ResourceConstraint) {}

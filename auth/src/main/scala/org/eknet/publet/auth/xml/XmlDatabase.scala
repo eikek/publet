@@ -121,11 +121,12 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
   }
 
 
-  def removeRepository(repo: RepositoryModel) {
+  def removeRepository(repoName: String) {
+    val name = if (repoName.endsWith(".git")) repoName.substring(0, repoName.length-4) else repoName
     synchronized {
-      val newList = repositories - repo
+      val newList = repositories.filterNot(_.name == name)
       this.repositories = newList
-      write("Permission: Remove repository "+ repo.name)
+      write("Permission: Remove repository "+ name)
     }
   }
 

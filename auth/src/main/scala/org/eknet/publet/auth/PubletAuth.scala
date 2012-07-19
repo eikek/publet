@@ -62,7 +62,7 @@ trait PubletAuth {
    * @param repo
    */
   def updateRepository(repo: RepositoryModel)
-  def removeRepository(repo: RepositoryModel)
+  def removeRepository(repoName: String)
 
   def updatePermission(perm: PermissionModel)
   def removePermission(group: String, perm: Permission)
@@ -83,7 +83,7 @@ object PubletAuth {
     def getAllGroups = Set()
     def updateUser(user: User) {}
     def updateRepository(repo: RepositoryModel) {}
-    def removeRepository(repo: RepositoryModel) {}
+    def removeRepository(repoName: String) {}
     def updatePermission(perm: PermissionModel) {}
     def removePermission(group: String, perm: Permission) {}
     def getResourceConstraints(uri: String) = None
