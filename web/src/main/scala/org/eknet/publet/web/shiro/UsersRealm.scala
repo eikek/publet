@@ -71,8 +71,6 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
     def algorithm = user.algorithm
   }
 
-  override def getCredentialsMatcher = super.getCredentialsMatcher
-
   class DynamicHashCredentialsMatcher extends CredentialsMatcher {
     private val fallback = new SimpleCredentialsMatcher()
 
