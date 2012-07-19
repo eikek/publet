@@ -36,6 +36,7 @@ script(src="gitr-listing.js" type="text/javascript")
   }
 
 --- name:content pipeline:jade
+- import org.eknet.publet.auth.GitAction
 
 h2 Repository View
 .modal.fade#myModal
@@ -58,6 +59,11 @@ h2 Repository View
             input(type="checkbox" name="closed")
             i.icon-lock
             | Closed Repository
+          -if (Security.hasPerm(GitAction.gitcreateRoot.toString))
+            .controls
+              input(type="checkbox" name="rootProject")
+              i.icon-star-empty
+              | Root Repository
         .control-group
           label.control-label Description (optional)
           .controls

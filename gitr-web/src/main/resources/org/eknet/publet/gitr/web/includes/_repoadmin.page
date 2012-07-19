@@ -156,7 +156,7 @@ hr/
           | the repository. This page is only visible to owners.
         .alert.alert-error
           :markdown
-            **Big warning:** If you transfer ownership to another user, you are no longer able
+            **Big warning:** If you transfer ownership to another user, you may no longer be able
             to administrate this repository!
 
             If the repository is located below a username (like `jdoe/myrepo.git`), the
@@ -176,7 +176,7 @@ hr/
         h2 Collaborators
         p
           | You can grant other groups pull or push rights to your repository.
-          | Just start typing in the user-field to start searching.
+          | Just start typing in the group-field to start searching.
         .alert.alert-info#colaboratorsOpenRepoWarning
           :markdown
             Note: Explicitely given _pull_ rights have no effect, since your

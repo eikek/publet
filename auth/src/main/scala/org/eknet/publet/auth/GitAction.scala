@@ -22,5 +22,5 @@ package org.eknet.publet.auth
  */
 object GitAction extends Enumeration {
   val pull, push = Value
-  val gitadmin, gitcreate = Value
+  val gitadmin, gitcreate, gitcreateRoot = Value
 }

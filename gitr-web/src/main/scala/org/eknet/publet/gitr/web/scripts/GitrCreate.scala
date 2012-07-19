@@ -40,10 +40,14 @@ class GitrCreate extends ScalaScript {
           makeJson(Map("success"->false, "message"->"Invalid repository name!"))
         } else {
           val login = Security.username
-          Security.checkGitAction(GitAction.gitcreate, RepositoryModel(r, RepositoryTag.open, login))
-          val normName = login +"/"+ r
+          val rootRepo = PubletWebContext.param("rootProject").collect({ case "on" => true}).getOrElse(false)
+          val normName = if (rootRepo) r else login +"/"+ r
+          if (rootRepo) {
+            Security.checkGitAction(GitAction.gitcreateRoot, RepositoryModel(normName, RepositoryTag.open, login))
+          }
+          Security.checkGitAction(GitAction.gitcreate, RepositoryModel(normName, RepositoryTag.open, login))
           val repoName = RepositoryName(normName).toDotGit
-          PubletWeb.gitr.get(repoName).map(x=> json(false, "Repository already exists"))
+          PubletWeb.gitr.get(repoName).map(x=> error("Repository already exists"))
             .getOrElse {
             val newRepo = PubletWeb.gitr.create(repoName, true)
             PubletWebContext.param("description")
@@ -60,10 +64,10 @@ class GitrCreate extends ScalaScript {
         }
       }
       case _ => {
-        json(false, "No repository name given.")
+        error("No repository name given.")
       }
     }
   }
 
-  def json(success:Boolean, str:String) = makeJson(Map("success"->success, "message"->str))
+  def error(str:String) = makeJson(Map("success"->false, "message"->str))
 }

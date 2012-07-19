@@ -189,6 +189,9 @@ object GitrControl {
   /** Permission granted to allow creation of new repositories. */
   val createPerm = GitAction.gitcreate.toString
 
+  /** Permission granted to allow creation of new root repositories */
+  val createRootPerm = GitAction.gitcreateRoot.toString
+
   val gitradminTemplate = mountPoint+"/_gitradmin.page"
   val gitrrepoAdminTemplate = mountPoint+"/_repoadmin.page"
   val gitrsourceTemplate = mountPoint+"/_gitrbrowse.page"
