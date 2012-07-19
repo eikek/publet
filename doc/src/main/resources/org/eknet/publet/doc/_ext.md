@@ -12,13 +12,19 @@ This is a predefined template that renders a download component. The component
 is a table and each row represents a file. The click count and md5 checksum are
 also rendered.
 
+Include it in your `jade` page like this:
+
+    - setAttribute("rootDir", Some("/some/other/path/"))
+    =include("/publet/ext/includes/templates/_downloadTable.jade")
+
 Here is an example screen:
 
 ![download table example](downloadTemplate.png)
 
 You can control the resulting output by specifying following optional paramters:
 
-* `rootDir`: (String) the path to a directory. all files within that directory are rendered for download.
+* `rootDir`: (String) the path to a directory. all files within that directory are rendered for download. It
+  defaults to the directory of the current page.
 * `folderImagePath`: (String) an internal path to a image resource that is used to display next to folders
 * `exclExtensions`: (Seq[String]) a set of file extensions. Those files are _excluded_ from rendering. The
    default list is `Seq("html", "jade", "md", "markdown", "page", "ssp")`.
