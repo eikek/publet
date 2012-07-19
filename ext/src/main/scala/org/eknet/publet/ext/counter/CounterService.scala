@@ -8,7 +8,7 @@ import com.tinkerpop.blueprints.Vertex
 import org.apache.shiro.crypto.hash.Md5Hash
 import org.eknet.publet.vfs.{ContentResource, Resource, Path}
 import org.apache.shiro.util.ByteSource
-import org.apache.shiro.crypto.hash.format.{HexFormat, DefaultHashFormatFactory, HashFormat}
+import org.apache.shiro.crypto.hash.format.HexFormat
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

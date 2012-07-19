@@ -28,7 +28,7 @@ final class User(
     val password: Array[Char],
     val algorithm: Option[String],
     val groups: Set[String],
-    properties: Map[String, String]
+    val properties: Map[String, String]
 ) extends Serializable {
   require(login != null && !login.isEmpty)
 

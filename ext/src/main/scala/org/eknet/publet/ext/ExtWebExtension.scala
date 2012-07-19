@@ -44,6 +44,7 @@ object ExtWebExtension {
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
     muc.addResource(new WebScriptResource("contact.html".rn, new MailContact))
+    muc.addResource(new WebScriptResource("myDataUpdate.json".rn, new MyDataScript))
     publet.mountManager.mount(extScriptPath, muc)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
