@@ -2,13 +2,55 @@
 title: Publet Documentation
 
 --- name:content pipeline:jade
+- import org.eknet.publet.web.util.AppSignature
 .row
   .offset1.span1
     img(src="publet_deepskyblue4.png" height="55px")
   .span9
-    h1 User documentation
-    p This is the user documentation for publet.
+    h1 Publet Documentation
+    p
+      | This is the user documentation for
+      = AppSignature.toString
+      | .
     br/
 .row
   .offset1.span10
-    =include("_userdoc.md")
+    .subnav
+      ul.nav.nav-pills
+        li
+          a(href="#Introduction") Introduction
+        li
+          a(href="#Conventions") Conventions
+        li
+          a(href="#Usage") Usage
+        li
+          a(href="#Configuration") Configuration
+        li
+          a(href="#Layouts") Layouts
+        li
+          a(href="#Security") Security
+        li
+          a(href="#Partitions") Partitions
+        li
+          a(href="#Scala%20Scripts") Scala Scripts
+        li
+          a(href="#Git") Git
+
+    br/
+    =include("_intro.md")
+    hr/
+    =include("_conventions.md")
+    hr/
+    =include("usage.md")
+    hr/
+    =include("_configuration.md")
+    hr/
+    =include("_page-layouts.md")
+    hr/
+    =include("_security.md")
+    hr/
+    =include("_partitions.md")
+    hr/
+    =include("_scala-scripts.md")
+    hr/
+    =include("_git.md")
