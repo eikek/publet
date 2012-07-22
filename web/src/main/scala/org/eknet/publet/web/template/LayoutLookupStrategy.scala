@@ -30,7 +30,7 @@ class LayoutLookupStrategy(val engine: TemplateEngine, defaultLayouts: String*) 
   private val loader = new IncludeLoader()
 
   val layoutName = "pageLayout"
-  val layoutCandidates = engine.extensions.map(layoutName +"."+ _)
+  val layoutCandidates = engine.codeGenerators.keySet.map(layoutName +"."+ _)
 
   def layout(template: Template, context: RenderContext) {
     PubletWebContext.param("noLayout") match {
