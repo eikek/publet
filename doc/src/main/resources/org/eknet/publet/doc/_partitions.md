@@ -71,7 +71,7 @@ while x is incremented by one.
     partition.0.dir=parts/files
     partition.0.mounts=/files,/dav/files
 
-    partition.1.type=gitr
+    partition.1.type=git
     partition.1.dir=wiki/eike
     partition.1.mounts=/wikis/eike,/dav/wikis/eike
 
