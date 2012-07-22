@@ -43,9 +43,9 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
    *
    * @return
    */
-  private lazy val redirects = PubletWeb.publetSettings.keySet.filter(_.startsWith("redirect."))
+  private def redirects = PubletWeb.publetSettings.keySet.filter(_.startsWith("redirect."))
 
-  private lazy val allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), PubletWeb.publetSettings(key).get)).toMap
+  private def allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), PubletWeb.publetSettings(key).get)).toMap
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     val path = PubletWebContext.applicationPath
