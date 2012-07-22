@@ -133,5 +133,5 @@ The object `OrientDb` can be used to create new databases:
 Databases can only be created once on application startup. A listener is
 registered that will shut down all Orient databases on application exit.
 
-For the counter extension and for convenience, there is a database singleton
-provided you can use: `ExtDb`.
+For the counter extension and for convenience, there is a database provided
+you can use: `ExtDb`.

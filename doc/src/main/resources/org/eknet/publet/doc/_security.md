@@ -2,12 +2,15 @@
 
 Publet implements a simple security strategy using [Apache Shiro](http://shiro.apache.org).
 
-Resources are always inside a git repository. A repository can be _open_ or _closed_. An
+Resources may be maintained in a git repository. A repository can be _open_ or _closed_. An
 open repository can be cloned by anybody, while closed repositories need explicit _pull_
 permission for cloning and any other read access. Write access will always be protected by
 checking an explicit _push_ permission.
 
-Furthermore, restriction on resources can be defined.
+Furthermore, restriction on resources can be defined by URL patterns. These
+permissions are checked on each request to the resource. Obviously it wouldn't
+make sense to restrict resources in an open repository, as it can be cloned by
+anybody. Thus, to make use of URL restrictions, use a closed repositories.
 
 These rules are specified in one xml file on a specific location
 
@@ -16,7 +19,8 @@ These rules are specified in one xml file on a specific location
 If this file is not present, a realm with one user called _superadmin_ is created. The
 default password of this user is also _superadmin_, but can be specified in the
 configuration file with property "superadminPassword". The _superadmin_ always has
-all privileges.
+all privileges. As soon as this file is found, the default _superadmin_ account is
+removed.
 
 ## Permission file explained
 
