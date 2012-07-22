@@ -106,7 +106,7 @@ class IncludeLoader {
     val publet = PubletWeb.publet
     val cand = allIncludesPath / name
     publet.findSources(cand).toList match {
-      case c::cs => Some(cand.sibling(c.name.fullName))
+      case c::cs => Some(cand.sibling(c.name.fullName).toAbsolute)
       case _ => None
     }
   }
