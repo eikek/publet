@@ -7,9 +7,9 @@ in some cases.
 
 ## Special Directories
 
-The structuring of the files is completely up to the user. However, there are
-the following directories that publet searches for resources if needed by
-certain features.
+The structuring of the web contents is completely up to the user, of course.
+However, there are the following directories that publet searches for
+resources if needed by certain features.
 
 * `.allIncludes/` only at the root of the repository
 * `.includes/` at any level in the content tree

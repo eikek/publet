@@ -1,6 +1,7 @@
 # Usage
 
-When starting publet the first time, it presents a welcome screen similiar to this:
+When starting publet the first time, it presents a welcome screen similiar to
+this:
 
 ![publet welcome screen](welcome-screen.png)
 
@@ -23,8 +24,7 @@ directories as usual.
 
 On the top there is a button bar with some actions: saving changes, deleting
 the file in questions, or to cancel the action and view the page. The button
-_Upload Files_ takes you to another screen for uploading files (instead of
-editing).
+_Upload Files_ takes you to another screen for uploading files (like images).
 
 Below the button bar, there is a combo box _Extensions_. This lets you choose
 from a set of file extensions. The file you're editing is then saved using
@@ -34,6 +34,11 @@ markdown files and processed accordingly to get the HTML output.
 
 At the bottom you can add an optional commit message that is saved along with
 the change.
+
+Besides editing existing resources, you can add new ones by typing an URL to a
+non existing resource. Another alternative is to create a link to a
+non-existing page and click on that link. Also you could just change the url
+parameter `resource` to another (non-existing or existing) file,
 
 ## Markup
 
@@ -239,18 +244,20 @@ _markdown_ if it is omitted.
 
 ## Includes
 
-Using the `include()` function in templates, you can include other templates on the server
-side. With Jade, it looks like this:
+Using the `include()` function in templates, you can include other templates
+on the server side. With Jade, it looks like this:
 
     =include("_description.md")
 
-It's also possible to include content via ajax at the client. A small javascript
-function is executed on each page that looks for tags with a `p:ref` attribute. If found,
-it triggers an ajax request to the URL obtained from the `p:ref` attribute and adds
-the returned html inside that element (The parameter `noLayout` is added automatically
-to the request). Using Jade again, the client side include could look like this:
+It's also possible to include content via ajax at the client. A small
+javascript function is executed on each page that looks for tags with a
+`p:ref` attribute. If found, it triggers an ajax request to the URL obtained
+from the `p:ref` attribute and adds the returned html inside that element (The
+parameter `noLayout` is added automatically to the request). Using Jade again,
+the client side include could look like this:
 
-    div(p:ref="_description.html")
+    div(p:ref="contact.html")
 
 Note, that you now need to specify the `html` file if you want to include the
-HTML output of the markdown file `_description.md`.
+HTML output. Also, it is obviously not possible to include _hidden resources_
+that way, since a request is necessary to obtain the content.

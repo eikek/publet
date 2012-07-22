@@ -2,12 +2,12 @@
 
 Partitions are a concept in publet to make resources from multiple sources
 available to the server. The idea is taken from unix/linux systems where you
-can mount different file systems in the tree.
+can mount different file systems in one tree.
 
-A partition in publet is some container providing access to resources. The
-very simple case is a directory on the file system of the server that is
-running publet. Another implementation is the `GitPartition` that maintains
-a git working copy and a bare repository.
+A partition in publet is some container holding resources. The very simple
+case is a directory on the file system of the server that is running publet.
+Another implementation is the `GitPartition` that maintains a git working copy
+and a bare repository.
 
 Those partitions are then "mounted into publet". The root container is the
 root of all publet resources. Thus it makes up the structure of the content
@@ -22,10 +22,12 @@ be added next to the main resources. In other words, publet instantiates a
 
 ## Known partition types
 
-There are two partition types implemented so far:
+There are few partition types implemented so far:
 
 * file system
-* git _tandem_
+* _git tandem_
+* classpath
+* map
 
 The file system type is just a plain directory. The "Git tandem" is the term
 for a git bare repository and a working copy that is kept in sync with the
@@ -33,6 +35,11 @@ bare repository.
 
 The file system partition is a good choice to store big files that don't need
 to be tracked and versioned in a git repository.
+
+Other container implementations include the `ClasspathContainer` and
+`MapContainer`. These are useful when serving resources from within the
+classpath, or fetched otherwise.
+
 
 ## Specifying partitions
 

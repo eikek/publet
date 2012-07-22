@@ -1,56 +1,90 @@
 ---
 title: Publet Documentation
+layout: /publet/bootstrap/bootstrap.single.jade
+
+--- name:head pipeline:jade
+=include("_includes/htmlhead.jade")
+
+--- name:navigationBar pipeline:jade
+=include("_includes/nav.jade")
 
 --- name:content pipeline:jade
-- import org.eknet.publet.web.util.AppSignature
+=include("_includes/header.jade")
 .row
-  .offset1.span1
-    img(src="publet_deepskyblue4.png" height="55px")
-  .span9
-    h1 Publet Documentation
-    p
-      | This is the user documentation for
-      = AppSignature.toString
-      | .
-    br/
-.row
-  .offset1.span10
-    .subnav
-      ul.nav.nav-pills
-        li
-          a(href="#Introduction") Introduction
-        li
-          a(href="#Conventions") Conventions
-        li
-          a(href="#Usage") Usage
-        li
-          a(href="#Configuration") Configuration
-        li
-          a(href="#Layouts") Layouts
-        li
-          a(href="#Security") Security
-        li
-          a(href="#Partitions") Partitions
-        li
-          a(href="#Scala%20Scripts") Scala Scripts
-        li
-          a(href="#Git") Git
+  .span3
+    ul.nav.nav-pills.nav-stacked
+      li.active
+        a(href="#intro" data-toggle="pill")
+          i.icon-chevron-right
+          | Introduction
+      li
+        a(href="#install" data-toggle="pill")
+          i.icon-chevron-right
+          | Installation
+      li
+        a(href="#usage" data-toggle="pill")
+          i.icon-chevron-right
+          | Basic Usage
+      li
+        h4 Good to know
+      li
+        a(href="#conventions" data-toggle="pill")
+          i.icon-chevron-right
+          | Conventions
+      li
+        a(href="#configuration" data-toggle="pill")
+          i.icon-chevron-right
+          | Configuration
+      li
+        a(href="#security" data-toggle="pill")
+          i.icon-chevron-right
+          | Security
+      li
+        a(href="#git" data-toggle="pill")
+          i.icon-chevron-right
+          | Git
+      li
+        h4 Advanced Topics
+      li
+        a(href="#partitions" data-toggle="pill")
+          i.icon-chevron-right
+          | Paritions
+      li
+        a(href="#webdav" data-toggle="pill")
+          i.icon-chevron-right
+          | WebDAV
+      li
+        a(href="#scripts" data-toggle="pill")
+          i.icon-chevron-right
+          | Scala Scripts
+      li
+        a(href="#redirects" data-toggle="pill")
+          i.icon-chevron-right
+          | Redirects
 
-    br/
-    =include("_intro.md")
-    hr/
-    =include("_conventions.md")
-    hr/
-    =include("usage.md")
-    hr/
-    =include("_configuration.md")
-    hr/
-    =include("_page-layouts.md")
-    hr/
-    =include("_security.md")
-    hr/
-    =include("_partitions.md")
-    hr/
-    =include("_scala-scripts.md")
-    hr/
-    =include("_git.md")
+  .span9
+    .tab-content
+      .tab-pane.active#intro
+        =include("_intro.md")
+      .tab-pane#usage
+        =include("usage.md")
+      .tab-pane#install
+        =include("install.md")
+      .tab-pane#configuration
+        =include("_configuration.md")
+      .tab-pane#conventions
+        =include("_conventions.md")
+      .tab-pane#git
+        =include("_git.md")
+      .tab-pane#redirects
+        =include("_redirects.md")
+      .tab-pane#layouts
+        =include("_page-layouts.md")
+      .tab-pane#partitions
+        =include("_partitions.md")
+      .tab-pane#scripts
+        =include("_scala-scripts.md")
+      .tab-pane#security
+        =include("_security.md")
+      .tab-pane#webdav
+        =include("_webdav.md")

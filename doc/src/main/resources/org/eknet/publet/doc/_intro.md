@@ -8,9 +8,9 @@ By using a git repository you'll get versioning of the web content "for free".
 
 Publet offers three wiki markup languages:
 
-* markdown (<http://daringfireball.net/projects/markdown/>)
-* textile and (<http://textile.thresholdstate.com/>)
-* confluence (<https://confluence.atlassian.com/display/DOC/Confluence+Wiki+Markup>)
+* [markdown](<http://daringfireball.net/projects/markdown/>)
+* [textile](<http://textile.thresholdstate.com/>) and
+* [confluence](<https://confluence.atlassian.com/display/DOC/Confluence+Wiki+Markup>)
 
 This is achieved by utilising [Scalate](http://scalate.fusesource.org/), a
 template engine that supports those three major wiki markup languages. Publet

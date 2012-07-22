@@ -32,11 +32,23 @@ trait WebExtension {
    */
   def onStartup()
 
-
+  /**
+   * This method is invoked when the servlet container is
+   * shutting down.
+   *
+   */
   def onShutdown()
 
+  /**
+   * This method is invoked on the begin of each request.
+   *
+   */
   def onBeginRequest()
 
+  /**
+   * This method is invoked on the end of each request.
+   *
+   */
   def onEndRequest()
 
 }

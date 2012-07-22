@@ -1,8 +1,9 @@
 # Scala Scripts
 
-It is also possible to write Scala scripts. They are executed on each request
-and are supposed to act as a controller. The code is embedded in the trait
-`org.eknet.publet.engine.scala.ScalaScript` which is defined as:
+Besides writing templates and wiki pages, it is also possible to write Scala
+scripts. They are executed on each request and are supposed to act as a
+controller. The code is embedded in the trait `ScalaScript` which is defined
+as:
 
     trait ScalaScript extends Logging {
 
@@ -109,11 +110,11 @@ Go to `/.allIncludes/config/admin.html` to reload something...
 
 Scala scripts can access all classes in the classpath of the web application.
 Often, one wants to define addtional objects and classes to share code between
-scripts. You can extend the source and classpath of Scala scripts to achieve
-it.
+scripts. You can extend the sourcepath and classpath of Scala scripts to
+achieve it.
 
 Suppose there exists several scripts in `/apps/myapp/` that want to share
-code. You can create a _mini project_ by creating the following directory
+code. You would create a _mini project_ by creating the following directory
 outline:
 
     /apps/myapp/.includes/project/src/main/scala/

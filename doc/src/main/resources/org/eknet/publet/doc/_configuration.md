@@ -29,11 +29,32 @@ applying a string key, for example:
 
 Note, the settings must be explcitely reloaded after making changes.
 
-The following properties are known to publet:
 
-* `applicationName` used sometimes to refer to the application.
-* `publet.useHighlightJs` whether to activate [HighlightJS](http://softwaremaniacs.org/soft/highlight/en/)
-* `publet.highlightTheme` the global [HighlightJS](http://softwaremaniacs.org/soft/highlight/en/) theme to use
-* `publet.searchForSidebar` whether to search the include directories for a `sidebar` file
-* `publet.searchForHeadIncludes` whether to search for addtional html head includes (like javascript and css files)
+### Reference settings file
 
+A (hopefully) complete `settings.properties` file is shown below.
+
+<div p:ref="settings.html"></div>
+
+
+## Configuration File
+
+The location of the configuration file `publet.properties` depends on whether
+you use the war file or the standalone server.
+
+### War
+
+Using the war file, the configuration file is expected at the root of the
+`$PUBLET_DIR/<context-path>` of the war file. Please see the [install instructions]() for more information.
+
+
+### Standalone Server
+
+The file is expected in the `etc` directory.
+
+
+### Reference configuration file
+
+A (hopefully) complete `publet.properties` file is shown below.
+
+<div p:ref="publet-cfg.html"></div>

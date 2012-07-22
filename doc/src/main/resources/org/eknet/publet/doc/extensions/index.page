@@ -1,0 +1,39 @@
+---
+title: Publet Documentation
+layout: /publet/bootstrap/bootstrap.single.jade
+
+--- name:head pipeline:jade
+=include("../_includes/htmlhead.jade")
+
+--- name:navigationBar pipeline:jade
+=include("../_includes/nav.jade")
+
+--- name:content pipeline:jade
+=include("../_includes/header.jade")
+.row
+  .span3
+    ul.nav.nav-pills.nav-stacked
+      li.active
+        a(href="#intro" data-toggle="pill")
+          i.icon-chevron-right
+          | Introduction
+      li
+        h4 Included Extensions
+      li
+        a(href="#ext" data-toggle="pill")
+          i.icon-chevron-right
+          | Ext
+      li
+        a(href="#gitrweb" data-toggle="pill")
+          i.icon-chevron-right
+          | GitR Web
+      li
+
+  .span9
+    .tab-content
+      .tab-pane.active#intro
+        =include("_intro.md")
+      .tab-pane#ext
+        =include("_ext.md")
+      .tab-pane#gitrweb
+        =include("_gitrweb.md")

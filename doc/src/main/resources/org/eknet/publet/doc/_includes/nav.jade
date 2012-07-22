@@ -1,0 +1,19 @@
+- import org.eknet.publet.vfs.Path
+- def urlOf(str: String) = PubletWebContext.urlOf(str)
+- val path = PubletWebContext.getResourceUri
+a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
+  span(class="icon-bar")
+  span(class="icon-bar")
+  span(class="icon-bar")
+a(class="brand" href={urlOf("/publet/doc/")} style="height:37px; padding-top: 0; padding-bottom: 0; margin-top: 3px;")
+  img(src={ urlOf("/publet/doc/publet_deepskyblue4.png") } alt="logo" height="34px" style="padding: 0; border: 0; vertical-align: middle;")
+  | Publet Documentation
+.nav-collapse
+  ul.nav
+    li
+      a(href={ urlOf("/publet/doc/extensions/index.html") }) Extensions
+  ul.nav.pull-right
+    li
+      a(href="https://eknet.org/main/projects/publet/") Publet's project page
+    li
+      a(href={ urlOf("index.html") }) Home
