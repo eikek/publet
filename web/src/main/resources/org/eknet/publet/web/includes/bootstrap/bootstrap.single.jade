@@ -40,9 +40,8 @@ html
         .container
           - if (nav != null)
             !~~ nav
-          - if (nav == null)
+          - else
             =include(loadInclude("nav"))
-
     #content.container
       - val sidebar = if (searchForSidebar) findInclude("sidebar", false) else None
       - if (sidebar.isDefined)
@@ -55,6 +54,6 @@ html
         !~~ body
 
     - if (footer != null)
-      !~~ nav
+      !~~ footer
     - if (footer == null)
       =include(loadInclude("footer"))
