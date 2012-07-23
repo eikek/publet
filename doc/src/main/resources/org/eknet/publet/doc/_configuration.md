@@ -29,6 +29,8 @@ applying a string key, for example:
 
 Note, the settings must be explcitely reloaded after making changes.
 
+In code, the settings can be accessed via the object
+`PubletWeb.publetSettings`.
 
 ### Reference settings file
 
@@ -41,6 +43,9 @@ A (hopefully) complete `settings.properties` file is shown below.
 
 The location of the configuration file `publet.properties` depends on whether
 you use the war file or the standalone server.
+
+The configuration can be accessed in code using the object
+`org.eknet.publet.web.Config`.
 
 ### War
 
