@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web
+package org.eknet.publet.web.template
 
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
 import xml.{XML, NodeSeq}
+import scala.Some
+import org.eknet.publet.web.Config.mainMount
+import org.eknet.publet.web.{PubletWeb, PubletWebContext, Config}
 
 
 /**
@@ -27,7 +30,7 @@ import xml.{XML, NodeSeq}
  */
 class IncludeLoader {
 
-  val allIncludesPath = Path(Config.mainMount + "/"+ Publet.allIncludes)
+  val allIncludesPath = Path(Config.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
 
   /**Returns the path to the resource of the given name
@@ -35,19 +38,23 @@ class IncludeLoader {
    * @param name
    * @return
    */
-  def loadInclude(name: String, mainInclude:Boolean = true): String = {
-     findInclude(name, mainInclude) getOrElse emptyResource
+  def loadInclude(name: String, mainInclude: Boolean = true): String = {
+    findInclude(name, mainInclude) getOrElse emptyResource
   }
 
-  def findInclude(name: String, mainInclude:Boolean = true): Option[String] = {
+  def findInclude(name: String, mainInclude: Boolean = true): Option[String] = {
     val currentPath = PubletWebContext.applicationPath
     val path = currentPath.parent
     val resource = ResourceName(name).withExtIfEmpty("html").fullName
     (findInclude(path, resource)
       orElse findAllInclude(path, resource)
       orElse {
-        if (mainInclude) findMainAllInclude(resource) else None
+      if (mainInclude) findMainAllInclude(resource) else None
     }).map(_.asString)
+  }
+
+  def findIncludeExtension(name: String, mainInclude: Boolean = true): Option[String] = {
+    findInclude(name, mainInclude).map(ResourceName(_).ext)
   }
 
   /**
@@ -61,17 +68,22 @@ class IncludeLoader {
     val extensions = Set("js", "css", "meta")
     val currentPath = PubletWebContext.applicationPath.parent
 
-    val mainAll = (withMountedContainer(currentPath) { (path, container) =>
-      publet.rootContainer.lookup(path / Publet.allIncludes)
-        .collect({ case r: ContainerResource => r})
-        .map(r => (path/ Publet.allIncludes, r))
+    val mainAll = (withMountedContainer(currentPath) {
+      (path, container) =>
+        publet.rootContainer.lookup(path / Publet.allIncludes)
+          .collect({
+          case r: ContainerResource => r
+        })
+          .map(r => (path / Publet.allIncludes, r))
     } orElse {
       publet.rootContainer.lookup(allIncludesPath)
-        .collect({ case r: ContainerResource => r})
+        .collect({
+        case r: ContainerResource => r
+      })
         .map(r => (allIncludesPath, r))
     }).map(t => t._2.children
-                      .filter(c => extensions.contains(c.name.ext))
-                      .map(c => t._1 / c.name.fullName)
+      .filter(c => extensions.contains(c.name.ext))
+      .map(c => t._1 / c.name.fullName)
     ).map(_.toList)
 
     val incl = findNextIncludes(currentPath).map(t => t._2.children
@@ -79,11 +91,11 @@ class IncludeLoader {
       .map(c => t._1 / c.name.fullName)
     ).map(_.toList)
 
-    for (r <- (mainAll.getOrElse(List()):::incl.getOrElse(List()))) yield {
+    for (r <- (mainAll.getOrElse(List()) ::: incl.getOrElse(List()))) yield {
       if (r.name.ext == "css") {
-        <link href={ PubletWebContext.urlOf(r) } rel="stylesheet"/>
+          <link href={PubletWebContext.urlOf(r)} rel="stylesheet"/>
       } else if (r.name.ext == "js") {
-        <script type="text/javascript" src={ PubletWebContext.urlOf(r) }/>
+          <script type="text/javascript" src={PubletWebContext.urlOf(r)}/>
       } else {
         XML.load(publet.rootContainer.lookup(r).get.asInstanceOf[ContentResource].inputStream)
       }
@@ -106,7 +118,7 @@ class IncludeLoader {
     val publet = PubletWeb.publet
     val cand = allIncludesPath / name
     publet.findSources(cand).toList match {
-      case c::cs => Some(cand.sibling(c.name.fullName).toAbsolute)
+      case c :: cs => Some(cand.sibling(c.name.fullName).toAbsolute)
       case _ => None
     }
   }
@@ -118,12 +130,13 @@ class IncludeLoader {
 
   def findAllInclude(path: Path, name: String): Option[Path] = {
     val publet = PubletWeb.publet
-    withMountedContainer(path) { (path, container) =>
-      val cand = path / Publet.allIncludes / name
-      publet.findSources(cand).toList match {
-        case c::cs => Some(cand.sibling(c.name.fullName))
-        case _ => None
-      }
+    withMountedContainer(path) {
+      (path, container) =>
+        val cand = path / Publet.allIncludes / name
+        publet.findSources(cand).toList match {
+          case c :: cs => Some(cand.sibling(c.name.fullName))
+          case _ => None
+        }
     }
   }
 
@@ -132,14 +145,14 @@ class IncludeLoader {
     else {
       val cand = path / Publet.includes / name
       PubletWeb.publet.findSources(cand).toList match {
-        case c::cs => Some(cand.sibling(c.name.fullName))
+        case c :: cs => Some(cand.sibling(c.name.fullName))
         case _ => findInclude(path.parent, name)
       }
     }
   }
 
-  def isResourceEditable:Boolean = PubletWeb.publet.findSources(PubletWebContext.applicationPath).toList match {
-    case c::cs => c.isInstanceOf[Writeable]
+  def isResourceEditable: Boolean = PubletWeb.publet.findSources(PubletWebContext.applicationPath).toList match {
+    case c :: cs => c.isInstanceOf[Writeable]
     case _ => false
   }
 }

@@ -18,7 +18,7 @@ package org.eknet.publet.web.template
 
 import org.fusesource.scalate.{RenderContext, Template, TemplateEngine}
 import org.fusesource.scalate.layout.{DefaultLayoutStrategy, LayoutStrategy}
-import org.eknet.publet.web.{PubletWebContext, IncludeLoader}
+import org.eknet.publet.web.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

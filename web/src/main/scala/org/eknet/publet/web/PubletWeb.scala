@@ -24,7 +24,7 @@ import org.eknet.publet.partition.git.{GitPartition, GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
-import template.{ConfiguredScalateEngine, Templates}
+import template.{IncludeResourceLoader, IncludeLoader, ConfiguredScalateEngine, Templates}
 import util.{PropertiesMap, AttributeMap, Context, Key}
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver

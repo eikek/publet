@@ -41,19 +41,23 @@ html
           - if (navigationBar != null)
             !~~ navigationBar
           - else
-            =include(loadInclude("nav"))
+            - val ext = findIncludeExtension("nav")
+            - if (ext.isDefined)
+              =include("__incl_nav."+ext.get)
     #content.container
-      - val sidebar = if (searchForSidebar) findInclude("sidebar", false) else None
-      - if (sidebar.isDefined)
+      - val ext = if (searchForSidebar) findIncludeExtension("sidebar", false) else None
+      - if (ext.isDefined)
         .row
           .span8
             !~~ body
           .span4
-            !~~ include(sidebar.get)
-      - if (sidebar.isEmpty)
+            !~~ include("__incl_sidebar."+ext.get)
+      - if (ext.isEmpty)
         !~~ body
 
     - if (footer != null)
       !~~ footer
     - if (footer == null)
-      =include(loadInclude("footer"))
+      - val ext = findIncludeExtension("footer", false)
+      - if (ext.isDefined)
+        =include("__incl_footer."+ext.get)

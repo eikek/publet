@@ -57,8 +57,8 @@ for example, and it is included in every page.
 
 The parameter `nav` is containing HTML code to render contents of the
 navigation bar at the top of the page. If no value is specified for this
-parameter, publet will look up a template file with name `nav` in the _special
-directories_.
+parameter, publet will look up a template file with name `nav` in the
+_special directories_.
 
 The initial content provides a basic outline of the navigation bar that is
 stored at `.allIncludes/nav.jade`.

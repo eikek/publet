@@ -41,8 +41,12 @@ object ConfiguredScalateEngine {
   private def createEngine() = {
     val engine = new TemplateEngine()
     engine.workingDirectory = Config.newTempDir("scalate")
-    engine.allowCaching = false
+    engine.allowCaching = true
     engine.allowReload = true
+
+    val loader = new IncludeResourceLoader(engine.resourceLoader)
+    engine.resourceLoader = loader
+
     new Boot(engine).run()
     engine
   }
