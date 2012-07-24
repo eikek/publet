@@ -97,18 +97,20 @@ inside a graph database on the server.
 The data is available via the `CounterService`. Retrieve it via
 `CounterExtension.service`.
 
-You can specify a list of ip addresses that should be discarded (maybe you
-don't want to count your own accesses...)
+You can specify a list of ip addresses in `settings.properties` that should
+be discarded from counting (maybe you don't want to count your own accesses).
 
-A value of `true` will black-list the ip, a value of `false` yields in
-counting accesses from this ip.
-
-By default, accesses from all ips are taken into account by bots are not.
+The key must start with `ext.counter.blaclist.` and appended with the ip to
+blacklist. A value of `true` will black-list the ip, a value of `false` yields
+in counting accesses from this ip.
 
 #### Examples:
 
     ext.counter.blacklist.110.110.110.110=true
     ext.counter.blacklist.127.0.0.1=true
+
+By default, accesses from all ips are taken into account but not user agents
+with words _bot_ or _spider_ in its name.
 
 
 ## Blueprints / OrientDB

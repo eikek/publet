@@ -19,8 +19,8 @@ These rules are specified in one xml file on a specific location
 If this file is not present, a realm with one user called _superadmin_ is created. The
 default password of this user is also _superadmin_, but can be specified in the
 configuration file with property "superadminPassword". The _superadmin_ always has
-all privileges. As soon as this file is found, the default _superadmin_ account is
-removed.
+all privileges. As soon as the file `permissions.xml` is found, the default _superadmin_
+account is disabled.
 
 ## Permission file explained
 
@@ -41,7 +41,7 @@ Here is an example `permissions.xml` file explained:
         </user>
       </users>
 
-      <!-- Defines repository states, default is `closed` -->
+      <!-- Defines repository states, default is `open` -->
       <repositories>
         <repository name="jdoe/dotfiles" tag="closed" owner="jdoe"/>
         <repository name="wikis/mywiki" tag="open" owner="jdoe"/>
@@ -88,8 +88,8 @@ The only repository seen so far is `contentroot`. But there may exists more
 repositories. The tag `<repositories/>` defines the state for each. Any
 repository not listed is always an _open_ repository. In the example the
 `contentroot` is defined to be a closed repository. Access to a closed repository
-will always be checked. That means that no anonymous user could now browse
-a page anymore.
+will always be checked. That means that no anonymous user could now browse to
+a page in this repository anymore.
 
 Additionally (and optional), an owner can be specified. This should be a
 login of an registered user.
