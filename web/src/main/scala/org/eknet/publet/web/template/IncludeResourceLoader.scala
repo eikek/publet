@@ -31,24 +31,18 @@ import org.eknet.publet.web.PubletWeb
 class IncludeResourceLoader(delegate: ResourceLoader) extends ResourceLoader {
 
   private val includeLoader = new IncludeLoader
-  private val specialPattern = """^__incl_([^/]*)$""".r
+  private val specialPattern = """.*/__incl_([^/]*)$""".r
 
   def resource(uri: String): Option[Resource] = {
     delegate.resource(uri) orElse specialResource(uri)
   }
 
   private def specialResource(uri: String) = {
-    //get last segment
-    uri.lastIndexOf('/') match {
-      case i if (i>0) => {
-        uri.substring(i+1) match {
-          case specialPattern(r) => includeLoader.findInclude(r)
-            .flatMap(p => PubletWeb.publet.rootContainer.lookup(Path(p)))
-            .collect({ case c: ContentResource => c })
-            .map(cr => new TemplateResource(uri, cr))
-          case _ => None
-        }
-      }
+    uri match {
+      case specialPattern(r) => includeLoader.findInclude(r)
+        .flatMap(p => PubletWeb.publet.rootContainer.lookup(p))
+        .collect({ case c: ContentResource => c })
+        .map(cr => new TemplateResource(uri, cr))
       case _ => None
     }
   }

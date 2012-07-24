@@ -33,16 +33,7 @@ class IncludeLoader {
   val allIncludesPath = Path(Config.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
 
-  /**Returns the path to the resource of the given name
-   * in one of the include folders or the `emptyResource`
-   * @param name
-   * @return
-   */
-  def loadInclude(name: String, mainInclude: Boolean = true): String = {
-    findInclude(name, mainInclude) getOrElse emptyResource
-  }
-
-  def findInclude(name: String, mainInclude: Boolean = true): Option[String] = {
+  def findInclude(name: String, mainInclude: Boolean = true): Option[Path] = {
     val currentPath = PubletWebContext.applicationPath
     val path = currentPath.parent
     val resource = ResourceName(name).withExtIfEmpty("html").fullName
@@ -50,11 +41,11 @@ class IncludeLoader {
       orElse findAllInclude(path, resource)
       orElse {
       if (mainInclude) findMainAllInclude(resource) else None
-    }).map(_.asString)
+    })
   }
 
   def findIncludeExtension(name: String, mainInclude: Boolean = true): Option[String] = {
-    findInclude(name, mainInclude).map(ResourceName(_).ext)
+    findInclude(name, mainInclude).map(_.name.ext)
   }
 
   /**

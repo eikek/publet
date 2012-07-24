@@ -19,6 +19,7 @@ package org.eknet.publet.web.template
 import org.fusesource.scalate.{RenderContext, Template, TemplateEngine}
 import org.fusesource.scalate.layout.{DefaultLayoutStrategy, LayoutStrategy}
 import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,17 +40,15 @@ class LayoutLookupStrategy(val engine: TemplateEngine, defaultLayouts: String*) 
     }
     context.attributes.get("layout") getOrElse {
       findLayout(layoutCandidates.toList) foreach { layout =>
-        context.attributes.update("layout", layout)
+        context.attributes.update("layout", layout.asString)
       }
     }
     delegate.layout(template, context)
   }
 
-  private def findLayout(cand: List[String]): Option[String] = {
+  private def findLayout(cand: List[String]): Option[Path] = {
     cand match {
-      case c::cs => loader.findInclude(c) orElse {
-        findLayout(cs)
-      }
+      case c::cs => loader.findInclude(c) orElse findLayout(cs)
       case Nil => None
     }
   }
