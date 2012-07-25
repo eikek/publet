@@ -1,7 +1,6 @@
 import sbt._
 import Keys._
 import Dependencies._
-import com.typesafe.sbtosgi.OsgiPlugin._
 
 object Resolvers {
   val sonatype = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
@@ -9,7 +8,6 @@ object Resolvers {
   val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
 }
 object Version {
-  val osgi = "4.3"
   val slf4j = "1.6.4"
   val logback = "1.0.1"
   val servlet = "3.0.1"
@@ -19,7 +17,7 @@ object Version {
   val jgit = "1.3.0.201202151440-r"
   val shiro = "1.2.0"
   val scalaTest = "1.8"
-  val grizzled = "0.6.8"
+  val grizzled = "0.6.9"
   val scalate = "1.5.3"
   val mimeUtil = "2.1.3"
   val orientdb = "1.0.1"
@@ -29,6 +27,7 @@ object Version {
   val jdom = "1.1"
   val jetty = "8.1.4.v20120524"
   val bouncyCastle = "1.46"
+  val scala = "2.9.2"
 }
 
 object Dependencies {
@@ -55,8 +54,7 @@ object Dependencies {
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
   val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()
-  val osgiCore = "org.osgi" % "org.osgi.core" % Version.osgi withSources()
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % RootBuild.globalScalaVersion withSources()
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources()
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate
@@ -82,7 +80,9 @@ object RootBuild extends Build {
     settings = buildSettings
   ) aggregate (
       Publet.module,
+      ScalaScriptEngine.module,
       Web.module,
+      Gitr.module,
       GitPart.module,
       GitrWeb.module,
       Auth.module,
@@ -94,8 +94,6 @@ object RootBuild extends Build {
       Doc.module
     )
 
-  val globalScalaVersion = "2.9.1"
-
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-parent",
     libraryDependencies ++= deps
@@ -103,8 +101,8 @@ object RootBuild extends Build {
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.0.0-SNAPSHOT",
-    scalaVersion := globalScalaVersion,
-    sbtPlugin := true,
+    organization := "org.eknet.publet",
+    scalaVersion := Version.scala,
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     resolvers := Seq(Resolvers.sonatype, Resolvers.eknet, Resolvers.ettrema),
@@ -140,7 +138,7 @@ object Gitr extends Build {
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   lazy val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
 
@@ -157,7 +155,7 @@ object GitrWeb extends Build {
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr-web",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   lazy val deps = Seq(grizzledSlf4j, servletApiProvided, scalaTest)
 
@@ -174,11 +172,10 @@ object Publet extends Build {
   
   lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
     name := "publet",
-    OsgiKeys.exportPackage := Seq("org.eknet.publet"),
     libraryDependencies ++= deps,
     ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
     sourceGenerators in Compile <+= ReflectPlugin.reflect
-  ) ++ osgiSettings
+  ) 
   
   lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
 
@@ -196,11 +193,10 @@ object GitPart extends Build {
     name := "publet-git-part",
     description := "Provides a partition for publet around jgit.",
     libraryDependencies ++= deps
-  ) ++ osgiSettings 
+  )  
 
   val deps = Seq(slf4jApi, grizzledSlf4j, scalaTest)
 
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.gitr", "org.eknet.publet.partition.git")
 }
 
 object ScalaScriptEngine extends Build {
@@ -216,11 +212,10 @@ object ScalaScriptEngine extends Build {
     description := "Provides a engine that compiles and executes scala " +
       "scripts, converting from *.scala source files to some dynamic content.",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   val deps = Seq(slf4jApi, scalaCompiler, scalaTest, grizzledSlf4j)
 
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.engine.scala")
 }
 
 object Web extends Build {
@@ -234,7 +229,7 @@ object Web extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   val deps = Seq(servletApiProvided,
        slf4jApi, grizzledSlf4j,
@@ -245,7 +240,6 @@ object Web extends Build {
        miltonApi, miltonServlet,
        scalaTest) ++ miltonApiDeps
 
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.web")
 }
 
 object War extends Build {
@@ -280,9 +274,7 @@ object Auth extends Build {
     name := "publet-auth",
     description := "Authentication module for publet, exposing a AuthManager and default impls.",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
-
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.auth")
+  )
 
   val deps = Seq(slf4jApi, grizzledSlf4j, shiro, scalaTest)
 }
@@ -298,11 +290,10 @@ object WebEditor extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webeditor",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  )
 
   val deps = Seq(servletApiProvided, grizzledSlf4j, scalaTest)
 
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.webeditor")
 } 
 
 object Ext extends Build {
@@ -316,11 +307,10 @@ object Ext extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons)
 
-  OsgiKeys.exportPackage := Seq("org.eknet.publet.ext")
 }
 
 object ScalateEngine extends Build {
@@ -334,7 +324,7 @@ object ScalateEngine extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-scalate",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  ) 
 
   val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateWikitext, scalatePage)
 }
@@ -350,7 +340,7 @@ object Doc extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-doc",
     libraryDependencies ++= deps
-  ) ++ osgiSettings
+  )
 
   val deps = Seq(grizzledSlf4j)
 }
