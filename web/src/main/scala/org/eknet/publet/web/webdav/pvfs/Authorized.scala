@@ -1,20 +1,21 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import io.milton.resource.Resource
+import io.milton.resource.{DigestResource, Resource}
 import io.milton.http.{Auth, Request}
 import io.milton.http.Request.Method
-import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.shiro.{DigestAuthenticationToken, Security}
 import org.eknet.publet.web.PubletWebContext
 import org.eknet.publet.web.filter.AuthzFilter
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.UsernamePasswordToken
 import grizzled.slf4j.Logging
+import io.milton.http.http11.auth.DigestResponse
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.06.12 19:07
  */
-trait Authorized extends Resource with Logging {
+trait Authorized extends Resource with Logging with DigestResource {
 
   /**
    * Checks permission for the current request uri.
@@ -43,6 +44,15 @@ trait Authorized extends Resource with Logging {
 
   private def loginBasic(user: String, password: String) = {
     SecurityUtils.getSubject.login( new UsernamePasswordToken(user, password) )
+    findPrincipal
+  }
+
+  private def loginDigest(req: DigestResponse) = {
+    SecurityUtils.getSubject.login(new DigestAuthenticationToken(req))
+    findPrincipal
+  }
+
+  private def findPrincipal = {
     val p = SecurityUtils.getSubject.getPrincipal
     if (p == null && AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)) {
       "anonymous" //must return something in order to allow anonymous access
@@ -51,4 +61,24 @@ trait Authorized extends Resource with Logging {
     }
   }
 
+  def authenticate(digestRequest: DigestResponse) = {
+    Option(SecurityUtils.getSubject.getPrincipal) match {
+      case Some(p) => p
+      case None => loginDigest(digestRequest)
+    }
+  }
+
+
+  def isDigestAllowed = authenticationRequired
+
+  private def authenticationRequired = {
+    val method = Request.Method.valueOf(PubletWebContext.getMethod.toString)
+    if (method.isWrite) {
+      trace("WebDAV: authorize write!")
+      !Security.hasWritePermission(PubletWebContext.applicationPath)
+    } else {
+      trace("WebDAV: authorize read!")
+      !AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)
+    }
+  }
 }

@@ -5,7 +5,7 @@
    - any duplicates are ignored, the first entry wins.
   -->
   <users>
-    <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5">
+    <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" digest="efd" algorithm="md5">
       <fullName>John Doe</fullName>
       <email>jdoe@mail.com</email>
       <group>wikiuser</group>

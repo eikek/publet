@@ -23,6 +23,8 @@ import org.eknet.publet.auth.{PubletAuth, User, UserProperty}
 import org.apache.shiro.crypto.hash.{DefaultHashService, SimpleHash}
 import org.apache.shiro.authc.credential.DefaultPasswordService
 import org.eknet.publet.vfs.Content
+import io.milton.http.http11.auth.DigestGenerator
+import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -31,6 +33,8 @@ import org.eknet.publet.vfs.Content
 class MyDataScript extends ScalaScript {
 
   import ScalaScript._
+
+  private val digestGenerator = new DigestGenerator
 
   def serve(): Option[Content] = {
     if (!Security.isAuthenticated) {
@@ -66,7 +70,8 @@ class MyDataScript extends ScalaScript {
     val user = PubletWeb.authManager.findUser(Security.username).get
 
     val newpass = PubletAuth.encryptPassword(newpassPlain, algorithm)
-    val newUser = new User(user.login, newpass.toCharArray, Some(algorithm), user.groups, user.properties)
+    val newdigest = digestGenerator.encodePasswordInA1Format(user.login, WebdavFilter.getRealmName, newpassPlain)
+    val newUser = new User(user.login, newpass.toCharArray, Some(algorithm), newdigest.toCharArray, user.groups, user.properties)
     PubletWeb.authManager.updateUser(newUser)
     success("Password updated.")
   }
@@ -74,7 +79,7 @@ class MyDataScript extends ScalaScript {
   private def changeUserData(fullName: String, email: String) = {
     val user = PubletWeb.authManager.findUser(Security.username).get
     val props = user.properties + (UserProperty.fullName.toString -> fullName) + (UserProperty.email.toString -> email)
-    val newUser = new User(user.login, user.password, user.algorithm,user. groups, props)
+    val newUser = new User(user.login, user.password, user.algorithm, user.digest, user.groups, props)
     PubletWeb.authManager.updateUser(newUser)
     success("User data updated.")
   }

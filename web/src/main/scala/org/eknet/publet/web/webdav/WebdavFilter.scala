@@ -123,4 +123,12 @@ object WebdavFilter {
     }
   })).get
 
+  /**
+   * Returns the realm name that is used for WebDAV. This is
+   * either retrieved from the settings or the value "WebDav Area"
+   * is returned as fallback.
+   *
+   * @return
+   */
+  def getRealmName = PubletWeb.publetSettings("webdav.realmName").getOrElse("WebDav Area")
 }

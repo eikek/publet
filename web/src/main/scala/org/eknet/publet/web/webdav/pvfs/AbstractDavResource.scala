@@ -4,6 +4,7 @@ import io.milton.http.{Auth, Request}
 import java.util
 import org.eknet.publet.web.PubletWeb
 import io.milton.resource.{PropFindableResource, Resource}
+import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * Implements the milton `Resource` interface based on nothing.
@@ -17,7 +18,7 @@ abstract class AbstractDavResource extends Resource with PropFindableResource wi
 
   def getName: String = ""
 
-  def getRealm: String = PubletWeb.publetSettings("webdav.realmName").getOrElse("WebDav Area")
+  def getRealm: String = WebdavFilter.getRealmName
 
   def getModifiedDate: util.Date = null
 

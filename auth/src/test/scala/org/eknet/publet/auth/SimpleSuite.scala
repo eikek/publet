@@ -28,6 +28,7 @@ class SimpleSuite extends FunSuite with ShouldMatchers {
     db.getAllUser should equal(Seq(User("jdoe",
       "098f6bcd4621d373cade4e832627b4f6".toCharArray,
       Some("md5"),
+      "efd".toCharArray,
       Set("wikiuser", "editor"),
       Map("fullName" -> "John Doe",
           "email" -> "jdoe@mail.com")))
@@ -39,7 +40,9 @@ class SimpleSuite extends FunSuite with ShouldMatchers {
       Set("pull:wikis/mywiki",
         "pull:contentroot",
         "push:wikis/mywiki",
-        "push:jdoe/dotfiles")
+        "push:jdoe/dotfiles",
+        "gitadmin:wikis/mywiki",
+        "gitadmin:jdoe/dotfiles")
     )
   }
 

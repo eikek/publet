@@ -27,6 +27,7 @@ final class User(
     val login: String,
     val password: Array[Char],
     val algorithm: Option[String],
+    val digest: Array[Char],
     val groups: Set[String],
     val properties: Map[String, String]
 ) extends Serializable {
@@ -41,7 +42,7 @@ final class User(
     }
     val gs = groups.map(g => <group>{g}</group>)
 
-    val user = <user login={login} password={ new String(password) }>
+    val user = <user login={login} password={ new String(password) } digest={ new String(digest) }>
       { props ++ gs }
     </user>
     if (algorithm.isDefined) {
@@ -64,17 +65,18 @@ final class User(
 
 object User {
 
-  def apply(login: String, pw: Array[Char], alg: Option[String], groups: Set[String], props:Map[String,String]): User = {
-    new User(login, pw, alg, groups, props)
+  def apply(login: String, pw: Array[Char], alg: Option[String], digest: Array[Char], groups: Set[String], props:Map[String,String]): User = {
+    new User(login, pw, alg, digest, groups, props)
   }
 
   def apply(userN: Node): User = {
     val login = (userN \ "@login").text
     val pw = (userN \ "@password").text.toCharArray
-    val alg = Option((userN \ "@algorithm").text).filter(!_.isEmpty)
+    val alg = Option((userN \ "@algorithm").text).filterNot(_.isEmpty)
+    val digest = Option((userN \ "@digest").text).getOrElse("").toCharArray
     val attr = (for (c <- userN.child if (UserProperty.exists(c.label))) yield (c.label -> c.text)).toMap
     val groups = (for (c <- userN \ "group") yield c.text).toSet
-    User(login, pw, alg, groups, attr)
+    User(login, pw, alg, digest, groups, attr)
   }
 
 }

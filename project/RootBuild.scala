@@ -105,7 +105,7 @@ object RootBuild extends Build {
     version := "1.0.0-SNAPSHOT",
     organization := "org.eknet.publet",
     scalaVersion := Version.scala,
-    publishTo := Some("eknet-maven2" at "http://ithaka.local:8081/publet/maven2"),
+    publishTo := Some("eknet-maven2" at "https://eknet.org/maven2"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),

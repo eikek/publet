@@ -92,6 +92,7 @@ private object SuperUserAuth extends PubletAuth {
   private def superuser = User("superadmin",
     Config("superadminPassword").getOrElse("superadmin").toCharArray,
     None,
+    Array(),
     Set("superadmin"),
     Map(UserProperty.fullName.toString -> "Publet Superadmin"))
 

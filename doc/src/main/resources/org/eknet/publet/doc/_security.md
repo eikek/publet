@@ -33,7 +33,7 @@ Here is an example `permissions.xml` file explained:
        - any duplicates are ignored, the first entry wins.
       -->
       <users>
-        <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5">
+        <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5" digest="abcdef">
           <fullName>John Doe</fullName>
           <email>jdoe@mail.com</email>
           <group>wikiuser</group>
@@ -81,6 +81,12 @@ password using the command
 
 The `<group/>` tag specifies the roles or groups the user belongs to. Permissions
 can only be associated with groups.
+
+The `digest` property specifies the so called `HA1` value for authenticating
+using the [Digest](http://en.wikipedia.org/wiki/Digest_access_authentication)
+method. This is only used for authenticating WebDAV requests and is therefore
+optional (if it is not present authentication does not work for WebDAV
+requests). Please refer to the WebDAV documentation for more information.
 
 ### Repositories
 

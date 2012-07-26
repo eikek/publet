@@ -33,6 +33,15 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
 
   setCredentialsMatcher(new DynamicHashCredentialsMatcher())
 
+
+  override def supports(token: AuthenticationToken) = {
+    super.supports(token) || token.isInstanceOf[DigestAuthenticationToken]
+  }
+
+  override def assertCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) {
+    super.assertCredentialsMatch(token, info)
+  }
+
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val user = token.getPrincipal.toString
     db.findUser(user) match {
@@ -73,14 +82,19 @@ class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
 
   class DynamicHashCredentialsMatcher extends CredentialsMatcher {
     private val fallback = new SimpleCredentialsMatcher()
+    private val digestMatcher = new DigestCredentialsMatcher
 
     def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
-      info match {
-        case ui: UserAuthInfo => {
-          val matcher = ui.algorithm.map(new HashedCredentialsMatcher(_)).getOrElse(fallback)
-          matcher.doCredentialsMatch(token, info)
+      if (token.isInstanceOf[DigestAuthenticationToken]) {
+        digestMatcher.doCredentialsMatch(token, info)
+      } else {
+        info match {
+          case ui: UserAuthInfo => {
+            val matcher = ui.algorithm.map(new HashedCredentialsMatcher(_)).getOrElse(fallback)
+            matcher.doCredentialsMatch(token, info)
+          }
+          case _ => fallback.doCredentialsMatch(token, info)
         }
-        case _ => fallback.doCredentialsMatch(token, info)
       }
     }
   }
