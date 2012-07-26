@@ -19,6 +19,7 @@ package org.eknet.publet.web.filter
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{PubletWebContext, Config, PubletWeb}
 import javax.servlet._
+import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -49,7 +50,7 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     val path = PubletWebContext.applicationPath
-    if (allRedirects.keySet.contains(path.asString)) {
+    if (allRedirects.keySet.contains(path.asString) && !WebdavFilter.isDavRequest) {
       val newUri = allRedirects.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
       resp.sendRedirect(PubletWebContext.urlOf(newUri))

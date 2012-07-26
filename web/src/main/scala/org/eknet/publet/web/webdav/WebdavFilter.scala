@@ -1,14 +1,15 @@
 package org.eknet.publet.web.webdav
 
 import javax.servlet._
-import http.HttpServletRequest
 import org.eknet.publet.web.filter.HttpFilter
-import com.bradmcevoy.http.{Response, Request, AuthenticationService, HttpManager}
-import org.eknet.publet.web.{PubletWebContext, Config, PubletWeb}
+import org.eknet.publet.web.{Method, PubletWebContext, Config, PubletWeb}
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.util.Key
 import org.apache.shiro.authz.UnauthenticatedException
-import com.bradmcevoy.http.http11.auth.BasicAuthHandler
+import io.milton.http.{HttpManager, Response, Request}
+import io.milton.config.HttpManagerBuilder
+import io.milton.servlet.{MiltonServlet, DefaultMiltonConfigurator}
+import java.util
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -16,25 +17,49 @@ import com.bradmcevoy.http.http11.auth.BasicAuthHandler
  */
 class WebdavFilter extends Filter with HttpFilter {
 
-  def init(filterConfig: FilterConfig) {}
-  def destroy() {}
+  private val configurator = new DefaultMiltonConfigurator {
+    override def build() {
+      builder.setEnableFormAuth(false)
+      super.build()
+    }
+  }
+  private var servletContext:ServletContext = null
+  private var httpManager: HttpManager = null
 
-  lazy val httpManager = {
-    import collection.JavaConversions._
-    new HttpManager(new WebdavResourceFactory)
+  def init(filterConfig: FilterConfig) {
+    this.servletContext = filterConfig.getServletContext
+    val config = new io.milton.servlet.Config {
+
+      def initParamNames() = new util.Enumeration[String] {
+        val iter = List("resource.factory.class").iterator
+        def hasMoreElements = iter.hasNext
+        def nextElement() = iter.next()
+      }
+
+      def getServletContext = servletContext
+
+      def getInitParameter(string: String) = if ("resource.factory.class" == string) classOf[WebdavResourceFactory].getName else null
+    }
+    this.httpManager = configurator.configure(config)
+  }
+
+  def destroy() {
+    if (configurator != null)
+      configurator.shutdown()
   }
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     if (WebdavFilter.isDavRequest) {
-      import com.bradmcevoy
-      val request: Request = new bradmcevoy.http.ServletRequest(req, PubletWeb.servletContext)
-      val response: Response = new bradmcevoy.http.ServletResponse(resp)
+      import io.milton
       try {
+        MiltonServlet.setThreadlocals(req, resp)
+        val request: Request = new milton.servlet.ServletRequest(req, servletContext)
+        val response: Response = new milton.servlet.ServletResponse(resp)
         httpManager.process(request, response)
-      }
-      catch {
-        case e:UnauthenticatedException => {
-        }
+      } finally {
+        MiltonServlet.clearThreadlocals()
+        resp.getOutputStream.flush()
+        resp.flushBuffer()
       }
     } else {
       chain.doFilter(req, resp)
@@ -46,7 +71,10 @@ object WebdavFilter {
 
   private val webdavFilterKey = Key(getClass.getName, {
     case org.eknet.publet.web.util.Request => {
-      isDavRequest(PubletWebContext.applicationPath)
+      //for windows clients: they probe the server with an OPTIONS request to the root
+      //thus, we should let this go to milton.
+      isDavRequest(PubletWebContext.applicationUri) ||
+        (PubletWebContext.applicationPath.parent.isRoot && PubletWebContext.getMethod == Method.options)
     }
   })
 
@@ -65,11 +93,11 @@ object WebdavFilter {
    * @param path the request uri path
    * @return
    */
-  def isDavRequest(path: Path): Boolean = {
+  def isDavRequest(path: String): Boolean = {
     if (!Config("webdav.enabled").map(_.toBoolean).getOrElse(true)) {
       false
     } else {
-      getWebdavFilterUrls.exists(url => path.prefixedBy(Path(url)))
+      getWebdavFilterUrls.exists(url => path.startsWith(url))
     }
   }
 

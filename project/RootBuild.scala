@@ -11,6 +11,7 @@ object Version {
   val slf4j = "1.6.4"
   val logback = "1.0.1"
   val servlet = "3.0.1"
+  val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
   val squaremail = "1.0.1"
@@ -22,7 +23,7 @@ object Version {
   val mimeUtil = "2.1.3"
   val orientdb = "1.0.1"
   val blueprints = "2.0.0"
-  val milton = "1.8.0.1"
+  val milton = "2.0.4"
   val ccodec = "1.4"
   val jdom = "1.1"
   val jetty = "8.1.4.v20120524"
@@ -45,12 +46,13 @@ object Dependencies {
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
-  val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive()
+  val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
     "commons-codec" % "commons-codec" % Version.ccodec withSources(),
+    "commons-collections" % "commons-collections" % Version.ccollections withSources(),
     "org.jdom" % "jdom" % Version.jdom
   )
-  val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive()
+  val miltonServlet = "io.milton" % "milton-server" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
   val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()
@@ -103,7 +105,7 @@ object RootBuild extends Build {
     version := "1.0.0-SNAPSHOT",
     organization := "org.eknet.publet",
     scalaVersion := Version.scala,
-    publishTo := Some("eknet-maven2" at "https://eknet.org/maven2"),
+    publishTo := Some("eknet-maven2" at "http://ithaka.local:8081/publet/maven2"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),

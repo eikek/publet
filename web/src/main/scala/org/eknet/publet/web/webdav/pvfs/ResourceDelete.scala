@@ -1,8 +1,8 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import com.bradmcevoy.http.DeletableResource
 import org.eknet.publet.vfs.{Modifyable, Resource}
-import com.bradmcevoy.http.exceptions.BadRequestException
+import io.milton.resource.DeletableResource
+import io.milton.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

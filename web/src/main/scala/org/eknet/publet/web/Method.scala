@@ -27,5 +27,18 @@ object Method extends Enumeration {
   val get = Value("GET")
   val post = Value("POST")
   val delete = Value("DELETE")
+  val propfind = Value("PROPFIND")
+  val proppatch = Value("PROPPATCH")
+  val mkcol = Value("MKCOL")
+  val mkcalendar = Value("MKCALENDAR")
+  val copy = Value("COPY")
+  val move = Value("MOVE")
+  val lock = Value("LOCK")
+  val unlock = Value("UNLOCK")
+  val put = Value("PUT")
+  val trace = Value("TRACE")
+  val acl = Value("ACL")
+  val connect = Value("CONNECT")
+  val report = Value("REPORT")
 
 }

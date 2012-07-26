@@ -18,7 +18,7 @@ package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
-import io.Source
+import scala.io.Source
 import org.eknet.publet.webeditor.EditorPaths
 import org.eknet.publet.web.PubletWebContext
 

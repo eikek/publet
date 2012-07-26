@@ -1,9 +1,9 @@
 package org.eknet.publet.web.webdav.pvfs
 
 import org.eknet.publet.vfs.Container
-import com.bradmcevoy.http.CollectionResource
 import collection.JavaConversions._
 import org.eknet.publet.web.webdav.WebdavResource
+import io.milton.resource.CollectionResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

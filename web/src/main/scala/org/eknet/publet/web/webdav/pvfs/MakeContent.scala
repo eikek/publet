@@ -1,13 +1,12 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import com.bradmcevoy.http.PutableResource
 import org.eknet.publet.vfs.{Writeable, ContentResource, Modifyable, Container}
 import java.io.InputStream
 import java.lang.Long
-import com.bradmcevoy.http.exceptions.BadRequestException
 import org.eknet.publet.web.webdav.WebdavResource
-import javax.management.remote.rmi._RMIConnection_Stub
 import org.eknet.publet.web.shiro.Security
+import io.milton.resource.PutableResource
+import io.milton.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

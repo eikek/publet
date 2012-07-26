@@ -1,9 +1,9 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import com.bradmcevoy.http.{Auth, Request, Resource}
-import com.bradmcevoy.http.Request.Method
+import io.milton.resource.Resource
+import io.milton.http.{Auth, Request}
+import io.milton.http.Request.Method
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.PubletWebContext
 import org.eknet.publet.web.filter.AuthzFilter
 import org.apache.shiro.SecurityUtils
@@ -37,15 +37,18 @@ trait Authorized extends Resource with Logging {
   override def authenticate(user: String, password: String) = {
     Option(SecurityUtils.getSubject.getPrincipal) match {
       case Some(p) => p
-      case None => {
-        SecurityUtils.getSubject.login( new UsernamePasswordToken(user, password) )
-        val p = SecurityUtils.getSubject.getPrincipal
-        if (p == null && AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)) {
-          "anonymous" //must return something in order to allow anonymous access
-        } else {
-          p
-        }
-      }
+      case None => loginBasic(user, password)
     }
   }
+
+  private def loginBasic(user: String, password: String) = {
+    SecurityUtils.getSubject.login( new UsernamePasswordToken(user, password) )
+    val p = SecurityUtils.getSubject.getPrincipal
+    if (p == null && AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)) {
+      "anonymous" //must return something in order to allow anonymous access
+    } else {
+      p
+    }
+  }
+
 }

@@ -1,13 +1,9 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import com.bradmcevoy.http.{PropFindableResource, Auth, Request, Resource}
-import com.bradmcevoy.http.Request.Method
+import io.milton.http.{Auth, Request}
 import java.util
-import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
-import org.apache.shiro.SecurityUtils
-import org.apache.shiro.authc.{CredentialsException, UsernamePasswordToken}
-import org.eknet.publet.web.filter.AuthzFilter
+import org.eknet.publet.web.PubletWeb
+import io.milton.resource.{PropFindableResource, Resource}
 
 /**
  * Implements the milton `Resource` interface based on nothing.

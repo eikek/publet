@@ -1,8 +1,8 @@
 package org.eknet.publet.web.webdav
 
-import com.bradmcevoy.http._
 import org.eknet.publet.vfs
 import vfs.{ContainerResource, ContentResource}
+import io.milton.resource.Resource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

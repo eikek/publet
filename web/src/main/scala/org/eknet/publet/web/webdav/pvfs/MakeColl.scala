@@ -1,9 +1,9 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import com.bradmcevoy.http.MakeCollectionableResource
 import org.eknet.publet.vfs.{Container, Modifyable}
-import org.eknet.publet.web.webdav.{SimpleContainer, WebdavResource}
-import com.bradmcevoy.http.exceptions.BadRequestException
+import org.eknet.publet.web.webdav.SimpleContainer
+import io.milton.resource.MakeCollectionableResource
+import io.milton.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
