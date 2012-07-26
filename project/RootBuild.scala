@@ -103,6 +103,8 @@ object RootBuild extends Build {
     version := "1.0.0-SNAPSHOT",
     organization := "org.eknet.publet",
     scalaVersion := Version.scala,
+    publishTo := Some("eknet-maven2" at "https://eknet.org/maven2"),
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     resolvers := Seq(Resolvers.sonatype, Resolvers.eknet, Resolvers.ettrema),
@@ -110,7 +112,6 @@ object RootBuild extends Build {
       <license>
         <name>Apache 2</name>
         <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        <distribution>repo</distribution>
       </license>
     </licenses>,
 
