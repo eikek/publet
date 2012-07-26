@@ -9,7 +9,7 @@
 # find working dir and cd into it
 cd `dirname $0`/..
 
-JAVA_OPTS="-server -Xmx1024M -Djava.awt.headless=true -jar"
+JAVA_OPTS="-server -Xmx512M -Djava.awt.headless=true -jar"
 java $JAVA_OPTS bin/publet-server.jar --start
 
 cd -
