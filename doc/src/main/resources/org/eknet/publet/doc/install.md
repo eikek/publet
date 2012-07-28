@@ -3,29 +3,42 @@
 Publet is distributed in two flavors:
 
 1. as a war file. Just drop it in the `webapp` directory of some servlet container.
-2. as a "standalone" zip file that has a jetty integrated.
+2. as a "standalone" zip file that has jetty bundled inside.
 
 You can find packaged war/zip files on the [download
-page](https://eknet.org/main/projects/publet/download.html)
+page](https://eknet.org/main/projects/publet/download.html). Alternatively you can
+build those artifacts from sources as described [here](#Building_sources).
 
-## Building sources
+## Running
 
-Java 7 is required and Scala 2.9.1. [sbt](https://github.com/harrah/xsbt) is
-used as build tool. To compile type
+### WAR File
 
-    sbt compile
+The war file only needs to be dropped in a servlet container's webapp
+directory.
 
-and to create a war file type
+### Standalone
 
-    sbt package
+After downloading the zip file unpack it somewhere. Then copy the distributed
+configuration files in `etc` folder to their correct names (and make
+appropriate changes, if needed).
 
-The war is then available in `war/target/scala-2.9.1/sbt-0.11.2/`. To create
-the standalone zip file, type
+    unzip publet-server-<version>.zip
+    cd publet-server-<version>
+    cp etc/server.dist.properties etc/server.properties
+    cp etc/logback.dist.xml etc/logback.xml
 
-    sbt server-dist
+You can now start the server (make sure the port `8080` is available or change
+it in `server.properties`):
 
-The zip file is available afterwards in `server/target`.
+    sh bin/start.dist.sh
 
+Then point your browser to <http://localhost:8080/>. You can stop the server
+by pressing `CTRL+C`.
+
+Files in `etc` and `bin` always have an additional `dist` in their name. The
+idea behind that is that you can copy the files to their correct name and make
+any modifications there. When updating the installation to a new version, your
+changes are not overwritten.
 
 ## Configuration
 
@@ -44,9 +57,7 @@ container. If the context path is not defined, the directory `root` is used.
 The main configuration file `publet.properties` is expected in the root of
 such a directory.
 
-#### Jetty
-
-As an example, when using [Jetty](http://www.eclipse.org/jetty/), on Linux
+As an example, when using [Jetty](http://www.eclipse.org/jetty/) on Linux
 create a file `/etc/default/jetty` and define the environment variable:
 
 <pre>
@@ -82,3 +93,22 @@ You can specify a custom url base in the configuration file:
 
 Make sure, that it does not end with a slash. All links are then prefixed with
 `https://my.server.com`.
+
+## Building sources
+
+Java 7 is required and Scala 2.9.2. [sbt](http://www.scala-sbt.org/) is used
+as build tool. It will download the correct scala version automatically. To
+compile type
+
+    sbt compile
+
+and to create a war file type
+
+    sbt package
+
+The war is then available in `war/target/scala-2.9.1/sbt-0.11.2/`. To create
+the standalone zip file, type
+
+    sbt server-dist
+
+The zip file is available afterwards in `server/target`.

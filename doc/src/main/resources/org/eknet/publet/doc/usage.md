@@ -260,4 +260,5 @@ the client side include could look like this:
 
 Note, that you now need to specify the `html` file if you want to include the
 HTML output. Also, it is obviously not possible to include _hidden resources_
-that way, since a request is necessary to obtain the content.
+(see more on hidden resources in the _Convention_ section) that way, since a
+request is necessary to obtain the content.
