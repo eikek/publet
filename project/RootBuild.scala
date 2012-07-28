@@ -3,19 +3,18 @@ import Keys._
 import Dependencies._
 
 object Resolvers {
-  val sonatype = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
   val eknet = "eknet.org" at "https://eknet.org/maven2"
   val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
 }
 object Version {
   val slf4j = "1.6.4"
-  val logback = "1.0.1"
+  val logback = "1.0.6"
   val servlet = "3.0.1"
   val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
   val squaremail = "1.0.1"
-  val jgit = "1.3.0.201202151440-r"
+  val jgit = "2.0.0.201206130900-r"
   val shiro = "1.2.0"
   val scalaTest = "1.8"
   val grizzled = "0.6.9"
@@ -66,7 +65,7 @@ object Dependencies {
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources()
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
   val servletApiProvided = servletApi % "provided"
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail withSources()
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail 
 }
 
 // Root Module 
@@ -109,7 +108,7 @@ object RootBuild extends Build {
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
-    resolvers := Seq(Resolvers.sonatype, Resolvers.eknet, Resolvers.ettrema),
+    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema),
     pomExtra := <licenses>
       <license>
         <name>Apache 2</name>
