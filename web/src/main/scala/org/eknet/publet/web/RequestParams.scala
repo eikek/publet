@@ -32,9 +32,9 @@ trait RequestParams {
 
   protected def req: HttpServletRequest
 
-  def params = req.getParameterMap.map(t => t._1.asInstanceOf[String] -> t._2.asInstanceOf[Array[String]].toList)
+  def params = req.getParameterMap.map(t => t._1-> t._2.toList)
 
-  def param(name: String) = {
+  def param(name: String): Option[String] = {
     Option(req.getParameter(name)).orElse {
       multipartFormFields.find(_.getFieldName==name).map(_.getString)
     }

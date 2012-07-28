@@ -166,7 +166,7 @@ object Path {
   private val sep = '/'
 
   def apply(str: String): Path = {
-    Predef.ensuring(str.length() > 0)
+    Predef.ensuring(str.length() > 0, "empty paths are not allowed. use Path.root.")
     if (str == "/") root
     else {
       val segs = str.split(sep)

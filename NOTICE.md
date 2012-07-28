@@ -140,6 +140,11 @@ jQuery File Upload Plugin, licensed under the MIT license
 
 <http://blueimp.github.com/jQuery-File-Upload/>
 
+### JavaScript-Load-Image
+
+JavaScript Load Image, licensed under the MIT license
+
+<http://blueimp.github.com/JavaScript-Load-Image/>
 
 ### HighlightJS
 
