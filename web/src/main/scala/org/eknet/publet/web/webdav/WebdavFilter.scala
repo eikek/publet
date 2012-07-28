@@ -3,13 +3,9 @@ package org.eknet.publet.web.webdav
 import javax.servlet._
 import org.eknet.publet.web.filter.HttpFilter
 import org.eknet.publet.web.{Method, PubletWebContext, Config, PubletWeb}
-import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.util.Key
-import org.apache.shiro.authz.UnauthenticatedException
-import io.milton.http.{HttpManager, Response, Request}
-import io.milton.config.HttpManagerBuilder
-import io.milton.servlet.{MiltonServlet, DefaultMiltonConfigurator}
 import java.util
+import com.bradmcevoy.http.{Response, Request, MiltonServlet, HttpManager}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,46 +13,30 @@ import java.util
  */
 class WebdavFilter extends Filter with HttpFilter {
 
-  private val configurator = new DefaultMiltonConfigurator {
-    override def build() {
-      builder.setEnableFormAuth(false)
-      super.build()
-    }
-  }
   private var servletContext:ServletContext = null
   private var httpManager: HttpManager = null
 
   def init(filterConfig: FilterConfig) {
     this.servletContext = filterConfig.getServletContext
-    val config = new io.milton.servlet.Config {
-
-      def initParamNames() = new util.Enumeration[String] {
-        val iter = List("resource.factory.class").iterator
-        def hasMoreElements = iter.hasNext
-        def nextElement() = iter.next()
-      }
-
-      def getServletContext = servletContext
-
-      def getInitParameter(string: String) = if ("resource.factory.class" == string) classOf[WebdavResourceFactory].getName else null
-    }
-    this.httpManager = configurator.configure(config)
+    this.httpManager = new HttpManager(new WebdavResourceFactory)
   }
 
   def destroy() {
-    if (configurator != null)
-      configurator.shutdown()
+    if (httpManager != null) {
+      httpManager.shutdown()
+    }
   }
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     if (WebdavFilter.isDavRequest) {
-      import io.milton
+      import com.bradmcevoy.http
       try {
         MiltonServlet.setThreadlocals(req, resp)
-        val request: Request = new milton.servlet.ServletRequest(req, servletContext)
-        val response: Response = new milton.servlet.ServletResponse(resp)
+        val request: Request = new http.ServletRequest(req, servletContext)
+        val response: Response = new http.ServletResponse(resp)
         httpManager.process(request, response)
       } finally {
+//        http.ServletRequest.clearThreadLocals() <- this is package-private. that's bad ,because that means uncleared thread-locals.
         MiltonServlet.clearThreadlocals()
         resp.getOutputStream.flush()
         resp.flushBuffer()

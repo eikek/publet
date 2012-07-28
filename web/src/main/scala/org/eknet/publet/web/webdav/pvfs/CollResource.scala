@@ -3,7 +3,7 @@ package org.eknet.publet.web.webdav.pvfs
 import org.eknet.publet.vfs.Container
 import collection.JavaConversions._
 import org.eknet.publet.web.webdav.WebdavResource
-import io.milton.resource.CollectionResource
+import com.bradmcevoy.http.CollectionResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

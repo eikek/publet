@@ -1,7 +1,7 @@
 package org.eknet.publet.web.webdav.pvfs
 
 import org.eknet.publet.vfs.ContentResource
-import io.milton.resource.{CollectionResource, CopyableResource, MoveableResource}
+import com.bradmcevoy.http.{CollectionResource, CopyableResource, MoveableResource}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

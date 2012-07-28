@@ -20,11 +20,9 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.{PubletAuth, User, UserProperty}
-import org.apache.shiro.crypto.hash.{DefaultHashService, SimpleHash}
-import org.apache.shiro.authc.credential.DefaultPasswordService
 import org.eknet.publet.vfs.Content
-import io.milton.http.http11.auth.DigestGenerator
 import org.eknet.publet.web.webdav.WebdavFilter
+import com.bradmcevoy.http.http11.auth.DigestGenerator
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

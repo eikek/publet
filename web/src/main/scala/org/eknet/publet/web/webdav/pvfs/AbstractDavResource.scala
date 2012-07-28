@@ -1,10 +1,9 @@
 package org.eknet.publet.web.webdav.pvfs
 
-import io.milton.http.{Auth, Request}
 import java.util
 import org.eknet.publet.web.PubletWeb
-import io.milton.resource.{PropFindableResource, Resource}
 import org.eknet.publet.web.webdav.WebdavFilter
+import com.bradmcevoy.http.{Request, PropFindableResource, Resource}
 
 /**
  * Implements the milton `Resource` interface based on nothing.

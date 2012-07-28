@@ -23,7 +23,7 @@ object Version {
   val mimeUtil = "2.1.3"
   val orientdb = "1.0.1"
   val blueprints = "2.0.0"
-  val milton = "2.0.4"
+  val milton = "1.8.1.3"
   val ccodec = "1.4"
   val jdom = "1.1"
   val jetty = "8.1.4.v20120524"
@@ -39,20 +39,20 @@ object Dependencies {
   val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
   val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() //scala 2.9.1 only
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() //scala 2.9.2 only
   val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
-  val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
+  val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
     "commons-codec" % "commons-codec" % Version.ccodec withSources(),
     "commons-collections" % "commons-collections" % Version.ccollections withSources(),
     "org.jdom" % "jdom" % Version.jdom
   )
-  val miltonServlet = "io.milton" % "milton-server" % Version.milton withSources() intransitive()
+  val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
   val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()

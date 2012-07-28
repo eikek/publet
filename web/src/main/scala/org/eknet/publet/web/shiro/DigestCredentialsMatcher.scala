@@ -18,8 +18,8 @@ package org.eknet.publet.web.shiro
 
 import org.apache.shiro.authc.credential.CredentialsMatcher
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationToken}
-import io.milton.http.http11.auth.{DigestGenerator, DigestResponse}
 import org.eknet.publet.web.PubletWeb
+import com.bradmcevoy.http.http11.auth.{DigestResponse, DigestGenerator}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
