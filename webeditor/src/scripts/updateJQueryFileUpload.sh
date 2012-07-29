@@ -13,7 +13,9 @@ cd /tmp/fupupdate
 echo "Downloading plugin ..."
 wget https://github.com/blueimp/jQuery-File-Upload/zipball/master -O fup.zip
 unzip fup.zip
-
+wget https://raw.github.com/blueimp/JavaScript-Canvas-to-Blob/master/canvas-to-blob.min.js
+wget https://raw.github.com/blueimp/JavaScript-Load-Image/master/load-image.min.js
+wget https://raw.github.com/blueimp/JavaScript-Templates/master/tmpl.min.js
 cd -
 
 FILES_TO_UPDATE=(jquery.fileupload-ui.css \
