@@ -14,7 +14,7 @@ There are two configuration files:
 An optional `settings.properties` can be created in the contentroot repository
 at
 
-    /.allIncludes/settings.properties
+    /.allIncludes/config/settings.properties
 
 This should hold web application specific information. The settings file is
 also honored by the default layout to retrieve default values.
