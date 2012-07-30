@@ -7,7 +7,7 @@ object Resolvers {
   val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
 }
 object Version {
-  val slf4j = "1.6.4"
+  val slf4j = "1.6.5"
   val logback = "1.0.6"
   val servlet = "3.0.1"
   val ccollections = "3.2.1"
@@ -15,8 +15,8 @@ object Version {
   val cio = "2.2"
   val squaremail = "1.0.1"
   val jgit = "2.0.0.201206130900-r"
-  val shiro = "1.2.0"
-  val scalaTest = "1.8"
+  val shiro = "1.2.1"
+  val scalaTest = "2.0.M2"
   val grizzled = "0.6.9"
   val scalate = "1.5.3"
   val mimeUtil = "2.1.3"
@@ -61,11 +61,11 @@ object Dependencies {
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
   val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
+  val servletApiProvided = servletApi % "provided"
   val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources()
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources()
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
-  val servletApiProvided = servletApi % "provided"
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail 
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
 }
 
 // Root Module 
