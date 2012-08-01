@@ -9,7 +9,6 @@ import com.tinkerpop.blueprints.Vertex
  */
 object ExtDb extends OrientDb(OrientDb.newGraph("extdb")) {
 
-
   /**
    * Node where all nodes that represent pages/resources
    * are connected to.

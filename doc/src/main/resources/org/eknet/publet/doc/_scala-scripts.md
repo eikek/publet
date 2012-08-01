@@ -1,9 +1,8 @@
 # Scala Scripts
 
 Besides writing templates and wiki pages, it is also possible to write Scala
-scripts. They are executed on each request and are supposed to act as a
-controller. The code is embedded in the trait `ScalaScript` which is defined
-as:
+scripts. They are executed on each request. The code is embedded in the trait
+`ScalaScript` which is defined as:
 
     trait ScalaScript extends Logging {
 
@@ -12,9 +11,9 @@ as:
     }
 
 There exists some handy methods to create content objects. The
-`renderTemplate()` method can be used to create html by rendering a template.
-The method expects an uri that names the template and an optional map of
-attributes.
+`renderTemplate()` method from the singleton `org.eknet.publet.web.util.RenderUtils`
+can be used to create html by rendering a template. The method expects an uri that
+names the template and an optional map of attributes.
 
 Another quite common scenario is to return JSON, usually when interacting with
 javascript. The method `makeJson()` can be used for that. It will convert a

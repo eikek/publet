@@ -108,9 +108,8 @@ class CaptchaScript extends ScalaScript {
     import ctx._
     val captchaData = createCaptcha()
 
-    val captchaKey = Key(param("captchaParam").getOrElse("captchaString"), {
-      case Session => captchaData._1
-    })
+    val captchaKey = Key[String](param("captchaParam").getOrElse("captchaString"))
+    ctx.sessionMap.put(captchaKey, captchaData._1)
     ctx.attr(captchaKey)
 
     makePng(captchaData._2)

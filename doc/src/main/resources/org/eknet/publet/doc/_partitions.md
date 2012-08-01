@@ -47,9 +47,9 @@ On startup, publet scans the `settings.properties` file for partition
 settings. The settings define what partitions are mounted into the content
 tree. There are two types of partitions available:
 
-1. "fs" = "file system": This creates a plain folder on the
+1. `fs` = file system: This creates a plain folder on the
    server and hooks it into the content tree.
-2. "git" = "git repository": This creates a git repository
+2. `git` = git repository: This creates a git repository
    and a working copy on the server. On each update a commit
    is issued to the bare repository. The repository is also
    available via http.

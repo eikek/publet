@@ -6,7 +6,7 @@ by a WebDAV filter instead of the normal publet filter.
 
 Resources below those configured paths are only available via webdav. Since
 they must be mounted in the content tree, server templates can still access
-them (You can use them in templates, for example create download links those
+them (You can use them in templates, for example create download links to those
 resources; but templates are not processed).
 
 The list must use subsequent numbers, once no filter for a number exists, the
@@ -64,7 +64,7 @@ You can specify different passwords for WebDAV and normal authentication, if
 you like. Please make sure that you use the correct realm name. If you change
 the realm name in `settings.properties` the `digest` value of all user entries
 must be updated accordingly (which can be done by a simple password change as
-described below, login on the web site is still working.).
+described below; login on the web site is still working.).
 
 You can also let publet create the digest for you by performing the _Change password_
 action. The _ext_ extension that is distributed with publet provides a

@@ -21,6 +21,7 @@ import ScalaScript._
 import org.eknet.publet.ext.MailSupport._
 import org.eknet.publet.web.util.RenderUtils._
 import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
+import org.eknet.publet.web.util.Key
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,19 +29,17 @@ import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
  */
 class MailContact extends ScalaScript {
 
-  lazy val formTemplate = "/publet/ext/includes/templates/_contact.jade"
-  lazy val actionUrl = "/publet/ext/scripts/contact.json"
-
   def serve() = {
     val ctx = PubletWebContext
     import ctx._
+    val captchaString = PubletWebContext.attr(Key[String]("captchaString")).get
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
-      renderMessage("Mailer not configured", "Mailer not configured! Sorry, the contact form is not working.", "error")
+      jsonError("Mailer not configured! Sorry, the contact form is not working.")
     } else {
       val appName = PubletWeb.publetSettings("applicationName").map("["+ _ +"] ").getOrElse("")
-      val from = param("from")
-      val msg = param("message")
+      val from = param("from").collect({ case f if (!f.isEmpty) => f})
+      val msg = param("message").collect({ case f if (!f.isEmpty) => f})
       val invisible = param("text").exists(!_.isEmpty)
       if (from.isDefined && msg.isDefined && !invisible) {
         newMail(from.get)
@@ -48,12 +47,13 @@ class MailContact extends ScalaScript {
           .subject(appName+ "Contact Form")
           .text(msg.get)
           .send()
-        makeJson(Map("success"->true, "message"->"Mail successfully sent."))
+        jsonSuccess("Mail successfully sent.")
       } else {
-        renderTemplate(formTemplate, Map[String, Any]("actionUrl"->actionUrl))
+        jsonError("Mailer not configured! Sorry, the contact form is not working.")
       }
     }
   }
 
-
+  def jsonError(msg: String) = makeJson(Map("success"-> false, "message"->msg))
+  def jsonSuccess(msg: String) = makeJson(Map("success"-> true, "message"->msg))
 }
