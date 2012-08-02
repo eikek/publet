@@ -29,8 +29,6 @@ applying a string key, for example:
 
 Note, the settings must be explcitely reloaded after making changes.
 
-In code, the settings can be accessed via the object
-`PubletWeb.publetSettings`.
 
 ### Reference settings file
 
@@ -45,7 +43,11 @@ The location of the configuration file `publet.properties` depends on whether
 you use the war file or the standalone server.
 
 The configuration can be accessed in code using the object
-`org.eknet.publet.web.Config`.
+`org.eknet.publet.web.Config`. This object is also of type `o.e.p.web.util.PropertiesMap`
+(like the settings above) and string values can be accessed by applying a string key
+
+    import org.eknet.publet.web.Config
+    val stringValue: Option[String] = Config("webdav.enabled")
 
 ### War
 

@@ -20,7 +20,7 @@ It contains things that are global to the whole application.
 The `.includes/` directory, on the other hand, may appear in any directory in
 the content tree. The contents of this directory "apply" only to the sibling
 resources and to all resources below, that do not have their own `.includes`.
-What "apply" is determined by the feature in question.
+What "apply" means is determined by the feature in question.
 
 The default layout, for example, scans thoses directories for `.css` (and
 other) files and will include them in each page. Thus "apply" means here, that
