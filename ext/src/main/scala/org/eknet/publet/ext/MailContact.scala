@@ -32,7 +32,6 @@ class MailContact extends ScalaScript {
   def serve() = {
     val ctx = PubletWebContext
     import ctx._
-    val captchaString = PubletWebContext.attr(Key[String]("captchaString")).get
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
       jsonError("Mailer not configured! Sorry, the contact form is not working.")
