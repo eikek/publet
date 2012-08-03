@@ -65,3 +65,34 @@ The file is expected in the `etc` directory.
 A (hopefully) complete `publet.properties` file is shown below.
 
 <div p:ref="publet-cfg.html"></div>
+
+## Logging
+
+[Logback](http://logback.qos.ch/) is used as logging backend. It is configured via a
+`logback.xml` configuration file that is expected next to the `publet.properties` file.
+
+When using standalone server, this file should be in the `etc` directory. When using the
+war file, this file is picked up in the `$PUBLET_DIR/<context-path>`. If no such file is
+found, a default configuration similiar to this is used:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+      </appender>
+
+      <logger name="org" level="INFO"/>
+      <logger name="com" level="WARN"/>
+      <logger name="com.bradmcevoy" level="INFO"/>
+      <logger name="com.ettrema" level="INFO"/>
+
+      <root>
+        <appender-ref ref="STDOUT" />
+      </root>
+
+    </configuration>
