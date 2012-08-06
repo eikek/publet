@@ -34,6 +34,19 @@ trait CounterService {
   def getLastAccess(uriPath: String): Long
 
   /**
+   * Returns all uris sorted by last access time, descending.
+   * @return
+   */
+  def getUrisByAccess: List[(String, Long)]
+
+  /**
+   * Returns all uris sorted by access count, descending.
+   *
+   * @return
+   */
+  def getUrisByCount: List[(String, Long)]
+
+  /**
    * Returns the last time the given uri has been accessed in a standard
    * string format. The time is formatted according to the given locale
    * (or the default locale).
@@ -107,6 +120,32 @@ object CounterService {
           .flatMap(_.headOption)
           .map(_.getProperty(pageLastAccessKey).asInstanceOf[Long])
           .getOrElse(0L)
+      }
+    }
+
+    def getUrisByAccess: List[(String, Long)] = {
+      db.withTx {
+        db.graph.getVertices.filter(v => v.getProperty(pagePathKey) != null).toList.sortWith((v1, v2) => {
+          val l0 = v1.getProperty(pageLastAccessKey).asInstanceOf[Long]
+          val l1 = v2.getProperty(pageLastAccessKey).asInstanceOf[Long]
+          l0.compareTo(l1) > 0
+        }).map(v => (
+          v.getProperty(pagePathKey).asInstanceOf[String],
+          v.getProperty(pageLastAccessKey).asInstanceOf[Long])
+        )
+      }
+    }
+
+    def getUrisByCount: List[(String, Long)] = {
+      db.withTx {
+        db.graph.getVertices.filter(v => v.getProperty(pagePathKey) != null).toList.sortWith((v1, v2) => {
+          val l0 = v1.getProperty(pageCountKey).asInstanceOf[Long]
+          val l1 = v2.getProperty(pageCountKey).asInstanceOf[Long]
+          l0.compareTo(l1) > 0
+        }).map(v => (
+          v.getProperty(pagePathKey).asInstanceOf[String],
+          v.getProperty(pageCountKey).asInstanceOf[Long])
+        )
       }
     }
 
