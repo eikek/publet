@@ -35,8 +35,16 @@ trait Content {
 
   def length: Option[Long] = None
 
-  def copyTo(out: OutputStream) {
-    Content.copy(inputStream, out, true, false)
+  /**
+   * Copies this content to the given output stream. The
+   * `close` parameter indicates whether the output
+   * stream is closed or not at the end. The default
+   * is to close the stream.
+   *
+   * @param out
+   */
+  def copyTo(out: OutputStream, close: Boolean = true) {
+    Content.copy(inputStream, out, closeIn = true, closeOut = close)
   }
 
   def contentAsString = Source.fromInputStream(inputStream).getLines().mkString("\n")
@@ -92,7 +100,7 @@ object Content {
           out.write(buff, 0, len)
         }
       }
-      out.flush();
+      out.flush()
     } finally {
       if (closeOut) out.close()
       if (closeIn) in.close()

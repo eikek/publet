@@ -40,7 +40,7 @@ class AuthzFilter extends Filter with HttpFilter with Logging with PageWriter {
 
       // Webdav filter handles that itself. Initiates BASIC
       // auth challenges on UnauthenticatedException, for example
-      if (!WebdavFilter.isDavRequest) {
+      if (!WebdavFilter.isDavRequest(utils)) {
         AuthzFilter.checkAccessToCurrentResource()
       }
 

@@ -29,6 +29,7 @@ import util.{Request, Key}
  * @since 09.05.12 21:04
  */
 trait RequestParams {
+  this: RequestAttr =>
 
   protected def req: HttpServletRequest
 
@@ -54,7 +55,7 @@ trait RequestParams {
     }
   })
 
-  def multipartFields = PubletWebContext.attr(multipartFieldsKey).get
+  def multipartFields = attr(multipartFieldsKey).get
 
   private def multipartFormFields = multipartFields.filter(_.isFormField)
 }

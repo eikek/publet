@@ -19,9 +19,19 @@ package org.eknet.publet.web.filter
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{PubletWebContext, Config, PubletWeb}
 import javax.servlet._
+import http.{HttpServletRequest, HttpServletRequestWrapper}
 import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
+ * The first filter on the chain. Detects whether the current
+ * request should be redirected or forwarded. On either no more
+ * work is necessary.
+ *
+ * Doing a forward will only hand a modified request to the next
+ * filter in the chain. Thus, this filter needs to be before the
+ * one that sets up the thread; usually it's good to put this filter
+ * as the first one in the chain.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 06:50
  */
@@ -32,7 +42,10 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
   private lazy val defaultRedirects = Map(
     "/" -> (mount + "/"),
     "/index.html" -> (mount +"/index.html"),
-    "/index.htm" -> (mount +"/index.html"),
+    "/index.htm" -> (mount +"/index.html")
+  )
+
+  private val defaultForwards = Map(
     "/robots.txt" -> (mount +"/robots.txt"),
     "/favicon.ico" -> (mount +"/favicon.ico"),
     "/favicon.png" -> (mount +"/favicon.png")
@@ -46,14 +59,28 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
    */
   private def redirects = PubletWeb.publetSettings.keySet.filter(_.startsWith("redirect."))
 
+  /**
+   * Returns a list of property keys from `settings.properties`
+   * for those that start with `forward.`
+   * @return
+   */
+  private def forwards = PubletWeb.publetSettings.keySet.filter(_.startsWith("forward."))
+
   private def allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), PubletWeb.publetSettings(key).get)).toMap
+  private def allForwards = defaultForwards ++ forwards.map(key => (key.substring(8), PubletWeb.publetSettings(key).get)).toMap
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
-    val path = PubletWebContext.applicationPath
-    if (allRedirects.keySet.contains(path.asString) && !WebdavFilter.isDavRequest) {
+    val ru = getRequestUtils(req)
+    val path = ru.applicationPath
+    if (allRedirects.keySet.contains(path.asString) && !WebdavFilter.isDavRequest(ru)) {
       val newUri = allRedirects.get(path.asString).get
+      debug("Redirect "+ path +" to "+ newUri)
+      resp.sendRedirect(ru.urlOf(newUri))
+    } else if (allForwards.keySet.contains(path.asString) && !WebdavFilter.isDavRequest(ru)) {
+      val newUri = allForwards.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
-      resp.sendRedirect(PubletWebContext.urlOf(newUri))
+      val forwardingReq = new ForwardRequest(newUri, req)
+      chain.doFilter(forwardingReq, resp)
     } else {
       chain.doFilter(req, resp)
     }
@@ -62,4 +89,12 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
   def init(filterConfig: FilterConfig) {}
 
   def destroy() {}
+
+}
+private class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
+  import collection.JavaConversions._
+
+  req.getAttributeNames.toList.withFilter(!_.contains("eclipse.jetty")).foreach(key => req.removeAttribute(key))
+
+  override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
 }

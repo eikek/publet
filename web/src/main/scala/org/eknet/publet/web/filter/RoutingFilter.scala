@@ -43,8 +43,8 @@ class RoutingFilter extends Filter with HttpFilter {
    * in the following order
    */
   val mainfilters = List(
-    new WebContextFilter,
     new RedirectFilter,
+    new WebContextFilter,
     new BlacklistFilter,
     new PubletShiroFilter,
     new ExceptionFilter, //must be inside shiro

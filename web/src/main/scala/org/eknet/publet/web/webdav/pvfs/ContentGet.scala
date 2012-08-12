@@ -14,7 +14,7 @@ trait ContentGet extends GetableResource {
   this: DelegateResource[ContentResource] =>
 
   def sendContent(out: OutputStream, range: http.Range, params: util.Map[String, String], contentType: String) {
-    resource.copyTo(out)
+    resource.copyTo(out, close = true)
   }
 
   def getMaxAgeSeconds(auth: Auth) = null

@@ -25,7 +25,7 @@ import java.util.Locale
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:35
  */
-object PubletWebContext extends RequestParams with RequestUrl with RepositoryNameResolver {
+object PubletWebContext extends RequestAttr with RequestParams with RequestUrl with RepositoryNameResolver {
 
   private case class Cycle(req: HttpServletRequest, res: HttpServletResponse)
   private val threadCycle = new ThreadLocal[Cycle]
@@ -45,18 +45,6 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
   protected def res = cycle.res
 
 
-  def sessionMap = AttributeMap(req.getSession)
-  def requestMap = AttributeMap(req)
-  def contextMap = PubletWeb.contextMap
-
-  def attr[T: Manifest](key: Key[T]) = {
-    requestMap.get(key).orElse {
-      sessionMap.get(key).orElse {
-        contextMap.get(key)
-      }
-    }
-  }
-
   def redirect(uri: String) {
     res.sendRedirect(uri)
   }
@@ -70,14 +58,6 @@ object PubletWebContext extends RequestParams with RequestUrl with RepositoryNam
     val uri = applicationUri + (if (p.isEmpty) "" else "?"+p)
     redirect(urlOf(PubletWeb.getLoginPath)+"?redirect="+ urlOf(uri))
   }
-
-  /**
-   * Returns the http request method.
-   * @return
-   */
-  def getMethod: Method.Value = Method.withName(req.getMethod.toUpperCase(Locale.ROOT))
-
-  def getLocale = req.getLocale
 
   def getClientInfo = attr(clientInfoKey).get
   private val clientInfoKey = Key("clientInfo", {

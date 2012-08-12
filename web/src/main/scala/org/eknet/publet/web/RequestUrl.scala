@@ -27,6 +27,7 @@ import grizzled.slf4j.Logging
  * @since 09.05.12 21:03
  */
 trait RequestUrl extends Logging {
+  this: RequestAttr =>
 
   protected def req: HttpServletRequest
 
@@ -57,7 +58,7 @@ trait RequestUrl extends Logging {
    * with a `/` character
    * @return
    */
-  def urlBase = PubletWebContext.attr(urlBaseKey).get
+  def urlBase = attr(urlBaseKey).get
 
   private val applicationUriKey: Key[String] = Key("applicationUri", {
     case Request => {
@@ -69,7 +70,7 @@ trait RequestUrl extends Logging {
 
   /** The part of the uri after the context path. If it is a directory,
    * the standard `index.html` is appended. */
-  def applicationUri = PubletWebContext.attr(applicationUriKey).get
+  def applicationUri = attr(applicationUriKey).get
   /** The part of the uri after the context path. */
   def applicationPath = Path(applicationUri)
 
@@ -83,7 +84,7 @@ trait RequestUrl extends Logging {
   })
 
   /** The full uri to this request. With parameters, without contextPath */
-  def fullUrl = PubletWebContext.attr(fullUrlKey).get
+  def fullUrl = attr(fullUrlKey).get
 
   def isGitRequest = applicationUri.startsWith("/"+Config.gitMount+"/")
 
@@ -120,7 +121,7 @@ trait RequestUrl extends Logging {
    * is pointing to.
    * @return
    */
-  def resourcePath = PubletWebContext.attr(resourceUri).get
+  def resourcePath = attr(resourceUri).get
 
   def getResourceUri = resourcePath.map(_.asString).getOrElse("")
 }

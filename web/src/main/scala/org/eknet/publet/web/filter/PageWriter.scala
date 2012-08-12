@@ -98,7 +98,7 @@ trait PageWriter extends Logging {
       }
       case Some(p) => {
         resp.setContentType(p.contentType.mimeString)
-        p.copyTo(out)
+        p.copyTo(out, close = true)
       }
     }
   }

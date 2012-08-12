@@ -1,11 +1,12 @@
 package org.eknet.publet.web.webdav
 
 import javax.servlet._
-import org.eknet.publet.web.filter.HttpFilter
-import org.eknet.publet.web.{Method, PubletWebContext, Config, PubletWeb}
+import org.eknet.publet.web._
+import filter.{HttpFilter, ReqUtils}
 import org.eknet.publet.web.util.Key
-import java.util
 import com.bradmcevoy.http.{Response, Request, MiltonServlet, HttpManager}
+import scala.Some
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,7 +29,8 @@ class WebdavFilter extends Filter with HttpFilter {
   }
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
-    if (WebdavFilter.isDavRequest) {
+    val ru = getRequestUtils(req)
+    if (WebdavFilter.isDavRequest(ru)) {
       import com.bradmcevoy.http
       try {
         MiltonServlet.setThreadlocals(req, resp)
@@ -49,22 +51,24 @@ class WebdavFilter extends Filter with HttpFilter {
 
 object WebdavFilter {
 
-  private val webdavFilterKey = Key(getClass.getName, {
-    case org.eknet.publet.web.util.Request => {
-      //for windows clients: they probe the server with an OPTIONS request to the root
-      //thus, we should let this go to milton.
-      isDavRequest(PubletWebContext.applicationUri) ||
-        (PubletWebContext.applicationPath.parent.isRoot && PubletWebContext.getMethod == Method.options)
-    }
-  })
+  private def createIsWebdavRequestKey(ru: ReqUtils) = {
+    Key(getClass.getName, {
+      case org.eknet.publet.web.util.Request => {
+        //for windows clients: they probe the server with an OPTIONS request to the root
+        //thus, we should let this go to milton.
+        isDavRequest(ru.applicationUri) || (ru.applicationPath.isRoot && ru.getMethod == Method.options)
+      }
+    })
+  }
 
   /**
    * Returns whether the current request is handled by the webdav filter
    *
    * @return
    */
-  def isDavRequest:Boolean = PubletWebContext.attr(webdavFilterKey).get
-
+  def isDavRequest(ru: ReqUtils):Boolean = {
+    ru.attr(createIsWebdavRequestKey(ru)).get
+  }
 
   /**
    * Returns whether the request is pointing to a resource that
@@ -73,7 +77,7 @@ object WebdavFilter {
    * @param path the request uri path
    * @return
    */
-  def isDavRequest(path: String): Boolean = {
+  private def isDavRequest(path: String): Boolean = {
     if (!Config("webdav.enabled").map(_.toBoolean).getOrElse(true)) {
       false
     } else {
@@ -83,25 +87,22 @@ object WebdavFilter {
 
   /**
    * Returns all configured url prefixes that are handled by the
-   * webdav filter. The list is cached in the current session and
-   * re-fetched if missing.
+   * webdav filter.
    *
    * @return
    */
-  def getWebdavFilterUrls = PubletWebContext.attr(Key("webdavFilterUrls", {
-    case org.eknet.publet.web.util.Session => {
-      def recurseFind(num: Int): List[String] = {
-        val key = "webdav.filter."+num
-        PubletWeb.publetSettings(key) match {
-          case Some(filter) => {
-            filter :: recurseFind(num +1)
-          }
-          case None => Nil
+  private def getWebdavFilterUrls = {
+    def recurseFind(num: Int): List[String] = {
+      val key = "webdav.filter."+num
+      PubletWeb.publetSettings(key) match {
+        case Some(filter) => {
+          filter :: recurseFind(num +1)
         }
+        case None => Nil
       }
-      recurseFind(0)
     }
-  })).get
+    recurseFind(0)
+  }
 
   /**
    * Returns the realm name that is used for WebDAV. This is

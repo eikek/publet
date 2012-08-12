@@ -28,7 +28,7 @@ import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
  * @since 09.05.12 22:30
  */
 trait RepositoryNameResolver {
-  this: RequestUrl =>
+  this: RequestUrl with RequestAttr =>
 
   private val gitRepositoryNameKey = Key("gitRepositoryName", {
     case Request => {
@@ -40,7 +40,7 @@ trait RepositoryNameResolver {
    * The name of the repository the current request points to.
    * @return
    */
-  def getRepositoryName = PubletWebContext.attr(gitRepositoryNameKey).get
+  def getRepositoryName = attr(gitRepositoryNameKey).get
 
   private val repositoryModelKey = Key("requestRepositoryModel", {
     case Request => getRepositoryName.map { name =>
@@ -55,7 +55,7 @@ trait RepositoryNameResolver {
    *
    * @return
    */
-  def getRepositoryModel = PubletWebContext.attr(repositoryModelKey).get
+  def getRepositoryModel = attr(repositoryModelKey).get
 
   private val gitActionKey = Key("gitrequestAction", {
     case Request => {
@@ -74,7 +74,7 @@ trait RepositoryNameResolver {
    *
    * @return
    */
-  def getGitAction: Option[GitAction.Value] = PubletWebContext.attr(gitActionKey).get
+  def getGitAction: Option[GitAction.Value] = attr(gitActionKey).get
 
   private lazy val containerRequestUriKey = Key("containerRequestUri", {
     case Request => {
@@ -89,7 +89,7 @@ trait RepositoryNameResolver {
    *
    * @return
    */
-  def containerRequestUri = PubletWebContext.attr(containerRequestUriKey).get
+  def containerRequestUri = attr(containerRequestUriKey).get
 
 }
 

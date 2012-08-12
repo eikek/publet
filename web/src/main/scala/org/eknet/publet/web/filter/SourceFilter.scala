@@ -36,7 +36,7 @@ class SourceFilter extends Filter with HttpFilter with PageWriter {
       .collect({case c:ContentResource=>c}) match {
         case Some(c) => {
           response.setContentType(c.contentType.mimeString)
-          c.copyTo(response.getOutputStream)
+          c.copyTo(response.getOutputStream, close = true)
         }
         case _=> {
           if (!PubletWebContext.isGitRequest && path.name.targetType == ContentType.unknown) {

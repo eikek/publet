@@ -41,8 +41,8 @@ abstract class ScriptResource(val name: ResourceName, val script: ScalaScript) e
 
   val exists = true
 
-  override def copyTo(out: OutputStream) {
-    evaluate.copyTo(out)
+  override def copyTo(out: OutputStream, close: Boolean = true) {
+    evaluate.copyTo(out, close)
   }
 
   override def contentAsString = evaluate.contentAsString

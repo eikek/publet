@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web.filter
 
-import org.eknet.publet.web.{RepositoryNameResolver, RequestParams, RequestUrl}
+import org.eknet.publet.web.{RequestAttr, RepositoryNameResolver, RequestParams, RequestUrl}
 import javax.servlet.{ServletResponse, ServletRequest}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
@@ -26,10 +26,10 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
  */
 trait HttpFilter {
 
-  class ReqUtils(val req: HttpServletRequest) extends RequestUrl with RequestParams with RepositoryNameResolver
-
   def getRequestUtils(req:HttpServletRequest) = new ReqUtils(req)
 
   implicit def toHttpReq(request: ServletRequest) = request.asInstanceOf[HttpServletRequest]
   implicit def toHttpRes(res: ServletResponse) = res.asInstanceOf[HttpServletResponse]
 }
+
+class ReqUtils(val req: HttpServletRequest) extends RequestAttr with RequestUrl with RequestParams with RepositoryNameResolver

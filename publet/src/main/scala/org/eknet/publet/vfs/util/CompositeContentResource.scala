@@ -36,8 +36,8 @@ class CompositeContentResource(resource: Resource, content: Content) extends Con
   override def lastModification = content.lastModification
   override def length = content.length
 
-  override def copyTo(out: OutputStream) {
-    content.copyTo(out)
+  override def copyTo(out: OutputStream, close: Boolean = true) {
+    content.copyTo(out, close)
   }
 
   override def contentAsString = content.contentAsString

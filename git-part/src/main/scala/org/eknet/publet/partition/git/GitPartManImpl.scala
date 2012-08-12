@@ -80,7 +80,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     for (t <- init) {
       val file = t._1.segments.foldLeft(ws.getWorkTree)((file, seg) => new File(file, seg))
       if (!file.getParentFile.exists()) file.getParentFile.mkdirs()
-      t._2.copyTo(new FileOutputStream(file))
+      t._2.copyTo(new FileOutputStream(file), close = true)
 
       val pattern = t._1.segments.mkString(File.separator)
       git.add().addFilepattern(pattern).setUpdate(false).call()
