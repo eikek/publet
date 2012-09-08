@@ -14,7 +14,7 @@
         <file>log/publet.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>photozone.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>log/publet.%d{yyyy-MM-dd}.log</fileNamePattern>
 
             <!-- keep 14 days' worth of history -->
             <maxHistory>14</maxHistory>
