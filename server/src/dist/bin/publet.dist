@@ -5,11 +5,24 @@
 # tested on debian, but should work on other platforms
 #
 
+# LSB tags for Debian
+### BEGIN INIT INFO
+# Provides:             publet
+# Required-Start:       $networking $syslog
+# Required-Stop:        $networking $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:
+# Short-Description:    Publet Webapp
+### END INIT INFO
+
 # configure the publet working dir
 PUBLET_DIR=/opt/publet
 # the user used to run the server
 PUBLET_USER=www-data
 
+# set the locale
+#export LC_ALL=en_US.UTF-8
+#export LAN=
 
 # ---------------------------------------
 
