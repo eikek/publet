@@ -88,6 +88,17 @@ trait ServerConfig {
    * @return
    */
   def contextPath: String
+
+  /**
+   * The working directory for the server instance. Defaults to
+   * the current working directory. This directory is expected
+   * to contain the `etc` and `webapp` directory and is also
+   * used to save log files and other data.
+   *
+   * @return
+   */
+  def workingDirectory: String
+
 }
 
 object ServerConfig {
@@ -100,6 +111,7 @@ object ServerConfig {
   val propertyBindAddress = "publet.server.bindAddress"
   val propertySslBindAddress = "publet.server.secureBindAddress"
   val propertyContextPath = "publet.server.contextPath"
+  val propertyWorkingDirectory = "publet.server.workingDirectory"
 }
 
 class DefaultConfig extends ServerConfig {
@@ -112,6 +124,7 @@ class DefaultConfig extends ServerConfig {
   def sslBindAddress:Option[String] = None
   def bindAddress:Option[String] = None
   def contextPath = "/"
+  def workingDirectory = ""
 }
 
 /**
@@ -133,6 +146,7 @@ trait SyspropConfig extends ServerConfig {
   abstract override def sslBindAddress = sysprop(propertySslBindAddress) orElse (super.sslBindAddress)
   abstract override def bindAddress = sysprop(propertyBindAddress) orElse (super.bindAddress)
   abstract override def contextPath = sysprop(propertyContextPath) getOrElse(super.contextPath)
+  abstract override def workingDirectory = sysprop(propertyWorkingDirectory) getOrElse(super.workingDirectory)
 
   private def sysprop(name: String): Option[String] = Option(System.getProperty(name))
   private def syspropInt(name: String): Option[Int] = sysprop(name).map(_.toInt)
@@ -161,4 +175,5 @@ trait PropertiesConfig extends ServerConfig {
   abstract override def sslBindAddress = property(propertySslBindAddress) orElse (super.sslBindAddress)
   abstract override def bindAddress = property(propertyBindAddress) orElse (super.bindAddress)
   abstract override def contextPath = property(propertyContextPath) getOrElse(super.contextPath)
+  abstract override def workingDirectory = property(propertyWorkingDirectory) getOrElse(super.workingDirectory)
 }

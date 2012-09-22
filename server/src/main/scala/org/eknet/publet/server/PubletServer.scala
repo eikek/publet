@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.ajp.Ajp13SocketConnector
+import FileHelper._
 
 /**
  * Works for the following directory structure
@@ -40,11 +41,11 @@ import org.eclipse.jetty.ajp.Ajp13SocketConnector
  */
 class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer {
 
-  val tempDir = new File(new File("temp"), "jetty")
+  val tempDir = file("temp" / "jetty")
   if (!tempDir.exists()) tempDir.mkdirs()
 
   //configure logging
-  new File(new File("etc"), "logback.xml") match {
+  file("etc" / "logback.xml") match {
     case f if (f.exists()) => {
       configureLogging(f)
       info("Configured logging from file: "+ f)
@@ -52,7 +53,7 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
     case _ =>
   }
 
-  System.setProperty("publet.dir", "var")
+  System.setProperty("publet.dir", file("var").getAbsolutePath)
   System.setProperty("publet.standalone", "true")
 
   val server = new Server
@@ -72,14 +73,22 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   val webapp = new WebAppContext
   webapp setContextPath (config.contextPath)
   webapp.setServer(server)
-  webapp.setTempDirectory(new File(new File("temp"), "jetty"))
-  webapp setWar("webapp")
-  entries(new File("plugins"), f => f !=null && f.isFile).map(_.getAbsolutePath) match {
+  webapp.setTempDirectory(file("temp" / "jetty"))
+  webapp setWar(file("webapp").getAbsolutePath)
+  entries(file("plugins"), f => f !=null && f.isFile).map(_.getAbsolutePath) match {
     case list if (!list.isEmpty) => webapp.setExtraClasspath(list.mkString(";"))
     case _ =>
   }
-
   server.setHandler(webapp)
+
+  val varDir = file("var")
+  if (!varDir.exists) {
+    if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
+  }
+  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + new File("").getAbsolutePath)
+  val etc = file("etc")
+  etc.ensuring(f => f.exists() && f.isDirectory, "Cannot find `etc` directory: "+ etc)
+  new File("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
 
   def start() {
     info(">>> Starting server ...")
@@ -146,4 +155,7 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
     case null => Array[File]()
     case o@_ => o
   }
+
+  private def file(path: FileHelper): File = (config.workingDirectory / path).asFile
+
 }

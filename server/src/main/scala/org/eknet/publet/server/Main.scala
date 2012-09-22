@@ -27,12 +27,11 @@ import java.util
  */
 object Main extends App with Logging {
 
-  val etc = new File("etc")
-
   lazy val config = new DefaultConfig with PropertiesConfig with SyspropConfig {
     val props = new util.Properties
+    import FileHelper._
 
-    new File(etc, "server.properties") match {
+    (workingDirectory / "etc" / "server.properties").asFile match {
       case f if (f.exists()) => props.load(new FileInputStream(f))
       case _ =>
     }
@@ -45,14 +44,6 @@ object Main extends App with Logging {
 
 
   def startup() {
-    val varDir = new File("var")
-    if (!varDir.exists) {
-      if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
-    }
-    varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + new File("").getAbsolutePath)
-    etc.ensuring(f => f.exists() && f.isDirectory, "Cannot find `etc` directory: "+ etc)
-    new File("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
-
     val service = new PubletServer(config)
     val monitor = new ShutdownMonitor(service, config.shutdownPort)
     monitor.start()
