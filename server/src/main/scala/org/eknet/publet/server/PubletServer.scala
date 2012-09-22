@@ -85,10 +85,8 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   if (!varDir.exists) {
     if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
   }
-  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + new File("").getAbsolutePath)
-  val etc = file("etc")
-  etc.ensuring(f => f.exists() && f.isDirectory, "Cannot find `etc` directory: "+ etc)
-  new File("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
+  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + varDir.getAbsolutePath)
+  file("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
 
   def start() {
     info(">>> Starting server ...")
@@ -115,7 +113,7 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   def createSslConnector(port: Int, keystorePath: String, password: String): Connector = {
     info(">>> Creating ssl connector for port "+ port + "; keystore="+keystorePath+"; bind="+config.sslBindAddress)
     val fac = new SslContextFactory
-    val etcStore = new File(new File("etc"), "keystore.ks")
+    val etcStore = file("etc"/"keystore.ks")
     if (keystorePath.isEmpty) {
       fac.setKeyStorePath(etcStore.getAbsolutePath)
       if (!etcStore.exists()) {
