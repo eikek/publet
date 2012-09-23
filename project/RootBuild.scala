@@ -25,7 +25,7 @@ object Version {
   val milton = "1.8.1.3"
   val ccodec = "1.4"
   val jdom = "1.1"
-  val jetty = "8.1.4.v20120524"
+  val jetty = "8.1.7.v20120910"
   val bouncyCastle = "1.46"
   val scala = "2.9.2"
 }
