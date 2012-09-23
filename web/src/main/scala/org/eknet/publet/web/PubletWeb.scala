@@ -109,13 +109,13 @@ object PubletWeb extends Logging {
 
   def servletContext = servletContextI
   def contextMap = contextMapI
-  lazy val publet = contextMap(publetKey).get
-  lazy val scalateEngine = contextMap(scalateEngineKey).get
-  lazy val gitr: GitrMan = contextMap(gitrKey).get
-  lazy val gitpartman: GitPartMan = contextMap(gitPartKey).get
-  lazy val contentRoot = contextMap(contentRootKey).get
-  lazy val authManager = contextMap(authManagerKey).get
-  lazy val publetSettings = new PropertiesMap {
+  def publet = contextMap(publetKey).get
+  def scalateEngine = contextMap(scalateEngineKey).get
+  def gitr: GitrMan = contextMap(gitrKey).get
+  def gitpartman: GitPartMan = contextMap(gitPartKey).get
+  def contentRoot = contextMap(contentRootKey).get
+  def authManager = contextMap(authManagerKey).get
+  def publetSettings = new PropertiesMap {
     reload()
     override def file = contentRoot.lookup(Path(Publet.allIncludes+"config/settings.properties"))
       .collect({case cc: ContentResource => cc})
@@ -130,7 +130,7 @@ object PubletWeb extends Logging {
    */
   def getLoginPath = publetSettings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
-  lazy val notFoundHandlerKey = Key("notFoundHandler", {
+  def notFoundHandlerKey = Key("notFoundHandler", {
     case Context => new NotFoundHandler with PageWriter {
       def resourceNotFound(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
         writeError(HttpServletResponse.SC_NOT_FOUND, req, resp)
