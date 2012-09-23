@@ -95,7 +95,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
 
   private lazy val initialResources = {
     val index =
-      """# Welcome
+      """<div class="page-header"><h1>Welcome</h1></div>
         | <div class="alert alert-success">Publet installation was successful!</div>
         | Publet has been succesfully installed. You're viewing its sample page
         | right now. Please have a look at the [user guide](../publet/doc/index.html) to get started.
@@ -120,8 +120,8 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |    - if (Security.isAuthenticated)
         |      li
         |        .btn-group
-        |          a.btn.btn-inverse.dropdown-toggle(data-toggle="dropdown" href="#")
-        |            i.icon-user.icon-white
+        |          a.btn.dropdown-toggle(data-toggle="dropdown" href="#")
+        |            i.icon-user
         |            =Security.username
         |            span.caret
         |          ul.dropdown-menu
@@ -132,7 +132,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |    - if (!Security.isAuthenticated)
         |      li
         |        a(href={ loginUrl })
-        |          i.icon-user.icon-white
+        |          i.icon-user
         |          | Login
       """.stripMargin
     Map(
