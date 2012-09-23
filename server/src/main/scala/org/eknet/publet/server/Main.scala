@@ -20,8 +20,17 @@ import grizzled.slf4j.Logging
 import java.net.{InetAddress, Socket}
 import java.io.{FileInputStream, File}
 import java.util
+import FileHelper._
 
 /**
+ * Works for the following directory structure
+ * {{{
+ *   /etc - configuration files
+ *   /bin - start/stop scripts and the publet-server.jar
+ *   /var - data directory
+ *   /webapp - the war file
+ * }}}
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 01.07.12 01:30
  */
@@ -29,7 +38,6 @@ object Main extends App with Logging {
 
   lazy val config = new DefaultConfig with PropertiesConfig with SyspropConfig {
     val props = new util.Properties
-    import FileHelper._
 
     (workingDirectory / "etc" / "server.properties").asFile match {
       case f if (f.exists()) => props.load(new FileInputStream(f))
@@ -44,7 +52,7 @@ object Main extends App with Logging {
 
 
   def startup() {
-    val service = new PubletServer(config)
+    val service = new PubletServer(config, ZipFileConfigurer)
     val monitor = new ShutdownMonitor(service, config.shutdownPort)
     monitor.start()
     service.start()

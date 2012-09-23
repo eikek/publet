@@ -95,7 +95,7 @@ object Config extends PropertiesMap with Logging {
 
   private lazy val tempRoot = {
     val dir = if (System.getProperty("publet.standalone") != null) {
-      new File("temp")
+      new File(rootDirectory.getParentFile, "temp")
     } else {
       new File(directory, "temp")
     }

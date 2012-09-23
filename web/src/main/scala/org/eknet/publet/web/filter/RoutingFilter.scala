@@ -55,8 +55,8 @@ class RoutingFilter extends Filter with HttpFilter {
   )
 
   // the two main filters executed at the end
-  val publetFilter = new PubletFilter
-  val gitFilter = new GitHttpFilter(PubletWeb.gitr)
+  private var publetFilter: PubletFilter = null
+  private var gitFilter: GitHttpFilter = null
 
   class MyFilterChain(filters: List[Filter], chain:FilterChain) extends FilterChain {
 
@@ -77,6 +77,8 @@ class RoutingFilter extends Filter with HttpFilter {
   }
 
   def init(filterConfig: FilterConfig) {
+    this.publetFilter = new PubletFilter
+    this.gitFilter = new GitHttpFilter(PubletWeb.gitr)
     (publetFilter :: gitFilter :: mainfilters) foreach (_.init(filterConfig))
   }
 

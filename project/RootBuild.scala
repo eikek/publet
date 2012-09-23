@@ -357,7 +357,7 @@ object Server extends Build {
     id = "server",
     base = file("server"),
     settings = buildProperties
-  )
+  ) dependsOn (War.module)
 
   val buildProperties = Project.defaultSettings ++ assemblySettings ++ Seq[Project.Setting[_]](
     name := "publet-server",

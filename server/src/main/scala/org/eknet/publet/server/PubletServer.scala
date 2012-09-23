@@ -26,23 +26,14 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.ajp.Ajp13SocketConnector
 import FileHelper._
+import org.eknet.publet.web.Config
+import org.eknet.publet.war.LoggingConfigurer
 
 /**
- * Works for the following directory structure
- * {{{
- *   /etc - configuration files
- *   /bin - start/stop scripts and the publet-server.jar
- *   /var - data directory
- *   /webapp - the war file
- * }}}
- *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.06.12 21:19
  */
-class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer {
-
-  val tempDir = file("temp" / "jetty")
-  if (!tempDir.exists()) tempDir.mkdirs()
+class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Logging with LoggingConfigurer {
 
   //configure logging
   file("etc" / "logback.xml") match {
@@ -50,14 +41,26 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
       configureLogging(f)
       info("Configured logging from file: "+ f)
     }
-    case _ =>
+    case _ => file("logback.xml") match {
+      case f if (f.exists()) => {
+        configureLogging(f)
+        info("Configured logging from file: "+ f)
+      }
+      case _ =>
+    }
   }
 
+  val varDir = file("var")
+  if (!varDir.exists) {
+    if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
+  }
+  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + varDir.getAbsolutePath)
+
+  //properties to properly init the Config object
   System.setProperty("publet.dir", file("var").getAbsolutePath)
   System.setProperty("publet.standalone", "true")
 
   val server = new Server
-
   server setGracefulShutdown (8000)
   server setSendServerVersion false
   server setSendDateHeader true
@@ -70,23 +73,8 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
   })
   config.ajpPort map (port => server.addConnector(createAjpConnector(port)))
 
-  val webapp = new WebAppContext
-  webapp setContextPath (config.contextPath)
-  webapp.setServer(server)
-  webapp.setTempDirectory(file("temp" / "jetty"))
-  webapp setWar(file("webapp").getAbsolutePath)
-  entries(file("plugins"), f => f !=null && f.isFile).map(_.getAbsolutePath) match {
-    case list if (!list.isEmpty) => webapp.setExtraClasspath(list.mkString(";"))
-    case _ =>
-  }
-  server.setHandler(webapp)
-
-  val varDir = file("var")
-  if (!varDir.exists) {
-    if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
-  }
-  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + varDir.getAbsolutePath)
-  file("webapp").ensuring(f => f.exists && f.isDirectory, "Cannot find `webapp` directory")
+  //configure the webapp
+  setter.configure(server, config)
 
   def start() {
     info(">>> Starting server ...")
@@ -143,16 +131,6 @@ class PubletServer(config: ServerConfig) extends Logging with LoggingConfigurer 
     conn
   }
 
-
-  implicit def fun2Filter(f:File => Boolean): FileFilter = new FileFilter {
-    def accept(pathname: File) = f(pathname)
-  }
-
-  def entries(f: File, filter:File=>Boolean):List[File] = f :: (if (f.isDirectory) listFiles(f, filter).toList.flatMap(entries(_, filter)) else Nil)
-  private def listFiles(f:File, filter:File=>Boolean): Array[File] = f.listFiles(filter) match {
-    case null => Array[File]()
-    case o@_ => o
-  }
 
   private def file(path: FileHelper): File = (config.workingDirectory / path).asFile
 

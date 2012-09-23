@@ -32,7 +32,7 @@ import grizzled.slf4j.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 10.05.12 13:01
  */
-class PubletContextListener extends ServletContextListener with Logging {
+class PubletContextListener extends ServletContextListener with Logging with LoggingConfigurer {
 
   def contextInitialized(sce: ServletContextEvent) {
     info("""
@@ -58,22 +58,15 @@ class PubletContextListener extends ServletContextListener with Logging {
     PubletWeb.destroy(sce.getServletContext)
   }
 
+  /**
+   * Initializes logging from a "logback.xml" file in the directory
+   * which is configured for publet. In standalone-mode this file
+   * does not exist and the logging has already been initialised.
+   *
+   */
   private def initLogging() {
     var logfile = Config.getFile("logback.xml")
     if (!logfile.exists()) logfile = new File(Config.rootDirectory, "logback.xml")
-    if (logfile.exists()) {
-      println("Configuring logging...")
-      val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-      try {
-        val configurer = new JoranConfigurator
-        configurer.setContext(context)
-
-        context.reset()
-        configurer.doConfigure(logfile)
-      } catch {
-        case e: JoranException =>
-      }
-      StatusPrinter.printInCaseOfErrorsOrWarnings(context)
-    }
+    configureLogging(logfile)
   }
 }

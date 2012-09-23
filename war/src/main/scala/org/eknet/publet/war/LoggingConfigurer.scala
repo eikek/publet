@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.server
+package org.eknet.publet.war
 
 import java.io.File
 import org.slf4j.LoggerFactory
