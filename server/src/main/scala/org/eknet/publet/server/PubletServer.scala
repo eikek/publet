@@ -77,9 +77,13 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
   setter.configure(server, config)
 
   def start() {
+    startInBackground()
+    server.join()
+  }
+
+  def startInBackground() {
     info(">>> Starting server ...")
     server.start()
-    server.join()
   }
 
   def stop() {
