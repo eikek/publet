@@ -26,8 +26,6 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.ajp.Ajp13SocketConnector
 import FileHelper._
-import org.eknet.publet.web.Config
-import org.eknet.publet.war.LoggingConfigurer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

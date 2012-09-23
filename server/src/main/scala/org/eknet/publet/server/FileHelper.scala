@@ -22,7 +22,7 @@ import java.io.File
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.09.12 19:06
  */
-private[server] class FileHelper(val path: String) {
+class FileHelper(val path: String) {
 
   def asFile = new File(path)
 
@@ -31,7 +31,7 @@ private[server] class FileHelper(val path: String) {
 
 }
 
-private[server] object FileHelper {
+object FileHelper {
 
   implicit def string2Helper(s: String): FileHelper = new FileHelper(s)
   implicit def helper2String(fh: FileHelper): String = fh.path

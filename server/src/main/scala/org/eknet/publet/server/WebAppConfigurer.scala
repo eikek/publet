@@ -18,17 +18,8 @@ package org.eknet.publet.server
 
 import org.eclipse.jetty.webapp.WebAppContext
 import java.io.{FileFilter, File}
-import org.eclipse.jetty.server.session.{SessionHandler, HashSessionManager}
+import org.eclipse.jetty.server.session.HashSessionManager
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletHolder, ServletContextHandler}
-import org.eknet.publet.web.filter.RoutingFilter
-import java.util
-import javax.servlet.DispatcherType
-import org.eknet.publet.war.PubletContextListener
-import org.eclipse.jetty.server.handler.ContextHandlerCollection
-import javax.servlet.http.HttpServlet
-import org.eknet.publet.web.Config
-import org.eclipse.jetty.util.resource.Resource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -62,7 +53,7 @@ object ZipFileConfigurer extends WebAppConfigurer {
     val webapp = new WebAppContext
     webapp.setServer(server)
     webapp setContextPath (config.contextPath)
-    val tempdir = Config.newTempDir("jetty")
+    val tempdir = file("temp" / "jetty")
     if (!tempdir.exists()) {
       tempdir.mkdirs()
     }
@@ -92,44 +83,3 @@ object ZipFileConfigurer extends WebAppConfigurer {
 
 }
 
-/**
- * Configures the jetty server programmatically. No web.xml is needed, use this
- * to start the server from code.
- */
-object CodeWebappConfigurer extends WebAppConfigurer {
-  def configure(server: Server, config: ServerConfig) {
-    import FileHelper._
-    def file(path: FileHelper): File = (config.workingDirectory / path).asFile
-
-    val webapp = new WebAppContext
-    webapp.setServer(server)
-    webapp setContextPath (config.contextPath)
-    val tempdir = Config.newTempDir("jetty")
-    if (!tempdir.exists()) {
-      tempdir.mkdirs()
-    }
-    val baseResource = Resource.newResource(file("webapp"))
-    webapp.setTempDirectory(tempdir)
-    webapp.setBaseResource(baseResource)
-    val sessionManager = new HashSessionManager()
-    sessionManager.setHttpOnly(true)
-    sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.ajpPort.isEmpty && config.port.isEmpty)
-    webapp.getSessionHandler.setSessionManager(sessionManager)
-
-    //the web.xml
-    val sch = new ServletContextHandler(server, "/", ServletContextHandler.NO_SECURITY)
-    sch.setBaseResource(baseResource)
-    sch.setSessionHandler(new SessionHandler())
-    sch.addFilter(classOf[RoutingFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
-    sch.addEventListener(new PubletContextListener)
-    val nullServletHolder = new ServletHolder()
-    nullServletHolder.setServlet(new HttpServlet {})
-    sch.addServlet(nullServletHolder, "/")
-
-    val coll = new ContextHandlerCollection()
-    coll.addHandler(sch)
-    coll.addHandler(webapp)
-    server.setHandler(coll)
-  }
-
-}

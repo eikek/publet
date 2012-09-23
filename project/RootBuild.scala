@@ -92,7 +92,8 @@ object RootBuild extends Build {
       WebEditor.module,
       Ext.module,
       Server.module,
-      Doc.module
+      Doc.module,
+      App.module
     )
 
   val buildSettings = Project.defaultSettings ++ Seq(
@@ -358,7 +359,7 @@ object Server extends Build {
     id = "server",
     base = file("server"),
     settings = buildProperties
-  ) dependsOn (War.module)
+  )
 
   val buildProperties = Project.defaultSettings ++ assemblySettings ++ Seq[Project.Setting[_]](
     name := "publet-server",
@@ -397,4 +398,17 @@ object Server extends Build {
   )
 
   val deps = Seq(grizzledSlf4j, servletApi, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
+}
+
+object App extends Build {
+
+  lazy val module = Project(
+    id = "app",
+    base = file("app"),
+    settings = buildProperties
+  ) dependsOn(War.module, Server.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-app"
+  )
 }
