@@ -258,6 +258,7 @@ object War extends Build {
 
   val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
+    publishArtifact in (Compile, packageBin) := true,
     libraryDependencies ++= deps
   )
 
