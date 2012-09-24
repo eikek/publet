@@ -42,35 +42,34 @@ h2 Repository View
 .modal.fade#myModal
   .modal-header
     button.close(data-dismiss="modal") &times;
-    h2 Create a new personal git repository.
+    h3 Create a new personal git repository.
   .modal-body
     #response
-    form(action="gitrcreate.json" method="post" class="form-horizontal" id="createRepoForm")
-      fieldset
-        .control-group
-          label.control-label Repository name
-          .controls
-            input.span4(type="text" name="repositoryName" required="required")
-            p.help-block
-              | The name should be short and must not contain any weird characters. Allowed are letters, digits and hyphens only.
-        .control-group
-          label.control-label
-          .controls
+    form.form-horizontal(action="gitrcreate.json" method="post" id="createRepoForm")
+      .control-group
+        label.control-label Repository name
+        .controls
+          input.input-xlarge(type="text" name="repositoryName" required="required")
+          span.help-block
+            | The name should be short and must not contain any weird characters. Allowed are letters, digits and hyphens only.
+      .control-group
+        .controls
+          label.checkbox
             input(type="checkbox" name="closed")
             i.icon-lock
             | Closed Repository
           -if (Security.hasPerm(GitAction.gitcreateRoot.toString))
-            .controls
+            label.checkbox
               input(type="checkbox" name="rootProject")
               i.icon-star-empty
               | Root Repository
-        .control-group
-          label.control-label Description (optional)
-          .controls
-            input.span4(type="text" name="description")
-        .control-group
-          button.btn.btn-primary(type="submit") Create repository
-          button.btn(type="reset") Reset
+      .control-group
+        label.control-label Description (optional)
+        .controls
+          input.input-xlarge(type="text" name="description")
+      .control-group
+        button.btn.btn-primary(type="submit") Create repository
+        button.btn(type="reset") Reset
 
 .row
   - if (Security.isAuthenticated) {

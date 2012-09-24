@@ -5,13 +5,15 @@
     | Mailer not configured! Sorry, the contact form is not working. Please specify SMTP settings in the configuration file.
 - if (configValid())
   #response
-  form(method="post" action={ PubletWebContext.urlOf(actionUrl) } id="contactForm")
-    label
-      | From (Email)
-      input(type="text" name="from" required="required")
-    label
-      | Message
-      textarea(name="message" required="required")
+  form.form-horizontal(method="post" action={ PubletWebContext.urlOf(actionUrl) } id="contactForm")
+    .control-group
+      label.control-label(for="nameInput") From (Email)
+      .controls
+        input(type="text" name="from" id="nameInput" required="required")
+    .control-group
+      label.control-label(for="msgInput") Message
+      .controls
+        textarea(name="message" required="required" id="msgInput" rows="4")
     input.noheight(name="text")
     .form-actions
       button.btn.btn-primary

@@ -23,10 +23,10 @@ h3 Name and Email
 form#myDataForm(action={ formAction } method="post")
   label
     | Full name:
-    input(type="text" name="fullName")
+  input(type="text" name="fullName")
   label
     | Email:
-    input(type="text" name="email")
+  input(type="text" name="email")
   input(type="hidden" name="what" value="setUserData")
   .form-actions
     button.btn.btn-primary
@@ -38,10 +38,10 @@ h3 Change Password
 form#changePasswordForm(action={ formAction } method="post")
   label
     | New Password
-    input(type="password" name="newPassword1" required="required")
+  input(type="password" name="newPassword1" required="required")
   label
     | Repeat it
-    input(type="password" name="newPassword2" required="required")
+  input(type="password" name="newPassword2" required="required")
   input(type="hidden" name="algorithm" value={ hashAlgorithm })
   input(type="hidden" name="what" value="setPassword")
   .form-actions

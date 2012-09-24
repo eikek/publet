@@ -1,20 +1,27 @@
 - val actionUrl = PubletWebContext.urlOf("/publet/scripts/login.json")
 .row
-  .span4.offset4
+  .span6.offset3
     #response
-    form(method="post" class="well" action={actionUrl} id="loginForm")
-      label
-        | Username
-        input(name="username" id="username" type="text" size="20" required="required")
-      label
-        | Password
-        input(name="password" id="password" type="password" required="required")
-      label.checkbox
-        input(type="checkbox" name="rememberMe")/
-        | Remember me
-      button(type="submit" class="btn btn-primary")
-        i.icon-ok.icon-white
-        | Login
+    .well
+      form(method="post" class="form-horizontal" action={actionUrl} id="loginForm")
+        legend
+          | Login
+        .control-group
+          label.control-label(for="username") Username
+          .controls
+            input(name="username" id="username" type="text" size="20" required="required" placeholder="Username")
+        .control-group
+          label.control-label(for="password") Password
+          .controls
+            input(name="password" id="password" type="password" required="required" placeholder="Password")
+        .control-group
+          .controls
+            label.checkbox
+              input(type="checkbox" name="rememberMe") Remember me
+        .form-actions
+          button(type="submit" class="btn btn-primary")
+            i.icon-ok.icon-white
+            | Sign in
 :javascript
   $(document).ready(function() {
     $('#username').focus();
