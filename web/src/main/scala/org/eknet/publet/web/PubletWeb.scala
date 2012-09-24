@@ -115,7 +115,7 @@ object PubletWeb extends Logging {
   def gitpartman: GitPartMan = contextMap(gitPartKey).get
   def contentRoot = contextMap(contentRootKey).get
   def authManager = contextMap(authManagerKey).get
-  def publetSettings = new PropertiesMap {
+  lazy val publetSettings = new PropertiesMap {
     reload()
     override def file = contentRoot.lookup(Path(Publet.allIncludes+"config/settings.properties"))
       .collect({case cc: ContentResource => cc})
