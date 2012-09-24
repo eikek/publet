@@ -22,7 +22,7 @@ import java.io.File
 import scala.tools.nsc._
 import tools.nsc.Settings
 import tools.nsc.io.AbstractFile
-import java.net.URLClassLoader
+import java.net.{URL, URLClassLoader}
 import java.util.jar.JarFile
 import util.BatchSourceFile
 import org.eknet.publet.vfs._
@@ -34,7 +34,7 @@ import grizzled.slf4j.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:31
  */
-class ScriptCompiler(target: AbstractFile,
+class ScriptCompiler(target: AbstractFile, classPath: Option[String],
                      imports: List[String]) extends Logging {
 
 
@@ -42,9 +42,10 @@ class ScriptCompiler(target: AbstractFile,
 
 
   def scriptLoader(mp: Option[MiniProject], path: Path, resource: ContentResource): ScalaScript = {
-    val settings = ScriptCompiler.compilerSettings(target, mp)
+    val settings = ScriptCompiler.compilerSettings(target, classPath, mp)
     val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
-    val compiler = new Compiler(settings, cl)
+    val compiler = new Compiler(settings,
+      classPath.map(cp => new URLClassLoader(cp.split("\\s*[,;]\\s*").map(new URL(_)), cl)).getOrElse(cl))
     compiler.loadScalaScriptClass(path, resource)
   }
 
@@ -130,7 +131,7 @@ class ScriptCompiler(target: AbstractFile,
 
 object ScriptCompiler extends Logging {
 
-  def compilerSettings(target: AbstractFile, mp: Option[MiniProject]): Settings = {
+  def compilerSettings(target: AbstractFile, customClasspath: Option[String], mp: Option[MiniProject]): Settings = {
     val settings = new Settings()
 
     // got weird exception when setting `usejavacp` to true:
@@ -148,7 +149,7 @@ object ScriptCompiler extends Logging {
     settings.outputDirs.setSingleOutput(target)
 
     val cp = (libPath::: compilerPath ::: servletPath) ++ impliedClassPath ++ mp.map(_.libraryClassPath).getOrElse(List())
-    settings.classpath.value = cp.mkString(File.pathSeparator)
+    settings.classpath.value = cp.mkString(File.pathSeparator) + customClasspath.map(File.pathSeparator+ _).getOrElse("")
     settings
   }
 

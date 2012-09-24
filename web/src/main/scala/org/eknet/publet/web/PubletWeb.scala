@@ -38,12 +38,23 @@ import org.eknet.publet.vfs.util.MapContainer
 import grizzled.slf4j.Logging
 import org.eknet.publet.auth.RepositoryModel
 import org.apache.shiro.cache.MemoryConstrainedCacheManager
+import tools.nsc.util.ScalaClassLoader.URLClassLoader
+import java.net.URL
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:02
  */
 object PubletWeb extends Logging {
+
+  /**
+   * ServletContext Init-parameter.
+   *
+   * Comma or semicolon separated path of filenames or URLs
+   * pointing to directories or jar files. Directories should end
+   * with '/'.
+   */
+  val customClasspathInitParam = "custom-classpath"
 
   // initialized on context startup
   private var servletContextI: ServletContext = null
@@ -67,12 +78,25 @@ object PubletWeb extends Logging {
     case Context => new AuthManager()
   })
 
+  /**
+   * Returns the custom classpath that is optionally specified using a init-parameter
+   * with the servlet context.
+   *
+   * @return
+   */
+  private def getCustomClasspath = Option(servletContext.getInitParameter(customClasspathInitParam)).filterNot(_.isEmpty)
+
   private val scalateEngineKey = Key("scalateEngine", {
     case Context => {
       val e = new ConfiguredScalateEngine('wikiMain, publet)
       e.engine.combinedClassPath = true
       e.engine.importStatements ++= webImports.map("import "+ _)
       e.engine.classpath = ScriptCompiler.servletPath.mkString(File.pathSeparator)
+      getCustomClasspath.map(cp => {
+        e.engine.classpath = cp + File.pathSeparator + e.engine.classpath
+        val urls = cp.split("\\s*[,;]\\s*").map(new URL(_)).toSeq
+        e.engine.classLoader = new URLClassLoader(urls, e.engine.getClass.getClassLoader)
+      })
       e.engine.bindings ++= List(
         Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true)
       )
@@ -181,7 +205,7 @@ object PubletWeb extends Logging {
       "org.eknet.publet.web.util.RenderUtils",
       "RenderUtils._"
     )
-    val compiler = new DefaultPubletCompiler(publet, Config.mainMount, webImports ::: additionalImports)
+    val compiler = new DefaultPubletCompiler(publet, Config.mainMount, getCustomClasspath, webImports ::: additionalImports)
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
     publet.engineManager.register("*.scala", scalaEngine)
 

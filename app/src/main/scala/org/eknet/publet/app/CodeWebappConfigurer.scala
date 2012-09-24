@@ -33,8 +33,16 @@ import org.eknet.publet.web.filter.RoutingFilter
 /**
  * Configures the jetty server programmatically. No web.xml is needed, use this
  * to start the server from code.
+ *
+ * The directory containing the extension/plugin jar files can be specified with
+ * the constructor. If not specified, the `plugin` directory in the working directory
+ * is tried.
+ *
  */
-object CodeWebappConfigurer extends WebAppConfigurer {
+class CodeWebappConfigurer(pluginDir: Option[File]) extends WebAppConfigurer {
+
+  def this() = this(None)
+
   def configure(server: Server, config: ServerConfig) {
     import FileHelper._
     def file(path: FileHelper): File = (config.workingDirectory / path).asFile
@@ -53,6 +61,13 @@ object CodeWebappConfigurer extends WebAppConfigurer {
     sessionManager.setHttpOnly(true)
     sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.ajpPort.isEmpty && config.port.isEmpty)
     webapp.getSessionHandler.setSessionManager(sessionManager)
+    pluginDir.orElse(file("plugins").asFileIfPresent).foreach(dir => {
+      entries(dir, f => f !=null && f.isFile).map(_.getAbsolutePath) match {
+        case list if (!list.isEmpty) => webapp.setExtraClasspath(list.mkString(";"))
+        case _ =>
+      }
+    })
+    postProcessWebAppContext(webapp)
 
     //the web.xml
     val sch = new ServletContextHandler(server, "/", ServletContextHandler.NO_SECURITY)
@@ -63,6 +78,7 @@ object CodeWebappConfigurer extends WebAppConfigurer {
     val nullServletHolder = new ServletHolder()
     nullServletHolder.setServlet(new HttpServlet {})
     sch.addServlet(nullServletHolder, "/")
+    postProcessServletContext(sch)
 
     val coll = new ContextHandlerCollection()
     coll.addHandler(sch)
@@ -70,4 +86,9 @@ object CodeWebappConfigurer extends WebAppConfigurer {
     server.setHandler(coll)
   }
 
+  protected def postProcessWebAppContext(webapp: WebAppContext) {
+  }
+
+  protected def postProcessServletContext(sch: ServletContextHandler) {
+  }
 }

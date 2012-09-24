@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.engine.convert
+package org.eknet.publet.engine
 
-import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Path, ContentResource, ContentType}
 
 /**

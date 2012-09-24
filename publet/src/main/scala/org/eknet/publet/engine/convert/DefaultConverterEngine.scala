@@ -38,7 +38,7 @@ class DefaultConverterEngine(val name: Symbol) extends PubletEngine with Convert
         case None => {
           error("no converter found: "+ data.contentType+" -> "+ target)
           None
-        };
+        }
         case Some(c) => Option(c(path, data))
       }
     }

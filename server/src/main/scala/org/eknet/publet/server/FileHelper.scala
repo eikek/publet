@@ -16,7 +16,7 @@
 
 package org.eknet.publet.server
 
-import java.io.File
+import java.io.{FileFilter, File}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -26,6 +26,11 @@ class FileHelper(val path: String) {
 
   def asFile = new File(path)
 
+  def asFileIfPresent = asFile match {
+    case x if (x.exists()) => Some(x)
+    case _ => None
+  }
+
   def /(name: String) = if (path.isEmpty) new FileHelper(name)
     else new FileHelper(path + File.separator + name)
 
@@ -33,7 +38,18 @@ class FileHelper(val path: String) {
 
 object FileHelper {
 
+  implicit def file2Helper(f: File): FileHelper = new FileHelper(f.getAbsolutePath)
   implicit def string2Helper(s: String): FileHelper = new FileHelper(s)
   implicit def helper2String(fh: FileHelper): String = fh.path
   implicit def helper2File(fh: FileHelper): File = fh.asFile
+
+  def entries(f: File, filter:File=>Boolean):List[File] = f :: (if (f.isDirectory) listFiles(f, filter).toList.flatMap(entries(_, filter)) else Nil)
+  private def listFiles(f:File, filter:File=>Boolean): Array[File] = f.listFiles(filter) match {
+    case null => Array[File]()
+    case o@_ => o
+  }
+
+  implicit def fun2Filter(f:File => Boolean): FileFilter = new FileFilter {
+    def accept(pathname: File) = f(pathname)
+  }
 }

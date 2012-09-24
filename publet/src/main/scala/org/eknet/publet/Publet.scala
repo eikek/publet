@@ -18,7 +18,6 @@ package org.eknet.publet
 
 import engine._
 import vfs._
-import convert.PassThrough
 import impl.PubletImpl
 import java.io.InputStream
 

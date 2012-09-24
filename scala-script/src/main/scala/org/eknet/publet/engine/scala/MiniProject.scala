@@ -76,7 +76,7 @@ class MiniProject(val path: Path,
       val sourceDir = projectDir.lookup("/src/main/scala".p).collect({case cc:ContainerResource=>cc})
       if (sourceDir.isDefined && needRecompile()) {
         val start = System.currentTimeMillis()
-        val settings = ScriptCompiler.compilerSettings(AbstractFile.getDirectory(targetDir), Some(this))
+        val settings = ScriptCompiler.compilerSettings(AbstractFile.getDirectory(targetDir), None, Some(this))
         settings.sourcepath.value = (path / "src/main/scala").toAbsolute.segments.mkString(File.separator)
         val reporter = new ErrorReporter(settings)
         val global = new Global(settings, reporter)

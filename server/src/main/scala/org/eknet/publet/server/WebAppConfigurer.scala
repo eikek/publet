@@ -71,15 +71,5 @@ object ZipFileConfigurer extends WebAppConfigurer {
     server.setHandler(webapp)
   }
 
-  def entries(f: File, filter:File=>Boolean):List[File] = f :: (if (f.isDirectory) listFiles(f, filter).toList.flatMap(entries(_, filter)) else Nil)
-  private def listFiles(f:File, filter:File=>Boolean): Array[File] = f.listFiles(filter) match {
-    case null => Array[File]()
-    case o@_ => o
-  }
-
-  implicit def fun2Filter(f:File => Boolean): FileFilter = new FileFilter {
-    def accept(pathname: File) = f(pathname)
-  }
-
 }
 

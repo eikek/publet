@@ -78,7 +78,7 @@ trait ConverterRegistry {
       }
       //first create shortest path
       val path = mutable.ListBuffer[ContentType](e)
-      var z = e;
+      var z = e
       while (predecessor.get(z).isDefined) {
         z = predecessor.get(z).get
         path.prepend(z)

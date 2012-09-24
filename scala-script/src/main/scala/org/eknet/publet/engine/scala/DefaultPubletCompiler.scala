@@ -26,10 +26,11 @@ import tools.nsc.io.VirtualDirectory
  */
 class DefaultPubletCompiler(val publet: Publet,
                             val pathPrefix: String,
+                            classPath: Option[String],
                             imports: List[String]) extends PubletCompiler {
 
 
-  val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), imports)
+  val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), classPath, imports)
 
   def evaluate(path: Path, resource: ContentResource) = {
     val miniProject = MiniProject.find(path, publet, pathPrefix)
