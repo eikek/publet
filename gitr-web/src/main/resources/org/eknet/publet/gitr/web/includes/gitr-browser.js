@@ -79,7 +79,7 @@
         $('.readme-head').remove();
         $('.readme').remove();
         _getLastCommitHtml(data).appendTo(obj);
-        $('<h3/>', {
+        $('<h4/>', {
           class: "readme-head",
           html: data.fileName
         }).appendTo(obj);
@@ -168,7 +168,7 @@
         obj.empty();
         table[0].appendTo(obj); //breadcrumbs
         if (table[1]) { //lastCommit
-          $('<h4 class="commit-group-head">Last commit</h4>').appendTo(obj);
+          $('<h5 class="commit-group-head">Last commit</h5>').appendTo(obj);
           table[1].appendTo(obj);
         }
         table[2].appendTo(obj); // tree
