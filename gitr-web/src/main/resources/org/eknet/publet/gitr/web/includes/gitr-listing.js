@@ -36,9 +36,9 @@ $(function() {
 
     var contentEl = $('#repoListing');
     contentEl.empty();
-    contentEl.addClass("loading");
+    contentMask();
     $.getJSON("gitr-repolist.json", opts, function(data) {
-      contentEl.removeClass("loading");
+      contentUnmask();
       $.each(data, function(i, val) {
         var pushIcon = val.push ? ' <i class="icon-pencil"></i>' : '';
         var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +

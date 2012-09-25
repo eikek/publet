@@ -69,9 +69,10 @@
     params[pParam] = path;
     params[doParam] = "blob";
 
-    $('<img/>', { src: "loading.gif", height: "16px", width: "16px"}).prependTo($(el));
+    contentMask();
     $.getJSON(settings.actionUrl, params, function(data) {
-      obj.removeAttr("class");
+      //obj.removeAttr("class");
+      contentUnmask();
       if (data.success) {
         $('table', obj).prev().remove();
         $('table', obj).remove();
@@ -125,9 +126,9 @@
     params[hParam] = head;
     params[pParam] = path;
 
-    obj.attr("class", "loading");
+    contentMask();
     $.getJSON(settings.actionUrl, params, function (data) {
-      obj.removeAttr("class");
+      contentUnmask();
       if (data.success) {
         var list = [];
         if (data.parent) {
@@ -162,18 +163,17 @@
   };
 
   var _addDirectoryContents = function (repo, head, path) {
-    obj.empty();
     _directoryContents(repo, head, path, function (data, table) {
       if (data.success) {
         obj.empty();
         table[0].appendTo(obj); //breadcrumbs
         if (table[1]) { //lastCommit
-          $('<h3 class="commit-group-head">Last commit</h3>').appendTo(obj);
+          $('<h4 class="commit-group-head">Last commit</h4>').appendTo(obj);
           table[1].appendTo(obj);
         }
         table[2].appendTo(obj); // tree
         if (data.readme) { // readme file
-          $('<h3 class="readme-head">'+data.readmeFile+'</h3>\n').appendTo(obj);
+          $('<h4 class="readme-head">'+data.readmeFile+'</h4>\n').appendTo(obj);
           var readme = $('<div/>', {
             class: "readme",
             html: data.readme

@@ -41,6 +41,7 @@
 }
 .commit-group-head {
     padding: 5px 8px;
+    margin-bottom: 0;
     border: 1px solid #e3e4fa;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
