@@ -127,6 +127,7 @@ object PubletWeb extends Logging {
       publ.mountManager.mount(Path("/publet/scripts/"), cont)
 
       Templates.mountPubletResources(publ)
+      Templates.mountLoadmaskJs(publ)
       publ
     }
   })

@@ -41,4 +41,11 @@ object Templates {
     val includes = new ClasspathContainer(base = "/org/eknet/publet/web/includes/publet")
     publet.mountManager.mount("/publet/".p, includes)
   }
+
+  def mountLoadmaskJs(publet: Publet) {
+    publet.mountManager.mount("/publet/spinjs/".p,
+      new ClasspathContainer(base = "/org/eknet/publet/web/includes/spin"))
+    publet.mountManager.mount("/publet/loadmask/".p,
+      new ClasspathContainer(base = "/org/eknet/publet/web/includes/loadmask"))
+  }
 }

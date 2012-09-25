@@ -48,3 +48,21 @@ function isJson(str) {
         replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
         replace(/(?:^|:|,)(?:\s*\[)+/g, ''));
 }
+
+function contentMask(message) {
+    $('#content').mask({
+        spinner: {
+            lines:15,
+            length: 28,
+            width: 3,
+            radius: 18
+        },
+        delay: 1000,
+        label: message ? message : "",
+        spinnerPadding: 14}
+    );
+}
+
+function contentUnmask() {
+    $('#content').unmask();
+}

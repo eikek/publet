@@ -31,6 +31,10 @@ html
         :css
           pre code { background: inherit; }
 
+    script(type="text/javascript" src={ ctx.urlOf("/publet/spinjs/spin.min.js") })
+    script(type="text/javascript" src={ ctx.urlOf("/publet/loadmask/jquery.loadmask.spin.js") })
+    link(href={ ctx.urlOf("/publet/loadmask/jquery.loadmask.spin.css") } rel="stylesheet")
+
     script(type="text/javascript" src={ ctx.urlOf("/publet/js/publet.js") })
     - if (searchForHeadIncludes)
       =loadHeadIncludes()
