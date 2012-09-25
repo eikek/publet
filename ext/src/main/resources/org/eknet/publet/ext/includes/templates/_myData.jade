@@ -54,11 +54,17 @@ form#changePasswordForm(action={ formAction } method="post")
 :javascript
     $(function() {
       var options = {
+        beforeSubmit: function(arr, form, options) {
+          form.mask();
+        },
         error: function(data) {
+          $('#myDataForm').unmask();
+          $('#changePasswordForm').unmask();
           var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
           $('#myDataResponse').html('<div class="alert alert-error">Error with Ajax Request! '+ closeIcon + '</div>');
         },
-        success: function(data) {
+        success: function(data, status, xhr, form) {
+          form.unmask();
           var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
           if (data.success) {
             $('#myDataResponse').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
