@@ -33,17 +33,17 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
         a.btn.btn-info.pull-right(href={"?resource="+ (Path(resourcePath).parent.asString) })
           i.icon-file.icon-white
           | Upload Files
-      label
+      label(for="extensionInput")
         | Extensions
-        select(name="extension" class="span8")
-          =extensionOptions
-      label
+      select.span8#extensionInput(name="extension")
+        =extensionOptions
+      label(for="editPage")
         | Text
-        textarea(name="page" id="editPage" class="span8" style="height:380px; font-family:monospace;")<
-          !~~ contentAsString
-      label
+      textarea#editPage.span8(name="page" style="height:380px; font-family:monospace;")<
+        !~~ contentAsString
+      label(for="commitMsgInput")
         | Commit Message
-        input(name="commitMessage" class="span8")
+      input.span8#commitMsgInput(name="commitMessage" type="text")
       input(type="hidden" name="path" value={resourcePath})
       input(id="lastHead" type="hidden" name="head" value={lastMod})
   .span3
