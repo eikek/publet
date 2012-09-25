@@ -17,9 +17,6 @@ class UpdateRepository extends ScalaScript {
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
       Security.checkGitAction(GitAction.gitadmin, rm)
-      if (Security.username != rm.owner) {
-        throw new UnauthorizedException("Only owners can alter repository state.")
-      }
       PubletWebContext.param("repoState") flatMap ( state => {
         PubletWeb.authManager.updateRepository(RepositoryModel(rm.name, RepositoryTag.withName(state), rm.owner))
         makeJson(Map("success"->true, "message"->"Repository successfully updated."))
