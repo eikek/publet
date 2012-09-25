@@ -39,15 +39,12 @@ html
       !~~ head
     title = PubletWeb.publetSettings("applicationName").map(_ + " - ").getOrElse("") + title
   body
-    #nav.navbar.navbar-fixed-top
-      .navbar-inner
-        .container
-          - if (navigationBar != null)
-            !~~ navigationBar
-          - else
-            - val ext = findIncludeExtension("nav")
-            - if (ext.isDefined)
-              =include("__incl_nav."+ext.get)
+    - if (navigationBar != null)
+      !~~ navigationBar
+    - else
+      - val ext = findIncludeExtension("nav")
+      - if (ext.isDefined)
+        =include("__incl_nav."+ext.get)
     #content.container
       - val ext = if (searchForSidebar) findIncludeExtension("sidebar", false) else None
       - if (ext.isDefined)

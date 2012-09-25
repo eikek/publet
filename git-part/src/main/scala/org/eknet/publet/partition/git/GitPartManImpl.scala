@@ -106,34 +106,37 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |- val loginUrl = urlOf("/publet/templates/login.html") + "?redirect="+ urlOf(PubletWebContext.applicationUri)
         |- val logoutUrl = urlOf("/publet/scripts/logout.json")+ "?redirect=" + urlOf("/")
         |- val editUrl = urlOf("/publet/webeditor/scripts/edit.html")+ "?resource="+path
-        |a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
-        |  span(class="icon-bar")
-        |  span(class="icon-bar")
-        |  span(class="icon-bar")
-        |a(class="brand" href={ urlOf("/") }) =PubletWeb.publetSettings("applicationName").getOrElse("Project")
-        |.nav-collapse
-        |  ul.nav
-        |    - if (isResourceEditable)
-        |      li
-        |        a(href={ editUrl }) Edit
-        |  ul.nav.pull-right
-        |    - if (Security.isAuthenticated)
-        |      li
-        |        .btn-group
-        |          a.btn.dropdown-toggle(data-toggle="dropdown" href="#")
-        |            i.icon-user
-        |            =Security.username
-        |            span.caret
-        |          ul.dropdown-menu
+        |#nav.navbar.navbar-fixed-top
+        |  .navbar-inner
+        |    .container
+        |      a(class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse")
+        |        span(class="icon-bar")
+        |        span(class="icon-bar")
+        |        span(class="icon-bar")
+        |      a(class="brand" href={ urlOf("/") }) =PubletWeb.publetSettings("applicationName").getOrElse("Project")
+        |      .nav-collapse
+        |        ul.nav
+        |          - if (isResourceEditable)
         |            li
-        |              a(href={ logoutUrl })
-        |                i.icon-hand-right
-        |                | Logout
-        |    - if (!Security.isAuthenticated)
-        |      li
-        |        a(href={ loginUrl })
-        |          i.icon-user
-        |          | Login
+        |              a(href={ editUrl }) Edit
+        |        ul.nav.pull-right
+        |          - if (Security.isAuthenticated)
+        |            li
+        |              .btn-group
+        |                a.btn.dropdown-toggle(data-toggle="dropdown" href="#")
+        |                  i.icon-user
+        |                  =Security.username
+        |                  span.caret
+        |                ul.dropdown-menu
+        |                  li
+        |                    a(href={ logoutUrl })
+        |                      i.icon-hand-right
+        |                      | Logout
+        |          - if (!Security.isAuthenticated)
+        |            li
+        |              a(href={ loginUrl })
+        |                i.icon-user
+        |                | Login
       """.stripMargin
     Map(
       Path("/index.md") -> Content(index, ContentType.markdown),
