@@ -52,7 +52,11 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
 :javascript
   $(document).ready(function() {
     var options = {
+      beforeSubmit: function(form, options) {
+        contentMask();
+      },
       success: function(data) {
+        contentUnmask();
         var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
         if (data.success) {
           $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');

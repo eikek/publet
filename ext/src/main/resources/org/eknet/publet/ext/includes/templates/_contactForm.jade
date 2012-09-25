@@ -22,7 +22,11 @@
   :javascript
     $(function() {
       var options = {
-        success: function(data) {
+        beforeSubmit: function(arr, form, options) {
+          $('#contactForm').mask();
+        },
+        success: function(data, status, xhr, form) {
+          $('#contactForm').unmask();
           var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
           if (data.success) {
             $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
