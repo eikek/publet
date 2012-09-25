@@ -3,7 +3,7 @@
 - import org.eknet.publet.vfs.Resource
 - import org.eknet.publet.vfs.Path
 -@ val rootDir: String = PubletWebContext.applicationPath.parent.asString
--@ val folderImagePath: String = "/publet/ext/includes/img/folder_blue.png"
+-@ val folderImagePath: String = "/publet/ext/includes/img/folder_blue_30.png"
 -@ val exclExtensions: Seq[String] = Seq("html", "jade", "md", "markdown", "page", "ssp")
 - val dir = Path(rootDir)
 -
@@ -24,7 +24,7 @@ br/
   - val dPath = toPath(d)
   - val name = d.name.name.takeWhile(_ != '/')
   h2(id={ name })
-    img(src={ folderImagePath } height="30px")
+    img(src={ folderImagePath } height="30px" style="height: 30px;")
     =name
     
   table.table
