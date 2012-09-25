@@ -68,14 +68,18 @@ link(rel="stylesheet" href="gitr.css")
     - }
 .row
   .span4.offset4
-    - if (prevPage.isDefined) {
-      a.btn.btn-large(href={prevPage.get})
-        i.icon-arrow-left
-        | Newer commits
-    - }
-    - if (nextPage.isDefined) {
-      a.btn.btn-large(href={nextPage.get})
-        | Older commits
-        i.icon-arrow-right
-    - }
+    - if (prevPage.isDefined || nextPage.isDefined)
+      ul.pager
+        - if (prevPage.isDefined) {
+          li.previous
+            a(href={prevPage.get})
+              i.icon-arrow-left
+              | Newer commits
+        - }
+        - if (nextPage.isDefined) {
+          li.next
+            a(href={nextPage.get})
+              | Older commits
+              i.icon-arrow-right
+        - }
 br/

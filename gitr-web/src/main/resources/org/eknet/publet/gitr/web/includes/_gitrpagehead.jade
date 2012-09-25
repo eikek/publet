@@ -7,18 +7,17 @@
 =include("_repoHead.jade")
 - if (repositoryModel.isDefined)
   - val owner = repositoryModel.get.owner
-  .btn-toolbar
-    form.form-inline
-      .input-append
-        input.input.span5(type="text" id="revnames" placeholder="Revision - start typing to search heads or enter a commit id" data-provide="typeahead" data-source={revisions})
-        button.btn#searchRev(type="submit") Go
-      ul.nav.nav-pills.pull-right
-        li
-          a(href={"?r="+repositoryModel.get.name+".git"}) Source
-        li
-          a(href={"?r="+repositoryModel.get.name+".git&do=log"}) Log
-        li
-          a(href="./") Repositories
+  form.form-inline
+    .input-append
+      input.input.span5(type="text" id="revnames" placeholder="Revision - start typing to search heads or enter a commit id" data-provide="typeahead" data-source={revisions})
+      button.btn#searchRev(type="submit") Go
+    ul.nav.nav-pills.pull-right
+      li
+        a(href={"?r="+repositoryModel.get.name+".git"}) Source
+      li
+        a(href={"?r="+repositoryModel.get.name+".git&do=log"}) Log
+      li
+        a(href="./") Repositories
 :javascript
   $(function() {
     $('#searchRev').on('click', function(e) {

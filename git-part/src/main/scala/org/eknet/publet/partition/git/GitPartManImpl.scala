@@ -134,9 +134,10 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
         |                      | Logout
         |          - if (!Security.isAuthenticated)
         |            li
-        |              a(href={ loginUrl })
-        |                i.icon-user
-        |                | Login
+        |              .btn-group
+        |                a.btn(href={ loginUrl })
+        |                  i.icon-user
+        |                  | Login
       """.stripMargin
     Map(
       Path("/index.md") -> Content(index, ContentType.markdown),
