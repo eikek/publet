@@ -61,6 +61,12 @@
     var lastCommit = "";
     if (data.lastCommit) {
       var c = data.lastCommit;
+      var lastCommitUrl;
+      if (settings.lastCommitUrlFunction) {
+          lastCommitUrl = settings.lastCommitUrlFunction(c, settings);
+      } else {
+          lastCommitUrl = '?r='+settings.repo+'&do=commit&h='+ c.fullId;
+      }
       lastCommit = $('<ol/>', {
         class: "commit-group",
         html: '<li class="commit-group-item">' +
@@ -68,7 +74,7 @@
           '<p class="commit-title">' +
           '<span title="'+ c.authorEmail +'">'+c.author +', '+ c.age +'</span> ' +
           '<small>-- '+ c.commitDate +' --</small>' +
-          '<span class="pull-right"><a href="?r='+settings.repo+'&do=commit&h='+ c.fullId +'">['+ c.id+']</a></span> ' +
+          '<span class="pull-right"><a href="'+ lastCommitUrl +'">['+ c.id+']</a></span> ' +
           '<br>' +
           '<span class="shortMessage">'+ c.message +'</span> '+
           '</p></li>'
@@ -253,7 +259,8 @@
         'ref':getURLParameter(hParam) || "",
         'path':getURLParameter(pParam) || "",
         'tableClass'  : 'table table-condensed table-striped',
-        'gravatarTheme' : 'identicon'
+        'gravatarTheme' : 'identicon',
+        'lastCommitUrlFunction': null
       }, options);
 
       _addDirectoryContents(settings.repo, settings.ref, settings.path);
