@@ -5,19 +5,34 @@ title: Gitr Repository Admin
 link(rel="stylesheet" href="gitr.css")
 :javascript
   $(function() {
+    var _mask = function() {
+      $('.tab-content').mask({
+        spinner: {
+          lines:15,
+          length: 28,
+          width: 3,
+          radius: 18
+        },
+        delay: 1000
+      });
+    };
+    var _unmask = function() {
+      $('.tab-content').unmask();
+    };
+
     // initialize repo-state form
-    contentMask();
+    _mask();
     $.getJSON("gitrRepoModel.json", { r: getURLParameter("r") }, function(data) {
       var state = data.tag;
       $("#repoStateForm").find("[value='"+state+"']").attr("checked", "checked");
       if (state == "closed") {
         $('#colaboratorsOpenRepoWarning').remove();
       }
-      contentUnmask();
+      _unmask();
     });
     // initialize collaborators form
     var updateCollaboratorTable = function() {
-      contentMask();
+      _mask();
       $.getJSON("gitrGroupInfo.json", {r: getURLParameter("r") }, function(data) {
         var rows = [];
         data.collaborators.forEach(function(el, i) {
@@ -32,17 +47,17 @@ link(rel="stylesheet" href="gitr.css")
         var tableBody = $('#repoPermTableBody');
         tableBody.empty();
         $(rows.join("")).appendTo(tableBody);
-        contentUnmask();
+        _unmask();
 
         //bind remove buttons
         $('#repoPermTableBody').find('.removePermButton').on('click', function(e) {
           var group = $(e.target).attr('data-group');
           var perm = $(e.target).attr('data-perm');
           var params = { "r": getURLParameter("r"), "groupName": group, "permissionName": perm, "do":"remove" };
-          contentMask();
+          _mask();
           $.getJSON("updateCollaborator.json", params, function(data) {
             updateCollaboratorTable();
-            contentUnmask();
+            _unmask();
           }).error(function(e) {
               var cont = $('#messageContainer');
               cont.empty();
@@ -64,7 +79,7 @@ link(rel="stylesheet" href="gitr.css")
     });
     $('.ajaxForm').ajaxForm({
       beforeSubmit: function() {
-        contentMask();
+        _mask();
       },
       success: function(e) {
         if (e.redirect) {
@@ -77,7 +92,7 @@ link(rel="stylesheet" href="gitr.css")
             html: '<button class="close" data-dismiss="alert">&times;</button>'+e.message
           }).appendTo(cont);
           updateCollaboratorTable();
-          contentUnmask();
+          _unmask();
         }
       },
       error: function(e) {
@@ -87,7 +102,7 @@ link(rel="stylesheet" href="gitr.css")
           class: 'alert alert-error',
           html: '<button class="close" data-dismiss="alert">&times;</button>' +(e.statusText? e.statusText : e)
         }).appendTo(cont);
-        contentUnmask();
+        _unmask();
        }
     });
 

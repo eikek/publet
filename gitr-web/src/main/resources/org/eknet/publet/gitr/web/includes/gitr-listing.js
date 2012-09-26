@@ -35,10 +35,25 @@ $(function() {
     opts["name"] = $('#repoNameInput').val();
 
     var contentEl = $('#repoListing');
-    contentEl.empty();
-    contentMask();
+    var _mask = function() {
+      contentEl.mask({
+        spinner: {
+          lines:15,
+          length: 28,
+          width: 3,
+          radius: 18
+        },
+        delay: 1000
+      });
+    };
+    var _unmask = function() {
+      contentEl.unmask();
+    };
+
+    _mask();
     $.getJSON("gitr-repolist.json", opts, function(data) {
-      contentUnmask();
+      contentEl.empty();
+      _unmask();
       $.each(data, function(i, val) {
         var pushIcon = val.push ? ' <i class="icon-pencil"></i>' : '';
         var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +

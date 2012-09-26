@@ -27,6 +27,21 @@
 
   var obj = this;
 
+  var _mask = function() {
+    $('#'+ obj.attr("id")).mask({
+      spinner: {
+        lines:15,
+        length: 28,
+        width: 3,
+        radius: 18
+      },
+      delay: 1000
+    });
+  };
+  var _unmask = function() {
+    $('#'+ obj.attr("id")).unmask();
+  };
+
   var _getBreadcrumbsHtml = function(repo, path) {
     var crumbs = [];
     crumbs.push('<li><a href="#">'+repo+'</a> <span class="divider">/</span></li>')
@@ -69,10 +84,10 @@
     params[pParam] = path;
     params[doParam] = "blob";
 
-    contentMask();
+    _mask();
     $.getJSON(settings.actionUrl, params, function(data) {
       //obj.removeAttr("class");
-      contentUnmask();
+      _unmask();
       if (data.success) {
         $('table', obj).prev().remove();
         $('table', obj).remove();
@@ -126,9 +141,9 @@
     params[hParam] = head;
     params[pParam] = path;
 
-    contentMask();
+    _mask();
     $.getJSON(settings.actionUrl, params, function (data) {
-      contentUnmask();
+      _unmask();
       if (data.success) {
         var list = [];
         if (data.parent) {

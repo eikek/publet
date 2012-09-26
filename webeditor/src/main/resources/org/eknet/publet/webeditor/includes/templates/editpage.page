@@ -51,12 +51,26 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
     #filesTree
 :javascript
   $(document).ready(function() {
+    var _mask = function(element) {
+      element.mask({
+        spinner: {
+          lines:15,
+          length: 28,
+          width: 3,
+          radius: 18
+        },
+        delay: 1000
+      });
+    };
+    var _unmask = function(element) {
+      element.unmask();
+    };
     var options = {
-      beforeSubmit: function(form, options) {
-        contentMask();
+      beforeSubmit: function(arr, form, options) {
+        _mask(form);
       },
-      success: function(data) {
-        contentUnmask();
+      success: function(data, status, xhr, form) {
+        _unmask(form);
         var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
         if (data.success) {
           $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
