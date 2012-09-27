@@ -17,10 +17,9 @@
 package org.eknet.publet.web.filter
 
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{PubletWebContext, Config, PubletWeb}
+import org.eknet.publet.web.{PubletRequestWrapper, Config, PubletWeb}
 import javax.servlet._
 import http.{HttpServletRequest, HttpServletRequestWrapper}
-import org.eknet.publet.web.webdav.WebdavFilter
 
 /**
  * The first filter on the chain. Detects whether the current
@@ -35,7 +34,7 @@ import org.eknet.publet.web.webdav.WebdavFilter
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 06:50
  */
-class RedirectFilter extends Filter with Logging with HttpFilter {
+class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
 
   private lazy val mount = Config.mainMount
 
@@ -70,13 +69,12 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
   private def allForwards = defaultForwards ++ forwards.map(key => (key.substring(8), PubletWeb.publetSettings(key).get)).toMap
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
-    val ru = getRequestUtils(req)
-    val path = ru.applicationPath
-    if (allRedirects.keySet.contains(path.asString) && !WebdavFilter.isDavRequest(ru)) {
+    val path = req.applicationPath
+    if (allRedirects.keySet.contains(path.asString)) {
       val newUri = allRedirects.get(path.asString).get
       debug("Redirect "+ path +" to "+ newUri)
-      resp.sendRedirect(ru.urlOf(newUri))
-    } else if (allForwards.keySet.contains(path.asString) && !WebdavFilter.isDavRequest(ru)) {
+      resp.sendRedirect(req.urlOf(newUri))
+    } else if (allForwards.keySet.contains(path.asString)) {
       val newUri = allForwards.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
       val forwardingReq = new ForwardRequest(newUri, req)
@@ -90,11 +88,12 @@ class RedirectFilter extends Filter with Logging with HttpFilter {
 
   def destroy() {}
 
-}
-private class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
-  import collection.JavaConversions._
+  private class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
+    import collection.JavaConversions._
 
-  req.getAttributeNames.toList.withFilter(!_.contains("eclipse.jetty")).foreach(key => req.removeAttribute(key))
+    req.getAttributeNames.toList.withFilter(!_.contains("eclipse.jetty")).foreach(key => req.removeAttribute(key))
 
-  override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
+    override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
+  }
 }
+

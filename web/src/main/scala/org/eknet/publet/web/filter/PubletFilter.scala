@@ -18,7 +18,7 @@ package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper, PubletWeb}
 import org.eknet.publet.vfs.ContentType
 
 /** Servlet that processes the resource using the engine
@@ -29,7 +29,7 @@ import org.eknet.publet.vfs.ContentType
  * @since 05.04.12 15:03
  *
  */
-class PubletFilter extends Filter with PageWriter with HttpFilter {
+class PubletFilter extends Filter with PageWriter with PubletRequestWrapper {
 
 
   def init(filterConfig: FilterConfig) {}
@@ -37,7 +37,7 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
   def destroy() {}
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
-    PubletWebContext.param("a") match {
+    req.param("a") match {
       case Some(engine) => processEngine(req, resp, engine)
       case _ => processDefault(req, resp)
     }
@@ -45,7 +45,7 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
 
   def processEngine(req: HttpServletRequest, resp: HttpServletResponse, engine: String) {
     val engineId = Symbol(engine)
-    val path = PubletWebContext.applicationPath
+    val path = req.applicationPath
 
     val publet = PubletWeb.publet
     val targetType = path.name.targetType
@@ -56,7 +56,7 @@ class PubletFilter extends Filter with PageWriter with HttpFilter {
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
     val publet = PubletWeb.publet
-    val path = PubletWebContext.applicationPath
+    val path = req.applicationPath
 
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType
     val html = publet.process(path, tt)

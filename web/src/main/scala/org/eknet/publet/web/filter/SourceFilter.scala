@@ -19,7 +19,7 @@ package org.eknet.publet.web.filter
 import javax.servlet._
 import http.HttpServletResponse
 import org.eknet.publet.vfs.{ContentResource, ContentType}
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper, PubletWeb}
 
 /**
  * Filter that returns the resource as is if it is found. No processing necessary.
@@ -27,11 +27,11 @@ import org.eknet.publet.web.{PubletWebContext, PubletWeb}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.05.12 14:53
  */
-class SourceFilter extends Filter with HttpFilter with PageWriter {
+class SourceFilter extends Filter with PubletRequestWrapper with PageWriter {
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    val path = PubletWebContext.applicationPath
+    val path = request.applicationPath
     PubletWeb.publet.rootContainer.lookup(path)
       .collect({case c:ContentResource=>c}) match {
         case Some(c) => {
@@ -39,7 +39,7 @@ class SourceFilter extends Filter with HttpFilter with PageWriter {
           c.copyTo(response.getOutputStream, close = true)
         }
         case _=> {
-          if (!PubletWebContext.isGitRequest && path.name.targetType == ContentType.unknown) {
+          if (!request.isGitRequest && path.name.targetType == ContentType.unknown) {
             writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
           } else {
             chain.doFilter(request, response)

@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.filter
+package org.eknet.publet.web.req
 
-import grizzled.slf4j.Logging
-import org.eknet.publet.web.{PubletRequestWrapper, PubletWebContext}
-import javax.servlet._
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.Filter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 22.04.12 05:13
+ * @since 27.09.12 15:15
  */
-class WebContextFilter extends Filter with PubletRequestWrapper with Logging {
+trait RequestHandlerFactory {
 
-  def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
-    PubletWebContext.setup(req, resp)
-    try {
-      chain.doFilter(req, resp)
-    } finally {
-      PubletWebContext.clear()
-    }
-  }
+  def getApplicableScore(req: HttpServletRequest): Int
 
-  def init(filterConfig: FilterConfig) {}
+  def createFilter(): Filter
 
-  def destroy() {}
 }
+object RequestHandlerFactory {
+
+  val EXACT_MATCH = 10000
+  val DEFAULT_MATCH = 100
+  val NO_MATCH = Integer.MIN_VALUE
+
+  def nullHandler(): RequestHandlerFactory = NullRequestHandlerFactory
+
+  object NullRequestHandlerFactory extends RequestHandlerFactory {
+    private val filter = new SuperFilter(Seq())
+    def getApplicableScore(req: HttpServletRequest) = 0
+    def createFilter() = filter
+  }
+}
+

@@ -28,11 +28,11 @@
 
 
     <filter>
-        <filter-name>RoutingFilter</filter-name>
-        <filter-class>org.eknet.publet.web.filter.RoutingFilter</filter-class>
+        <filter-name>PubletMainFilter</filter-name>
+        <filter-class>org.eknet.publet.web.req.PubletMainFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>RoutingFilter</filter-name>
+        <filter-name>PubletMainFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

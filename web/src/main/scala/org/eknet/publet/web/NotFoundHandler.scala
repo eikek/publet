@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.filter
+package org.eknet.publet.web
 
 import org.eknet.publet.vfs.Path
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

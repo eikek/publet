@@ -17,24 +17,24 @@
 package org.eknet.publet.web.filter
 
 import org.eclipse.jgit.http.server.GitFilter
-import javax.servlet.FilterConfig
-import org.eknet.publet.web.Config
+import javax.servlet.{FilterChain, ServletResponse, ServletRequest, FilterConfig}
+import org.eknet.publet.web.{PubletRequestWrapper, Config}
 import org.eclipse.jgit.http.server.resolver.DefaultReceivePackFactory
-import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
 import org.eclipse.jgit.lib.Repository
-import java.util.Collection
 import org.eclipse.jgit.transport.{ReceiveCommand, PostReceiveHook, ReceivePack}
 import org.eknet.publet.gitr.{RepositoryName, GitrMan}
 import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 22:56
  */
-class GitHttpFilter(gitr: GitrMan) extends GitFilter with HttpFilter with Logging {
+class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper with Logging {
 
   class TandemUpdateHook(name: RepositoryName) extends PostReceiveHook {
-    def onPostReceive(rp: ReceivePack, commands: Collection[ReceiveCommand]) {
+    def onPostReceive(rp: ReceivePack, commands: java.util.Collection[ReceiveCommand]) {
       gitr.getTandem(name).map { tandem =>
         info("Update work tree at "+ name)
         tandem.updateWorkTree()
@@ -46,12 +46,17 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with HttpFilter with Loggin
     setReceivePackFactory(new DefaultReceivePackFactory() {
       override def create(req: HttpServletRequest, db: Repository) = {
         val pack = super.create(req, db)
-        val utils = getRequestUtils(req)
-        pack.setPostReceiveHook(new TandemUpdateHook(utils.getRepositoryName.get))
+        pack.setPostReceiveHook(new TandemUpdateHook(req.getRepositoryName.get))
         pack
       }
     })
     super.init(new PubletFilterConfig(filterConfig))
+  }
+
+
+  override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+    val req = new PathInfoServletReq(request)
+    super.doFilter(req, response, chain)
   }
 
   class PubletFilterConfig(val delegate: FilterConfig) extends FilterConfig {
@@ -72,5 +77,18 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with HttpFilter with Loggin
     }
 
     def getInitParameterNames = delegate.getInitParameterNames
+  }
+
+  private class PathInfoServletReq(req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
+
+    val gitMount = Config.gitMount
+
+    override def getPathInfo = {
+      val len = req.getContextPath.length + gitMount.length +1
+      getRequestURI.substring(len)
+      //+ (if (getQueryString != null) "?"+getQueryString else "")
+    }
+
+    override def getServletPath = Path(gitMount).toAbsolute.asString
   }
 }

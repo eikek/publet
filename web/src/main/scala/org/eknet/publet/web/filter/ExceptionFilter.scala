@@ -16,20 +16,28 @@
 
 package org.eknet.publet.web.filter
 
-import org.eknet.publet.web.{RequestAttr, RepositoryNameResolver, RequestParams, RequestUrl}
-import javax.servlet.{ServletResponse, ServletRequest}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet._
+import grizzled.slf4j.Logging
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 09.05.12 23:08
+ * @since 27.09.12 17:27
  */
-trait HttpFilter {
+class ExceptionFilter extends Filter with PageWriter with PubletRequestWrapper with Logging {
+  def init(filterConfig: FilterConfig) {}
 
-  def getRequestUtils(req:HttpServletRequest) = new ReqUtils(req)
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+    try {
+      chain.doFilter(request, response)
+    }
+    catch {
+      case e:Throwable => {
+        error("Application error", e)
+        writeError(e, request, response)
+      }
+    }
+  }
 
-  implicit def toHttpReq(request: ServletRequest) = request.asInstanceOf[HttpServletRequest]
-  implicit def toHttpRes(res: ServletResponse) = res.asInstanceOf[HttpServletResponse]
+  def destroy() {}
 }
-
-class ReqUtils(val req: HttpServletRequest) extends RequestAttr with RequestUrl with RequestParams with RepositoryNameResolver

@@ -16,13 +16,12 @@
 
 package org.eknet.publet.web.shiro
 
-import org.eknet.publet.vfs.{ChangeInfo, Path}
+import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eknet.publet.auth._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{RepositoryNameResolver, PubletWeb, PubletWebContext}
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.web.filter.{AuthzFilter, PubletShiroFilter}
 import org.eknet.publet.vfs.ChangeInfo
 
 /**
@@ -39,12 +38,12 @@ object Security extends Logging {
    *
    * @return
    */
-  def securityFilterEnabled = PubletShiroFilter.shiroFilterEnabled
+  def securityFilterEnabled = AuthcFilter.authenticationEnabled(PubletWebContext.req)
 
   def subject = SecurityUtils.getSubject
 
   def isAuthenticated = {
-    if (!PubletShiroFilter.shiroFilterEnabled) false
+    if (!securityFilterEnabled) false
     else subject.getPrincipals != null
   }
 
@@ -180,8 +179,40 @@ object Security extends Logging {
     }
   }
 
-  def hasReadPermission(appUri: String): Boolean = {
-    AuthzFilter.hasAccessToResource(appUri)
+  /**
+   * Returns whether the current request can access the resource at
+   * the specified uri.
+   *
+   * The request is allowed, if the resource is explicitely marked
+   * with an `anon` permission. If it is marked with another permission,
+   * it checks the permission against the principal of the current request.
+   *
+   * If no permission is specified, it is checked whether the resource
+   * belongs to a git repository. If it is an open git repository, access
+   * is granted. Otherwise `pull` permission is checked.
+   *
+   * If the resource it not marked with an explicit permission and neither
+   * belongs to a git repository, it is considered an open resource and
+   * any request may access it.
+   *
+   * @param applicationUri
+   * @return
+   */
+  def hasReadPermission(applicationUri: String): Boolean = {
+    lazy val repoModel = RepositoryNameResolver
+      .getRepositoryName(Path(applicationUri), isGitRequest = false)
+      .map(name => PubletWeb.authManager.getRepository(name.name))
+
+    lazy val hasPull = repoModel map { repoModel =>
+      Security.hasGitAction(GitAction.pull, repoModel)
+    }
+
+    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {
+      if (rc.perm.isAnon) true
+      else Security.hasPerm(rc.perm.permString)
+    }) getOrElse {
+      hasPull getOrElse (true)
+    }
   }
 
 }

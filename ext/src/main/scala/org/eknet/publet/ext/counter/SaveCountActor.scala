@@ -1,9 +1,9 @@
 package org.eknet.publet.ext.counter
 
-import actors.{DaemonActor, Actor}
-import org.eknet.publet.web.ClientInfo
+import actors.DaemonActor
 import java.util.concurrent.TimeUnit
 import org.fusesource.scalate.util.Logging
+import org.eknet.publet.web.util.ClientInfo
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

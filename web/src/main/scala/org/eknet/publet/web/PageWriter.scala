@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.filter
+package org.eknet.publet.web
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eknet.publet.vfs._
@@ -22,7 +22,6 @@ import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
 import org.eknet.publet.web.util.RenderUtils
-import org.eknet.publet.web._
 
 /**
  *

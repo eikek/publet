@@ -28,7 +28,7 @@ import javax.servlet.DispatcherType
 import javax.servlet.http.HttpServlet
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eknet.publet.war.PubletContextListener
-import org.eknet.publet.web.filter.RoutingFilter
+import org.eknet.publet.web.req.PubletMainFilter
 
 /**
  * Configures the jetty server programmatically. No web.xml is needed, use this
@@ -73,7 +73,7 @@ class CodeWebappConfigurer(pluginDir: Option[File]) extends WebAppConfigurer {
     val sch = new ServletContextHandler(server, "/", ServletContextHandler.NO_SECURITY)
     sch.setBaseResource(baseResource)
     sch.setSessionHandler(new SessionHandler())
-    sch.addFilter(classOf[RoutingFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
+    sch.addFilter(classOf[PubletMainFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
     sch.addEventListener(new PubletContextListener)
     val nullServletHolder = new ServletHolder()
     nullServletHolder.setServlet(new HttpServlet {})

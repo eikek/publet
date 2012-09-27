@@ -17,9 +17,7 @@
 package org.eknet.publet.web
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import util.{Request, Key, AttributeMap}
-import java.util.Locale
-
+import util.{ClientInfo, Request, Key}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,7 +39,7 @@ object PubletWebContext extends RequestAttr with RequestParams with RequestUrl w
   // ~~~
 
   private def cycle = Option(threadCycle.get()).getOrElse(sys.error("WebContext not initialized"))
-  protected def req = cycle.req
+  protected[web] def req = cycle.req
   protected def res = cycle.res
 
 
@@ -54,9 +52,7 @@ object PubletWebContext extends RequestAttr with RequestParams with RequestUrl w
    * the current request as parameter with name `redirect`
    */
   def redirectToLoginPage() {
-    val p = params.map(t => t._1 +"="+ t._2.mkString(",")).mkString("&")
-    val uri = applicationUri + (if (p.isEmpty) "" else "?"+p)
-    redirect(urlOf(PubletWeb.getLoginPath)+"?redirect="+ urlOf(uri))
+    new ReqUtils(req).redirectToLoginPage(res)
   }
 
   def getClientInfo = attr(clientInfoKey).get

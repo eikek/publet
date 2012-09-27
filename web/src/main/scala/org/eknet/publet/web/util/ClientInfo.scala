@@ -1,7 +1,6 @@
-package org.eknet.publet.web
+package org.eknet.publet.web.util
 
 import javax.servlet.http.HttpServletRequest
-import util.{Request, Key}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

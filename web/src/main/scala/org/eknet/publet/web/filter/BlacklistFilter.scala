@@ -18,9 +18,8 @@ package org.eknet.publet.web.filter
 
 import javax.servlet._
 import http.HttpServletResponse
-import org.eknet.publet.web.PubletWebContext
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.util.RenderUtils
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
 
 
 /**
@@ -30,12 +29,12 @@ import org.eknet.publet.web.util.RenderUtils
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.05.12 20:33
  */
-class BlacklistFilter extends Filter with HttpFilter with Logging with PageWriter {
+class BlacklistFilter extends Filter with PubletRequestWrapper with Logging with PageWriter {
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    if (!PubletWebContext.isGitRequest) {
-      val path = PubletWebContext.applicationPath
+    if (!request.isGitRequest) {
+      val path = request.applicationPath
       val underscoreSegment = path.segments.find(_.startsWith("_"))
       if (underscoreSegment.isDefined) {
         info("Blacklist-Filter wiping: "+ path.asString)

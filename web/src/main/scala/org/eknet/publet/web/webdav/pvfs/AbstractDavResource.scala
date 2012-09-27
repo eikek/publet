@@ -1,8 +1,7 @@
 package org.eknet.publet.web.webdav.pvfs
 
 import java.util
-import org.eknet.publet.web.PubletWeb
-import org.eknet.publet.web.webdav.WebdavFilter
+import org.eknet.publet.web.webdav.WebdavResource
 import com.bradmcevoy.http.{Request, PropFindableResource, Resource}
 
 /**
@@ -17,7 +16,7 @@ abstract class AbstractDavResource extends Resource with PropFindableResource wi
 
   def getName: String = ""
 
-  def getRealm: String = WebdavFilter.getRealmName
+  def getRealm: String = WebdavResource.getRealmName
 
   def getModifiedDate: util.Date = null
 

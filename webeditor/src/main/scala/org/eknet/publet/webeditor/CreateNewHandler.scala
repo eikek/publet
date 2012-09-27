@@ -17,10 +17,10 @@
 package org.eknet.publet.webeditor
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.eknet.publet.web.filter.{PageWriter, NotFoundHandler}
 import org.eknet.publet.vfs._
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{ErrorResponse, PubletWebContext, PubletWeb}
+import org.eknet.publet.web._
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

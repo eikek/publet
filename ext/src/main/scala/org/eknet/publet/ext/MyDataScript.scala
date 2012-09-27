@@ -21,7 +21,7 @@ import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.{PubletAuth, User, UserProperty}
 import org.eknet.publet.vfs.Content
-import org.eknet.publet.web.webdav.WebdavFilter
+import org.eknet.publet.web.webdav.WebdavResource
 import com.bradmcevoy.http.http11.auth.DigestGenerator
 
 /**
@@ -68,7 +68,7 @@ class MyDataScript extends ScalaScript {
     val user = PubletWeb.authManager.findUser(Security.username).get
 
     val newpass = PubletAuth.encryptPassword(newpassPlain, algorithm)
-    val newdigest = digestGenerator.encodePasswordInA1Format(user.login, WebdavFilter.getRealmName, newpassPlain)
+    val newdigest = digestGenerator.encodePasswordInA1Format(user.login, WebdavResource.getRealmName, newpassPlain)
     val newUser = new User(user.login, newpass.toCharArray, Some(algorithm), newdigest.toCharArray, user.groups, user.properties)
     PubletWeb.authManager.updateUser(newUser)
     success("Password updated.")

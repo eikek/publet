@@ -16,7 +16,6 @@
 
 package org.eknet.publet.web
 
-import filter.{PageWriter, NotFoundHandler}
 import javax.servlet.ServletContext
 import scripts._
 import shiro.{UsersRealm, AuthManager}
@@ -24,7 +23,7 @@ import org.eknet.publet.partition.git.{GitPartition, GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
-import template.{IncludeResourceLoader, IncludeLoader, ConfiguredScalateEngine, Templates}
+import template.{IncludeLoader, ConfiguredScalateEngine, Templates}
 import util.{PropertiesMap, AttributeMap, Context, Key}
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver

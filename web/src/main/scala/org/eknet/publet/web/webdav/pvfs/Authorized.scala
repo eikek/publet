@@ -2,7 +2,6 @@ package org.eknet.publet.web.webdav.pvfs
 
 import org.eknet.publet.web.shiro.{DigestAuthenticationToken, Security}
 import org.eknet.publet.web.PubletWebContext
-import org.eknet.publet.web.filter.AuthzFilter
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.UsernamePasswordToken
 import grizzled.slf4j.Logging
@@ -30,7 +29,7 @@ trait Authorized extends Resource with Logging with DigestResource {
       Security.hasWritePermission(PubletWebContext.applicationPath)
     } else {
       trace("WebDAV: authorize read!")
-      AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)
+      Security.hasReadPermission(PubletWebContext.applicationUri)
     }
   }
 
@@ -53,7 +52,7 @@ trait Authorized extends Resource with Logging with DigestResource {
 
   private def findPrincipal = {
     val p = SecurityUtils.getSubject.getPrincipal
-    if (p == null && AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)) {
+    if (p == null && Security.hasReadPermission(PubletWebContext.applicationUri)) {
       "anonymous" //must return something in order to allow anonymous access
     } else {
       p
@@ -77,7 +76,7 @@ trait Authorized extends Resource with Logging with DigestResource {
       !Security.hasWritePermission(PubletWebContext.applicationPath)
     } else {
       trace("WebDAV: authorize read!")
-      !AuthzFilter.hasAccessToResource(PubletWebContext.applicationUri)
+      !Security.hasReadPermission(PubletWebContext.applicationUri)
     }
   }
 }
