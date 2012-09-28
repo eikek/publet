@@ -20,10 +20,9 @@ import org.eknet.publet.vfs._
 import java.io.File
 import fs.FilesystemPartition
 import scala.Option
-import org.apache.shiro.{ShiroException, SecurityUtils}
+import org.apache.shiro.SecurityUtils
 import grizzled.slf4j.Logging
 import org.eknet.publet.gitr.Tandem
-import org.eknet.publet.auth.{UserProperty, User}
 
 class GitPartition (val tandem: Tandem)
   extends FilesystemPartition(tandem.workTree.getWorkTree, false) with Logging {

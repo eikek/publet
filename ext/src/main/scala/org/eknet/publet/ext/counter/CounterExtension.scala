@@ -1,10 +1,7 @@
 package org.eknet.publet.ext.counter
 
 import org.eknet.publet.web.{PubletWeb, PubletWebContext, WebExtension}
-import com.tinkerpop.blueprints.Vertex
 import org.eknet.publet.web.util.Key
-import com.orientechnologies.orient.core.Orient
-import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 
 /**
  * Installs the [[org.eknet.publet.ext.counter.CounterService]] and a thread that

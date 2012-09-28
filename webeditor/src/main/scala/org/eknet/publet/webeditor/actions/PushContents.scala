@@ -21,7 +21,6 @@ import org.eknet.publet.web.shiro.Security
 import java.io.ByteArrayInputStream
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.auth.GitAction
 import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.util.RenderUtils
 import org.eknet.publet.webeditor.EditorPaths

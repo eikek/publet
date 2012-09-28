@@ -17,14 +17,8 @@
 package org.eknet.publet.war
 
 import javax.servlet.{ServletContextEvent, ServletContextListener}
-import org.eknet.publet.web.{Config, WebExtension, PubletWeb}
+import org.eknet.publet.web.{Config, PubletWeb}
 import java.io.File
-import org.slf4j.LoggerFactory
-import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.classic.joran.JoranConfigurator
-import ch.qos.logback.core.joran.spi.JoranException
-import ch.qos.logback.core.util.StatusPrinter
-import java.util.ServiceLoader
 import grizzled.slf4j.Logging
 
 

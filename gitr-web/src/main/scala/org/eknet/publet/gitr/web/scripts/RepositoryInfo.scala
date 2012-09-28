@@ -17,8 +17,7 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.gitr.GitrRepository
-import org.eknet.publet.auth.{GitAction, RepositoryModel, RepositoryTag}
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
+import org.eknet.publet.auth.{GitAction, RepositoryModel}
 import org.eknet.publet.web.shiro.Security
 import org.eclipse.jgit.lib.Constants
 

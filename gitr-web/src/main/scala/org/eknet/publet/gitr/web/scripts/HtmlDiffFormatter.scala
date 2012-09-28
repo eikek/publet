@@ -1,11 +1,6 @@
 package org.eknet.publet.gitr.web.scripts
 
-import java.util.List
-import org.eclipse.jgit.diff.{RawText, EditList, DiffEntry, DiffFormatter}
-import org.eclipse.jgit.patch.FileHeader
-import org.eclipse.jgit.patch.FileHeader.PatchType
-import collection.mutable.ListBuffer
-import org.eclipse.jgit.diff.DiffEntry.ChangeType
+import org.eclipse.jgit.diff.{RawText, DiffFormatter}
 import java.io.{ByteArrayOutputStream, OutputStream}
 import org.eclipse.jgit.util.RawParseUtils
 

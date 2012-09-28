@@ -20,7 +20,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.web.filter._
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
-import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter, Security}
+import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 
 /**

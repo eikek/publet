@@ -6,7 +6,6 @@ import GitrControl._
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
 import org.eknet.publet.web.shiro.Security
-import org.apache.shiro.authz.UnauthorizedException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

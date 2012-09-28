@@ -22,7 +22,7 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import grizzled.slf4j.Logging
 import org.eknet.publet.engine.scalate.ScalateEngine
-import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -18,9 +18,8 @@ package org.eknet.publet.server
 
 import org.eclipse.jetty.server.{Connector, Server}
 import org.eclipse.jetty.server.nio.SelectChannelConnector
-import org.eclipse.jetty.webapp.WebAppContext
 import grizzled.slf4j.Logging
-import java.io.{FileFilter, File}
+import java.io.File
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory

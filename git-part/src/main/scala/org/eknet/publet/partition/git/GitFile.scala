@@ -20,7 +20,6 @@ import org.eknet.publet.vfs.fs.FileResource
 import java.io.{OutputStream, InputStream, File}
 import scala.Option
 import org.eknet.publet.vfs.{ChangeInfo, Content, Path}
-import org.eknet.publet.auth.User
 
 class GitFile(f: File,
               rootPath: Path,

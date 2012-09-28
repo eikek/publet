@@ -21,7 +21,6 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
 import util.PropertiesMap
-import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.partition.git
 
 /**

@@ -17,7 +17,7 @@
 package org.eknet.publet.doc
 
 import org.eknet.publet.vfs.util.ClasspathContainer
-import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 

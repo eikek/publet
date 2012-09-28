@@ -18,9 +18,7 @@ package org.eknet.publet.web.req
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.filter._
-import org.eknet.publet.web.webdav.WebdavFilter
 import RequestHandlerFactory._
-import org.eknet.publet.web.shiro.AuthcFilter
 import org.eknet.publet.web.PubletRequestWrapper
 
 /**

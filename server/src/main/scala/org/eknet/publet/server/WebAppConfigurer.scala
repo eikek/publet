@@ -17,7 +17,7 @@
 package org.eknet.publet.server
 
 import org.eclipse.jetty.webapp.WebAppContext
-import java.io.{FileFilter, File}
+import java.io.File
 import org.eclipse.jetty.server.session.HashSessionManager
 import org.eclipse.jetty.server.Server
 

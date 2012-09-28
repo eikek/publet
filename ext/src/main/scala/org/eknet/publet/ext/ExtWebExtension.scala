@@ -19,7 +19,7 @@ package org.eknet.publet.ext
 import org.eknet.publet.Publet
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{EmptyExtension, PubletWebContext, PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 

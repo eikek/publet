@@ -23,7 +23,6 @@ import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import ScalaScript._
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.auth.{RepositoryModel, RepositoryTag}
-import org.eknet.publet.auth.xml.PermissionModel
 
 class GitrCreate extends ScalaScript {
 

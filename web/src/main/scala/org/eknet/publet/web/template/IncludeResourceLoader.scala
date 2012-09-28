@@ -17,7 +17,7 @@
 package org.eknet.publet.web.template
 
 import org.fusesource.scalate.util.{Resource, ResourceLoader}
-import org.eknet.publet.vfs.{ContentResource, Path}
+import org.eknet.publet.vfs.ContentResource
 import org.eknet.publet.engine.scalate.TemplateResource
 import org.eknet.publet.web.PubletWeb
 

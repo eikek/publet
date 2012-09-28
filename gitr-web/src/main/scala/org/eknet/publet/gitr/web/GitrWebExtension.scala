@@ -16,7 +16,7 @@
 
 package org.eknet.publet.gitr.web
 
-import org.eknet.publet.web.{EmptyExtension, PubletWeb, WebExtension}
+import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.scripts.WebScriptResource

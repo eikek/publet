@@ -23,7 +23,7 @@ import util.Random
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import ScalaScript._
-import org.eknet.publet.web.util.{Session, Key}
+import org.eknet.publet.web.util.Key
 import org.eknet.publet.web.PubletWebContext
 
 /**Script generates a png image containing a random string. The

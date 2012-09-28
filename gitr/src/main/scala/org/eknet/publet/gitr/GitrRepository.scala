@@ -46,7 +46,7 @@ import org.eclipse.jgit.revwalk._
 import java.util.Date
 import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, TreeFilter, PathFilter}
 import org.eclipse.jgit.diff.{DiffFormatter, RawTextComparator}
-import java.io.{ByteArrayOutputStream, OutputStream, InputStream, File}
+import java.io.{ByteArrayOutputStream, InputStream, File}
 import org.eclipse.jgit.diff.DiffEntry.ChangeType
 import GitrRepository._
 import org.eclipse.jgit.util.io.DisabledOutputStream

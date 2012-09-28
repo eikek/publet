@@ -21,7 +21,7 @@ import org.eknet.publet.impl.PubletImpl
 import java.io.File
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
-import scala.{None, Some}
+import scala.None
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

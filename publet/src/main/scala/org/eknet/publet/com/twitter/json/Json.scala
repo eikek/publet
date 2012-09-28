@@ -16,7 +16,6 @@ package org.eknet.publet.com.twitter.json
  * limitations under the License.
  */
 
-import extensions._
 import scala.util.Sorting
 import scala.util.parsing.combinator._
 

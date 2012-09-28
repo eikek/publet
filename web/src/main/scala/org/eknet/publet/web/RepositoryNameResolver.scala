@@ -21,7 +21,7 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.auth.{GitAction, RepositoryTag, RepositoryModel}
+import org.eknet.publet.auth.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

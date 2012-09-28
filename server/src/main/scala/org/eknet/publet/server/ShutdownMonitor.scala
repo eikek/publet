@@ -16,8 +16,8 @@
 
 package org.eknet.publet.server
 
-import actors.{DaemonActor, Actor}
-import java.net.{Socket, InetAddress, ServerSocket}
+import actors.DaemonActor
+import java.net.{InetAddress, ServerSocket}
 import grizzled.slf4j.Logging
 import java.io.{InputStreamReader, BufferedReader}
 

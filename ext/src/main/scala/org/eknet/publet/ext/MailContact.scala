@@ -19,9 +19,7 @@ package org.eknet.publet.ext
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.eknet.publet.ext.MailSupport._
-import org.eknet.publet.web.util.RenderUtils._
 import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
-import org.eknet.publet.web.util.Key
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

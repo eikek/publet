@@ -18,7 +18,7 @@ package org.eknet.publet.server
 
 import grizzled.slf4j.Logging
 import java.net.{InetAddress, Socket}
-import java.io.{FileInputStream, File}
+import java.io.FileInputStream
 import java.util
 import FileHelper._
 

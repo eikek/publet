@@ -20,7 +20,6 @@ import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
 import xml.{XML, NodeSeq}
 import scala.Some
-import org.eknet.publet.web.Config.mainMount
 import org.eknet.publet.web.{PubletWeb, PubletWebContext, Config}
 
 

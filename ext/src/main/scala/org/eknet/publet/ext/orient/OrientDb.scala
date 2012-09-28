@@ -1,7 +1,7 @@
 package org.eknet.publet.ext.orient
 
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
-import com.tinkerpop.blueprints.{Edge, Vertex}
+import com.tinkerpop.blueprints.Vertex
 import java.io.File
 import org.eknet.publet.web.Config
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException

@@ -1,6 +1,6 @@
 package org.eknet.publet.web.webdav
 
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.PubletWeb
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import com.bradmcevoy.http.ResourceFactory

@@ -21,7 +21,7 @@ import grizzled.slf4j.Logging
 import org.eclipse.jgit.util.FS
 import java.io.{FileFilter, File}
 import org.eclipse.jgit.lib.RepositoryCache
-import java.nio.file.{Paths, StandardCopyOption, CopyOption, Files}
+import java.nio.file.{StandardCopyOption, Files}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
