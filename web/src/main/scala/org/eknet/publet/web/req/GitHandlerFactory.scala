@@ -36,9 +36,9 @@ class GitHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper 
     if (req.isGitRequest) EXACT_MATCH else NO_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-      new WebContextFilter,
+      Filters.webContext,
       GitShiroFilter,
-      new ExceptionFilter,
+      Filters.exceptionHandler,
       GitAuthzFilter,
       new GitHttpFilter(PubletWeb.gitr)
     ))

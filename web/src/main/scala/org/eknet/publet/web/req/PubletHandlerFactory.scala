@@ -32,14 +32,14 @@ class PubletHandlerFactory extends RequestHandlerFactory {
   def getApplicableScore(req: HttpServletRequest) = DEFAULT_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-      new RedirectFilter,
-      new WebContextFilter,
-      new BlacklistFilter,
-      new AuthcFilter,
-      new ExceptionFilter,
+      Filters.redirect,
+      Filters.webContext,
+      Filters.blacklist,
+      Filters.authc,
+      Filters.exceptionHandler,
       PubletAuthzFilter,
-      new SourceFilter,
-      new PubletFilter
+      Filters.source,
+      Filters.publet
     ))
 
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) {

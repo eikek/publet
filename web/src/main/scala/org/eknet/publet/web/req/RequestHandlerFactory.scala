@@ -36,7 +36,7 @@ object RequestHandlerFactory {
   val DEFAULT_MATCH = 100
   val NO_MATCH = Integer.MIN_VALUE
 
-  def nullHandler(): RequestHandlerFactory = NullRequestHandlerFactory
+  val nullHandler: RequestHandlerFactory = NullRequestHandlerFactory
 
   object NullRequestHandlerFactory extends RequestHandlerFactory {
     private val filter = new SuperFilter(Seq())

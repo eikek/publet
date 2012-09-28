@@ -35,11 +35,11 @@ class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapp
     if (req.isDavRequest) EXACT_MATCH else NO_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-    new WebContextFilter,
-    new AuthcFilter,
-    new ExceptionFilter,
-    new ExtensionRequestFilter,
-    new WebdavFilter
+    Filters.webContext,
+    Filters.authc,
+    Filters.exceptionHandler,
+    Filters.extensionRequest,
+    Filters.webdav
   ))
 
 }

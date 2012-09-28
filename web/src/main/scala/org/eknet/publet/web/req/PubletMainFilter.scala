@@ -47,7 +47,7 @@ class PubletMainFilter extends Filter with Logging {
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     val start = if (isDebugEnabled) Some(System.currentTimeMillis()) else None
     val req = request.asInstanceOf[HttpServletRequest]
-    val handler = handlerFactories.foldLeft(nullHandler())((f1, f2) => {
+    val handler = handlerFactories.foldLeft(nullHandler)((f1, f2) => {
       f1.getApplicableScore(req) match {
         case score1 if (score1 == NO_MATCH) => f2
         case score1 => {
