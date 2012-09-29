@@ -2,8 +2,6 @@
 title: Gitr Web
 
 --- name:head pipeline:jade
-link(rel="stylesheet" href="gitr.css")
-script(src="gitr-browser.js" type="text/javascript")
 :javascript
   $(function() {
     $('#searchRev').on('click', function(e) {

@@ -23,6 +23,7 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 import java.net.URL
 import scripts._
+import org.eknet.publet.web.asset.{Group, AssetExtension}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -59,6 +60,15 @@ class GitrWebExtension extends EmptyExtension {
     pages.addResource(new WebScriptResource("transferOwnership.json".rn, new TransferOwner()))
     pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
     PubletWeb.publet.mountManager.mount(GitrControl.mountPoint.p, pages)
+
+    val gitrPath = (GitrControl.mountPoint.p / "/**").asString
+    AssetExtension.assetManager setup (
+      Assets.gitrBrowser.forPath(gitrPath),
+      Assets.gitrListing.forPath(gitrPath),
+      Assets.gitrweb.forPath(gitrPath))
+
+    AssetExtension.assetManager setup
+      Group("default").use(Assets.gitrweb.name)
   }
 
   private def toUrl(name: String): URL = {
