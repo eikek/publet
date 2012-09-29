@@ -22,6 +22,7 @@ import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
+import org.eknet.publet.web.asset.AssetFilter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,6 +35,7 @@ class PubletHandlerFactory extends RequestHandlerFactory {
   def createFilter() = new SuperFilter(Seq(
       Filters.redirect,
       Filters.webContext,
+      new AssetFilter,
       Filters.blacklist,
       Filters.authc,
       Filters.exceptionHandler,

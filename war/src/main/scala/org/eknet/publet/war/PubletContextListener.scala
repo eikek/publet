@@ -41,6 +41,9 @@ class PubletContextListener extends ServletContextListener with Logging with Log
            |""".stripMargin)
     try {
       PubletWeb.initialize(sce.getServletContext, initLogging)
+      if (Config.mode == "development") {
+        info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))
+      }
       info(">>> publet initialized.\n")
     }
     catch {

@@ -131,6 +131,15 @@ object Config extends PropertiesMap with Logging {
   def gitMount = apply("publet.gitMount").getOrElse("git")
 
   /**
+   * Returns the current mode the application is in, which is either
+   * `development` (the default), or the string defined in `publet.properties`
+   * associated to the key `publet.mode`.
+   *
+   * @return
+   */
+  def mode = apply("publet.mode").getOrElse("development")
+
+  /**
    * Returns a file beneath configuration directory of this
    * application.
    * @param name

@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.template
+package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{EmptyExtension, PubletWeb}
-import org.eknet.publet.vfs.util.ClasspathContainer
-import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.{ContentResource, Writeable}
+import org.eknet.publet.web.asset.AssetProcessor
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 19.05.12 18:25
+ * @since 29.09.12 01:28
  */
-class BootstrapTemplate extends EmptyExtension with Logging {
+class CssCompressor extends AssetProcessor {
 
-  override def onStartup() {
-    val publ = PubletWeb.publet
-    Templates.mountJQuery(publ)
-    Templates.mountHighlightJs(publ)
-    publ.mountManager.mount(Path("/publet/bootstrap/"),
-      new ClasspathContainer(base = "/org/eknet/publet/web/includes/bootstrap"))
-
-    PubletWeb.scalateEngine.setDefaultLayoutUri("/publet/bootstrap/bootstrap.single.jade")
+  def createResource(list: List[ContentResource], target: Writeable) {
+    val ins = list.map(_.inputStream)
+    val input = ConcatInputStream(ins)
+    target.writeFrom(input)
   }
 
 }

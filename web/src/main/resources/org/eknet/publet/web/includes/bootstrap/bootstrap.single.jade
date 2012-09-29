@@ -7,6 +7,7 @@
 -@ val useHighlightJs: Boolean = PubletWeb.publetSettings("publet.useHighlightJs").getOrElse("true").toBoolean
 -@ val footer: String = null
 -@ val navigationBar: String = null
+-@ val assetGroups: String = null
 - val ctx = PubletWebContext
 - val home = ctx.urlOf("/")
 - val highlightCss = ctx.urlOf("/publet/highlightjs/styles/"+ highlightTheme +".css")
@@ -15,27 +16,23 @@
 html
   head
     meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery-1.8.2.min.js") })
-    script(type="text/javascript" src={ ctx.urlOf("/publet/jquery/jquery.form.js") })
-
-    link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.min.css") } rel="stylesheet")
-    script(type="text/javascript" src={ ctx.urlOf("/publet/bootstrap/js/bootstrap.min.js") })
-    link(href={ ctx.urlOf("/publet/bootstrap/css/bootstrap.custom.css") } rel="stylesheet")
+    - if (assetGroups == null)
+      - if (useHighlightJs)
+        =loadAssets("default")
+      - else
+        =loadAssets("defaultNoHighlightJs")
+    - else
+      - if (useHighlightJs)
+        =loadAssets((Seq("default") ++ assetGroups.split("\\s*,\\s*")): _*)
+      - else
+        =loadAssets((Seq("defaultNoHighlightJs") ++ assetGroups.split("\\s*,\\s*")): _*)
 
     - if (useHighlightJs)
-      script(type="text/javascript" src={ ctx.urlOf("/publet/highlightjs/highlight.pack.js") })
       link(href={ highlightCss } rel="stylesheet")
-      :javascript
-            hljs.initHighlightingOnLoad();
       - if (highlightTheme == "googlecode")
         :css
           pre code { background: inherit; }
 
-    script(type="text/javascript" src={ ctx.urlOf("/publet/spinjs/spin.min.js") })
-    script(type="text/javascript" src={ ctx.urlOf("/publet/loadmask/jquery.loadmask.spin.js") })
-    link(href={ ctx.urlOf("/publet/loadmask/jquery.loadmask.spin.css") } rel="stylesheet")
-
-    script(type="text/javascript" src={ ctx.urlOf("/publet/js/publet.js") })
     - if (searchForHeadIncludes)
       =loadHeadIncludes()
 

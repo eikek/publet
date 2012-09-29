@@ -2,6 +2,7 @@ package org.eknet.publet.web.filter
 
 import org.eknet.publet.web.shiro.AuthcFilter
 import org.eknet.publet.web.webdav.WebdavFilter
+import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
 
 /**
  *
@@ -20,4 +21,12 @@ object Filters {
   val webContext = new WebContextFilter
   val authc = new AuthcFilter
   val webdav = new WebdavFilter
+
+  private[web] class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
+    import collection.JavaConversions._
+
+    req.getAttributeNames.toList.withFilter(!_.contains("eclipse.jetty")).foreach(key => req.removeAttribute(key))
+
+    override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
+  }
 }
