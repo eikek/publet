@@ -27,7 +27,7 @@ class UrlResource(val url: Option[URL], val name: ResourceName) extends ContentR
 
   def this(url: URL, name: ResourceName) = this(Some(url), name)
 
-  def this(url: URL) = this(Some(url), ResourceName(url.getFile))
+  def this(url: URL) = this(Some(url), Path(url.getPath).name)
 
   override def lastModification = url.get.openConnection().getLastModified match {
     case 0 => None
