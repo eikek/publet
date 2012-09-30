@@ -25,7 +25,7 @@ import org.eknet.publet.Glob
  */
 final case class Group(name: String,
                   pathPattern: Glob = Glob("**"),
-                  resources: List[ContentResource] = Nil,
+                  resources: List[AssetResource] = Nil,
                   befores: Set[String] = Set(),
                   afters: Set[String] = Set(),
                   uses: Set[String] = Set()) {
@@ -36,16 +36,16 @@ final case class Group(name: String,
    * @param r
    * @return
    */
-  def add(r: ContentResource): Group =
-    Group(name, pathPattern, r :: resources, befores, afters, uses)
+  def add(r: AssetResource): Group =
+    Group(name, pathPattern, r.inGroup(name) :: resources, befores, afters, uses)
 
   /**
    * Creates a new group with the given resources.
    * @param rs
    * @return
    */
-  def add(rs: Iterable[ContentResource]): Group =
-    Group(name, pathPattern, rs.toList ::: resources, befores, afters, uses)
+  def add(rs: Iterable[AssetResource]): Group =
+    Group(name, pathPattern, rs.map(_.inGroup(name)).toList ::: resources, befores, afters, uses)
 
   /**
    * Creates a new group with all child resources of the container whose
@@ -55,10 +55,17 @@ final case class Group(name: String,
    * @return
    */
   def add(c: Container): Group = {
-    val list = c.children.collect({ case r: ContentResource => r})
+    val list = c.children.collect({ case r: ContentResource => new AssetResource(r).inGroup(name) })
     add(list)
   }
 
+  /**
+   * Specify a glob pattern such that this group is only active
+   * when the path is matching this glob.
+   *
+   * @param glob
+   * @return
+   */
   def forPath(glob: String) =
     Group(name, Glob(glob), resources, befores, afters, uses)
 

@@ -4,10 +4,10 @@
 -@ val highlightTheme: String = PubletWeb.publetSettings("publet.highlightTheme").getOrElse("googlecode")
 -@ val searchForSidebar: Boolean = PubletWeb.publetSettings("publet.searchForSidebar").getOrElse("true").toBoolean
 -@ val searchForHeadIncludes: Boolean = PubletWeb.publetSettings("publet.searchForHeadIncludes").getOrElse("true").toBoolean
--@ val useHighlightJs: Boolean = PubletWeb.publetSettings("publet.useHighlightJs").getOrElse("true").toBoolean
 -@ val footer: String = null
 -@ val navigationBar: String = null
 -@ val assetGroups: String = null
+-@ val defaultAssetGroup: String = "default"
 - val ctx = PubletWebContext
 - val home = ctx.urlOf("/")
 - val highlightCss = ctx.urlOf("/publet/highlightjs/styles/"+ highlightTheme +".css")
@@ -17,17 +17,11 @@ html
   head
     meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
     - if (assetGroups == null)
-      - if (useHighlightJs)
-        =loadAssets("default")
-      - else
-        =loadAssets("defaultNoHighlightJs")
+      =loadAssets(defaultAssetGroup)
     - else
-      - if (useHighlightJs)
-        =loadAssets((Seq("default") ++ assetGroups.split("\\s*,\\s*")): _*)
-      - else
-        =loadAssets((Seq("defaultNoHighlightJs") ++ assetGroups.split("\\s*,\\s*")): _*)
+      =loadAssets((Seq(defaultAssetGroup) ++ assetGroups.split("\\s*,\\s*")): _*)
 
-    - if (useHighlightJs)
+    - if (defaultAssetGroup == "default")
       link(href={ highlightCss } rel="stylesheet")
       - if (highlightTheme == "googlecode")
         :css

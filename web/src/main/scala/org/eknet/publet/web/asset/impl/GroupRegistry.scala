@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2012 Eike Kettner
  *
@@ -19,7 +20,7 @@ package org.eknet.publet.web.asset.impl
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.Glob
 import collection.mutable.ListBuffer
-import org.eknet.publet.web.asset.{Kind, Group}
+import org.eknet.publet.web.asset.{AssetResource, Kind, Group}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,6 +37,21 @@ class GroupRegistry {
     }
   }
 
+  def getGroups = graph.values.map(_.group).toList
+
+  def getSourcesUnordered = graph.values.flatMap(_.group.resources)
+
+  /**
+   * Returns all resources of types not listed in [[org.eknet.publet.web.asset.Kind]]
+   * for the specified group.
+   *
+   * @param group
+   * @param path
+   * @return
+   */
+  def getUnknownResources(group: String, path: Option[Path]) =
+    collectSources(group, path, f => !Kind.values.toSet.contains(f.name.ext))
+
   /**
    * Returns all sources registered with the given group in the
    * correct order.
@@ -43,7 +59,10 @@ class GroupRegistry {
    * @param group
    * @return
    */
-  def getSources(group: String, path: Path, kind: Kind.KindVal) = {
+  def getSources(group: String, path: Option[Path], kind: Kind.KindVal) =
+    collectSources(group, path, f => f.name.ext == kind.ext)
+
+  private def collectSources(group: String, path: Option[Path], predicate: AssetResource => Boolean) = {
     val root = graph.get(group).getOrElse(sys.error("Asset group '"+ group+"' not registered."))
     def collect(nodes: Set[Node]): List[Set[Node]] = {
       if (nodes.exists(!_.group.uses.isEmpty)) {
@@ -56,15 +75,19 @@ class GroupRegistry {
       }
     }
     //collect minimum node list
-    val nodeList = collect(Set(root)).flatten
-      .distinct
-      .filter(_.group.pathPattern.matches(path.asString))
+    val nodeList = path match {
+      case Some(p) => collect(Set(root)).flatten
+        .distinct
+        .filter(_.group.pathPattern.matches(p.asString))
+      case _ => collect(Set(root)).flatten
+        .distinct
+    }
 
     //create graph for sorting
     val sorted = new Graph(nodeList).topoSort
 
     // topo-sort to resource-list
-    sorted.flatMap(_.group.resources.reverse.filter(_.name.ext == kind.ext))
+    sorted.flatMap(_.group.resources.reverse.filter(predicate))
   }
 
   private class Graph(nodeList: Seq[Node]) {

@@ -21,8 +21,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.eknet.publet.vfs.Path
 import Path._
 import org.eknet.publet.impl.PubletImpl
-import org.eknet.publet.web.asset.{Kind, Group, AssetManager}
-import org.eknet.publet.vfs.fs.FilesystemPartition
+import org.eknet.publet.web.asset.{Kind, Group}
 import java.io.File
 import java.nio.file.Files
 import ResourceHelper._
@@ -38,12 +37,12 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
   var assetMgr: DefaultAssetManager = _
   var tempDir: File = _
 
+  implicit def toSome(p:Path) = Some(p)
+
   before {
     publet = new PubletImpl
     tempDir = Files.createTempDirectory("testassets").toFile
-    publet.mountManager.mount(AssetManager.assetPath.p,
-      new FilesystemPartition(tempDir, true))
-    assetMgr = new DefaultAssetManager(publet)
+    assetMgr = new DefaultAssetManager(publet, tempDir)
   }
 
   after {
@@ -83,6 +82,6 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
     assetMgr setup Group("default").use("bootstrap", "highlightjs", "jquery.loadmask", "publet")
 
     val js = assetMgr.getResources("default", "/main".p, Kind.js)
-    println(js.mkString("; "))
+    println(js.map(_.asString).mkString("; "))
   }
 }

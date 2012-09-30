@@ -32,7 +32,8 @@ class PubletMainFilter extends Filter with Logging {
   val handlerFactories = List(
     new GitHandlerFactory,
     new WebdavHandlerFactory,
-    new PubletHandlerFactory
+    new PubletHandlerFactory,
+    new AssetsHandlerFactory
   )
 
   private var handlerMap: Map[Class[_], Filter] = null

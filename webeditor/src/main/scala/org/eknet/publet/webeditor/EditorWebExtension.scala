@@ -21,9 +21,9 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{EmptyExtension, PubletWeb}
-import org.eknet.publet.web.asset.AssetExtension
 import org.eknet.publet.webeditor.EditorPaths._
 import org.eknet.publet.vfs.ResourceName._
+import org.eknet.publet.web.asset.AssetManager
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -50,7 +50,7 @@ class EditorWebExtension extends EmptyExtension with Logging {
     publet.engineManager.addEngine(editEngine)
     PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
 
-    AssetExtension.assetManager setup (
+    AssetManager.service setup (
       Assets.editpageBrowser,
       Assets.blueimpFileUpload,
       Assets.blueimpCanvasToBlob,

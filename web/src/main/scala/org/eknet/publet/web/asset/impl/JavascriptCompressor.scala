@@ -16,8 +16,8 @@
 
 package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.vfs.{ContentResource, Writeable, Content}
-import org.eknet.publet.web.asset.AssetProcessor
+import org.eknet.publet.vfs.{Writeable, Content}
+import org.eknet.publet.web.asset.{AssetResource, AssetProcessor}
 import org.mozilla.javascript.{EvaluatorException, ErrorReporter}
 import java.io._
 import com.yahoo.platform.yui.compressor.{JavaScriptCompressor => JSCompressor}
@@ -31,13 +31,18 @@ import java.util.logging.Level
  */
 class JavascriptCompressor extends AssetProcessor with Logging {
 
-  def createResource(list: List[ContentResource], target: Writeable) {
+  def createResource(list: List[AssetResource], target: Writeable) {
     val out = target.outputStream
-    val ins = list.flatMap(c => {
-      List(c.inputStream, new ByteArrayInputStream("\n\n".getBytes("UTF-8")))
+    val w = new BufferedWriter(new OutputStreamWriter(out))
+    list.foreach(c => {
+      if (c.compress) {
+        compressGoogle(c.name.fullName, c.inputStream, out)
+      } else {
+        Content.copy(c.inputStream, out, closeOut = false, closeIn = true)
+      }
+      w.write("\n")
     })
-//    compressGoogle("module", ConcatInputStream(ins), out)
-    Content.copy(ConcatInputStream(ins), out, true, true)
+    out.flush()
     out.close()
   }
 
@@ -78,6 +83,7 @@ class JavascriptCompressor extends AssetProcessor with Logging {
     } else {
       val w = new BufferedWriter(new OutputStreamWriter(out))
       w.write(compiler.toSource)
+      w.flush()
     }
   }
 

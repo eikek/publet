@@ -37,14 +37,14 @@ class GroupRegistryTest extends FunSuite with ShouldMatchers with BeforeAndAfter
   test ("merge group resources") {
     reg setup Group("test").add(resource("jquery/jquery-1.8.2.min.js"))
     reg setup Group("test").add(resource("jquery/jquery.form.js"))
-    reg.getSources("test", "/".p, Kind.js) should have size (2)
+    reg.getSources("test", Some("/".p), Kind.js) should have size (2)
   }
 
   test ("merge group uses") {
     reg setup (jqueryGroup, spinGroup, loadmaskGroup, publetGroup, highlightGroup, bootstrapGroup)
     reg setup Group("default").use("bootstrap", "highlightjs")
     reg setup Group("default").use("jquery.loadmask", "publet")
-    val sources = reg.getSources("default", "/".p, Kind.js)
+    val sources = reg.getSources("default", Some("/".p), Kind.js)
     sources should have size 7
   }
 }

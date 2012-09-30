@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.asset
+package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.vfs.Writeable
+import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.matchers.ShouldMatchers
+import java.nio.file.Files
+import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 29.09.12 01:03
+ * @since 30.09.12 15:26
  */
-trait AssetProcessor {
+class AssetContainerTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
+  import ResourceHelper._
 
-  def createResource(list: List[AssetResource], target: Writeable)
+  val cnt = new AssetContainer(Files.createTempDirectory("assetcontainer").toFile)
 
+  test ("mount and resolve") {
+    cnt.mount(jqueryGroup)
+
+    val path = Path("/groups/jquery/js/jquery-1.8.2.min.js")
+    cnt.lookup(path) should not be None
+  }
 }

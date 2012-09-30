@@ -21,8 +21,8 @@ The first line declares the request to `/welcome.html` to be redirected to
 
 There are the following redirects configured by default:
 
-* `/` --> `/main/`
-* `/index.html` --> `/main/index.html`
+* `/` -> `/main/`
+* `/index.html` -> `/main/index.html`
 * `/index.htm` -> `/main/index.html`
 * `/favicon.ico` -> `/main/favicon.ico`
 * `/favicon.png` -> `/main/favicon.png`

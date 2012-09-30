@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.web.asset.{Kind, AssetManager}
+import org.eknet.publet.web.asset.{Group, Kind, AssetManager}
 import org.eknet.publet.vfs.{Writeable, Path}
 import org.eknet.publet.Publet
 import java.util.concurrent
@@ -28,49 +28,40 @@ import grizzled.slf4j.Logging
 import org.apache.shiro.util.ByteSource
 import org.eknet.publet.web.asset.Kind.KindVal
 import Path._
+import java.io.File
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.09.12 22:09
  */
-class DefaultAssetManager(publet: Publet) extends GroupRegistry with Logging with AssetManager {
+class DefaultAssetManager(publet: Publet, tempDir: File) extends GroupRegistry with Logging with AssetManager {
 
-  private val fileCache: concurrent.ConcurrentMap[Key, Future[List[Path]]] = new ConcurrentHashMap()
+  private val fileCache: concurrent.ConcurrentMap[Key, Future[Path]] = new ConcurrentHashMap()
+  private val assetContainer = new AssetContainer(tempDir)
 
-  def getCompressed(group: String, path: Path, kind: Kind.KindVal): Path =  {
+  if (publet.mountManager.resolveMount(AssetManager.assetPath.p) == None) {
+    publet.mountManager.mount(AssetManager.assetPath.p, assetContainer)
+  }
+
+  override def setup(groups: Group*) {
+    super.setup(groups: _*)
+    groups.foreach(assetContainer.mount)
+  }
+
+  def getCompressed(group: String, path: Option[Path], kind: Kind.KindVal): Path =  {
     val newTask = future {
       val sources = getSources(group, path, kind)
       val bytes = ConcatInputStream(sources.map(_.inputStream))
       // create filename
       val fileName = new Md5Hash(ByteSource.Util.bytes(bytes)).toHex + "."+ kind.toString
       // if file does not exists, create it
-      val targetPath = AssetManager.compressedPath.p / fileName
-      publet.rootContainer.lookup(targetPath) getOrElse {
-        val target = publet.rootContainer.createResource(targetPath)
+      assetContainer.lookupTempFile(fileName) getOrElse {
+        val target = assetContainer.createTempFile(fileName)
         kind.processor.createResource(sources, target.asInstanceOf[Writeable])
       }
-      List(targetPath)
+      assetContainer.pathForCompressed(fileName)
     }
-    val task = fileCache.putIfAbsent(Key(group, path, kind, compressed = true), newTask)
-    val list = if (task == null) {
-      newTask()
-    } else {
-      task()
-    }
-    list(0)
-  }
-
-  def getResources(group: String, path: Path, kind: KindVal) = {
-    val newTask = future {
-      val sources = getSources(group, path, kind)
-      for (source <- sources) yield {
-        val targetPath = AssetManager.partsPath.p / source.name
-        val target = publet.rootContainer.createResource(targetPath)
-        target.asInstanceOf[Writeable].writeFrom(source.inputStream)
-        targetPath
-      }
-    }
-    val task = fileCache.putIfAbsent(Key(group, path, kind, compressed = false), newTask)
+    val task = fileCache.putIfAbsent(Key(group, path, kind), newTask)
     if (task == null) {
       newTask()
     } else {
@@ -78,5 +69,10 @@ class DefaultAssetManager(publet: Publet) extends GroupRegistry with Logging wit
     }
   }
 
-  private case class Key(group: String, path: Path, kind: Kind.KindVal, compressed: Boolean)
+  def getResources(group: String, path: Option[Path], kind: KindVal) = {
+    val sources = getSources(group, path, kind)
+    sources map { s => assetContainer.pathFor(s) }
+  }
+
+  private case class Key(group: String, path: Option[Path], kind: Kind.KindVal)
 }

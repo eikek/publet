@@ -23,7 +23,7 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 import java.net.URL
 import scripts._
-import org.eknet.publet.web.asset.{Group, AssetExtension}
+import org.eknet.publet.web.asset.{AssetManager, Group}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -62,12 +62,12 @@ class GitrWebExtension extends EmptyExtension {
     PubletWeb.publet.mountManager.mount(GitrControl.mountPoint.p, pages)
 
     val gitrPath = (GitrControl.mountPoint.p / "/**").asString
-    AssetExtension.assetManager setup (
+    AssetManager.service setup (
       Assets.gitrBrowser.forPath(gitrPath),
       Assets.gitrListing.forPath(gitrPath),
       Assets.gitrweb.forPath(gitrPath))
 
-    AssetExtension.assetManager setup
+    AssetManager.service setup
       Group("default").use(Assets.gitrweb.name)
   }
 

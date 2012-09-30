@@ -20,7 +20,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
 import xml.{Comment, NodeBuffer, XML, NodeSeq}
 import org.eknet.publet.web.{PubletWeb, PubletWebContext, Config}
-import org.eknet.publet.web.asset.{AssetManager, Kind, AssetExtension}
+import org.eknet.publet.web.asset.{AssetManager, Kind}
 import scala.Some
 
 
@@ -164,18 +164,15 @@ class IncludeLoader {
 
   private def loadAssetGroups(groups: Seq[String], compressed: Boolean): NodeSeq = {
     import PubletWebContext._
-    val mgr = AssetExtension.assetManager
+    val mgr = AssetManager.service
 
     def load(group: String): NodeBuffer = {
       if (compressed) {
-//        val jsPath = mgr.getCompressed(group, applicationPath, Kind.js)
-//        val cssPath = mgr.getCompressed(group, applicationPath, Kind.css)
-
-        <script type="text/javascript" src={ urlOf( AssetManager.assetPath+ group+".js?path="+ applicationUri) }></script>
-        <link rel="stylesheet" href={ urlOf( AssetManager.assetPath + group+".css?path="+ applicationUri ) }></link>
+        <script type="text/javascript" src={ urlOf( AssetManager.assetPath+ "js/"+ group+".js?path="+ applicationUri) }></script>
+        <link rel="stylesheet" href={ urlOf( AssetManager.assetPath +"css/"+ group+".css?path="+ applicationUri ) }></link>
       } else {
-        val jsPath = mgr.getResources(group, applicationPath, Kind.js)
-        val cssPath = mgr.getResources(group, applicationPath, Kind.css)
+        val jsPath = mgr.getResources(group, Some(applicationPath), Kind.js)
+        val cssPath = mgr.getResources(group, Some(applicationPath), Kind.css)
 
         new NodeBuffer() &+ (for (js <- jsPath) yield {
           <script type="text/javascript" src={ urlOf(js) }></script>

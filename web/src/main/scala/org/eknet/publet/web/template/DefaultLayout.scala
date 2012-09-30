@@ -16,14 +16,13 @@
 
 package org.eknet.publet.web.template
 
-import org.eknet.publet.vfs.{Content, ContentType, Path}
+import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{EmptyExtension, PubletWeb}
-import org.eknet.publet.vfs.util.{SimpleContentResource, UrlResource, ClasspathContainer}
+import org.eknet.publet.vfs.util.ClasspathContainer
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.asset.{Group, AssetExtension}
+import org.eknet.publet.web.asset.{AssetCollection, AssetManager, Group}
 import Path._
 import org.eknet.publet.web.template.DefaultLayout.Assets
-import io.Source
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,7 +32,7 @@ class DefaultLayout extends EmptyExtension with Logging {
 
   override def onStartup() {
     val publ = PubletWeb.publet
-    val assetMgr = AssetExtension.assetManager
+    val assetMgr = AssetManager.service
 
     //jquery
     assetMgr setup Assets.jquery
@@ -64,14 +63,16 @@ class DefaultLayout extends EmptyExtension with Logging {
 }
 
 object DefaultLayout {
-  import org.eknet.publet.vfs.ResourceName._
-  object Assets {
+
+  object Assets extends AssetCollection {
+
+    override def classPathBase = "/org/eknet/publet/web/includes"
 
     val jquery = Group("jquery")
-      .add(resource("jquery/jquery-1.8.2.min.js"))
+      .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
       .add(resource("jquery/jquery.form.js"))
 
-    val spin =  Group("spinjs").add(resource("spin/spin.min.js"))
+    val spin =  Group("spinjs").add(resource("spin/spin.min.js").noCompress)
 
     val loadmask = Group("loadmask.jquery")
       .add(resource("loadmask/jquery.loadmask.spin.js"))
@@ -83,13 +84,15 @@ object DefaultLayout {
       .require(jquery.name)
 
     val highlightjs = Group("highlightjs")
-      .add(resource("highlight/highlight.pack.js"))
+      .add(resource("highlight/highlight.pack.js").noCompress)
       .add(resource("highlight/highlight-onload.js"))
 
     val bootstrap = Group("bootstrap")
       .add(resource("bootstrap/js/bootstrap.js"))
-      .add(new SimpleContentResource("bootstrap.css".rn, Content(replaceBootstrapImgUrl, ContentType.css)))
+      .add(resource("bootstrap/css/bootstrap.css"))
       .add(resource("bootstrap/css/bootstrap.custom.css"))
+      .add(resource("bootstrap/img/glyphicons-halflings.png"))
+      .add(resource("bootstrap/img/glyphicons-halflings-white.png"))
       .require(jquery.name)
 
     val default = Group("default").use(jquery.name, spin.name, loadmask.name,
@@ -97,20 +100,7 @@ object DefaultLayout {
 
     val defaultNoHighlightJs = Group("defaultNoHighlightJs")
       .use(jquery.name, spin.name, loadmask.name, publet.name, bootstrap.name)
+
   }
 
-  private def findResource(name: String) = Option(getClass.getResource(
-    ("/org/eknet/publet/web/includes".p / name).asString))
-
-  private def resource(name: String) = new UrlResource(findResource(name).get)
-
-  private def replaceBootstrapImgUrl: String = {
-    val file = findResource("bootstrap/css/bootstrap.css").get
-    Source.fromURL(file, "UTF-8").getLines().map(line => {
-      if (line.contains("../img/"))
-        line.replace("../img/", "../bootstrap/img/")
-      else
-        line
-    }).mkString("\n")
-  }
 }

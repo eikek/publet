@@ -16,7 +16,10 @@
 
 package org.eknet.publet.web.asset
 
+import impl.DefaultAssetManager
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.util.Key
+import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -45,22 +48,19 @@ trait AssetManager {
    * @param kind the type of resource, see [[org.eknet.publet.web.asset.Kind]]
    * @return
    */
-  def getCompressed(group: String, path: Path, kind: Kind.KindVal): Path
+  def getCompressed(group: String, path: Option[Path], kind: Kind.KindVal): Path
 
 
   /**
    * Returns a list of path to the resources belonging to the specified
    * group.
    *
-   * If invoked the first time, the resources are collected and saved
-   * to a temporary place.
-   *
    * @param group
    * @param path
    * @param kind
    * @return
    */
-  def getResources(group: String, path: Path, kind: Kind.KindVal): List[Path]
+  def getResources(group: String, path: Option[Path], kind: Kind.KindVal): List[Path]
 
 }
 
@@ -68,6 +68,22 @@ object AssetManager {
 
   val assetPath = "/publet/assets/"
   val compressedPath = assetPath + "compressed/"
-  val partsPath = assetPath + "parts/"
+  val groupsPath = assetPath + "groups"
+
+  private val assetManagerKey = Key[AssetManager](classOf[AssetManager].getName)
+
+  /**
+   * Either creates a new [[org.eknet.publet.web.asset.AssetManager]] or
+   * retrieves an existing instance from the servlet context. Note, that
+   * this method is only valid in web environment.
+   *
+   * @return
+   */
+  def service = PubletWebContext.contextMap(assetManagerKey).getOrElse {
+    val tempDir = Config.newStaticTempDir("assets")
+    val mgr: AssetManager = new DefaultAssetManager(PubletWeb.publet, tempDir)
+    PubletWeb.contextMap.put(assetManagerKey, mgr)
+    mgr
+  }
 
 }

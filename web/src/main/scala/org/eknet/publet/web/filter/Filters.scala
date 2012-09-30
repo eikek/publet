@@ -3,6 +3,7 @@ package org.eknet.publet.web.filter
 import org.eknet.publet.web.shiro.AuthcFilter
 import org.eknet.publet.web.webdav.WebdavFilter
 import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
+import org.eknet.publet.web.asset.AssetFilter
 
 /**
  *
@@ -21,6 +22,7 @@ object Filters {
   val webContext = new WebContextFilter
   val authc = new AuthcFilter
   val webdav = new WebdavFilter
+  val assets = new AssetFilter
 
   private[web] class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
     import collection.JavaConversions._

@@ -16,8 +16,11 @@
 
 package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.vfs.{ContentResource, Writeable}
+import org.eknet.publet.vfs.Writeable
 import org.eknet.publet.web.asset.AssetProcessor
+import java.io._
+import com.yahoo.platform.yui.compressor.{CssCompressor => YuiCompressor}
+import org.eknet.publet.web.asset.AssetResource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,10 +28,19 @@ import org.eknet.publet.web.asset.AssetProcessor
  */
 class CssCompressor extends AssetProcessor {
 
-  def createResource(list: List[ContentResource], target: Writeable) {
+  def createResource(list: List[AssetResource], target: Writeable) {
     val ins = list.map(_.inputStream)
     val input = ConcatInputStream(ins)
-    target.writeFrom(input)
+    val out = target.outputStream
+    compressCss(input, out)
+    out.flush()
+    out.close()
   }
 
+  def compressCss(in: InputStream, out: OutputStream) {
+    val comp = new YuiCompressor(new InputStreamReader(in, "UTF-8"))
+    val writer = new BufferedWriter(new OutputStreamWriter(out))
+    comp.compress(writer, -1)
+    writer.flush()
+  }
 }

@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.asset
+package org.eknet.publet.web.req
 
-import org.eknet.publet.vfs.Writeable
+import javax.servlet.http.HttpServletRequest
+import org.eknet.publet.web.PubletRequestWrapper
+import org.eknet.publet.web.asset.AssetManager
+import org.eknet.publet.web.req.RequestHandlerFactory._
+import org.eknet.publet.web.filter.Filters
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 29.09.12 01:03
+ * @since 30.09.12 10:26
  */
-trait AssetProcessor {
+class AssetsHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
 
-  def createResource(list: List[AssetResource], target: Writeable)
+  def getApplicableScore(req: HttpServletRequest) =
+    if (req.applicationUri.startsWith(AssetManager.assetPath)) EXACT_MATCH else NO_MATCH
 
+  def createFilter() = new SuperFilter(Seq(
+    Filters.webContext,
+    Filters.assets,
+    Filters.source
+  ))
 }

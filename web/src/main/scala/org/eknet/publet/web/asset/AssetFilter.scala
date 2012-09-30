@@ -18,7 +18,6 @@ package org.eknet.publet.web.asset
 
 import javax.servlet._
 import org.eknet.publet.web.PubletRequestWrapper
-import org.eknet.publet.web.filter.Filters
 import AssetManager._
 import org.eknet.publet.vfs.{ContentType, Path}
 import org.eknet.publet.web.filter.Filters.ForwardRequest
@@ -30,28 +29,25 @@ import org.eknet.publet.web.filter.Filters.ForwardRequest
 class AssetFilter extends Filter with PubletRequestWrapper {
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    if (request.applicationUri.startsWith(assetPath)) {
-      if (request.applicationUri.startsWith(partsPath) || request.applicationUri.startsWith(compressedPath)) {
-        Filters.source.doFilter(request, response, chain)
-      } else {
-        val path = request.param("path").map(Path(_)).getOrElse(Path.root)
-        val contentType = request.applicationPath.name.targetType
-        if (contentType == ContentType.javascript) {
-          val target = AssetExtension.assetManager.getCompressed(request.applicationPath.name.name, path, Kind.js)
-          Filters.source.doFilter(new ForwardRequest(request.getContextPath + target.asString, request), response, chain)
-        }
-        else if (contentType == ContentType.css) {
-          val target = AssetExtension.assetManager.getCompressed(request.applicationPath.name.name, path, Kind.css)
-          Filters.source.doFilter(new ForwardRequest(request.getContextPath + target.asString, request), response, chain)
-        }
-        else {
-          chain.doFilter(request, response)
-        }
-      }
-    } else {
+    if (request.applicationUri.startsWith(groupsPath) || request.applicationUri.startsWith(compressedPath)) {
       chain.doFilter(request, response)
+    } else {
+      val path = request.param("path").map(Path(_))
+      val kind = request.applicationPath.name.targetType match {
+        case ContentType.javascript => Some(Kind.js)
+        case ContentType.css => Some(Kind.css)
+        case _ => None
+      }
+      kind map { k =>
+        AssetManager.service.getCompressed(request.applicationPath.name.name, path, k)
+      } map { p =>
+        chain.doFilter(new ForwardRequest(request.getContextPath+p.asString, request), response)
+      } getOrElse {
+        chain.doFilter(request, response)
+      }
     }
   }
+
 
   def init(filterConfig: FilterConfig) {}
 

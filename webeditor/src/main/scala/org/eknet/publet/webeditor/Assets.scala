@@ -16,11 +16,10 @@
 
 package org.eknet.publet.webeditor
 
-import org.eknet.publet.vfs.util.{SimpleContentResource, UrlResource}
-import org.eknet.publet.vfs.Path._
+import org.eknet.publet.vfs.util.SimpleContentResource
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.web.{Config, PubletWeb}
-import org.eknet.publet.web.asset.Group
+import org.eknet.publet.web.asset.{AssetCollection, Group}
 import scala.Some
 import io.Source
 import org.eknet.publet.vfs.{ContentType, Content}
@@ -33,26 +32,31 @@ import org.eknet.publet.vfs.{ContentType, Content}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 29.09.12 17:13
  */
-object Assets {
+object Assets extends AssetCollection {
 
-  lazy val jqueryUiWidget = Group("jquery.ui.widget")
+  override def classPathBase = "/org/eknet/publet/webeditor/includes"
+
+  val jqueryUiWidget = Group("jquery.ui.widget")
     .add(resource("js/vendor/jquery.ui.widget.js"))
 
-  lazy val blueimpTmpl = Group("blueimp.tmpl")
+  val blueimpTmpl = Group("blueimp.tmpl")
     .add(resource("js/blueimp/tmpl.min.js"))
 
-  lazy val blueimpCanvasToBlob = Group("blueimp.canvastoblob")
+  val blueimpCanvasToBlob = Group("blueimp.canvastoblob")
     .add(resource("js/blueimp/canvas-to-blob.min.js"))
 
-  lazy val blueimpLoadImage = Group("blueimp.loadimage")
+  val blueimpLoadImage = Group("blueimp.loadimage")
     .add(resource("js/blueimp/load-image.min.js"))
     .require(blueimpCanvasToBlob.name)
 
-  lazy val jqueryIframeTransport = Group("jquery.iframe-transport")
+  val jqueryIframeTransport = Group("jquery.iframe-transport")
     .add(resource("js/jquery.iframe-transport.js"))
 
-  lazy val blueimpFileUpload = Group("blueimp.fileupload")
-    .add(new SimpleContentResource("fileupload-ui.css".rn, Content(replaceRelativeImgUrls, ContentType.css)))
+  val blueimpFileUpload = Group("blueimp.fileupload")
+    .add(resource("img/loading.gif"))
+    .add(resource("img/progressbar.gif"))
+    .add(resource("img/publet_nopreview.png"))
+    .add(resource("css/jquery.fileupload-ui.css"))
     .add(resource("js/jquery.fileupload.js"))
     .add(resource("js/jquery.fileupload-fp.js"))
     .add(resource("js/jquery.fileupload-ui.js"))
@@ -62,25 +66,20 @@ object Assets {
               blueimpTmpl.name, blueimpLoadImage.name)
 
 
-  lazy val publetFileBrowser = Group("publet.webeditor.filebrowser")
-    .add(resource("js/publet-browser.js"))
+  val publetFileBrowser = Group("publet.webeditor.filebrowser")
+    .add(resource("js/publet-browser.js").noCompress) //todo: syntax errors detected while compressing
     .add(resource("css/browser.css"))
 
-  lazy val editpageBrowser = Group("publet.webeditor.editpage.browser")
+  val editpageBrowser = Group("publet.webeditor.browserloader")
     .add(new SimpleContentResource("browser.js".rn, Content(generateBrowserLoadJs, ContentType.javascript)))
     .require(publetFileBrowser.name)
 
-  lazy val editPage = Group("publet.webeditor.editpage")
+  val editPage = Group("publet.webeditor.editpage")
     .use(editpageBrowser.name)
 
-  lazy val uploadPage = Group("publet.webeditor.uploadpage")
+  val uploadPage = Group("publet.webeditor.uploadpage")
     .use(blueimpFileUpload.name, editpageBrowser.name)
 
-  private def findResource(name: String) = Option(getClass.getResource(
-    ("/org/eknet/publet/webeditor/includes".p / name).asString))
-
-  private def resource(name: String) = new UrlResource(findResource(name)
-    .getOrElse(sys.error("Resource '"+ name + "' not found")))
 
   private def generateBrowserLoadJs: String = {
     val pathRegex = ("\"("+ EditorPaths.editorPath.asString +"[^\"]*\")").r
@@ -99,13 +98,4 @@ object Assets {
     })
   }
 
-  private def replaceRelativeImgUrls: String = {
-    val file = findResource("css/jquery.fileupload-ui.css").get
-    Source.fromURL(file, "UTF-8").getLines().map(line => {
-      if (line.contains("../img/"))
-        line.replace("../img/", "../webeditor/img/")
-      else
-        line
-    }).mkString("\n")
-  }
 }

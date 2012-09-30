@@ -16,16 +16,16 @@
 
 package org.eknet.publet.gitr.web
 
-import org.eknet.publet.vfs.util.UrlResource
-import org.eknet.publet.vfs.Path._
-import org.eknet.publet.web.asset.Group
+import org.eknet.publet.web.asset.{AssetCollection, Group}
 import org.eknet.publet.web.template.DefaultLayout
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 29.09.12 18:58
  */
-object Assets {
+object Assets extends AssetCollection {
+
+  override def classPathBase = "/org/eknet/publet/gitr/web/includes"
 
   val gitrListing = Group("gitr-web-listing")
     .add(resource("gitr-listing.js"))
@@ -33,7 +33,7 @@ object Assets {
     .require(DefaultLayout.Assets.bootstrap.name)
 
   val gitrBrowser = Group("gitr-web-browser")
-    .add(resource("gitr-browser.js"))
+    .add(resource("gitr-browser.js").noCompress) //todo: syntax errors detected while compressing
     .add(resource("gitr.css"))
     .require(DefaultLayout.Assets.jquery.name)
     .require(DefaultLayout.Assets.bootstrap.name)
@@ -41,9 +41,4 @@ object Assets {
   val gitrweb = Group("publet.gitrweb")
     .use(gitrListing.name, gitrBrowser.name)
 
-  private def findResource(name: String) = Option(getClass.getResource(
-    ("/org/eknet/publet/gitr/web/includes".p / name).asString))
-
-  private def resource(name: String) = new UrlResource(findResource(name)
-    .getOrElse(sys.error("Resource '"+ name + "' not found")))
 }

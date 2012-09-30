@@ -16,7 +16,9 @@
 
 package org.eknet.publet.server
 
-import java.io.{FileFilter, File}
+import java.io.{IOException, FileFilter, File}
+import java.nio.file.{FileVisitResult, Path, SimpleFileVisitor, Files}
+import java.nio.file.attribute.BasicFileAttributes
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -51,5 +53,28 @@ object FileHelper {
 
   implicit def fun2Filter(f:File => Boolean): FileFilter = new FileFilter {
     def accept(pathname: File) = f(pathname)
+  }
+
+  /**
+   * Deletes the given file and, if it is a directory, it deletes all
+   * entries.
+   *
+   * @param file
+   */
+  def deleteRecursice(file: File) {
+    Files.walkFileTree(file.toPath, new SimpleFileVisitor[Path] {
+      override def visitFile(file: Path, attrs: BasicFileAttributes) = {
+        Files.delete(file)
+        FileVisitResult.CONTINUE
+      }
+      override def postVisitDirectory(dir: Path, exc: IOException) = {
+        if (exc == null) {
+          Files.delete(dir)
+          FileVisitResult.CONTINUE
+        } else {
+          FileVisitResult.TERMINATE
+        }
+      }
+    })
   }
 }

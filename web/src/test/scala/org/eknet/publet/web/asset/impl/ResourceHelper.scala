@@ -16,34 +16,30 @@
 
 package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.vfs.util.UrlResource
-import org.eknet.publet.vfs.Path._
-import org.eknet.publet.web.asset.Group
+import org.eknet.publet.web.asset.{AssetCollection, Group}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 29.09.12 16:31
  */
-object ResourceHelper {
+object ResourceHelper extends AssetCollection {
 
-  def findResource(name: String) = Option(getClass.getResource(
-    ("/org/eknet/publet/web/includes".p / name).asString))
-
-  def resource(name: String) = new UrlResource(findResource(name)
-    .getOrElse(sys.error("Resource '"+name+"' not found")))
+  override def classPathBase = "/org/eknet/publet/web/includes"
 
   val bootstrapGroup = Group("bootstrap")
-    .add(resource("bootstrap/js/bootstrap.js"))
-    .add(resource("bootstrap/css/bootstrap.css"))
+    .add(resource("bootstrap/js/bootstrap.js").into("js")) // into("js") is default for js
+    .add(resource("bootstrap/css/bootstrap.css").into("css")) //into("css") is default for css
     .add(resource("bootstrap/css/bootstrap.custom.css"))
+    .add(resource("bootstrap/img/glyphicons-halflings.png").into("img")) //into("img") is default for images
+    .add(resource("bootstrap/img/glyphicons-halflings-white.png"))
 //    .require("jquery")
 
   val highlightGroup = Group("highlightjs")
-    .add(resource("highlight/highlight.pack.js"))
+    .add(resource("highlight/highlight.pack.js").noCompress)
     .add(resource("highlight/styles/googlecode.css"))
 
   val jqueryGroup = Group("jquery")
-    .add(resource("jquery/jquery-1.8.2.min.js"))
+    .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
     .add(resource("jquery/jquery.form.js"))
 
   val spinGroup = Group("spinjs")
