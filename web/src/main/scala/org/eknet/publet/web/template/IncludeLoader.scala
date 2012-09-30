@@ -18,9 +18,10 @@ package org.eknet.publet.web.template
 
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
-import xml.{XML, NodeSeq}
-import scala.Some
+import xml.{Comment, NodeBuffer, XML, NodeSeq}
 import org.eknet.publet.web.{PubletWeb, PubletWebContext, Config}
+import org.eknet.publet.web.asset.{AssetManager, Kind}
+import scala.Some
 
 
 /**
@@ -144,5 +145,51 @@ class IncludeLoader {
   def isResourceEditable: Boolean = PubletWeb.publet.findSources(PubletWebContext.applicationPath).toList match {
     case c :: cs => c.isInstanceOf[Writeable]
     case _ => false
+  }
+
+  /**
+   * Returns a html snippet with all css and javascript resources belonging
+   * to the given group. If in development mode, the resources are listed
+   * as contributed. If in production mode, the resources are compressed to
+   * one file (one for javascript, and one for css).
+   *
+   * @param groups
+   * @return
+   */
+  def loadAssets(groups: String*): NodeSeq = loadAssetGroups(groups, Config.mode != "development")
+
+  def loadAssetsCompressed(groups: String*) = loadAssetGroups(groups, compressed = true)
+
+  def loadAssetsSingle(groups: String*) = loadAssetGroups(groups, compressed = false)
+
+  private def loadAssetGroups(groups: Seq[String], compressed: Boolean): NodeSeq = {
+    import PubletWebContext._
+    val mgr = AssetManager.service
+
+    def load(group: String): NodeBuffer = {
+      if (compressed) {
+        <script type="text/javascript" src={ urlOf( AssetManager.assetPath+ "js/"+ group+".js?path="+ applicationUri) }></script>
+        <link rel="stylesheet" href={ urlOf( AssetManager.assetPath +"css/"+ group+".css?path="+ applicationUri ) }></link>
+      } else {
+        val jsPath = mgr.getResources(group, Some(applicationPath), Kind.js)
+        val cssPath = mgr.getResources(group, Some(applicationPath), Kind.css)
+
+        new NodeBuffer() &+ (for (js <- jsPath) yield {
+          <script type="text/javascript" src={ urlOf(js) }></script>
+        }) ++ (for (css <- cssPath) yield {
+          <link rel="stylesheet" href={ urlOf(css) }></link>
+        })
+      }
+    }
+
+    def loadAll(list: Seq[String]): NodeBuffer =  {
+      list match {
+        case e::es => load(e) &+ loadAll(es)
+        case Nil => new NodeBuffer
+      }
+    }
+
+    new Comment("asset groups '" + groups.mkString(", ")+ "'") ++
+    loadAll(groups.toList)
   }
 }

@@ -28,44 +28,49 @@ object Version {
   val jetty = "8.1.7.v20120910"
   val bouncyCastle = "1.46"
   val scala = "2.9.2"
+  val yuicompressor = "2.4.7"
+  val googleClosureCompiler = "rr2079.1"
 }
 
 object Dependencies {
 
-  val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
-  val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
+  val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload exclude("rhino", "js")
+  val commonsIo = "commons-io" % "commons-io" % Version.cio withSources() exclude("rhino", "js")
   val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive() //uses orientdb 1.0.1
   val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
-  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
-  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() //scala 2.9.2 only
-  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
-  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
-  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
-  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
-  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources()
+  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle exclude("rhino", "js")
+  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle exclude("rhino", "js")
+  val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("rhino", "js") //scala 2.9.2 only
+  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty exclude("rhino", "js")
+  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources() exclude("rhino", "js")
+  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty exclude("rhino", "js")
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources() exclude("rhino", "js")
+  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources() exclude("rhino", "js")
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("rhino", "js")
   val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
-    "commons-codec" % "commons-codec" % Version.ccodec withSources(),
-    "commons-collections" % "commons-collections" % Version.ccollections withSources(),
-    "org.jdom" % "jdom" % Version.jdom
+    "commons-codec" % "commons-codec" % Version.ccodec withSources() exclude("rhino", "js"),
+    "commons-collections" % "commons-collections" % Version.ccollections withSources() exclude("rhino", "js"),
+    "org.jdom" % "jdom" % Version.jdom exclude("rhino", "js")
   )
   val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
-  val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources()
-  val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources()
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources()
-  val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate
-  val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate
-  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate
-  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
-  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
-  val servletApiProvided = servletApi % "provided"
-  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources()
-  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources()
-  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
+  val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources() exclude("rhino", "js")
+  val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources() exclude("rhino", "js")
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources() exclude("rhino", "js")
+  val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
+  val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
+  val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate exclude("rhino", "js")
+  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate exclude("rhino", "js")
+  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources() exclude("rhino", "js")
+  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources() exclude("rhino", "js")
+  val servletApiProvided = servletApi % "provided" exclude("rhino", "js")
+  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("rhino", "js")
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("rhino", "js")
+  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j exclude("rhino", "js")
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail exclude("rhino", "js")
+  val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor
 }
 
 // Root Module 
@@ -241,6 +246,9 @@ object Web extends Build {
        jgitHttpServer,
        shiroWeb,
        miltonApi, miltonServlet,
+       yuicompressor,
+       googleClosureCompiler,
+       "com.google.guava" % "guava" % "12.0",
        scalaTest) ++ miltonApiDeps
 
 }
@@ -330,7 +338,7 @@ object ScalateEngine extends Build {
     libraryDependencies ++= deps
   ) 
 
-  val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateWikitext, scalatePage)
+  val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateUtil, scalateWikitext, scalatePage)
 }
 
 object Doc extends Build {

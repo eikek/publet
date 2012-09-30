@@ -1,9 +1,5 @@
 ---
 title: Publet Documentation
-layout: /publet/bootstrap/bootstrap.single.jade
-
---- name:head pipeline:jade
-=include("_includes/htmlhead.jade")
 
 --- name:navigationBar pipeline:jade
 =include("_includes/nav.jade")
@@ -11,7 +7,7 @@ layout: /publet/bootstrap/bootstrap.single.jade
 --- name:content pipeline:jade
 =include("_includes/header.jade")
 .row
-  .span3
+  .span2
     ul.nav.nav-pills.nav-stacked
       li.active
         a(href="#intro" data-toggle="pill")
@@ -46,6 +42,14 @@ layout: /publet/bootstrap/bootstrap.single.jade
       li
         h4 Advanced Topics
       li
+        a(href="#layouts" data-toggle="pill")
+          i.icon-chevron-right
+          | Layouts
+      li
+        a(href="#assets" data-toggle="pill")
+          i.icon-chevron-right
+          | Assets
+      li
         a(href="#partitions" data-toggle="pill")
           i.icon-chevron-right
           | Paritions
@@ -62,7 +66,7 @@ layout: /publet/bootstrap/bootstrap.single.jade
           i.icon-chevron-right
           | Redirects
 
-  .span9
+  .span10
     .tab-content
       .tab-pane.active#intro
         =include("_intro.md")
@@ -88,3 +92,5 @@ layout: /publet/bootstrap/bootstrap.single.jade
         =include("_security.md")
       .tab-pane#webdav
         =include("_webdav.md")
+      .tab-pane#assets
+        =include("_assets.jade")

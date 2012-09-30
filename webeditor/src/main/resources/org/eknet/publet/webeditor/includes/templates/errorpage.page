@@ -1,11 +1,7 @@
 ---
 title: Error
 searchForSidebar: false
---- name:head pipeline:jade
-- def urlOf(str:String) = PubletWebContext.urlOf(str)
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/publet-browser.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/scripts/browser.js") })
-link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
+assetGroups: "publet.webeditor.editpage
 
 --- name:content pipeline:jade
 

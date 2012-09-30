@@ -29,7 +29,7 @@ import org.eknet.publet.Glob.{Token, Lexer}
  *
  * @param pattern
  */
-final class Glob(val pattern: String) extends Ordered[Glob] {
+final case class Glob(pattern: String) extends Ordered[Glob] {
 
   private val separatorString = "/"
   private val lexed = new Lexer(separatorString).split(pattern)
@@ -78,10 +78,6 @@ final class Glob(val pattern: String) extends Ordered[Glob] {
 }
 
 object Glob {
-
-  def apply(pattern: String): Glob = new Glob(pattern)
-
-  // ~~
 
   private abstract class Token(val name: String) {
     def :: (tok: Token): List[Token]

@@ -23,7 +23,7 @@ import org.eknet.publet.partition.git.{GitPartition, GitPartMan, GitPartManImpl}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{ContentResource, ResourceName, Path}
-import template.{IncludeLoader, ConfiguredScalateEngine, Templates}
+import template.{IncludeLoader, ConfiguredScalateEngine}
 import util.{PropertiesMap, AttributeMap, Context, Key}
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
@@ -125,8 +125,6 @@ object PubletWeb extends Logging {
       cont.addResource(new WebScriptResource(ResourceName("logout.json"), Logout))
       publ.mountManager.mount(Path("/publet/scripts/"), cont)
 
-      Templates.mountPubletResources(publ)
-      Templates.mountLoadmaskJs(publ)
       publ
     }
   })

@@ -1,21 +1,7 @@
 ---
 title: Upload File
 searchForSidebar: false
---- name:head pipeline:jade
-- def urlOf(str:String) = PubletWebContext.urlOf(str)
-link(href={ urlOf("/publet/webeditor/css/jquery.fileupload-ui.css") } rel="stylesheet")
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/vendor/jquery.ui.widget.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/tmpl.min.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/load-image.min.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/blueimp/canvas-to-blob.min.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.iframe-transport.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload-fp.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/jquery.fileupload-ui.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/locale.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/js/publet-browser.js") })
-script(type="text/javascript" src={ urlOf("/publet/webeditor/scripts/browser.js") })
-link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
+assetGroups: publet.webeditor.uploadpage
 
 --- name:content pipeline:ssp
 <% import org.eknet.publet.webeditor.EditorPaths %>
@@ -60,11 +46,13 @@ link(href={ urlOf("/publet/webeditor/css/browser.css") } rel="stylesheet")
         </div>
     </div>
     <div class="row">
-      <div class="alert alert-block">
-        <a class="close" data-dismiss="alert" href="#">&times;</a>
-        <h4 class="alert-heading">Warning!</h4>
-        If you click the <span class="label label-important">Delete</span> button, the file
-        gets deleted at the server immediately!
+      <div class="span12">
+        <div class="alert alert-block">
+          <a class="close" data-dismiss="alert" href="#">&times;</a>
+          <h4 class="alert-heading">Warning!</h4>
+          If you click the <span class="label label-important">Delete</span> button, the file
+          gets deleted at the server immediately!
+        </div>
       </div>
     </div>
     <!-- The loading indicator is shown during file processing -->

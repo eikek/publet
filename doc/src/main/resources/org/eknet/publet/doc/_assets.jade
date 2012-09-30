@@ -1,0 +1,220 @@
+.row
+  .span10
+    :~markdown
+      # Assets
+
+      Most web pages today use assets like javascript and css resources quite frequently. Those are usually not
+      subject to authorization and can therefore circument certain request processing rules. If
+      a site includes many resources, response time slows down, because the browser has to do
+      many request to fully load the site.
+
+      The `AssetManager` aims to help here. It provides a central point for all open static
+      resources like javascripts or css. It can
+
+      * minimize css files using [Yui Compressor](http://developer.yahoo.com/yui/compressor/)
+      * minimize javascripts using [Google's Closure Compiler](https://developers.google.com/closure/compiler/)
+      * easy registration of resources organizing them in groups
+        and specifying dependencies on each other
+      * include all resources of a group using one line of code in a template
+
+      ## Registering Resources
+
+      ### Creating Groups
+
+      Resources always belong to a group with some name. For example, the following creates a group of
+      bootstrap resources and saves the resulting group definitions in an `object`:
+
+          object Assets extends AssetCollection {
+
+            val jquery = Group("jquery")
+              .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
+              .add(resource("jquery/jquery.form.js"))
+
+            val bootstrap = Group("bootstrap")
+              .add(resource("bootstrap/js/bootstrap.js"))
+              .add(resource("bootstrap/css/bootstrap.css"))
+              .add(resource("bootstrap/css/bootstrap.custom.css"))
+              .add(resource("bootstrap/img/glyphicons-halflings.png"))
+              .add(resource("bootstrap/img/glyphicons-halflings-white.png"))
+              .require(jquery.name)
+
+            val global = Group("global")
+              .use(jquery.name, bootstrap.name)
+          }
+
+      This defines three groups, where the group *global* is a meta group comprised of
+      two asset groups. With `require` a group can define a dependency. This dependent
+      group will come first when being rendered in the page. Also the resources are
+      added to the page in the order they are added to the group.
+
+      The trait `AssetCollection` defines a few helper methods. The method `resource()` creates
+      a `UrlResource` using the given name and looks it up in the current classpath.
+
+
+      ### Make them available
+
+      In your code, for example, inside an *Extension's* `onStartup()` method, use the `AssetManager`
+      to register asset groups on application start.
+
+          val assetMgr = AssetManager.service
+          assetMgr setup (Assets.jquery, Assets.bootstrap)
+
+
+      You can add group definitions to an existing group if their name match. For example:
+
+          //creates a new group, because it's the first time it is given to setup()
+          assetMgr.setup Group("global").add(myresource.css)
+
+          //adds to the now existing group
+          assetMgr.setup Group("global").add(myresource2.css)
+
+      This is most useful when adding groups from different modules to an meta group. Publet defines
+      the meta group *default*. So if you want a resource to be included in every page, you could add
+      it to the default group using an *Extension*.
+
+      ## Get them
+
+      The `AssetManager` mounts the resources to a special path
+
+          /publet/assets/groups/<groupname>/js/<js-files>
+          /publet/assets/groups/<groupname>/css/<css-files>
+          /publet/assets/groups/<groupname>/img/<image-files>
+          /publet/assets/groups/<groupname>/other/<other-files>
+
+      For example, jquery can be fetched with these URL:
+
+          /publet/assets/groups/jquery/js/jquery-1.8.2.min.js
+
+      The requests to those resources are not authorized or authenticated, so it is
+      not possible to put any permission constraints on them.
+
+      In order to get all resources (of one type) of a group in one compressed file, use
+      the following URL scheme:
+
+          /publet/assets/js/<groupname>.js
+          /publet/assets/css/<groupname>.css
+
+      Any image and other resources defined with the group are additionally mounted to
+      `/publet/assets/img` and `/publet/assets/other`, respectively such that references
+      from CSS files resolve correctly. This can be changed for each resource by specifying
+      a target path:
+
+          .add(resource("bootstrap/img/glyphicons-halflings.png").into("images"))
+
+      The resource registered as above would be placed in `publet/assets/groups/bootstrap/images/glyphicons-halflings.png`
+      and `/publet/assets/images/glyphicons-halflings.png`.
+
+      The compressed files are created on first invocation and then cached in a (temporary)
+      directory on the server. Those are also available, but not as convenient:
+
+          /publet/assets/compressed/<grouphash>.js
+          /publet/assets/compressed/<grouphash>.css
+
+      The hash sum of the contents of the file is used as a file name. Thus if any included resource
+      changes, a new file is created.
+
+      To exclude certain resources from compressing (they are still concatenated into one
+      file, but not compressed), add a `noCompress` to the resource definition as in
+
+          .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
+
+      ## Using with Templates
+
+      A template can include all resources of one or more groups with a single line:
+
+          =loadAssets("group")
+
+      The above jade snippet calls a method that returns a bunch of `<script/>` and
+      `<link/>` tags referencing all javascript and css resources belonging to the
+      given group. Just place this in the head section of the template. The method will
+      check whether the application is running in *Development-Mode* in which case it
+      returns one tag per resource. In the other case, it returns one `<script/>`
+      tag referencing the compressed javascript and one `<link/>` referring to the
+      compressed css resource.
+
+      There are overloaded variants to use the compressed or single version
+      explicitely.
+
+          def loadAssetsCompressed(groups: String*)
+          def loadAssetsSingle(groups: String*)
+
+
+      ### Predefined Groups
+
+      Publet already has a number of resources registered, like JQuery, Bootstrap, a few
+      plugins etc. All those are collected in the meta group *default* and *defaultNoHighlightJs* which
+      just excludes the library *highlightjs*. The group *default* is loaded by the default layout
+      template. You can override this or include additional groups by defining parameters. See
+      the following page template as an example:
+
+          ---
+          title: Asset Group Test
+          defaultAssetGroup: defaultNoHighlightJs
+          assetGroups: mygroup1, mygroup2
+
+          --- name:content
+
+          # Headline
+
+          Some text.
+
+      The template specifies a new default asset group to the layout template that does not
+      include the syntax highlighter *HighlightJs*. Additionally it specified to load resources
+      of the groups "mygroup1" and "mygroup2".
+
+      #### Example
+
+      Just to quickly see the difference, consider the two *page* templates:
+
+.row
+  .span5
+    span.badge.badge-info 1
+    :~markdown
+      A template using the *default* asset group:
+
+          ---
+          title: Asset Group Test
+
+          --- name:content
+
+          # Headline
+
+          Some code
+
+              public static void main(String[] args) {
+                System.out.println("Hello World.");
+              }
+
+          in Java.
+
+  .span5
+    span.badge.badge-info 2
+    :~markdown
+      A template using the *defaultNoHighlightJs* asset group:
+
+          ---
+          title: Asset Group Test
+          defaultAssetGroup: defaultNoHighlightJs
+
+          --- name:content
+
+          # Headline
+
+          Some code
+
+              public static void main(String[] args) {
+                System.out.println("Hello World.");
+              }
+
+          in Java.
+.row
+  .span9
+    :markdown
+      The results are not very surprising, but shown below nevertheless.
+
+.row
+  .span5
+    img.img.img-polaroid(src="asset02.png")
+  .span5
+    img.img.img-polaroid(src="asset01.png")
+br/

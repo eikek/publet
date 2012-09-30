@@ -1,9 +1,5 @@
 ---
 title: Publet Documentation
-layout: /publet/bootstrap/bootstrap.single.jade
-
---- name:head pipeline:jade
-=include("../_includes/htmlhead.jade")
 
 --- name:navigationBar pipeline:jade
 =include("../_includes/nav.jade")
@@ -11,7 +7,7 @@ layout: /publet/bootstrap/bootstrap.single.jade
 --- name:content pipeline:jade
 =include("../_includes/header.jade")
 .row
-  .span3
+  .span2
     ul.nav.nav-pills.nav-stacked
       li.active
         a(href="#intro" data-toggle="pill")
@@ -29,7 +25,7 @@ layout: /publet/bootstrap/bootstrap.single.jade
           | GitR Web
       li
 
-  .span9
+  .span10
     .tab-content
       .tab-pane.active#intro
         =include("_intro.md")

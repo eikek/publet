@@ -19,7 +19,6 @@ package org.eknet.publet.web.filter
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{PubletRequestWrapper, Config, PubletWeb}
 import javax.servlet._
-import http.{HttpServletRequest, HttpServletRequestWrapper}
 
 /**
  * The first filter on the chain. Detects whether the current
@@ -77,7 +76,7 @@ class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
     } else if (allForwards.keySet.contains(path.asString)) {
       val newUri = allForwards.get(path.asString).get
       debug("Forward "+ path +" to "+ newUri)
-      val forwardingReq = new ForwardRequest(newUri, req)
+      val forwardingReq = new Filters.ForwardRequest(newUri, req)
       chain.doFilter(forwardingReq, resp)
     } else {
       chain.doFilter(req, resp)
@@ -88,12 +87,5 @@ class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
 
   def destroy() {}
 
-  private class ForwardRequest(uri: String, req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
-    import collection.JavaConversions._
-
-    req.getAttributeNames.toList.withFilter(!_.contains("eclipse.jetty")).foreach(key => req.removeAttribute(key))
-
-    override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
-  }
 }
 

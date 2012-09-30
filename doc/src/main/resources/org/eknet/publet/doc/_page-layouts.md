@@ -36,11 +36,14 @@ Pages can control the layout's behaviour by defining parameters:
   _special directories_ (default is `true`)
 * `searchForHeadIncludes: Boolean` whether to search for additional head
   includes in _special directories_ (default is `true`)
-* `useHighlightJs: Boolean` whether to use HighlightJS (default is `true`)
 * `highlightTheme: String` the theme for highlightJs (the css file without
   extension; default is "googlecode")
 * `layout: String` the uri to the layout to use. Default is `null` which
   results in using the default layout
+* `defaultAssetGroup`: the asset group that is first loaded. Default is `default` and will
+  include the mentioned javascript and css resources
+* `assetGroups`: additional asset groups to be included. Default is `null`. Please see
+  the documentation page on *Assets*.
 
 See the full source of the default layout [here](../../../publet/bootstrap/bootstrap.single.jade).
 

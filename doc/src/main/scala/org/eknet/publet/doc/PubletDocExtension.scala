@@ -20,14 +20,27 @@ import org.eknet.publet.vfs.util.ClasspathContainer
 import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
+import org.eknet.publet.web.asset.{AssetManager, Group, AssetCollection}
+import org.eknet.publet.web.template.DefaultLayout
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 22:29
  */
-class PubletDocExtension extends EmptyExtension with Logging {
+class PubletDocExtension extends EmptyExtension with Logging with AssetCollection {
+
+  override def classPathBase = "/org/eknet/publet/doc/_includes/"
+
+  val css = Group("publet.doc")
+    .forPath("/publet/doc/**")
+    .add(resource("doc.css"))
+    .require(DefaultLayout.Assets.bootstrap.name)
 
   override def onStartup() {
+    AssetManager.service setup css
+    AssetManager.service setup Group("default")
+      .use(css.name)
+
     val cont = new ClasspathContainer(base = "/org/eknet/publet/doc")
     PubletWeb.publet.mountManager.mount(Path("/publet/doc"), cont)
   }

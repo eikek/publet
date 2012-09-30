@@ -106,13 +106,29 @@ object Config extends PropertiesMap with Logging {
   }
 
   /**
-   * Creates a new temporary directory. The directory is newly created.
-   * The directory is not removed automatically.
+   * Creates a new temporary directory. The name is made of the prefix and
+   * some random number/char sequence. The directory is newly created.
+   *
+   * The directory is not removed automatically on jvm shutdown.
+   *
+   * @see newStaticTempDir
+   * @param prefix
+   * @return
+   */
+  def newTempDir(prefix: String = "publet"): File = Files.createTempDirectory(tempRoot.toPath, prefix).toFile
+
+  /**
+   * Creates a directory beneath the temp root using the given name. The directory
+   * may already exists, and is created if it does not exist.
    *
    * @param name
    * @return
    */
-  def newTempDir(name: String = "publet"): File = Files.createTempDirectory(tempRoot.toPath, name).toFile
+  def newStaticTempDir(name: String): File = {
+    val t = new File(tempRoot, name)
+    if (!t.exists()) t.mkdirs()
+    t
+  }
 
   /**
    * Returns the configured string to use as prefix for
@@ -129,6 +145,15 @@ object Config extends PropertiesMap with Logging {
    * @return
    */
   def gitMount = apply("publet.gitMount").getOrElse("git")
+
+  /**
+   * Returns the current mode the application is in, which is either
+   * `development` (the default), or the string defined in `publet.properties`
+   * associated to the key `publet.mode`.
+   *
+   * @return
+   */
+  def mode = apply("publet.mode").getOrElse("development")
 
   /**
    * Returns a file beneath configuration directory of this
