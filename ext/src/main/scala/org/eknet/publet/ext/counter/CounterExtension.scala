@@ -30,7 +30,7 @@ class CounterExtension extends WebExtension{
 
   def onEndRequest() {
     if (PubletWebContext.getErrorResponse.isEmpty) {
-      val uri = PubletWebContext.fullUrl
+      val uri = CounterExtension.getDefaultCountingUri
       val cinfo = PubletWebContext.getClientInfo
       counterThread ! Message(uri, cinfo)
     }
@@ -50,4 +50,7 @@ object CounterExtension {
   def service = PubletWeb.contextMap.get(serviceKey).get
 
   def serviceOption = PubletWeb.contextMap.get(serviceKey)
+
+  def getDefaultCountingUri =
+    PubletWebContext.applicationUri + PubletWebContext.getQueryString.map("?"+_).getOrElse("")
 }

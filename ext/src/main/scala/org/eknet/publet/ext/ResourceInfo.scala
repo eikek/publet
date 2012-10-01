@@ -43,7 +43,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getAccessCount: Long = getAccessCount(PubletWebContext.fullUrl)
+  def getAccessCount: Long = getAccessCount(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the point in time of last access to the resource at the given
@@ -68,7 +68,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastAccess:Long = getLastAccess(PubletWebContext.fullUrl)
+  def getLastAccess:Long = getLastAccess(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the timestamp of the last access to the resource at the given uri
@@ -95,7 +95,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastAccessString: String = getLastAccessString(PubletWebContext.fullUrl)
+  def getLastAccessString: String = getLastAccessString(CounterExtension.getDefaultCountingUri)
 
   private def findSource(path: Path) = PubletWeb.publet.findSources(path).headOption
 
@@ -116,7 +116,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastModified: Option[Long] = getLastModified(PubletWebContext.applicationUri)
+  def getLastModified: Option[Long] = getLastModified(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the timestamp of the last modification of the resource at the given uri. It
@@ -140,7 +140,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastModifiedString: Option[String] = getLastModifiedString(PubletWebContext.applicationUri)
+  def getLastModifiedString: Option[String] = getLastModifiedString(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the name of the person who last authored the resource at the given uri. This
@@ -161,7 +161,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastAuthor: Option[String] = getLastAuthor(PubletWebContext.applicationUri)
+  def getLastAuthor: Option[String] = getLastAuthor(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the login of the person who last authored the resource at the given uri.
@@ -192,7 +192,7 @@ object ResourceInfo {
    *
    * @return
    */
-  def getLastAuthorLogin: Option[String] = getLastAuthorLogin(PubletWebContext.applicationUri)
+  def getLastAuthorLogin: Option[String] = getLastAuthorLogin(CounterExtension.getDefaultCountingUri)
 
   /**
    * Returns the md5 checksum of the resource contents at the specified uri.
@@ -210,13 +210,13 @@ object ResourceInfo {
    *
    * @return
    */
-  def getChecksum: Option[String] = getChecksum(PubletWebContext.applicationUri)
+  def getChecksum: Option[String] = getChecksum(CounterExtension.getDefaultCountingUri)
 
   def getSize(uri: String): Option[Long] = {
     findSource(Path(uri)) flatMap (_.length)
   }
 
-  def getSize:Option[Long] = getSize(PubletWebContext.applicationUri)
+  def getSize:Option[Long] = getSize(CounterExtension.getDefaultCountingUri)
 
   def getSizeString(uri: String): Option[String] = {
     getSize(uri) map { sz => ByteSize.bytes.normalizeString(sz.toDouble) }

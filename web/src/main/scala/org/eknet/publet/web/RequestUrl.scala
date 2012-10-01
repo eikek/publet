@@ -124,4 +124,13 @@ trait RequestUrl extends Logging {
   def resourcePath = attr(resourceUri).get
 
   def getResourceUri = resourcePath.map(_.asString).getOrElse("")
+
+  /**
+   * Returns the query string that is contained in the request URL after the path. This method
+   * returns [[scala.None]] if the URL does not have a query string. Same as the value of the CGI
+   * variable QUERY_STRING.
+   * @return
+   */
+  def getQueryString = Option(req.getQueryString)
+
 }
