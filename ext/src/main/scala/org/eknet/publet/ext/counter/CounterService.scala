@@ -10,6 +10,7 @@ import org.eknet.publet.vfs.{ContentResource, Path}
 import org.apache.shiro.util.ByteSource
 import org.apache.shiro.crypto.hash.format.HexFormat
 import org.eknet.publet.web.util.ClientInfo
+import org.eknet.publet.Glob
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -170,7 +171,9 @@ object CounterService {
 
         bot || bl
       }
-      if (!isBlacklisted) {
+      val urlmatch = PubletWeb.publetSettings("ext.counter.pattern")
+        .map(Glob(_).matches(uri)).getOrElse(true)
+      if (!isBlacklisted && urlmatch) {
         val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
         db.withTx {
           val pageVertex = getOrCreatePageVertex(uriPath)

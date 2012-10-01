@@ -180,6 +180,16 @@ accesses from this ip.
 By default, accesses from all ips are taken into account but not user agents
 with words _bot_ or _spider_ in their name.
 
+Additionally a glob pattern can be specified that is matched against the uri. Only
+if it matches, the uri is counted. If no such pattern is found, this evaluates to
+`true`. Specify the pattern in `settings.xml` with key `ext.counter.pattern`:
+
+    ext.counter.pattern=/main/**
+
+This would count only URLs starting with `/main/`, all others are discarded. The glob
+can contain a `*` to match any sequence of characters but not a `/`, a `?` to match any
+single character and `**` to match any sequence of characters including `/`.
+
 
 ## Blueprints / OrientDB
 
