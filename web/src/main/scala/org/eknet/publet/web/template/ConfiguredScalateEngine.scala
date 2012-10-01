@@ -40,7 +40,7 @@ object ConfiguredScalateEngine {
 
   private def createEngine() = {
     val engine = new TemplateEngine()
-    engine.workingDirectory = Config.newTempDir("scalate")
+    engine.workingDirectory = Config.newStaticTempDir("scalate")
     engine.allowCaching = true
     engine.allowReload = true
 
