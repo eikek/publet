@@ -38,6 +38,7 @@ class PubletHandlerFactory extends RequestHandlerFactory {
       Filters.authc,
       Filters.exceptionHandler,
       PubletAuthzFilter,
+      Filters.extensionRequest,
       Filters.source,
       Filters.publet
     ))
