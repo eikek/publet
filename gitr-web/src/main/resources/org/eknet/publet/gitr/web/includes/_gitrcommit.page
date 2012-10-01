@@ -103,7 +103,7 @@ table.plain
         pre.plainPre<>
           !~~commit.getFullMessage
 br/
-h3.commit-group-head
+h4.commit-group-head
   i.icon-file
   | Changed files
   =" ("+ changedFiles.size +")"

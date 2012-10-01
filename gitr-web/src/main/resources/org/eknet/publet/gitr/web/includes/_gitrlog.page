@@ -31,7 +31,7 @@ highlightTheme: magula
 .row
   .span12
     - for (cg <- commits) {
-      h3.commit-group-head
+      h4.commit-group-head
         =cg.title
       ol.commit-group
         - for (c <- cg.commits) {
