@@ -1,7 +1,7 @@
 ---
 title: Error
 searchForSidebar: false
-assetGroups: "publet.webeditor.editpage
+assetGroups: publet.webeditor.editpage
 
 --- name:content pipeline:jade
 
