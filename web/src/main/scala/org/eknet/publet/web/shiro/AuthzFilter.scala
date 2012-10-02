@@ -26,7 +26,7 @@ import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 16:36
  */
-abstract class AuthzFilter(val redirectToLoginPage: Boolean = true) extends Filter with PubletRequestWrapper with Logging with PageWriter {
+abstract class AuthzFilter(val redirectToLoginPage: Boolean = true) extends Filter with PubletRequestWrapper with Logging {
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     try {

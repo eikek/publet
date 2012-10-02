@@ -16,6 +16,8 @@
 
 package org.eknet.publet.web
 
+import javax.servlet.http.HttpServletRequest
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:31
@@ -40,16 +42,24 @@ trait WebExtension {
   def onShutdown()
 
   /**
-   * This method is invoked on the begin of each request.
+   * This method is invoked on the begin of each request. It allows
+   * to wrap the given request. For example to forward to another
+   * resource.
+   *
+   * The request at this point is already authenticated and authorized.
+   * See [[org.eknet.publet.web.req.PubletHandlerFactory]] for details.
+   *
+   * Requests to the git repository and to a webdav resource are
+   * not routed here.
    *
    */
-  def onBeginRequest()
+  def onBeginRequest(req:HttpServletRequest): HttpServletRequest
 
   /**
    * This method is invoked on the end of each request.
    *
    */
-  def onEndRequest()
+  def onEndRequest(req: HttpServletRequest)
 
 }
 
@@ -57,7 +67,7 @@ trait EmptyExtension extends WebExtension {
 
   def onStartup() {}
   def onShutdown() {}
-  def onBeginRequest() {}
-  def onEndRequest() {}
+  def onBeginRequest(req: HttpServletRequest) = req
+  def onEndRequest(req: HttpServletRequest) {}
 
 }

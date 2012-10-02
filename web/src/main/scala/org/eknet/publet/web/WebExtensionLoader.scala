@@ -19,6 +19,7 @@ package org.eknet.publet.web
 import scala.collection.JavaConversions._
 import java.util.ServiceLoader
 import grizzled.slf4j.Logging
+import javax.servlet.http.HttpServletRequest
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -51,21 +52,25 @@ object WebExtensionLoader extends Logging {
     loader.iterator().toList
   }
 
-  def executeBeginRequest() {
-    for (ext <- loadExtensions) {
+  def executeBeginRequest(req: HttpServletRequest): HttpServletRequest = {
+    def applySafe(ext: WebExtension, r: HttpServletRequest) = {
       try {
-        ext.onBeginRequest()
+        Option(ext.onBeginRequest(r)).getOrElse(r)
       }
       catch {
-        case e:Exception => error("Exception invoking onBeginRequest of extension '"+ ext +"'!", e)
+        case e:Exception => {
+          error("Exception invoking onBeginRequest of extension '"+ ext +"'!", e)
+          req
+        }
       }
     }
+    loadExtensions.foldLeft(req)((r1, ext) => applySafe(ext, r1))
   }
 
-  def executeEndRequest() {
+  def executeEndRequest(req:HttpServletRequest) {
     for (ext <- loadExtensions) {
       try {
-        ext.onEndRequest()
+        ext.onEndRequest(req)
       }
       catch {
         case e:Exception => error("Exception invoking onEndRequest of extension '"+ ext +"'!", e)

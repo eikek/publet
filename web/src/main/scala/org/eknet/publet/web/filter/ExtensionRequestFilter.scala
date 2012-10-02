@@ -12,12 +12,12 @@ class ExtensionRequestFilter extends Filter with PubletRequestWrapper with Loggi
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-      WebExtensionLoader.executeBeginRequest()
+      val req = WebExtensionLoader.executeBeginRequest(request)
       try {
-        chain.doFilter(request, response)
+        chain.doFilter(req, response)
       }
       finally {
-        WebExtensionLoader.executeEndRequest()
+        WebExtensionLoader.executeEndRequest(request)
       }
   }
 

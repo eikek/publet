@@ -36,7 +36,6 @@ class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapp
     Filters.webContext,
     Filters.authc,
     Filters.exceptionHandler,
-    Filters.extensionRequest,
     Filters.webdav
   ))
 

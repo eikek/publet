@@ -18,7 +18,7 @@ package org.eknet.publet.web.req
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.web.filter._
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.{PageWriter, PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
@@ -43,7 +43,7 @@ class PubletHandlerFactory extends RequestHandlerFactory {
       Filters.publet
     ))
 
-  object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) {
+  object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {
     override def checkResourceAccess(req: HttpServletRequest) {
       PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
         .filterNot(_.perm.isAnon)
