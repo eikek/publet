@@ -4,6 +4,7 @@ import org.eknet.publet.web.{PubletWeb, PubletWebContext, WebExtension}
 import org.eknet.publet.web.util.Key
 import java.net.{UnknownHostException, InetAddress}
 import grizzled.slf4j.Logging
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Installs the [[org.eknet.publet.ext.counter.CounterService]] and a thread that
@@ -45,10 +46,9 @@ class CounterExtension extends WebExtension with Logging {
     counterThread ! StopMessage
   }
 
-  def onBeginRequest() {
-  }
+  def onBeginRequest(req: HttpServletRequest) = req
 
-  def onEndRequest() {
+  def onEndRequest(req: HttpServletRequest) {
     if (PubletWebContext.getErrorResponse.isEmpty) {
       val uri = CounterExtension.getDefaultCountingUri
       val cinfo = PubletWebContext.getClientInfo

@@ -72,7 +72,7 @@ object ListContents extends ScalaScript {
       "container" -> isContainer(r),
       "type" -> contentType.typeName.name,
       "sourceRef" -> (path / r).asString,
-      "thumbnail" -> ctx.urlOf(EditorPaths.thumbNailer.asString+"?resource="+(path/r).asString),
+      "thumbnail" -> (ctx.urlOf(path/ r.name) + "?thumb"),
       "delete_url" -> ctx.urlOf(EditorPaths.pushScript.asString+"?delete="+(path/r).asString),
       "href" -> ctx.urlOf(path/ r.name.withExtension("html")),
       "mimeBase" -> contentType.mime._1,

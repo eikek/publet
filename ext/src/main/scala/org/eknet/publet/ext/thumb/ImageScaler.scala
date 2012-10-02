@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.webeditor.actions
+package org.eknet.publet.ext.thumb
 
 import java.awt.image.BufferedImage
 import java.awt.{Transparency, RenderingHints}

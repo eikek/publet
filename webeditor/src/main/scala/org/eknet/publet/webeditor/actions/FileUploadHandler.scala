@@ -74,7 +74,7 @@ object FileUploadHandler extends ScalaScript with Logging {
     map.put("name", res.name.fullName)
     map.put("size", res.length.getOrElse(0L))
     map.put("url", ctx.urlOf(path.sibling(res.name.fullName).asString))
-    map.put("thumbnail_url", ctx.urlOf(EditorPaths.thumbNailer.asString+"?resource="+path.sibling(res.name.fullName).asString))
+    map.put("thumbnail_url", ctx.urlOf(path.sibling(res.name.fullName).asString)+"?thumb")
     map.put("delete_url", ctx.urlOf(pushJson+"?delete=" + path.sibling(res.name.fullName).asString))
     map.put("delete_type", "DELETE")
     map.toMap

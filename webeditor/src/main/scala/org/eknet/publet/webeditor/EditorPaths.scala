@@ -32,8 +32,6 @@ object EditorPaths {
   val uploadScript = scriptPath / "/upload.json"
   val pushScript = scriptPath / "/push.json"
   val editHtmlPage = scriptPath / "edit.html"
-  val thumbNailer = scriptPath / "thumb.png"
-
 
   val editPageTemplate = templatePath / "editpage.page"
   val uploadTemplate = templatePath / "uploadpage.page"

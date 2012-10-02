@@ -43,7 +43,6 @@ class EditorWebExtension extends EmptyExtension with Logging {
     muc.addResource(new WebScriptResource("push.json".rn, PushContents))
     muc.addResource(new WebScriptResource("edit.html".rn, new Edit))
     muc.addResource(new WebScriptResource("upload.json".rn, FileUploadHandler))
-    muc.addResource(new WebScriptResource("thumb.png".rn, Thumbnailer))
     publet.mountManager.mount(scriptPath, muc)
 
     val editEngine = new WebEditor('edit, scalateEngine)

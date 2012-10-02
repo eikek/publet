@@ -299,7 +299,7 @@ object WebEditor extends Build {
     id = "webeditor",
     base = file("webeditor"),
     settings = buildProperties
-  ) dependsOn (Publet.module, Web.module)
+  ) dependsOn (Publet.module, Web.module, Ext.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webeditor",

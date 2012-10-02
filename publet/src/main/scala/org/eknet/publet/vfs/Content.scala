@@ -88,6 +88,7 @@ object Content {
   def apply(in: Array[Byte], ct: ContentType): Content = new Content {
     def contentType = ct
     def inputStream = new ByteArrayInputStream(in)
+    override def length = Some(in.length)
   }
 
   protected[publet] def copy(in: InputStream, out: OutputStream, closeOut: Boolean = true, closeIn: Boolean = true) {
