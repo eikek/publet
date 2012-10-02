@@ -28,7 +28,17 @@ abstract class PropertiesMap extends StringMap {
 
   protected def file: Option[InputStream]
 
-  private val props = new Properties();
+  private val props = new Properties()
+
+  /**
+   * Puts the key-value pair in the map. This value is only
+   * kept in memory and not written to the underlying file!
+   * @param key
+   * @param value
+   */
+  def put(key: String, value: String) {
+    props.setProperty(key, value)
+  }
 
   def apply(key: String) = Option(props.getProperty(key))
 
