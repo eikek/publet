@@ -16,12 +16,14 @@
 
 package org.eknet.publet.web
 
+import filter.ServeContentResource
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eknet.publet.vfs._
 import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
 import org.eknet.publet.web.util.RenderUtils
+import org.eknet.publet.vfs.util.SimpleContentResource
 
 /**
  *
@@ -85,20 +87,11 @@ trait PageWriter extends Logging {
    * @param resp
    */
   def writePage(page: Option[Content], req: HttpServletRequest, resp: HttpServletResponse) {
-    val out = resp.getOutputStream
     val path = PubletWebContext.applicationPath
     page match {
       case None => createNew(path, req, resp)
-      case Some(p:ErrorResponse) => {
-        p.send(req, resp)
-      }
-      case Some(p: StreamResponse) => {
-        p.send(resp)
-      }
-      case Some(p) => {
-        resp.setContentType(p.contentType.mimeString)
-        p.copyTo(out, close = true)
-      }
+      case Some(p: CustomContent) => p.send(req, resp)
+      case Some(p) => ServeContentResource.serveResource(new SimpleContentResource(path.name, p), req, resp)
     }
   }
 

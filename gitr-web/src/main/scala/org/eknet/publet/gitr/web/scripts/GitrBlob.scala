@@ -40,7 +40,7 @@ class GitrBlob extends ScalaScript {
             val in = loader.openStream()
             val len = loader.getSize
             val mime = ContentType.getMimeType(file.name.fullName)
-            Some(StreamResponse(in, mime, Some(len), file.name.fullName))
+            Some(new StreamResponse(in, mime, Some(len), file.name.fullName))
           })
         } getOrElse {
           Some(ErrorResponse.notFound)

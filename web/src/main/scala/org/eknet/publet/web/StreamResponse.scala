@@ -17,15 +17,17 @@
 package org.eknet.publet.web
 
 import java.io.InputStream
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eknet.publet.vfs.{ContentType, Content}
+import com.google.common.net.HttpHeaders
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.06.12 11:08
  */
-case class StreamResponse(inputStream: InputStream, mime: String, override val length: Option[Long], name: String) extends Content {
-  def contentType = {
+class StreamResponse(override val inputStream: InputStream, mime: String, override val length: Option[Long], name: String) extends CustomContent {
+
+  override def contentType = {
     val sym = Symbol(mime.replace('/', 'S'))
     val mimeRegex = "([^/]+)/(.*)".r
     val mimeTuple = mime match {
@@ -35,10 +37,10 @@ case class StreamResponse(inputStream: InputStream, mime: String, override val l
     ContentType(sym, Set(), mimeTuple)
   }
 
-  def send(res: HttpServletResponse) {
+  def send(req: HttpServletRequest, res: HttpServletResponse) {
     res.setContentType(mime)
     length.foreach(l => res.setContentLength(l.toInt))
-    res.setHeader("Content-Disposition", "attachment; filename="+name)
+    res.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+name)
 
     val os = res.getOutputStream
     Content.copy(inputStream, os, true, false)

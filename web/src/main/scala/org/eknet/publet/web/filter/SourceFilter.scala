@@ -35,8 +35,7 @@ class SourceFilter extends Filter with PubletRequestWrapper with PageWriter {
     PubletWeb.publet.rootContainer.lookup(path)
       .collect({case c:ContentResource=>c}) match {
         case Some(c) => {
-          response.setContentType(c.contentType.mimeString)
-          c.copyTo(response.getOutputStream, close = true)
+          ServeContentResource.serveResource(c, request, response)
         }
         case _=> {
           if (!request.isGitRequest && path.name.targetType == ContentType.unknown) {

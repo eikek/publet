@@ -24,9 +24,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.05.12 19:24
  */
-case class ErrorResponse(code: Int) extends Content {
-  def contentType = ContentType.unknown
-  def inputStream = null
+case class ErrorResponse(code: Int) extends CustomContent {
 
   def send(req: HttpServletRequest, resp: HttpServletResponse) {
     resp.sendError(code)

@@ -62,7 +62,8 @@ object ContentType {
   val jar = ContentType('jar, Set("jar"), ("application", "java-archive"))
   val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
 
-  val all = Set(text, html, markdown, textile, confluence, page, feed, ssp, scaml, mustache, jade, xml, css, javascript, json, png, jpg, gif, icon, scal, pdf)
+  val all = Set(text, html, markdown, textile, confluence, page, feed, ssp, scaml,
+    mustache, jade, xml, css, javascript, json, png, jpg, gif, icon, scal, pdf, jar, zip, unknown)
 
   def apply(f: File): ContentType = apply(extension(f))
 
@@ -106,6 +107,19 @@ object ContentType {
       types.exists(mt => MimeUtil2.isTextMimeType(mt))
     } else {
       t.mime._1 == "text"
+    }
+  }
+
+  def fromString(mime: String) = {
+    val mimeRegex = "([^/]+)/(.*)".r
+    mime match {
+      case mimeRegex(b, s) => {
+        all.find(_.mime ==(b, s)).getOrElse {
+          val sym = Symbol(mime.replace('/', 'S'))
+          ContentType(sym, Set(), (b, s))
+        }
+      }
+      case _ => ContentType.unknown
     }
   }
 
