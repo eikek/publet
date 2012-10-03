@@ -46,7 +46,7 @@ class CreateNewHandler extends NotFoundHandler with PageWriter with Logging {
       writePage(Some(c.get), req, resp)
 
     } getOrElse {
-      error("Path not mounted: "+ path.asString)
+      debug("Path not mounted: "+ path.asString)
       ErrorResponse.notFound.send(req, resp)
     }
   }
