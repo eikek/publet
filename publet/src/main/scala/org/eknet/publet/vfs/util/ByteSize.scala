@@ -14,6 +14,14 @@ object ByteSize extends Enumeration {
   private val cMegabi = cKibi * 1024
   private val cGigabi = cMegabi * 1024
 
+  def fromString(str: String): ByteSize.SizeVal = str.toLowerCase match {
+    case "bytes" => ByteSize.bytes
+    case "kib" => ByteSize.kib
+    case "mib" => ByteSize.mib
+    case "gib" => ByteSize.gib
+    case c@_ => sys.error("Unknown ByteSize constant: "+ c)
+  }
+
   abstract class SizeVal(name: String) extends Val(name) {
     def toBytes(size: Double): Long
 

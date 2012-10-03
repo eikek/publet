@@ -70,6 +70,9 @@ class Thumbnailer(mm: MountManager, tempDir: File, options: CacheOptions) {
    * Creates a thumbnail of the given resource and caches it in the
    * temporary directory.
    *
+   * The path to the thumbnail is returned that can be used to lookup
+   * the thumbnail resource.
+   *
    * @param c
    * @param maxh
    * @param maxw
@@ -94,7 +97,10 @@ class Thumbnailer(mm: MountManager, tempDir: File, options: CacheOptions) {
   }
 
   private case class Key(name: String, lastmod: Long, maxw: Int, maxh: Int) {
-    val targetName = name +"-"+ lastmod +"-"+ maxw +"x"+ maxh+ ".png"
+    //make the thumbnail not accessible as is, because the original image could
+    //have special permissions to be checked. Making the thumbnails were accessible
+    //could circumvent security constraints.
+    val targetName = "_"+ name +"-"+ lastmod +"-"+ maxw +"x"+ maxh+ ".png"
   }
 
 }
@@ -105,7 +111,18 @@ object Thumbnailer {
 
   def service() = PubletWebContext.contextMap(thumbnailerKey).getOrElse {
     val tempDir = Config.newStaticTempDir("thumbs")
-    val tn = new Thumbnailer(PubletWeb.publet.mountManager, tempDir, CacheOptions())
+    val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
+    val options = Config("thumbnail.maxDiskSize") flatMap (str => str match {
+      case sizeRegex(num, i, p, unit) => {
+        if (unit.isEmpty) Some(CacheOptions.maxSize(i.toLong))
+        else Some(CacheOptions.maxSize(ByteSize.fromString(unit).toBytes(num.toDouble)))
+      }
+      case _ => None
+    }) orElse {
+      Config("thumbnail.maxEntries") map (entr => CacheOptions.maxEntries(entr.toInt))
+    } getOrElse(CacheOptions.getDefault)
+
+    val tn = new Thumbnailer(PubletWeb.publet.mountManager, tempDir, options)
     PubletWeb.contextMap.put(thumbnailerKey, tn)
     tn
   }
@@ -117,8 +134,15 @@ object Thumbnailer {
  * You can *either* specify a maximum size *or* a maximum entry count. If both
  * are specified, maximum size is prefered.
  *
+ * Use the factory methods in the companion object.
+ *
  * @param maxSize bytes, defaults to 50MiB
  * @param maxEntries number of entries, defaults to [[scala.None]]
  */
-case class CacheOptions(maxSize: Option[Long] = Some(ByteSize.mib.toBytes(50)), maxEntries: Option[Int] = None)
+class CacheOptions private(val maxSize: Option[Long], val maxEntries: Option[Int])
 
+object CacheOptions {
+  def maxEntries(size: Int) = new CacheOptions(None, Some(size))
+  def maxSize(bytes: Long) = new CacheOptions(Some(bytes), None)
+  def getDefault = maxSize(ByteSize.mib.toBytes(50))
+}
