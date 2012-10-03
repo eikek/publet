@@ -51,27 +51,31 @@ class GitPartition (val tandem: Tandem)
   }
 
   protected[git] def commitWrite(c: GitFile, changeInfo: Option[ChangeInfo] = None) {
-    val path = Path(c.file).strip(c.rootPath)
-    git.add()
-      .addFilepattern(path.toRelative.asString)
-      .setUpdate(false)
-      .call()
+    synchronized {
+      val path = Path(c.file).strip(c.rootPath)
+      git.add()
+        .addFilepattern(path.toRelative.asString)
+        .setUpdate(false)
+        .call()
 
-    if (!git.status().call().isClean) {
-      info("commit: "+ path.toRelative.asString)
+      if (!git.status().call().isClean) {
+        info("commit: "+ path.toRelative.asString)
 
-      commit(c, changeInfo, "Update")
-      tandem.pushToBare()
+        commit(c, changeInfo, "Update")
+        tandem.pushToBare()
+      }
     }
   }
 
   protected[git] def commitDelete(c: GitFile) {
-    val path = Path(c.file).strip(c.rootPath)
-    git.rm()
-      .addFilepattern(path.toRelative.asString)
-      .call()
-    commit(c, None, "Delete")
-    tandem.pushToBare()
+    synchronized {
+      val path = Path(c.file).strip(c.rootPath)
+      git.rm()
+        .addFilepattern(path.toRelative.asString)
+        .call()
+      commit(c, None, "Delete")
+      tandem.pushToBare()
+    }
   }
 
   override def children = super.children.filterNot(_.name.name == ".git/")
