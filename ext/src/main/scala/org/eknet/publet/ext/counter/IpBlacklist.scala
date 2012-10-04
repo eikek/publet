@@ -65,7 +65,7 @@ class IpBlacklist(m: PropertiesMap, resolveIntervall: (Long, TimeUnit)) extends 
    */
   def isListed(ip: String): Boolean = {
     //is ip address listed?
-    m("ext.counter.blacklist."+ ip).map(_.toBoolean) getOrElse {
+    m(keyPrefix + ip).map(_.toBoolean) getOrElse {
 
       //else lookup hostname, re-resolve if necessary
       lock.readLock().lock()
@@ -80,7 +80,7 @@ class IpBlacklist(m: PropertiesMap, resolveIntervall: (Long, TimeUnit)) extends 
         }
       }
       try {
-        ipcache.get(ip).flatMap(name => m(name).map(_.toBoolean)).getOrElse(false)
+        ipcache.get(ip).flatMap(name => m(keyPrefix+name).map(_.toBoolean)).getOrElse(false)
       } finally {
         lock.readLock().unlock()
       }
