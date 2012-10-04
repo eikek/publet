@@ -29,7 +29,7 @@ import org.eknet.publet.webeditor.EditorPaths
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 19:47
  */
-object ListContents extends ScalaScript {
+object ListContents extends ScalaScript with ThumbnailUrlUtil {
 
   def serve() = {
     val ctx = PubletWebContext
@@ -72,7 +72,7 @@ object ListContents extends ScalaScript {
       "container" -> isContainer(r),
       "type" -> contentType.typeName.name,
       "sourceRef" -> (path / r).asString,
-      "thumbnail" -> (ctx.urlOf(path/ r.name) + "?thumb"),
+      "thumbnail" -> thumbnailUrl(path, r),
       "delete_url" -> ctx.urlOf(EditorPaths.pushScript.asString+"?delete="+(path/r).asString),
       "href" -> ctx.urlOf(path/ r.name.withExtension("html")),
       "mimeBase" -> contentType.mime._1,

@@ -30,7 +30,7 @@ import org.eknet.publet.web._
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.05.12 19:17
  */
-object FileUploadHandler extends ScalaScript with Logging {
+object FileUploadHandler extends ScalaScript with Logging with ThumbnailUrlUtil {
 
   lazy val pushJson = EditorPaths.pushScript.asString
   lazy val uploadJson = EditorPaths.uploadScript.asString
@@ -74,7 +74,7 @@ object FileUploadHandler extends ScalaScript with Logging {
     map.put("name", res.name.fullName)
     map.put("size", res.length.getOrElse(0L))
     map.put("url", ctx.urlOf(path.sibling(res.name.fullName).asString))
-    map.put("thumbnail_url", ctx.urlOf(path.sibling(res.name.fullName).asString)+"?thumb")
+    map.put("thumbnail_url", thumbnailUrl(path, res))
     map.put("delete_url", ctx.urlOf(pushJson+"?delete=" + path.sibling(res.name.fullName).asString))
     map.put("delete_type", "DELETE")
     map.toMap
