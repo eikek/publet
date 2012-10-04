@@ -45,7 +45,7 @@ abstract class ScriptResource(val name: ResourceName, val script: ScalaScript) e
     evaluate.copyTo(out, close)
   }
 
-  override def contentAsString = evaluate.contentAsString
+  override def contentAsString(charset: String = "UTF-8") = evaluate.contentAsString(charset)
 
   override def toString = "Script:" + name
 }

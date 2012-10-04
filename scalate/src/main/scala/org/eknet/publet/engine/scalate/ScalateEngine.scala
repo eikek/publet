@@ -112,7 +112,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
   def renderErrorView(e: InvalidSyntaxException, data: Option[ContentResource]): Content = {
     val info = Map(
       "title" -> ("Error in "+e.template),
-      "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
+      "content" -> data.map(_.contentAsString().split('\n').toList).getOrElse(List()),
       "templateUri" -> e.template,
       "errors" -> Map(e.pos.line -> ErrorMessage(e.pos, e.brief))
     )
@@ -125,7 +125,7 @@ class ScalateEngine(val name: Symbol, val engine: TemplateEngine) extends Publet
     val name = data.map(_.name.fullName).getOrElse("")
     val info = Map(
       "title" -> ("Error in "+ name),
-      "content" -> data.map(_.contentAsString.split('\n').toList).getOrElse(List()),
+      "content" -> data.map(_.contentAsString().split('\n').toList).getOrElse(List()),
       "templateUri" -> name,
       "errors" -> errors.toMap
     )
@@ -163,7 +163,7 @@ private class CodeTemplateSource(path: Path, c: ContentResource) extends Templat
   def uri = path.withExt("ssp").asString
 
   def inputStream = {
-    NodeContent(<pre><code>{c.contentAsString}</code></pre>, ContentType.ssp).inputStream
+    NodeContent(<pre><code>{c.contentAsString() }</code></pre>, ContentType.ssp).inputStream
   }
 
   def lastModified = c.lastModification.getOrElse(created)

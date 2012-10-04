@@ -87,7 +87,7 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
         else "") +
         "class "+ cn+ " extends ScalaScript { \n\n" +
         " def serve() = { \n" +
-        script.contentAsString + "\n" +
+        script.contentAsString() + "\n" +
         " }\n" +
         "}"
     }

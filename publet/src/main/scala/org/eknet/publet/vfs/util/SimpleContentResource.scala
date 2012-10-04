@@ -32,7 +32,7 @@ class SimpleContentResource(val name: ResourceName, content: Content) extends Co
 
   override def length = content.length
 
-  override def contentAsString = content.contentAsString
+  override def contentAsString(charset: String = "UTF-8") = content.contentAsString()
 
   val exists = true
 }

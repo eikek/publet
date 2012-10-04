@@ -40,5 +40,5 @@ class CompositeContentResource(resource: Resource, content: Content) extends Con
     content.copyTo(out, close)
   }
 
-  override def contentAsString = content.contentAsString
+  override def contentAsString(charset: String = "UTF-8") = content.contentAsString(charset)
 }

@@ -58,7 +58,7 @@ class Edit extends ScalaScript {
 
   def handleTextContent(resourcePath: Path, data: ContentResource) = {
     val attr = mutable.Map[String, Any]()
-    attr += "contentAsString" -> data.contentAsString
+    attr += "contentAsString" -> data.contentAsString()
     attr += "actionPath" -> EditorPaths.pushScript.asString
     attr += "lastMod" -> data.lastModification.map(_.toString).getOrElse("")
     attr += "resourcePath" -> resourcePath.sibling(data.name.fullName).asString

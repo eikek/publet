@@ -47,7 +47,7 @@ trait Content {
     Content.copy(inputStream, out, closeIn = true, closeOut = close)
   }
 
-  def contentAsString = Source.fromInputStream(inputStream).getLines().mkString("\n")
+  def contentAsString(charset: String = "UTF-8") = Source.fromInputStream(inputStream, charset).getLines().mkString("\n")
 }
 
 case class NodeContent(node: NodeSeq, contentType: ContentType) extends Content {
@@ -61,7 +61,7 @@ object Content {
   def empty(ct: ContentType) = Content("", ct)
 
   def apply(file: File, ct: ContentType): Content = new Content {
-    def inputStream = new FileInputStream(file);
+    def inputStream = new FileInputStream(file)
     override def lastModification = Some(file.lastModified)
     def outputStream = new FileOutputStream(file)
     val contentType = ct
@@ -77,7 +77,7 @@ object Content {
   def apply(str: String, ct: ContentType): Content = new Content {
     def inputStream = new ByteArrayInputStream(str.getBytes("UTF-8"))
     val contentType = ct
-    override val contentAsString = str
+    override def contentAsString(charset:String = "UTF-8") = str
   }
 
   def apply(in: InputStream, ct: ContentType): Content = new Content {
