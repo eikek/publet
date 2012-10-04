@@ -56,6 +56,7 @@ object Assets extends AssetCollection {
     .add(resource("codemirror/mode/javascript/javascript.js"))
     .add(resource("codemirror/mode/markdown/markdown.js"))
     .add(resource("codemirror/mode/xml/xml.js"))
+    .add(resource("codemirror/mode/htmlmixed/htmlmixed.js"))
 
   val codemirrorJquery = Group("codemirror.jquery")
     .add(resource("js/codemirror.jquery.js"))

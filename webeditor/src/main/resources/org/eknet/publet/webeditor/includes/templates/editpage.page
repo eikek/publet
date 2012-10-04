@@ -126,7 +126,7 @@ assetGroups: publet.webeditor.editpage
       var filetype = $('#extensionInput').val();
       var mode = null;
       if (filetype === "scala") mode = "clike";
-      if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "html";
+      if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "htmlmixed";
       if (filetype === "css") mode = "css";
       if (filetype === "js") mode = "javascript";
       if (filetype === "markdown" || filetype === "md" || filetype === "page") mode = "markdown";
