@@ -108,7 +108,10 @@
 
     save: function() {
       if (isInitialized(this)) {
-        $(this).data('codemirror').editor.save();
+        var editor = $(this).data('codemirror').editor;
+        var target = $(this).data('codemirror').target;
+        editor.save();
+        target.html(target.val());
       }
       return this;
     },

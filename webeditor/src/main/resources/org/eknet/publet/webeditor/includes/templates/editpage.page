@@ -41,7 +41,7 @@ assetGroups: publet.webeditor.editpage
     #response
     form(method="post" id="editPageForm" action={ PubletWebContext.urlOf(actionPath) })
       .form-actions
-        button.btn.btn-primary
+        button.btn.btn-primary#pageSaveButton
           i.icon-hdd.icon-white
           | Save
         a.btn.btn-info(href={ ctx.urlOf(viewResource) })
@@ -99,7 +99,7 @@ assetGroups: publet.webeditor.editpage
     var options = {
       beforeSubmit: function(arr, form, options) {
         _mask(form);
-        $('#editPage').codemirror('save');
+        return true;
       },
       success: function(data, status, xhr, form) {
         _unmask(form);
@@ -115,6 +115,11 @@ assetGroups: publet.webeditor.editpage
       },
       dataType: 'json'
     };
+    //must copy the editor contents _before_ the form plugin does its work
+    //the `beforeSubmit` callback was still too late.
+    $('#pageSaveButton').click(function() {
+      $('#editPage').codemirror('save');
+    });
     $('#editPageForm').ajaxForm(options);
 
     var getEditorMode = function() {
