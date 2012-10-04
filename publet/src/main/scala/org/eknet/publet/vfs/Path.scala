@@ -26,24 +26,24 @@ import java.net.URLEncoder
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 30.03.12 18:41
  */
-case class Path(segments: List[String], absolute: Boolean, directory: Boolean) extends Ordered[Path] {
+case class Path(segments: List[String], query: Option[String], absolute: Boolean, directory: Boolean) extends Ordered[Path] {
 
   /**
    * Returns a copy of this without the last element
    */
-  lazy val parent = if (isRoot) this else Path(segments.take(segments.length - 1), absolute, true)
+  lazy val parent = if (isRoot) this else Path(segments.take(segments.length - 1), query, absolute, true)
 
-  def strip = Path(segments.tail, absolute, directory)
+  def strip = Path(segments.tail, query, absolute, directory)
 
   def head = segments.head
-  def tail = Path(segments.tail, false, directory)
+  def tail = Path(segments.tail, query, false, directory)
 
   def strip(p: Path): Path = {
-    if (prefixedBy(p)) Path(segments.slice(p.size, size), absolute, directory)
+    if (prefixedBy(p)) Path(segments.slice(p.size, size), query, absolute, directory)
     else this
   }
   def strip(n: Int): Path = {
-    Path(segments.drop(n), false, directory)
+    Path(segments.drop(n), query, false, directory)
   }
 
   lazy val isRoot = segments.isEmpty
@@ -51,7 +51,7 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
   def child(name: String) = {
     val directory = name.endsWith(String.valueOf(Path.sep))
     val cn = if (directory) name.substring(0, name.length-1) else name
-    Path(segments ::: List(cn), absolute, directory)
+    Path(segments ::: List(cn), query, absolute, directory)
   }
 
   def sibling(name: String) = parent.child(name)
@@ -73,7 +73,8 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
   /**
    * Returns this path as a url-encoded string.
    */
-  lazy val asUrlString = toString(URLEncoder.encode(_, "UTF-8"))
+  lazy val asUrlString =
+    toString(URLEncoder.encode(_, "UTF-8")) + query.map(q => "?"+q).getOrElse("")
 
   lazy val size = segments.length
 
@@ -106,17 +107,17 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
     else segments.slice(0, p.size) == p.segments
   }
 
-  def toAbsolute = if (absolute) this else Path(segments, true, directory)
+  def toAbsolute = if (absolute) this else Path(segments, query, true, directory)
 
-  def toRelative = if (!absolute) this else Path(segments, false, directory)
+  def toRelative = if (!absolute) this else Path(segments, query, false, directory)
 
-  def /(p: Path): Path = Path(segments ++ p.segments, absolute, p.directory)
+  def /(p: Path): Path = Path(segments ++ p.segments, query, absolute, p.directory)
 
   def /(s: String): Path = this / Path(s)
 
   def /(rn: ResourceName):Path = this / Path(rn.fullName)
 
-  def /(r: Resource): Path = Path(this.segments++ Path(r.name.fullName).segments, absolute, isContainer(r))
+  def /(r: Resource): Path = Path(this.segments++ Path(r.name.fullName).segments, query, absolute, isContainer(r))
 
   def toFile(p: Path): File = new File(p.asString)
 
@@ -168,7 +169,7 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
 
 object Path {
 
-  val root = Path(List(), true, true)
+  val root = Path(List(), null, true, true)
 
   private val sep = '/'
 
@@ -176,13 +177,21 @@ object Path {
     Predef.ensuring(str.length() > 0, "empty paths are not allowed. use Path.root.")
     if (str == "/") root
     else {
-      val segs = str.split(sep)
-      val abs = str.charAt(0) == sep
-      val dir = str.endsWith(String.valueOf(Path.sep))
-      if (abs) new Path(segs.tail.toList, abs, dir)
-      else new Path(segs.toList, abs, dir)
+      val pathRegex = "((.*?)(\\?.*)?)".r
+      str match {
+        case pathRegex(f, p, q) => {
+          val segs = p.split(sep)
+          val abs = str.charAt(0) == sep
+          val dir = str.endsWith(String.valueOf(Path.sep))
+          if (abs) new Path(segs.tail.toList, Option(q).map(_.substring(1)), abs, dir)
+          else new Path(segs.toList, Option(q).map(_.substring(1)), abs, dir)
+        }
+        case _ => sys.error("Wrong path: "+str)
+      }
     }
   }
+
+  def apply(segments: List[String], absolute: Boolean, directory: Boolean): Path = new Path(segments, None, absolute, directory)
 
   def apply(f: File): Path = Path(f.toURI.getPath)
 
