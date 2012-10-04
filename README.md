@@ -21,16 +21,17 @@ JSON.
 
 ## Building
 
-Java 7 is required and Scala 2.9.1. [sbt](https://github.com/harrah/xsbt) is used
+Java 7 is required and Scala 2.9.x. [sbt](https://github.com/harrah/xsbt) is used
 as build tool. To compile type
 
     sbt compile
 
-and to create a war file used
+and to create a war file and standalon zip use
 
-    sbt package
+    sbt server-dist
 
-The war is then available in `war/target/scala-2.9.1/sbt-0.11.2/`.
+The war is then available in `war/target/scala-2.9.1/sbt-0.11.2/`, the zip file
+in `server/target/`.
 
 ## Install
 

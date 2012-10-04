@@ -368,3 +368,9 @@ other libraries with their own licenses as stated below.
 Google Closure Compiler, licensed under the Apache Software License, Version 2.0.
 
 <https://developers.google.com/closure/compiler/>
+
+### Guava
+
+Guava - Google core libraries, licensed under the Apache Software License, Version 2.0.
+
+<http://code.google.com/p/guava-libraries/>
