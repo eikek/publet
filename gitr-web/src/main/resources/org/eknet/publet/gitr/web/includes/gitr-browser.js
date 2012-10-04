@@ -15,9 +15,10 @@
  */
 
 /**
- * Repository browser jQuery plugin
+ *
+ * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
+ * @since 29.05.12 20:28
  */
-
 (function ($) {
 
   var rParam = "r";
@@ -25,10 +26,8 @@
   var pParam = "p";
   var doParam = "do";
 
-  var obj = this;
-
-  var _mask = function() {
-    $('#'+ obj.attr("id")).mask({
+  function _mask($this) {
+    $this.mask({
       spinner: {
         lines:15,
         length: 28,
@@ -37,12 +36,13 @@
       },
       delay: 1000
     });
-  };
-  var _unmask = function() {
-    $('#'+ obj.attr("id")).unmask();
-  };
+  }
 
-  var _getBreadcrumbsHtml = function(repo, path) {
+  function _unmask($this) {
+    $this.unmask();
+  }
+
+  function _getBreadcrumbsHtml(repo, path) {
     var crumbs = [];
     crumbs.push('<li><a href="#">'+repo+'</a> <span class="divider">/</span></li>')
     var len = path.split('/').length;
@@ -55,68 +55,69 @@
       class:"breadcrumb",
       html:crumbs.join('\n')
     });
-  };
+  }
 
-  var _getLastCommitHtml = function(data) {
+  function _getLastCommitHtml($this, data) {
+    var settings = $this.data('gitrRepoBrowser').settings;
     var lastCommit = "";
     if (data.lastCommit) {
       var c = data.lastCommit;
       var lastCommitUrl;
       if (settings.lastCommitUrlFunction) {
-          lastCommitUrl = settings.lastCommitUrlFunction(c, settings);
+        lastCommitUrl = settings.lastCommitUrlFunction(c, settings);
       } else {
-          lastCommitUrl = '?r='+settings.repo+'&do=commit&h='+ c.fullId;
+        lastCommitUrl = '?r='+settings.repo+'&do=commit&h='+ c.fullId;
       }
       lastCommit = $('<ol/>', {
         class: "commit-group",
         html: '<li class="commit-group-item">' +
-          '<img class="gravatar" src="'+c.gravatar+'?s=35&d='+settings.gravatarTheme+'"/> ' +
-          '<p class="commit-title">' +
-          '<span title="'+ c.authorEmail +'">'+c.author +', '+ c.age +'</span> ' +
-          '<small>-- '+ c.commitDate +' --</small>' +
-          '<span class="pull-right"><a href="'+ lastCommitUrl +'">['+ c.id+']</a></span> ' +
-          '<br>' +
-          '<span class="shortMessage">'+ c.message +'</span> '+
-          '</p></li>'
+            '<img class="gravatar" src="'+c.gravatar+'?s=35&d='+settings.gravatarTheme+'"/> ' +
+            '<p class="commit-title">' +
+            '<span title="'+ c.authorEmail +'">'+c.author +', '+ c.age +'</span> ' +
+            '<small>-- '+ c.commitDate +' --</small>' +
+            '<span class="pull-right"><a href="'+ lastCommitUrl +'">['+ c.id+']</a></span> ' +
+            '<br>' +
+            '<span class="shortMessage">'+ c.message +'</span> '+
+            '</p></li>'
       });
     }
     return lastCommit;
-  };
+  }
 
-  var _addFileContents = function(repo, head, path, el) {
+  function _addFileContents($this, repo, head, path, el) {
     var params = {};
     params[rParam] = repo;
     params[hParam] = head;
     params[pParam] = path;
     params[doParam] = "blob";
+    var settings = $this.data('gitrRepoBrowser').settings;
 
-    _mask();
+    _mask($this);
     $.getJSON(settings.actionUrl, params, function(data) {
-      //obj.removeAttr("class");
-      _unmask();
+      _unmask($this);
       if (data.success) {
-        $('table', obj).prev().remove();
-        $('table', obj).remove();
+        $('table', $this).prev().remove();
+        $('table', $this).remove();
         $('.readme-head').remove();
         $('.readme').remove();
-        _getLastCommitHtml(data).appendTo(obj);
+        _getLastCommitHtml($this, data).appendTo($this);
         $('<h4/>', {
           class: "readme-head",
           html: data.fileName
-        }).appendTo(obj);
+        }).appendTo($this);
         if (data.contents) {
           if (data.processed) {
             var readme = $('<div/>', {
               class: "readme",
               html: data.contents
             });
-            readme.appendTo(obj);
+            readme.appendTo($this);
             if (hljs) {
               $('code', readme).each(function(i, e) { hljs.highlightBlock(e); });
             }
           } else {
             var cont = $('<div class="readme"><pre class="plainPre"><code>'+data.contents+'</code></pre></div>');
-            cont.appendTo(obj);
+            cont.appendTo($this);
             if (hljs) {
               $('code', cont).each(function(i, e) { hljs.highlightBlock(e); });
             }
@@ -131,25 +132,26 @@
             $('<div/>', {
               class: "readme",
               html: img
-            }).appendTo(obj);
+            }).appendTo($this);
           } else {
             var u = '<div class="readme"><a href="'+data.url+'">Download</a></div>';
-            $(u).appendTo(obj);
+            $(u).appendTo($this);
           }
         }
       }
     });
-  };
+  }
 
-  var _directoryContents = function (repo, head, path, callback) {
+  function _directoryContents($this, repo, head, path, callback) {
     var params = {};
     params[rParam] = repo;
     params[hParam] = head;
     params[pParam] = path;
+    var settings = $this.data('gitrRepoBrowser').settings;
 
-    _mask();
+    _mask($this);
     $.getJSON(settings.actionUrl, params, function (data) {
-      _unmask();
+      _unmask($this);
       if (data.success) {
         var list = [];
         if (data.parent) {
@@ -168,12 +170,12 @@
         });
 
         var breadcrumbs = _getBreadcrumbsHtml(repo, path);
-        var lastCommit = _getLastCommitHtml(data);
+        var lastCommit = _getLastCommitHtml($this, data);
         var table = $('<table/>', {
           class: settings.tableClass,
           html:'<thead><tr><th style="width:16px;"></th>' +
-            '<th>name</th><th>age</th><th>message</th></tr></thead>' +
-            '<tbody>' + list.join('\n') + '</tbody>'
+              '<th>name</th><th>age</th><th>message</th></tr></thead>' +
+              '<tbody>' + list.join('\n') + '</tbody>'
         });
         callback(data, [breadcrumbs, lastCommit, table]);
       } else {
@@ -181,25 +183,26 @@
       }
 
     });
-  };
+  }
 
-  var _addDirectoryContents = function (repo, head, path) {
-    _directoryContents(repo, head, path, function (data, table) {
+  function _addDirectoryContents($this, repo, head, path) {
+    var settings = $this.data('gitrRepoBrowser').settings;
+    _directoryContents($this, repo, head, path, function (data, table) {
       if (data.success) {
-        obj.empty();
-        table[0].appendTo(obj); //breadcrumbs
+        $this.empty();
+        table[0].appendTo($this); //breadcrumbs
         if (table[1]) { //lastCommit
-          $('<h5 class="commit-group-head">Last commit</h5>').appendTo(obj);
-          table[1].appendTo(obj);
+          $('<h5 class="commit-group-head">Last commit</h5>').appendTo($this);
+          table[1].appendTo($this);
         }
-        table[2].appendTo(obj); // tree
+        table[2].appendTo($this); // tree
         if (data.readme) { // readme file
-          $('<h4 class="readme-head">'+data.readmeFile+'</h4>\n').appendTo(obj);
+          $('<h4 class="readme-head">'+data.readmeFile+'</h4>\n').appendTo($this);
           var readme = $('<div/>', {
             class: "readme",
             html: data.readme
           });
-          readme.appendTo(obj);
+          readme.appendTo($this);
           if (hljs) {
             $('code', readme).each(function(i, e) { hljs.highlightBlock(e); })
           }
@@ -207,17 +210,17 @@
         //register click listener for tree entry
         $('a', table[2]).each(function(i, el) {
           $(el).bind('click', function(e) {
-            obj.trigger('gitResourceClick', [data, i, el]);
+            $this.trigger('gitResourceClick', [data, i, el]);
             if (e.target.text == "..") {
-              _addDirectoryContents(repo, head, data.parentPath);
+              _addDirectoryContents($this, repo, head, data.parentPath);
             } else {
               var offset = data.parent? 1 : 0;
               var file = data.files[i - offset];
               var path = data.containerPath + file.name;
               if (file.container) {
-                _addDirectoryContents(repo, head, path);
+                _addDirectoryContents($this, repo, head, path);
               } else {
-                _addFileContents(repo, head, path, el);
+                _addFileContents($this, repo, head, path, el);
               }
             }
             return false;
@@ -233,61 +236,58 @@
               }
             });
             settings.path = path;
-            _addDirectoryContents(settings.repo, settings.ref, path);
+            _addDirectoryContents($this, settings.repo, settings.ref, path);
           });
         });
       } else {
-        obj.empty();
-        $('<div class="alert alert-error">'+data.message+'</div>').appendTo(obj)
+        $this.empty();
+        $('<div class="alert alert-error">'+data.message+'</div>').appendTo($this)
       }
     });
-  };
+  }
 
-  var settings = {};
   var methods = {
-    init: function(options) {
-      //events: 'publetResourceClick'  on resource click
-      //            arguments: e - event object
-      //                       data - the complete json server response
-      //                       i    - the index in the files array
-      //                       el   - the `a` element
+    init:function (options) {
+      return this.each(function () {
+        var $this = $(this);
+        var data = $this.data('gitrRepoBrowser');
 
-      settings = $.extend({
-        'actionUrl':"gitrview.json",
-        'barElementId':"bar",
-        'repo':getURLParameter(rParam) || "contentroot.git",
-        'ref':getURLParameter(hParam) || "",
-        'path':getURLParameter(pParam) || "",
-        'tableClass'  : 'table table-condensed table-striped',
-        'gravatarTheme' : 'identicon',
-        'lastCommitUrlFunction': null
-      }, options);
+        //events: 'publetResourceClick'  on resource click
+        //            arguments: e - event object
+        //                       data - the complete json server response
+        //                       i    - the index in the files array
+        //                       el   - the `a` element
 
-      _addDirectoryContents(settings.repo, settings.ref, settings.path);
-    },
 
-    load: function(path, ref) {
-      if (path) {
-        settings.path = path;
-      }
-      if (ref) {
-        settings.ref = ref;
-      }
-      _addDirectoryContents(settings.repo, settings.ref, settings.path);
+        if (!data) {
+          var settings = $.extend({
+            'actionUrl':"gitrview.json",
+            'barElementId':"bar",
+            'repo':getURLParameter(rParam) || "contentroot.git",
+            'ref':getURLParameter(hParam) || "",
+            'path':getURLParameter(pParam) || "",
+            'tableClass'  : 'table table-condensed table-striped',
+            'gravatarTheme' : 'identicon',
+            'lastCommitUrlFunction': null
+          }, options);
+          $(this).data('gitrRepoBrowser', {
+            target:$this,
+            settings:settings
+          });
+
+          _addDirectoryContents($this, settings.repo, settings.ref, settings.path);
+        }
+      });
     }
-
   };
-  $.fn.gitrRepoBrowser = function (method) {
-    // From the "create your first jquery plugin" tutorial:
-    // Method calling logic
-    obj = this;
-    if ( methods[method] ) {
-      return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
-    } else if ( typeof method === 'object' || ! method ) {
-      return methods.init.apply( this, arguments );
-    } else {
-      $.error( 'Method ' +  method + ' does not exist on jQuery.gitrRepoBrowser' );
-    }
 
+  $.fn.gitrRepoBrowser = function (method) {
+    if (methods[method]) {
+      return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+    } else if (typeof method === 'object' || !method) {
+      return methods.init.apply(this, arguments);
+    } else {
+      $.error('Method ' + method + ' does not exist on jQuery.gitrRepoBrowser');
+    }
   };
 })(jQuery);
