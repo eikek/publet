@@ -11,6 +11,10 @@ import org.apache.shiro.util.ByteSource
 import org.apache.shiro.crypto.hash.format.HexFormat
 import org.eknet.publet.web.util.ClientInfo
 import org.eknet.publet.Glob
+import com.google.common.cache._
+import util.concurrent.TimeUnit
+import java.net.InetAddress
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -97,10 +101,11 @@ object CounterService {
    */
   def apply(): CounterService = new Impl
 
-  private class Impl extends CounterService {
+  private class Impl extends CounterService with IpPropertyUtil {
     import collection.JavaConversions._
     import ExtDb.Property._
 
+    private val ipBlacklist = new IpBlacklist(PubletWeb.publetSettings, (15, TimeUnit.HOURS))
     private val db = ExtDb
 
     def getPageCount(uri: String) = {
@@ -165,9 +170,7 @@ object CounterService {
           .exists(agent => agent.contains("spider") || agent.contains("bot"))
 
         //honor blacklist in settings
-        lazy val bl = PubletWeb
-          .publetSettings("ext.counter.blacklist."+ info.ip)
-          .map(_.toBoolean).getOrElse(false)
+        lazy val bl = ipBlacklist.isListed(info.ip)
 
         bot || bl
       }

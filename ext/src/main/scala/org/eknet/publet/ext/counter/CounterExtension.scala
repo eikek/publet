@@ -22,24 +22,6 @@ class CounterExtension extends WebExtension with Logging {
     val service = CounterService()
     PubletWeb.contextMap.put(serviceKey, service)
     counterThread.start()
-
-    val ipRegex = """\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}""".r
-    val keyPrefix = "ext.counter.blacklist."
-    for (key <- PubletWeb.publetSettings.keySet if (key.startsWith(keyPrefix))) {
-      key.substring(keyPrefix.length) match {
-        case ipRegex() =>
-        case hostname => {
-          try {
-            val ip = InetAddress.getByName(hostname).getHostAddress
-            info("Resolved hostname '" + hostname + "'. Add '" + ip + "' to counter blacklist...")
-            PubletWeb.publetSettings.put("ext.counter.blacklist." + ip, PubletWeb.publetSettings(key).get)
-          }
-          catch {
-            case e:UnknownHostException => error("Cannot resolve hostname '"+hostname+"'! Cannot add to counter blacklist.")
-          }
-        }
-      }
-    }
   }
 
   def onShutdown() {

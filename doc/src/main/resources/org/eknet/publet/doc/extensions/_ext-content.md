@@ -170,8 +170,8 @@ be discarded from counting (maybe you don't want to count your own accesses).
 
 The key must start with `ext.counter.blacklist.` and appended with an ip address
 or a valid hostname. A value of `true` will black-list the ip, a value of `false`
-yields in counting accesses from this ip. If a hostname is given, it is resolved
-on application start to its ip address.
+yields in counting accesses from this ip. If a hostname is given, it is re-resolved
+in certain intervals to its ip address.
 
 #### Examples:
 

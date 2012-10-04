@@ -30,6 +30,16 @@ abstract class PropertiesMap extends StringMap {
 
   private val props = new Properties()
 
+  private var reloadListeners: List[PropertiesMap => Unit] = Nil
+
+  def listener(l:PropertiesMap=>Unit) {
+    reloadListeners ::= l
+  }
+
+  def remove(l:PropertiesMap=>Unit) {
+    reloadListeners = reloadListeners.filterNot(_ == l)
+  }
+
   /**
    * Puts the key-value pair in the map. This value is only
    * kept in memory and not written to the underlying file!
@@ -53,6 +63,7 @@ abstract class PropertiesMap extends StringMap {
       props.clear()
       if (file.isDefined) props.load(file.get)
     }
+    reloadListeners.foreach { l => l(this) }
   }
 }
 
