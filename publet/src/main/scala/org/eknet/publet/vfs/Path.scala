@@ -19,6 +19,7 @@ package org.eknet.publet.vfs
 import collection.immutable.List
 import java.io.File
 import org.eknet.publet.vfs.Resource._
+import java.net.URLEncoder
 
 /**
  *
@@ -55,18 +56,24 @@ case class Path(segments: List[String], absolute: Boolean, directory: Boolean) e
 
   def sibling(name: String) = parent.child(name)
 
-  lazy val asString = {
+  private def toString(segF: String=>String) = {
     val buf = new StringBuilder()
     if (absolute) {
       buf.append(String.valueOf(Path.sep))
     }
-    buf.append(segments.mkString(String.valueOf(Path.sep)))
+    buf.append(segments.map(segF).mkString(String.valueOf(Path.sep)))
     if (directory && !segments.isEmpty) {
       buf.append(String.valueOf(Path.sep))
     }
-
     buf.toString()
   }
+
+  lazy val asString = toString(identity)
+
+  /**
+   * Returns this path as a url-encoded string.
+   */
+  lazy val asUrlString = toString(URLEncoder.encode(_, "UTF-8"))
 
   lazy val size = segments.length
 
