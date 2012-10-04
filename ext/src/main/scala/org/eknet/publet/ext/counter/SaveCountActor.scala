@@ -2,8 +2,8 @@ package org.eknet.publet.ext.counter
 
 import actors.DaemonActor
 import java.util.concurrent.TimeUnit
-import org.fusesource.scalate.util.Logging
 import org.eknet.publet.web.util.ClientInfo
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -53,7 +53,7 @@ private[counter] trait IpPropertyUtil extends Logging {
   class HostnameMap(m: PropertiesMap) {
     def blacklistHostnames = m.keySet.filter(_.startsWith(keyPrefix))
       .map(key => key.substring(keyPrefix.length))
-      .collect({ case hn if (hn.matches("^[a-zA-Z]+")) => hn})
+      .collect({ case hn if (hn.matches("^[a-zA-Z].*")) => hn})
   }
 
   implicit def toListener[K,V](f: RemovalNotification[K,V]=>Unit) = new RemovalListenerFun[K, V](f)

@@ -80,7 +80,7 @@ class IpBlacklist(m: PropertiesMap, resolveIntervall: (Long, TimeUnit)) extends 
         }
       }
       try {
-        ipcache.get(ip).isDefined
+        ipcache.get(ip).flatMap(name => m(name).map(_.toBoolean)).getOrElse(false)
       } finally {
         lock.readLock().unlock()
       }
