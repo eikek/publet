@@ -31,8 +31,8 @@ trait ThumbnailUrlUtil {
    * is an image, an URL to a thumbnail is returned, otherwise some
    * place-holder image is returned.
    *
-   * @param path
-   * @param r
+   * @param path the path to the resource
+   * @param r the resource used for checking content type
    * @return
    */
   def thumbnailUrl(path: Path, r: Resource) = {
@@ -41,7 +41,7 @@ trait ThumbnailUrlUtil {
     val url = if (r.isInstanceOf[ContentResource]
       && r.asInstanceOf[ContentResource].contentType.mime._1 == "image") {
 
-      ctx.urlOf(path.sibling(r.name.fullName).asString)
+      ctx.urlOf(path.asString)
     } else {
       ctx.urlOf(EditorPaths.editorPath / "img/nopreview.png")
     }
