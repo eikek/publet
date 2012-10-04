@@ -36,6 +36,31 @@ object Assets extends AssetCollection {
 
   override def classPathBase = "/org/eknet/publet/webeditor/includes"
 
+  val codemirror = Group("codemirror")
+    .add(resource("codemirror/lib/codemirror.css"))
+    .add(resource("codemirror/lib/codemirror.js"))
+    .add(resource("codemirror/lib/util/closetag.js"))
+    .add(resource("codemirror/lib/util/dialog.js"))
+    .add(resource("codemirror/lib/util/dialog.css"))
+    .add(resource("codemirror/lib/util/foldcode.js"))
+    .add(resource("codemirror/lib/util/formatting.js"))
+    .add(resource("codemirror/lib/util/javascript-hint.js"))
+    .add(resource("codemirror/lib/util/search.js"))
+    .add(resource("codemirror/lib/util/searchcursor.js"))
+    .add(resource("codemirror/lib/util/match-highlighter.js"))
+    .add(resource("codemirror/lib/util/simple-hint.js"))
+    .add(resource("codemirror/lib/util/simple-hint.css"))
+    .add(resource("codemirror/lib/util/xml-hint.js"))
+    .add(resource("codemirror/mode/clike/clike.js"))
+    .add(resource("codemirror/mode/css/css.js"))
+    .add(resource("codemirror/mode/javascript/javascript.js"))
+    .add(resource("codemirror/mode/markdown/markdown.js"))
+    .add(resource("codemirror/mode/xml/xml.js"))
+
+  val codemirrorJquery = Group("codemirror.jquery")
+    .add(resource("js/codemirror.jquery.js"))
+    .require(codemirror.name)
+
   val jqueryUiWidget = Group("jquery.ui.widget")
     .add(resource("js/vendor/jquery.ui.widget.js"))
 
@@ -75,7 +100,7 @@ object Assets extends AssetCollection {
     .require(publetFileBrowser.name)
 
   val editPage = Group("publet.webeditor.editpage")
-    .use(editpageBrowser.name)
+    .use(editpageBrowser.name, codemirrorJquery.name)
 
   val uploadPage = Group("publet.webeditor.uploadpage")
     .use(blueimpFileUpload.name, editpageBrowser.name)

@@ -3,6 +3,30 @@ title: Edit Page
 searchForSidebar: false
 assetGroups: publet.webeditor.editpage
 
+--- name:head pipeline:jade
+:css
+  .CodeMirror {
+    border: 1px solid #EEE;
+    border-radius: 8px;
+  }
+  span.CodeMirror-matchhighlight { background: #e9e9e9 }
+  .CodeMirror-focused span.CodeMirror-matchhighlight { background: #e7e4ff; !important }
+  .CodeMirror-scroll {
+    height: 380px;
+  }
+  .CodeMirror pre {
+    font-size: 13px;
+  }
+  .CodeMirror-fullscreen {
+    display: block;
+    background: white;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 9999;
+  }
+  .activeline {background: #e8f2ff !important;}
+
 --- name:content pipeline:jade
 - import org.eknet.publet.vfs.Path
 - val ctx = PubletWebContext
@@ -30,23 +54,34 @@ assetGroups: publet.webeditor.editpage
           i.icon-file.icon-white
           | Upload Files
       label(for="extensionInput")
-        | Extensions
-      select.span8#extensionInput(name="extension")
-        =extensionOptions
-      label(for="editPage")
-        | Text
-      textarea#editPage.span8(name="page" style="height:380px; font-family:monospace;")<
-        !~~ contentAsString
-      label(for="commitMsgInput")
-        | Commit Message
-      input.span8#commitMsgInput(name="commitMessage" type="text")
+        | File extension
+      .controls
+        select.span8#extensionInput(name="extension" style="width: 100%")
+          =extensionOptions
+      .controls
+        textarea#editPage.span8(name="page" style="height:380px; width:100%; font-family:monospace;")<
+          !~~ contentAsString
+        span.help-block
+          h4
+            | Editor Instructions
+            span(style="font-size: 11px;")
+              a#toggleEditorButton(href="#" data-toggle="button") [toggle editor]
+          :markdown
+            * **F11** for fullscreen mode; **ESC** or **F11** again to come back.
+            * **CTRL+F** to start search, **CTRL+g** next match
+
+      .control-group
+        label(for="commitMsgInput")
+          | Commit Message
+        .controls
+          input.span8#commitMsgInput(name="commitMessage" type="text" style="width:100%;")
       input(type="hidden" name="path" value={resourcePath})
       input(id="lastHead" type="hidden" name="head" value={lastMod})
   .span3
     h3 File browser
     #filesTree
 :javascript
-  $(document).ready(function() {
+  $(function() {
     var _mask = function(element) {
       element.mask({
         spinner: {
@@ -64,6 +99,7 @@ assetGroups: publet.webeditor.editpage
     var options = {
       beforeSubmit: function(arr, form, options) {
         _mask(form);
+        $('#editPage').codemirror('save');
       },
       success: function(data, status, xhr, form) {
         _unmask(form);
@@ -80,4 +116,39 @@ assetGroups: publet.webeditor.editpage
       dataType: 'json'
     };
     $('#editPageForm').ajaxForm(options);
+
+    var getEditorMode = function() {
+      var filetype = $('#extensionInput').val();
+      var mode = null;
+      if (filetype === "scala") mode = "clike";
+      if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "html";
+      if (filetype === "css") mode = "css";
+      if (filetype === "js") mode = "javascript";
+      if (filetype === "markdown" || filetype === "md" || filetype === "page") mode = "markdown";
+      if (filetype === "xml") mode = "xml";
+      return mode;
+    }
+    $('#toggleEditorButton').click(function() {
+      var mode = getEditorMode();
+      var extraKeys = {
+        "F11": function(cm) {
+          $('#editPage').codemirror('fullscreen');
+        },
+        "Esc": function(cm) {
+          $('#editPage').codemirror('fullscreen', false);
+        }
+      }
+      if (mode === "xml" || mode === "html") {
+        extraKeys["'>'"] = function(cm) { cm.closeTag(cm, '>'); }
+        extraKeys["'/'"] = function(cm) { cm.closeTag(cm, '/'); }
+      }
+      $('#editPage').codemirror('toggleEditor', {
+        mode: getEditorMode(),
+        extraKeys: extraKeys
+      });
+    });
+    $('#toggleEditorButton').click();
+    $('#extensionInput').change(function() {
+      $('#editPage').codemirror('updateMode', getEditorMode());
+    });
   });

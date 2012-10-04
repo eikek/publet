@@ -58,6 +58,8 @@ class EditorWebExtension extends EmptyExtension with Logging {
       Assets.jqueryIframeTransport,
       Assets.jqueryUiWidget,
       Assets.publetFileBrowser,
+      Assets.codemirror,
+      Assets.codemirrorJquery,
       Assets.editPage,
       Assets.uploadPage)
 
