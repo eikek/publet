@@ -3,30 +3,6 @@ title: Edit Page
 searchForSidebar: false
 assetGroups: publet.webeditor.editpage
 
---- name:head pipeline:jade
-:css
-  .CodeMirror {
-    border: 1px solid #EEE;
-    border-radius: 8px;
-  }
-  span.CodeMirror-matchhighlight { background: #e9e9e9 }
-  .CodeMirror-focused span.CodeMirror-matchhighlight { background: #e7e4ff; !important }
-  .CodeMirror-scroll {
-    height: 380px;
-  }
-  .CodeMirror pre {
-    font-size: 13px;
-  }
-  .CodeMirror-fullscreen {
-    display: block;
-    background: white;
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    z-index: 9999;
-  }
-  .activeline {background: #e8f2ff !important;}
-
 --- name:content pipeline:jade
 - import org.eknet.publet.vfs.Path
 - val ctx = PubletWebContext
@@ -36,6 +12,15 @@ assetGroups: publet.webeditor.editpage
 -@ val resourcePath: String = ""
 -@ val extensionOptions: Seq[scala.xml.Elem] = Seq()
 - val viewResource = org.eknet.publet.vfs.Path(resourcePath).withExt("html").asString
+.modal.hide.fade#confirmModal
+  .modal-header
+    h3 Confirm
+  .modal-body
+    p Really delete this file?
+  .modal-footer
+    a.btn.cancel Cancel
+    a.btn.btn-danger.delete Yes, really!
+
 .row
   .span9
     #response
@@ -44,32 +29,41 @@ assetGroups: publet.webeditor.editpage
         button.btn.btn-primary#pageSaveButton
           i.icon-hdd.icon-white
           | Save
-        a.btn.btn-info(href={ ctx.urlOf(viewResource) })
-          i.icon-eye-open.icon-white
+        a.btn(href={ ctx.urlOf(viewResource) })
+          i.icon-eye-open
           | View
-        a.btn.btn-danger(onClick="return confirm('Really delete this file?');" href={ ctx.urlOf(actionPath)+"?delete="+viewResource})
+        a.btn.btn-danger#deleteFileButton(href={ ctx.urlOf(actionPath)+"?delete="+viewResource})
           i.icon-trash.icon-white
           | Delete
-        a.btn.btn-info.pull-right(href={"?resource="+ (Path(resourcePath).parent.asString) })
-          i.icon-file.icon-white
+        a.btn.pull-right(href={"?resource="+ (Path(resourcePath).parent.asString) })
+          i.icon-file
           | Upload Files
-      label(for="extensionInput")
-        | File extension
-      .controls
-        select.span8#extensionInput(name="extension" style="width: 100%")
-          =extensionOptions
-      .controls
-        textarea#editPage.span8(name="page" style="height:380px; width:100%; font-family:monospace;")<
-          !~~ contentAsString
-        span.help-block
-          h4
-            | Editor Instructions
-            span(style="font-size: 11px;")
-              a#toggleEditorButton(href="#" data-toggle="button") [toggle editor]
-          :markdown
-            * **F11** for fullscreen mode; **ESC** or **F11** again to come back.
-            * **CTRL+F** to start search, **CTRL+g** next match
-
+      .control-group
+        label(for="extensionInput")
+          | File extension
+        .controls
+          select.span8#extensionInput(name="extension")
+            =extensionOptions
+      .control-group
+        .controls
+          .btn-toolbar#editorButtonBar
+            .btn-group
+              a.btn.btn-small#searchBarButton(rel="tooltip" title="Search in text" href="#")
+                i.icon-search
+              a.btn.btn-small#autoformatBarButton(rel="tooltip" title="Auto-format selected text")
+                i.icon-align-justify
+              a.btn.btn-small#commentBarButton(rel="tooltip" title="Comment selected code")
+                i.icon-hand-right
+              a.btn.btn-small#uncommentBarButton(rel="tooltip" title="Uncomment selected code")
+                i.icon-hand-left
+              a.btn.btn-small#fullscreenBarButton(rel="tooltip" title="Fullscreen mode, <em>F11</em> to come back" href="#")
+                i.icon-fullscreen
+            .btn-group.pull-right
+              a.btn.btn-small.btn-inverse#editorHelpButton(rel="popover" data-toggle="button" data-original-title="Editor Help") Help
+          textarea#editPage.span8(name="page")<
+            !~~ contentAsString
+          span.help-block.pull-right.small-link
+            a#toggleEditorButton(href="#" data-toggle="button") [toggle editor]
       .control-group
         label(for="commitMsgInput")
           | Commit Message
@@ -80,80 +74,3 @@ assetGroups: publet.webeditor.editpage
   .span3
     h3 File browser
     #filesTree
-:javascript
-  $(function() {
-    var _mask = function(element) {
-      element.mask({
-        spinner: {
-          lines:15,
-          length: 28,
-          width: 3,
-          radius: 18
-        },
-        delay: 1000
-      });
-    };
-    var _unmask = function(element) {
-      element.unmask();
-    };
-    var options = {
-      beforeSubmit: function(arr, form, options) {
-        _mask(form);
-        return true;
-      },
-      success: function(data, status, xhr, form) {
-        _unmask(form);
-        var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
-        if (data.success) {
-          $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
-          if (data.lastMod) {
-            $('#lastHead').attr('value', data.lastMod);
-          }
-        } else {
-          $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
-        }
-      },
-      dataType: 'json'
-    };
-    //must copy the editor contents _before_ the form plugin does its work
-    //the `beforeSubmit` callback was still too late.
-    $('#pageSaveButton').click(function() {
-      $('#editPage').codemirror('save');
-    });
-    $('#editPageForm').ajaxForm(options);
-
-    var getEditorMode = function() {
-      var filetype = $('#extensionInput').val();
-      var mode = null;
-      if (filetype === "scala") mode = "clike";
-      if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "htmlmixed";
-      if (filetype === "css") mode = "css";
-      if (filetype === "js") mode = "javascript";
-      if (filetype === "markdown" || filetype === "md" || filetype === "page") mode = "markdown";
-      if (filetype === "xml") mode = "xml";
-      return mode;
-    }
-    $('#toggleEditorButton').click(function() {
-      var mode = getEditorMode();
-      var extraKeys = {
-        "F11": function(cm) {
-          $('#editPage').codemirror('fullscreen');
-        },
-        "Esc": function(cm) {
-          $('#editPage').codemirror('fullscreen', false);
-        }
-      }
-      if (mode === "xml" || mode === "html") {
-        extraKeys["'>'"] = function(cm) { cm.closeTag(cm, '>'); }
-        extraKeys["'/'"] = function(cm) { cm.closeTag(cm, '/'); }
-      }
-      $('#editPage').codemirror('toggleEditor', {
-        mode: getEditorMode(),
-        extraKeys: extraKeys
-      });
-    });
-    $('#toggleEditorButton').click();
-    $('#extensionInput').change(function() {
-      $('#editPage').codemirror('updateMode', getEditorMode());
-    });
-  });

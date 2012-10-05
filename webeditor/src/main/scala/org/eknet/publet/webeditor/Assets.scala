@@ -101,7 +101,9 @@ object Assets extends AssetCollection {
     .require(publetFileBrowser.name)
 
   val editPage = Group("publet.webeditor.editpage")
-    .use(editpageBrowser.name, codemirrorJquery.name)
+    .add(resource("css/edit-page.css"))
+    .add(resource("js/edit-page.js"))
+    .require(codemirrorJquery.name, editpageBrowser.name)
 
   val uploadPage = Group("publet.webeditor.uploadpage")
     .use(blueimpFileUpload.name, editpageBrowser.name)

@@ -49,6 +49,13 @@
     cm.refresh();
   }
 
+  function _getSelectedRange(cm) {
+    return {
+      from: cm.getCursor(true),
+      to: cm.getCursor(false)
+    }
+  }
+
   var methods = {
 
     init:function (options) {
@@ -130,6 +137,19 @@
 
       setFullScreen(cm, flag);
       return this;
+    },
+
+    commentSelection: function(flag) {
+      var cm = $(this).data('codemirror').editor;
+      var range = _getSelectedRange(cm);
+      if (flag == null) flag = true;
+      cm.commentRange(flag, range.from, range.to);
+    },
+
+    autoFormatSelection: function() {
+      var cm = $(this).data('codemirror').editor;
+      var range = _getSelectedRange(cm);
+      cm.autoFormatRange(range.from, range.to);
     }
   };
 
