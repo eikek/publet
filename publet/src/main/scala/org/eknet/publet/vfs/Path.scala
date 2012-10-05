@@ -169,7 +169,7 @@ case class Path(segments: List[String], query: Option[String], absolute: Boolean
 
 object Path {
 
-  val root = Path(List(), null, true, true)
+  val root = Path(List(), None, true, true)
 
   private val sep = '/'
 
