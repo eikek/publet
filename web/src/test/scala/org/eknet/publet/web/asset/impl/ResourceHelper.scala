@@ -16,7 +16,9 @@
 
 package org.eknet.publet.web.asset.impl
 
-import org.eknet.publet.web.asset.{AssetCollection, Group}
+import org.eknet.publet.web.asset.{AssetResource, AssetCollection, Group}
+import org.eknet.publet.vfs.{ContentResource, ResourceName}
+import java.io.ByteArrayInputStream
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -54,4 +56,13 @@ object ResourceHelper extends AssetCollection {
     .add(resource("publet/js/publet.js"))
     .require("jquery")
 
+  def mockResource(name: String):AssetResource = NameResource(name)
+
+  case class NameResource(n: String) extends ContentResource {
+    def name = ResourceName(n)
+    def exists = true
+    def contentType = name.targetType
+    def inputStream = new ByteArrayInputStream(Array())
+    override def toString = n
+  }
 }

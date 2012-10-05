@@ -21,6 +21,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.eknet.publet.web.asset._
 import ResourceHelper._
 import org.eknet.publet.vfs.Path._
+import org.eknet.publet.vfs.{ResourceName, Resource}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -47,4 +48,34 @@ class GroupRegistryTest extends FunSuite with ShouldMatchers with BeforeAndAfter
     val sources = reg.getSources("default", Some("/".p), Kind.js)
     sources should have size 7
   }
+
+  test ("transitive dependencies") {
+    //a
+    val a = Group("a")
+      .add(mockResource("1.css"))
+      .add(mockResource("1.js"))
+
+    //b
+    val b = Group("b")
+      .add(mockResource("2.css"))
+      .add(mockResource("2.js"))
+      .require(a.name)
+
+    //c
+    val c = Group("c")
+      .add(mockResource("3.css"))
+      .add(mockResource("3.js"))
+      .require(b.name)
+
+    reg setup (a, b, c)
+
+    val js = reg.getSources(c.name, None, Kind.js)
+    js should have size 3
+
+    val css = reg.getSources(c.name, None, Kind.css)
+    css should have size 3
+    toString
+  }
+
+
 }

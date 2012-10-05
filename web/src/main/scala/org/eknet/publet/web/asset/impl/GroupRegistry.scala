@@ -19,8 +19,8 @@ package org.eknet.publet.web.asset.impl
 
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.Glob
-import collection.mutable.ListBuffer
 import org.eknet.publet.web.asset.{AssetResource, Kind, Group}
+import collection.mutable
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -93,23 +93,33 @@ class GroupRegistry {
   private class Graph(nodeList: Seq[Node]) {
     val nodes = collection.mutable.Set() ++ (nodeList)
     val edges = collection.mutable.Set[Edge]()
-    nodeList.map { node =>
-      for (after <- node.group.afters) {
-        val an = graph.get(after).getOrElse(sys.error("Group '"+after+"' not in graph"))
-        edges += Edge(an, node)
-        nodes += an
-      }
-      for (before <- node.group.befores) {
-        val bn = graph.get(before).getOrElse(sys.error("Group '"+before+"' not in graph"))
-        edges += Edge(node, bn)
-        nodes += bn
+    fillGraph(nodeList.toList)
+
+    def fillGraph(nodes: List[Node]) {
+      nodes match {
+        case node::ns => {
+          val reqnodes = mutable.Set[Node]()
+          for (after <- node.group.afters) {
+            val an = graph.get(after).getOrElse(sys.error("Group '"+after+"' not in graph"))
+            edges += Edge(an, node)
+            reqnodes += an
+          }
+          for (before <- node.group.befores) {
+            val bn = graph.get(before).getOrElse(sys.error("Group '"+before+"' not in graph"))
+            edges += Edge(node, bn)
+            reqnodes += bn
+          }
+          this.nodes ++= reqnodes
+          fillGraph( ns ::: reqnodes.toList )
+        }
+        case Nil =>
       }
     }
 
     def nextNode = nodes.find(n => !edges.map(_.end).contains(n))
 
     def topoSort: List[Node] = {
-      val buf = new ListBuffer[Node]
+      val buf = new mutable.ListBuffer[Node]
       while (!nodes.isEmpty) {
         nextNode map { n =>
           buf.append(n)

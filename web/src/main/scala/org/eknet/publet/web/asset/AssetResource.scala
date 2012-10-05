@@ -53,4 +53,6 @@ final class AssetResource(val delegate: ContentResource,
    * @return
    */
   def into(target: String) = new AssetResource(delegate, Some(target), compress)
+
+  override def toString = delegate.toString
 }
