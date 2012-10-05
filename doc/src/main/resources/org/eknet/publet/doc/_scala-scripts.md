@@ -58,8 +58,11 @@ At first, we create a template for the new page at `/.allIncludes/config/admin.p
     :javascript
       $(function() {
         $('button').each(function(i, el) {
-          $(el).on('click', function() {
-            $.get("reload.json", { what: $(el).attr("id") }, function(result) {
+          var button = $(el);
+          button.on('click', function() {
+            button.mask(); button.attr("disabled", "disabled");
+            $.get("reload.json", { what: button.attr("id") }, function(result) {
+              button.unmask(); button.removeAttr("disabled");
               var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
               if (result.success) {
                 $('#response').html('<div class="alert alert-success">'+result.message + closeIcon + '</div>');
