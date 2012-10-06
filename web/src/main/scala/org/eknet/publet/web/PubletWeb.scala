@@ -39,6 +39,7 @@ import org.eknet.publet.auth.RepositoryModel
 import org.apache.shiro.cache.MemoryConstrainedCacheManager
 import tools.nsc.util.ScalaClassLoader.URLClassLoader
 import java.net.URL
+import ref.WeakReference
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -56,7 +57,7 @@ object PubletWeb extends Logging {
   val customClasspathInitParam = "custom-classpath"
 
   // initialized on context startup
-  private var servletContextI: ServletContext = null
+  private var servletContextI: WeakReference[ServletContext] = null
   private var contextMapI: AttributeMap = null
 
   private val contentRootRepo = Path("contentroot")
@@ -129,7 +130,7 @@ object PubletWeb extends Logging {
     }
   })
 
-  def servletContext = servletContextI
+  def servletContext = servletContextI()
   def contextMap = contextMapI
   def publet = contextMap(publetKey).get
   def scalateEngine = contextMap(scalateEngineKey).get
@@ -192,8 +193,8 @@ object PubletWeb extends Logging {
    * @param loggerInit
    */
   def initialize(sc: ServletContext, loggerInit: ()=>Unit) {
-    this.servletContextI = sc
-    this.contextMapI = AttributeMap(servletContext)
+    this.servletContextI = new WeakReference[ServletContext](sc)
+    this.contextMapI = AttributeMap(servletContextI)
     Config.setContextPath(servletContext.getContextPath)
     loggerInit.apply()
 
@@ -234,7 +235,7 @@ object PubletWeb extends Logging {
     resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
     resolver.getFilterChainManager.createChain("/**", "anon")
     webenv.setFilterChainResolver(resolver)
-    servletContextI.setAttribute(EnvironmentLoader.ENVIRONMENT_ATTRIBUTE_KEY, webenv)
+    servletContext.setAttribute(EnvironmentLoader.ENVIRONMENT_ATTRIBUTE_KEY, webenv)
   }
 
 
