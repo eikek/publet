@@ -1,7 +1,7 @@
 -@ val body: String
 -@ val title : String = "Welcome"
 -@ val head: String = null
--@ val highlightTheme: String = PubletWeb.publetSettings("publet.highlightTheme").getOrElse("googlecode")
+-@ val highlightTheme: String = PubletWeb.publetSettings("publet.highlightTheme").getOrElse("idea")
 -@ val searchForSidebar: Boolean = PubletWeb.publetSettings("publet.searchForSidebar").getOrElse("true").toBoolean
 -@ val searchForHeadIncludes: Boolean = PubletWeb.publetSettings("publet.searchForHeadIncludes").getOrElse("true").toBoolean
 -@ val footer: String = null
@@ -23,9 +23,6 @@ html
 
     - if (defaultAssetGroup == "default")
       link(href={ highlightCss } rel="stylesheet")
-      - if (highlightTheme == "googlecode")
-        :css
-          pre code { background: inherit; }
 
     - if (searchForHeadIncludes)
       =loadHeadIncludes()

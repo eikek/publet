@@ -29,6 +29,8 @@ body {
 pre {
     margin: 0.5em 0 9px;
 }
+div#content pre code { background: transparent; }
+
 div#content, div#content p {
     font-size: 16px;
     font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
