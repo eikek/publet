@@ -27,6 +27,19 @@ import javax.servlet.http.HttpServletRequest
  */
 object WebExtensionLoader extends Logging {
 
+  private lazy val loadExtensions = ServiceLoader.load(classOf[WebExtension])
+    .iterator()
+    .withFilter(ext => Config(ext.getClass.getName).getOrElse("true").toBoolean)
+    .toList
+
+  private def safely[A](errorMsg: => String)(body: () => A): Option[A] = {
+    try {
+      Some(body())
+    } catch {
+      case e: Exception => error(errorMsg, e); None
+    }
+  }
+
   /**
    * Looks up all [[org.eknet.publet.web.WebExtension]]s using the
    * service-loader pattern from java.
@@ -35,46 +48,28 @@ object WebExtensionLoader extends Logging {
    * Extensions can be configured to not run on startup, if the config
    * file contains an entry of the complete class name and a value of `false`
    */
-  def installWebExtensions() {
+  def onStartup() {
     for (ext <- loadExtensions) {
-      val name = ext.getClass.getName
-      if (Config(name).getOrElse("true").toBoolean) {
-        info("Installing extension: "+ name)
-        ext.onStartup()
-      } else {
-        info("Extension '"+name+"' not installed.")
-      }
+      info("Installing extension: "+ ext.getClass.getName)
+      safely("Error on startup for extension '"+ext.getClass+"'!")(ext.onStartup)
     }
   }
 
-  private lazy val loadExtensions: List[WebExtension] = {
-    val loader = ServiceLoader.load(classOf[WebExtension])
-    loader.iterator().toList
+  def onShutdown() {
+    loadExtensions.foreach(ext => safely("Error on shutdown for extension '"+ext+"'!")(ext.onShutdown))
   }
 
   def executeBeginRequest(req: HttpServletRequest): HttpServletRequest = {
-    def applySafe(ext: WebExtension, r: HttpServletRequest) = {
-      try {
-        Option(ext.onBeginRequest(r)).getOrElse(r)
-      }
-      catch {
-        case e:Exception => {
-          error("Exception invoking onBeginRequest of extension '"+ ext +"'!", e)
-          req
-        }
-      }
-    }
-    loadExtensions.foldLeft(req)((r1, ext) => applySafe(ext, r1))
+    loadExtensions.foldLeft(req)((r1, ext) => {
+      safely("Exception invoking onBeginRequest of extension '"+ ext +"'!") { () =>
+        ext.onBeginRequest(r1)
+      } getOrElse(r1)
+    })
   }
 
   def executeEndRequest(req:HttpServletRequest) {
-    for (ext <- loadExtensions) {
-      try {
-        ext.onEndRequest(req)
-      }
-      catch {
-        case e:Exception => error("Exception invoking onEndRequest of extension '"+ ext +"'!", e)
-      }
-    }
+    loadExtensions.foreach(ext => safely("Exception invoking onEndRequest of extension '"+ ext +"'!") { () =>
+      ext.onEndRequest(req)
+    })
   }
 }

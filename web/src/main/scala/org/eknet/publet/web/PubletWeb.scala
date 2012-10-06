@@ -211,7 +211,7 @@ object PubletWeb extends Logging {
     contextMap(publetKey).get
     initShiro()
 
-    WebExtensionLoader.installWebExtensions()
+    WebExtensionLoader.onStartup()
   }
 
   private def initShiro() {
@@ -240,6 +240,7 @@ object PubletWeb extends Logging {
 
 
   def destroy(sc: ServletContext) {
+    WebExtensionLoader.onShutdown()
     this.servletContextI = null
     this.contextMapI = null
   }
