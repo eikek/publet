@@ -1,7 +1,9 @@
 # Publet
 
-Publet is a wiki web application written in [Scala](http://www.scala-lang.org/)
-that glues together three major players
+Publet is a web application written in [Scala](http://www.scala-lang.org/) where you can edit
+pages like in a wiki. Besides three wiki languages, you can also write Scala scripts and choose
+from a broad set of template languages to not only create static sites, but also dynamic sites
+conveniently. Mainly, it glues together three great open-source components:
 
 * [Scalate](http://scalate.fusesource.org/) which is a template engine
 * [Git](http://git-scm.com/), using the java implementation [JGit](http://www.jgit.org/)
@@ -9,15 +11,15 @@ that glues together three major players
 
 By using Scalate you can use markdown and textile wiki markup and create templates
 using one of their [supported template languages](http://scalate.fusesource.org/documentation/index.html#Templates). 
-Git is used to hold all source files, which allows to edit the contents 
+Git can be used to hold all source files, which allows to edit the contents
 offline and push changes back to the server. Also, it is possible to have multiple repositories. Finally 
 Bootstrap is used for the default page layout creating a great look and feel. 
 
 Publet aims to be an extensible application which makes setting up dynamic
 web sites more convenient. Use wiki markup on text heavy pages, and use templates 
-combined Scala code for more complex view creation. It's also possible to create
+combined with Scala code for more complex views. It's also possible to create
 Scala Scripts (the controller part) that can return any content, like for example 
-JSON. 
+JSON for interoperating with Javascript.
 
 ## Building
 

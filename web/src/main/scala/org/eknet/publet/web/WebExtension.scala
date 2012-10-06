@@ -62,12 +62,3 @@ trait WebExtension {
   def onEndRequest(req: HttpServletRequest)
 
 }
-
-trait EmptyExtension extends WebExtension {
-
-  def onStartup() {}
-  def onShutdown() {}
-  def onBeginRequest(req: HttpServletRequest) = req
-  def onEndRequest(req: HttpServletRequest) {}
-
-}

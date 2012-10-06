@@ -29,7 +29,7 @@ import org.eknet.publet.web.template.DefaultLayout
  */
 class PubletDocExtension extends EmptyExtension with Logging with AssetCollection {
 
-  override def classPathBase = "/org/eknet/publet/doc/_includes/"
+  override def classPathBase = "/org/eknet/publet/doc/resources/_includes/"
 
   val css = Group("publet.doc")
     .forPath("/publet/doc/**")
@@ -41,7 +41,7 @@ class PubletDocExtension extends EmptyExtension with Logging with AssetCollectio
     AssetManager.service setup Group("default")
       .use(css.name)
 
-    val cont = new ClasspathContainer(base = "/org/eknet/publet/doc")
+    val cont = new ClasspathContainer(base = "/org/eknet/publet/doc/resources")
     PubletWeb.publet.mountManager.mount(Path("/publet/doc"), cont)
   }
 

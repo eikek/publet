@@ -1,10 +1,9 @@
 # Introduction
 
-Publet is a web application that allows you to edit content just like a wiki
-does. Besides many other wiki applications, publet does not use a relational
-database to store the content. Publet stores each page in a file on the
-server's file system. All those files are maintained inside a git repository.
-By using a git repository you'll get versioning of the web content "for free".
+Publet is a web application where you can edit pages like in a wiki. Besides three
+wiki languages, you can also write Scala scripts and choose from a broad set of
+template languages to not only create static sites, but also dynamic sites conveniently
+and *"on the fly"*.
 
 Publet offers three wiki markup languages:
 
@@ -44,11 +43,12 @@ that offers a lot of attractive client side functionality. Since
 [Scalate](http://scalate.fusesource.org/) template, this can be replaced
 easily.
 
-While you could edit all text resources online, you can also clone the git
-repository edit files offline and push changes back to the server. Publet will
-update its working copy after each push. A possible workflow could be to
-install publet locally, add/edit files with your favorite editor and verify
-the result in the local publet instance. The collected changes can then be
+By default, resources are maintained in a git repository. This gives you
+versioning "for free". While you could edit all text resources online, you
+can also clone the git repository edit files offline and push changes back
+to the server. Publet will update its working copy after each push. A possible
+workflow could be to install publet locally, add/edit files with your favorite
+editor and verify the result locally. The collected changes can then be
 pushed to the server via git.
 
 Publet can be seen as a wiki for developers. The more interesting features are

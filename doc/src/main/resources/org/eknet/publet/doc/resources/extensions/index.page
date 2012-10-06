@@ -28,7 +28,7 @@ title: Publet Documentation
   .span10
     .tab-content
       .tab-pane.active#intro
-        =include("_intro.md")
+        =include("_intro.jade")
       .tab-pane#ext
         =include("_ext.jade")
       .tab-pane#gitrweb

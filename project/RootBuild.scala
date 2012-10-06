@@ -353,6 +353,13 @@ object Doc extends Build {
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-doc",
+    // add the WebExtension source file to have it available from the docs
+    resourceGenerators in Compile <+= (sourceDirectory in Web.module, resourceManaged in Compile) map { (sd:File, rd: File) =>
+      val source = sd / "main" / "scala" / "org" / "eknet" / "publet" / "web" / "WebExtension.scala"
+      val target = rd / "org" / "eknet" / "publet" / "doc" / "resources" / "_sources" / "WebExtension.scala"
+      IO.copyFile(source, target)
+      Seq(target)
+    },
     libraryDependencies ++= deps
   )
 
