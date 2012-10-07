@@ -16,6 +16,7 @@
 
 package org.eknet.publet.web
 
+import guice.PubletShiroModule
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.{ServletResponse, ServletRequest}
 
@@ -40,6 +41,7 @@ class ReqUtils(val req: HttpServletRequest) extends
   def redirectToLoginPage(res: HttpServletResponse) {
     val p = params.map(t => t._1 +"="+ t._2.mkString(",")).mkString("&")
     val uri = applicationUri + (if (p.isEmpty) "" else "?"+p)
-    res.sendRedirect(urlOf(PubletWeb.getLoginPath)+"?redirect="+ urlOf(uri))
+    val loginPath = PubletWeb.instance[String]("loginPath")
+    res.sendRedirect(urlOf(loginPath)+"?redirect="+ urlOf(uri))
   }
 }

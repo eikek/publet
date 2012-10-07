@@ -401,3 +401,10 @@ Codemirror, licensed under a MIT-style license.
 > THE SOFTWARE.
 
 <http://codemirror.net/>
+
+
+### Google Guice
+
+Google Guice, licensed under the Apache Software License, Version 2.0.
+
+<http://code.google.com/p/google-guice/>

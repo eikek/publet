@@ -70,20 +70,11 @@ object AssetManager {
   val compressedPath = assetPath + "compressed/"
   val groupsPath = assetPath + "groups"
 
-  private val assetManagerKey = Key[AssetManager](classOf[AssetManager].getName)
-
   /**
-   * Either creates a new [[org.eknet.publet.web.asset.AssetManager]] or
-   * retrieves an existing instance from the servlet context. Note, that
-   * this method is only valid in web environment.
+   * Retrieves an instance from the web environment.
    *
    * @return
    */
-  def service = PubletWebContext.contextMap(assetManagerKey).getOrElse {
-    val tempDir = Config.newStaticTempDir("assets")
-    val mgr: AssetManager = new DefaultAssetManager(PubletWeb.publet, tempDir)
-    PubletWeb.contextMap.put(assetManagerKey, mgr)
-    mgr
-  }
+  def service = PubletWeb.instance[AssetManager]
 
 }

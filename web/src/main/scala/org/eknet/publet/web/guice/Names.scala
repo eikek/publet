@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.req
+package org.eknet.publet.web.guice
 
-import javax.servlet.http.HttpServletRequest
-import org.eknet.publet.web.filter._
-import RequestHandlerFactory._
-import org.eknet.publet.web.PubletRequestWrapper
+import com.google.inject.name
 
 /**
- * Creates a filter chain to handle webdav requests.
- *
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 27.09.12 15:35
+ * @since 07.10.12 02:05
  */
-class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
+object Names {
 
-  def getApplicableScore(req: HttpServletRequest) =
-    if (req.isDavRequest) EXACT_MATCH else NO_MATCH
+  val scriptEngine = annot("ScriptEngine")
+  val contentroot = annot("contentroot")
+  val servletContext = annot("publetServletContext")
+  val settings = annot("settings")
 
-  def createFilter() = new SuperFilter(Seq(
-    Filters.guice,
-    Filters.webContext,
-    Filters.authc,
-    Filters.exceptionHandler,
-    Filters.webdav
-  ))
-
+  implicit def annot(str: String) = name.Names.named(str)
 }

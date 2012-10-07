@@ -14,30 +14,16 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.req
+package org.eknet.publet.ext.counter
 
-import javax.servlet.http.HttpServletRequest
-import org.eknet.publet.web.filter._
-import RequestHandlerFactory._
-import org.eknet.publet.web.PubletRequestWrapper
+import com.google.inject.{Scopes, AbstractModule}
 
 /**
- * Creates a filter chain to handle webdav requests.
- *
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 27.09.12 15:35
+ * @since 07.10.12 02:48
  */
-class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
-
-  def getApplicableScore(req: HttpServletRequest) =
-    if (req.isDavRequest) EXACT_MATCH else NO_MATCH
-
-  def createFilter() = new SuperFilter(Seq(
-    Filters.guice,
-    Filters.webContext,
-    Filters.authc,
-    Filters.exceptionHandler,
-    Filters.webdav
-  ))
-
+object CounterModule extends AbstractModule {
+  def configure() {
+    bind(classOf[CounterService]) to (classOf[CounterServiceImpl]) in Scopes.SINGLETON
+  }
 }

@@ -19,9 +19,11 @@ package org.eknet.publet.ext
 import org.eknet.publet.Publet
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{EmptyExtension, PubletWeb}
+import org.eknet.publet.web.{Config, EmptyExtension, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
+import com.google.inject.AbstractModule
+import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,8 +31,19 @@ import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
  */
 class ExtWebExtension extends EmptyExtension with Logging {
 
+  override def getModule = Some(MailModule)
+
   override def onStartup() {
-    ExtWebExtension.install(PubletWeb.publet)
+    import ExtWebExtension.extScriptPath
+    import org.eknet.publet.vfs.ResourceName._
+    val muc = new MapContainer()
+    muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
+    muc.addResource(new WebScriptResource("sendMail.json".rn, new MailContact))
+    muc.addResource(new WebScriptResource("myDataUpdate.json".rn, new MyDataScript))
+    PubletWeb.publet.mountManager.mount(extScriptPath, muc)
+
+    val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
+    PubletWeb.publet.mountManager.mount(Path("/publet/ext/includes/"), cont)
   }
 
 }
@@ -39,15 +52,19 @@ object ExtWebExtension {
 
   val extScriptPath = Path("/publet/ext/scripts/")
 
-  def install(publet: Publet) {
-    import org.eknet.publet.vfs.ResourceName._
-    val muc = new MapContainer()
-    muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
-    muc.addResource(new WebScriptResource("sendMail.json".rn, new MailContact))
-    muc.addResource(new WebScriptResource("myDataUpdate.json".rn, new MyDataScript))
-    publet.mountManager.mount(extScriptPath, muc)
+}
 
-    val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
-    publet.mountManager.mount(Path("/publet/ext/includes/"), cont)
+object MailModule extends AbstractModule {
+  def configure() {
+  }
+
+  def createDefaultMailer(): MailSender = {
+    val sessionFactory = new DefaultSessionFactory(
+      Config("smtp.host").getOrElse("localhost"),
+      Config("smtp.port").getOrElse("-1").toInt,
+      Config("smtp.username").getOrElse(""),
+      Config("smtp.password").getOrElse("").toCharArray)
+
+    new DefaultMailSender(sessionFactory)
   }
 }

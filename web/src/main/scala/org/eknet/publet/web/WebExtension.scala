@@ -17,12 +17,22 @@
 package org.eknet.publet.web
 
 import javax.servlet.http.HttpServletRequest
+import com.google.inject.Module
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:31
  */
 trait WebExtension {
+
+  /**
+   * Optionally contribute a guice module to the application. This
+   * is used to create the [[com.google.inject.Injector]] for the
+   * application on startup.
+   *
+   * @return
+   */
+  def getModule: Option[Module]
 
   /**
    * Point on which extension code is executed

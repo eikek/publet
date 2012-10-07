@@ -31,6 +31,7 @@ object Version {
   val yuicompressor = "2.4.7"
   val googleClosureCompiler = "rr2079.1"
   val guava = "12.0"
+  val guice = "3.0"
 }
 
 object Dependencies {
@@ -44,6 +45,10 @@ object Dependencies {
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
   val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("rhino", "js") //scala 2.9.2 only
   val guava = "com.google.guava" % "guava" % Version.guava
+  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib")
+  val cglib = "cglib" % "cglib" % "2.2.2"
+  val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice withSources()
+  val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice
   val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty exclude("rhino", "js")
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources() exclude("rhino", "js")
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty exclude("rhino", "js")
@@ -251,6 +256,10 @@ object Web extends Build {
        yuicompressor,
        googleClosureCompiler,
        guava,
+       guice,
+       cglib,
+       guiceServlet,
+       guiceMultibindings,
        scalaTest) ++ miltonApiDeps
 
 }

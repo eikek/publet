@@ -6,6 +6,7 @@ import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
 import org.eknet.publet.web.asset.AssetFilter
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.PubletWebContext
+import com.google.inject.servlet.GuiceFilter
 
 /**
  *
@@ -25,6 +26,7 @@ object Filters {
   val authc = new AuthcFilter
   val webdav = new WebdavFilter
   val assets = new AssetFilter
+  val guice = new GuiceFilter
 
   private[web] class ForwardRequest(uri: String, req: HttpServletRequest, clearAttributes: Boolean = true) extends HttpServletRequestWrapper(req) {
     import collection.JavaConversions._

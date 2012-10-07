@@ -22,7 +22,6 @@ class DestroyRepo extends ScalaScript with Logging {
       try {
         PubletWeb.gitr.delete(repo.name)
         PubletWeb.authManager.removeRepository(repo.name.name)
-        PubletWeb.authManager.reload()
         info("Successfully destroyed repository: "+ repo.name)
         makeJson(Map("success"->true,
           "message"->"Successfully destroyed the repository.",

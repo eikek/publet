@@ -71,7 +71,6 @@ object AttributeMap {
   }
 
   def apply(request: HttpServletRequest): AttributeMap = new RequestMap(request)
-  def apply(context: WeakReference[ServletContext]): AttributeMap = new ContextMap(context)
   def apply(session: HttpSession): AttributeMap = new SessionMap(session)
 
   protected class SessionMap(session: HttpSession) extends AttributeMap {
@@ -107,24 +106,6 @@ object AttributeMap {
 
     def removeAttr(name: String) {
       req.removeAttribute(name)
-    }
-  }
-
-  protected class ContextMap(ctx: WeakReference[ServletContext]) extends AttributeMap {
-    val scope = Context
-
-    def setAttr(name: String, value: Any) {
-      ctx.get.map(_.setAttribute(name, value))
-    }
-
-    def getAttr(name: String) = ctx.get.map(_.getAttribute(name)).getOrElse(null)
-
-    def keys = new Iterable[String] {
-      def iterator = ctx.get.map(c => enumToIterator(c.getAttributeNames)).getOrElse(Iterator())
-    }
-
-    def removeAttr(name: String) {
-      ctx.get.map(_.removeAttribute(name))
     }
   }
 }

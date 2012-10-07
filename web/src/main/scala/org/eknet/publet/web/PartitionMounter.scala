@@ -20,7 +20,7 @@ import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
-import util.PropertiesMap
+import util.{StringMap, PropertiesMap}
 import org.eknet.publet.partition.git
 
 /**
@@ -92,7 +92,7 @@ class PartitionMounter extends EmptyExtension with Logging {
    * @param config
    * @return
    */
-  def readPartitionConfig(config: PropertiesMap): List[PartitionConfig] = {
+  def readPartitionConfig(config: StringMap): List[PartitionConfig] = {
 
     def recurseRead(num: Int): List[PartitionConfig] = {
 

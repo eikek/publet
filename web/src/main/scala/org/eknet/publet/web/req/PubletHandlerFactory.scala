@@ -22,6 +22,7 @@ import org.eknet.publet.web.{PageWriter, PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
+import com.google.inject.servlet.GuiceFilter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,6 +34,7 @@ class PubletHandlerFactory extends RequestHandlerFactory {
 
   def createFilter() = new SuperFilter(Seq(
       Filters.redirect,
+      Filters.guice,
       Filters.webContext,
       Filters.blacklist,
       Filters.authc,

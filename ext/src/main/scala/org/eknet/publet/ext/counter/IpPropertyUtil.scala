@@ -16,7 +16,7 @@
 
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.util.PropertiesMap
+import org.eknet.publet.web.util.{StringMap, PropertiesMap}
 import org.eknet.publet.web.PubletWeb
 import java.net.{UnknownHostException, InetAddress}
 import grizzled.slf4j.Logging
@@ -32,7 +32,7 @@ private[counter] trait IpPropertyUtil extends Logging {
   val keyPrefix = "ext.counter.blacklist."
 
   implicit def strToResolver(n:String) = new IpResolver(n)
-  implicit def mapToHelper(m: PropertiesMap) = new HostnameMap(m)
+  implicit def mapToHelper(m: StringMap) = new HostnameMap(m)
 
   class IpResolver(name: String) {
     def resolveIp = {
@@ -50,7 +50,7 @@ private[counter] trait IpPropertyUtil extends Logging {
     }
   }
 
-  class HostnameMap(m: PropertiesMap) {
+  class HostnameMap(m: StringMap) {
     def blacklistHostnames = m.keySet.filter(_.startsWith(keyPrefix))
       .map(key => key.substring(keyPrefix.length))
       .collect({ case hn if (hn.matches("^[a-zA-Z].*")) => hn})

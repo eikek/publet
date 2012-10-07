@@ -42,8 +42,8 @@ trait RequestUrl extends Logging {
       else
         uri +":" +req.getServerPort
 
-      if (PubletWeb.servletContext.getContextPath.isEmpty) base
-      else base + PubletWeb.servletContext.getContextPath
+      if (PubletWeb.contextPath.isEmpty) base
+      else base + PubletWeb.contextPath
     }
   })
 
