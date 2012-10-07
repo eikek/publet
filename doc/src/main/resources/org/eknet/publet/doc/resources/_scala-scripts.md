@@ -40,39 +40,40 @@ At first, we create a template for the new page at `/.allIncludes/config/admin.p
     br/
     #response
     table.table.table-condensed
-      tr
-        td Server config dir
-        td =Config.repositories.getParentFile.getAbsolutePath
-      tr
-        td Reload Configuration:
-        td
-          button.btn.btn-primary(href="#" id="config") Reload Configuration
-      tr
-        td Reload Settings
-        td
-          button.btn.btn-primary(href="#" id="settings") Reload Settings
-      tr
-        td Reload Permissions
-        td
-          button.btn.btn-primary(href="#" id="permissions") Reload Permissions
+     tr
+       td Server config dir
+       td =Config.repositories.getParentFile.getAbsolutePath
+     tr
+       td Reload Configuration:
+       td
+         button.btn.btn-primary(href="#" id="config") Reload Configuration
+     tr
+       td Reload Settings
+       td
+         button.btn.btn-primary(href="#" id="settings") Reload Settings
+    hr/
+    ul
+     li
+       a(href="/main/internal/page-lists.html") Page List
+
     :javascript
-      $(function() {
-        $('button').each(function(i, el) {
-          var button = $(el);
-          button.on('click', function() {
-            button.mask(); button.attr("disabled", "disabled");
+     $(function() {
+       $('button').each(function(i, el) {
+         var button = $(el);
+         button.on('click', function() {
+            button.mask().attr("disabled", "disabled");
             $.get("reload.json", { what: button.attr("id") }, function(result) {
-              button.unmask(); button.removeAttr("disabled");
+              button.unmask().removeAttr("disabled");
               var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
               if (result.success) {
-                $('#response').html('<div class="alert alert-success">'+result.message + closeIcon + '</div>');
+               $('#response').html('<div class="alert alert-success">'+result.message + closeIcon + '</div>');
               } else {
-                $('#response').html('<div class="alert alert-error">' +result.message + closeIcon + '</div>');
+               $('#response').html('<div class="alert alert-error">' +result.message + closeIcon + '</div>');
               }
             });
-          });
-        });
-      });
+         });
+       });
+     });
 
 This displays a simple table and registers javascript click handlers that will
 execute an ajax request to the url `reload.json` with one request parameter
@@ -91,10 +92,6 @@ The reload functionality is implemented in a Scala script
         PubletWeb.publetSettings.reload();
         makeJson(Map("success"->true, "message"->"Settings reloaded!"))
       }
-      case Some("permissions") => {
-        PubletWeb.authManager.reload()
-        makeJson(Map("success"->true, "message"->"Permissions reloaded!"))
-      }
       case _ => {
         makeJson(Map("success"->false, "message"->"Don't know what to reload!"))
       }
@@ -104,8 +101,6 @@ At first a special permission `configure` is checked. The `Security` object is
 imported by default and defines some helper methods for checking permissions.
 Then the parameter is evaluated and the corresponding action is executed. The
 output will be a short JSON response that the client will handle.
-
-Go to `/.allIncludes/config/admin.html` to reload something...
 
 
 ## Mini projects
