@@ -153,9 +153,9 @@ object Config extends PropertiesMap with Logging {
    *
    * @return
    */
-  def mode = RunMode.values
+  def mode: RunMode.Value = RunMode.values
     .find(en => Some(en.toString) == apply("publet.mode"))
-    .getOrElse(RunMode.development.toString)
+    .getOrElse(RunMode.development)
 
   /**
    * Returns a file beneath configuration directory of this
