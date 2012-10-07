@@ -62,14 +62,7 @@ trait CounterService {
    * @param locale
    * @return
    */
-  def getLastAccessString(uri: String, locale: Option[util.Locale] = None): String = {
-    val df = DateFormat.getDateTimeInstance(
-      DateFormat.MEDIUM,
-      DateFormat.MEDIUM,
-      locale.getOrElse(util.Locale.getDefault)
-    )
-    df.format(getLastAccess(uri))
-  }
+  def getLastAccessString(uri: String, locale: Option[util.Locale] = None): String
 
   /**
    * "Collect" the page uri and client info. This increments

@@ -3,6 +3,7 @@ package org.eknet.publet.web.webdav
 import javax.servlet._
 import org.eknet.publet.web._
 import com.bradmcevoy.http.{Response, Request, MiltonServlet, HttpManager}
+import ref.WeakReference
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -10,11 +11,11 @@ import com.bradmcevoy.http.{Response, Request, MiltonServlet, HttpManager}
  */
 class WebdavFilter extends Filter with PubletRequestWrapper {
 
-  private var servletContext:ServletContext = null
+  private var servletContext: WeakReference[ServletContext] = null
   private var httpManager: HttpManager = null
 
   def init(filterConfig: FilterConfig) {
-    this.servletContext = filterConfig.getServletContext
+    this.servletContext = new WeakReference(filterConfig.getServletContext)
     this.httpManager = new HttpManager(new WebdavResourceFactory)
   }
 
@@ -28,7 +29,7 @@ class WebdavFilter extends Filter with PubletRequestWrapper {
     import com.bradmcevoy.http
     try {
       MiltonServlet.setThreadlocals(req, resp)
-      val request: Request = new http.ServletRequest(req, servletContext)
+      val request: Request = new http.ServletRequest(req, servletContext())
       val response: Response = new http.ServletResponse(resp)
       httpManager.process(request, response)
     } finally {

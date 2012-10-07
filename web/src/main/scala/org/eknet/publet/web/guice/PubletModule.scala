@@ -99,7 +99,7 @@ object PubletModule extends ServletModule {
   }
 
   @Provides@Singleton
-  def createScalateEngine(publet: Publet, servletContext: ServletContext): ScalateEngine = {
+  def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext): ScalateEngine = {
     val e = new ConfiguredScalateEngine('wikiMain, publet)
     e.engine.combinedClassPath = true
     e.engine.importStatements ++= webImports.map("import "+ _)
@@ -118,7 +118,7 @@ object PubletModule extends ServletModule {
   }
 
   @Provides@Singleton@Named("ScriptEngine")
-  def createScriptEngine(publet: Publet, scalateEngine: ScalateEngine, servletContext: ServletContext): PubletEngine = {
+  def createScriptEngine(publet: Publet, scalateEngine: ScalateEngine, @Named("publetServletContext") servletContext: ServletContext): PubletEngine = {
     val additionalImports = List(
       "org.eknet.publet.web.util.RenderUtils",
       "RenderUtils._"

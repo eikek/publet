@@ -19,24 +19,29 @@ package org.eknet.publet.ext.counter
 import org.eknet.publet.ext.ExtDb
 import org.eknet.publet.web.PubletWeb
 import java.util.concurrent.TimeUnit
-import org.eknet.publet.web.util.ClientInfo
+import org.eknet.publet.web.util.{StringMap, ClientInfo}
 import org.eknet.publet.Glob
 import org.eknet.publet.vfs.{Path, ContentResource}
 import org.apache.shiro.util.ByteSource
 import org.apache.shiro.crypto.hash.Md5Hash
 import org.apache.shiro.crypto.hash.format.HexFormat
 import com.tinkerpop.blueprints.Vertex
+import java.util.Locale
+import java.text.DateFormat
+import java.util
+import collection.JavaConversions._
+import ExtDb.Property._
+import com.google.inject.name.Named
+import com.google.inject.{Singleton, Inject}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:49
  */
-class CounterServiceImpl extends CounterService {
+@Singleton
+class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap) extends CounterService {
 
-  import collection.JavaConversions._
-  import ExtDb.Property._
-
-  private val ipBlacklist = new IpBlacklist(PubletWeb.publetSettings, (15, TimeUnit.HOURS))
+  private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = ExtDb
 
   def getPageCount(uri: String) = {
@@ -85,6 +90,15 @@ class CounterServiceImpl extends CounterService {
         v.getProperty(pageCountKey).asInstanceOf[Long])
       )
     }
+  }
+
+  def getLastAccessString(uri: String, locale: Option[Locale]) = {
+    val df = DateFormat.getDateTimeInstance(
+      DateFormat.MEDIUM,
+      DateFormat.MEDIUM,
+      locale.getOrElse(util.Locale.getDefault)
+    )
+    df.format(getLastAccess(uri))
   }
 
   private def getOrCreatePageVertex(uriPath: String) = db.graph.getVertices(pagePathKey, uriPath).headOption getOrElse {

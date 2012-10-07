@@ -17,8 +17,6 @@
 package org.eknet.publet.web.util
 
 import javax.servlet.http.{HttpServletRequest, HttpSession}
-import javax.servlet.ServletContext
-import ref.WeakReference
 
 trait AttributeMap {
 

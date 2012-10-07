@@ -18,19 +18,13 @@ package org.eknet.publet.web
 
 import guice.{Guicey, Names}
 import javax.servlet.ServletContext
-import shiro.UsersRealm
 import org.eknet.publet.partition.git.{GitPartition, GitPartMan}
 import org.eknet.publet.gitr.GitrMan
 import org.eknet.publet.Publet
-import org.eknet.publet.vfs.{Container, ContentResource, Path}
-import util.{StringMap, PropertiesMap, AttributeMap, Key}
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager
-import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
-import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
-import org.apache.shiro.web.env.{EnvironmentLoader, DefaultWebEnvironment}
+import org.eknet.publet.vfs.{Container, Path}
+import util.{StringMap, Key}
 import grizzled.slf4j.Logging
 import org.eknet.publet.auth.{PubletAuth, RepositoryModel}
-import org.apache.shiro.cache.MemoryConstrainedCacheManager
 import ref.WeakReference
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
