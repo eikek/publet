@@ -46,9 +46,9 @@ trait RequestAttr {
    */
   def attr[T: Manifest](key: Key[T]) = {
     requestMap.get(key).orElse {
-      key.synchronized {
+      sessionMap.synchronized {
         sessionMap.get(key).orElse {
-          contextMap.get(key)
+          contextMap.synchronized { contextMap.get(key) }
         }
       }
     }
