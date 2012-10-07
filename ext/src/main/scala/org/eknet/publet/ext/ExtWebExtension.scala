@@ -22,7 +22,7 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{Config, EmptyExtension, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
-import com.google.inject.AbstractModule
+import com.google.inject.{Singleton, Provides, AbstractModule}
 import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
 
 /**
@@ -58,6 +58,7 @@ object MailModule extends AbstractModule {
   def configure() {
   }
 
+  @Provides@Singleton
   def createDefaultMailer(): MailSender = {
     val sessionFactory = new DefaultSessionFactory(
       Config("smtp.host").getOrElse("localhost"),
