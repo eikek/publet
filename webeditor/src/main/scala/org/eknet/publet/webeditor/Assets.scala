@@ -122,7 +122,7 @@ object Assets extends AssetCollection {
       ).mkString("\n")
     }
     replaceUrlInJsSource(s => {
-      Config("publet.urlBase").getOrElse(PubletWeb.servletContext.getContextPath) + s
+      Config("publet.urlBase").getOrElse(PubletWeb.contextPath) + s
     })
   }
 

@@ -18,7 +18,7 @@ package org.eknet.publet.web.template
 
 import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.Publet
-import org.eknet.publet.engine.scalate.{VfsResourceLoader, ScalateEngine}
+import org.eknet.publet.engine.scalate.{ScalateEngineImpl, VfsResourceLoader, ScalateEngine}
 import scalate.Boot
 import org.eknet.publet.web.Config
 
@@ -26,7 +26,7 @@ import org.eknet.publet.web.Config
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 23:47
  */
-class ConfiguredScalateEngine(name: Symbol, publet: Publet) extends ScalateEngine(name, ConfiguredScalateEngine.createEngine()) {
+class ConfiguredScalateEngine(name: Symbol, publet: Publet) extends ScalateEngineImpl(name, ConfiguredScalateEngine.createEngine()) {
 
   VfsResourceLoader.install(engine, publet)
 

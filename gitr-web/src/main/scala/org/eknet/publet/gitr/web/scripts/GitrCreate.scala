@@ -53,7 +53,6 @@ class GitrCreate extends ScalaScript {
               .collect({case d if (!d.isEmpty) => d})
               .foreach(desc => newRepo.setDescription(desc))
             PubletWeb.authManager.updateRepository(RepositoryModel(normName, tag, login))
-            PubletWeb.authManager.reload()
             makeJson(Map(
               "success" -> true,
               "message" -> "Repository successfully created.",

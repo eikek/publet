@@ -19,7 +19,7 @@ package org.eknet.publet.ext.counter
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import org.eknet.publet.web.util.PropertiesMap
+import org.eknet.publet.web.util.{StringMap, PropertiesMap}
 
 /**
  * Uses `ext.counter.blacklist.*` keys in the given [[org.eknet.publet.web.util.PropertiesMap]]
@@ -29,7 +29,7 @@ import org.eknet.publet.web.util.PropertiesMap
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.10.12 10:46
  */
-class IpBlacklist(m: PropertiesMap, resolveIntervall: (Long, TimeUnit)) extends IpPropertyUtil {
+class IpBlacklist(m: StringMap, resolveIntervall: (Long, TimeUnit)) extends IpPropertyUtil {
 
   private val lock = new ReentrantReadWriteLock()
   private val updateSpan = resolveIntervall._2.toMillis(resolveIntervall._1)

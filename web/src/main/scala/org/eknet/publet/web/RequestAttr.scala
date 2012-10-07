@@ -32,13 +32,11 @@ trait RequestAttr {
 
   def sessionMap = AttributeMap(req.getSession)
   def requestMap = AttributeMap(req)
-  def contextMap = PubletWeb.contextMap
 
   /**
    * Gets the value of the specified key from one of the attribute maps.
    *
-   * It first tries the request, than the session and at last the map
-   * on the servlet context.
+   * It first tries the request, than the session.
    *
    * @param key
    * @tparam T
@@ -47,9 +45,7 @@ trait RequestAttr {
   def attr[T: Manifest](key: Key[T]) = {
     requestMap.get(key).orElse {
       key.synchronized {
-        sessionMap.get(key).orElse {
-          contextMap.get(key)
-        }
+        sessionMap.get(key)
       }
     }
   }

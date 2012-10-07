@@ -71,4 +71,12 @@ trait StringMap {
 
   def apply(key: String): Option[String]
 
+  def reload()
+
+  def keySet: Set[String]
+
+  def put(key: String, value: String)
+
+  def listener(l:PropertiesMap=>Unit)
+  def remove(l:PropertiesMap=>Unit)
 }

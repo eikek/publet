@@ -26,11 +26,11 @@ class WebdavResourceFactory extends ResourceFactory with Logging {
   }
 
   private def stripContextPath(path: String): String = {
-    if (PubletWeb.servletContext.getContextPath.isEmpty) {
+    if (PubletWeb.contextPath.isEmpty) {
       path
     } else {
       val npath = if (!path.startsWith("/")) "/"+path else path
-      npath.substring(PubletWeb.servletContext.getContextPath.length)
+      npath.substring(PubletWeb.contextPath.length)
     }
   }
 }

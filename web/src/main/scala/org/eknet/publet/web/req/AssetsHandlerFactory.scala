@@ -32,6 +32,7 @@ class AssetsHandlerFactory extends RequestHandlerFactory with PubletRequestWrapp
     if (req.applicationUri.startsWith(AssetManager.assetPath)) EXACT_MATCH else NO_MATCH
 
   def createFilter() = new SuperFilter(Seq(
+    Filters.guice,
     Filters.webContext,
     Filters.assets,
     Filters.source

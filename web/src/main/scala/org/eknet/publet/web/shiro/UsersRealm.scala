@@ -22,14 +22,16 @@ import org.apache.shiro.authz.AuthorizationInfo
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.auth.{Policy, User}
+import org.eknet.publet.auth.{PubletAuth, Policy, User}
 import org.apache.shiro.authc.credential.{HashedCredentialsMatcher, SimpleCredentialsMatcher, CredentialsMatcher}
+import com.google.inject.{Singleton, Inject}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
-class UsersRealm(val db: AuthManager) extends AuthorizingRealm {
+@Singleton
+class UsersRealm @Inject() (val db: PubletAuth) extends AuthorizingRealm {
 
   setCredentialsMatcher(new DynamicHashCredentialsMatcher())
 

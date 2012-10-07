@@ -20,16 +20,19 @@ import actions._
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{EmptyExtension, PubletWeb}
+import org.eknet.publet.web.{NotFoundHandler, EmptyExtension, PubletWeb}
 import org.eknet.publet.webeditor.EditorPaths._
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.web.asset.AssetManager
+import com.google.inject.{Scopes, AbstractModule}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 16:16
  */
 class EditorWebExtension extends EmptyExtension with Logging {
+
+  override def getModule = Some(WebeditorModule)
 
   override def onStartup() {
     val publet = PubletWeb.publet
@@ -47,7 +50,6 @@ class EditorWebExtension extends EmptyExtension with Logging {
 
     val editEngine = new WebEditor('edit, scalateEngine)
     publet.engineManager.addEngine(editEngine)
-    PubletWeb.contextMap.put(PubletWeb.notFoundHandlerKey, new CreateNewHandler())
 
     AssetManager.service setup (
       Assets.editpageBrowser,
@@ -65,4 +67,10 @@ class EditorWebExtension extends EmptyExtension with Logging {
 
   }
 
+}
+
+object WebeditorModule extends AbstractModule {
+  def configure() {
+    bind(classOf[NotFoundHandler]) to classOf[CreateNewHandler] in Scopes.SINGLETON
+  }
 }

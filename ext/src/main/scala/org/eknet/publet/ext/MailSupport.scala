@@ -18,14 +18,13 @@ package org.eknet.publet.ext
 
 import javax.mail.internet.InternetAddress
 import org.eknet.squaremail._
-import org.eknet.publet.web.util.{Context, Key}
-import org.eknet.publet.web.{PubletWebContext, Config}
+import org.eknet.publet.web.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 14.04.12 17:49
  */
-object MailSupport {
+trait MailSupport {
 
   import org.eknet.squaremail.Messages._
 
@@ -37,30 +36,9 @@ object MailSupport {
 
   def newMail(from: InternetAddress) = new DefaulMailMessage(from)
 
-  def sessionFactory(host: String, port: Int = -1, user: String, password: Array[Char]) =
-    new DefaultSessionFactory(host, port, user, password)
-
-  def sender(host: String, port: Int = -1, user: String, password: Array[Char]): MailSender =
-    new DefaultMailSender(sessionFactory(host, port, user, password))
-
-  def senderKey(host: String, port: Int = -1, user: String, password: Array[Char]): Key[MailSender] = Key(host + port + user, {
-    case Context => sender(host, port, user, password)
-  })
-
-  /**Creates a key to obtain the mail service that is
-   * configured from the config file. The value `smtp.host`
-   * is mandatory in the config file.
-   *
-   * @return
-   */
-  def senderKey(): Key[MailSender] = senderKey(Config("smtp.host").get,
-    Config("smtp.port").getOrElse("-1").toInt,
-    Config("smtp.username").getOrElse(""),
-    Config("smtp.password").getOrElse("").toCharArray)
-
   class EasyMail(mail: MailMessage) {
     def send() {
-      PubletWebContext.attr(senderKey()).get.send(mail)
+      PubletWeb.instance[MailSender].send(mail)
     }
 
     def to(em: InternetAddress) = {

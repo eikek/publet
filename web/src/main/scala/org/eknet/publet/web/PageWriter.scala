@@ -22,7 +22,7 @@ import org.eknet.publet.vfs._
 import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
-import org.eknet.publet.web.util.RenderUtils
+import util.{StringMap, RenderUtils}
 import org.eknet.publet.vfs.util.SimpleContentResource
 
 /**
@@ -96,7 +96,15 @@ trait PageWriter extends Logging {
   }
 
   def createNew(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
-    PubletWeb.notFoundHandler.resourceNotFound(path, req, resp)
+    val notFoundHandler = {
+      val settings = PubletWeb.instance[StringMap]("settings")
+      settings("publet.service.notFoundHandlerNamed").map { name =>
+        PubletWeb.instance[NotFoundHandler](name)
+      } getOrElse {
+        PubletWeb.instance[NotFoundHandler]
+      }
+    }
+    notFoundHandler.resourceNotFound(path, req, resp)
   }
 
 }

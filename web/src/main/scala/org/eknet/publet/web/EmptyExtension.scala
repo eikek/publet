@@ -17,6 +17,7 @@
 package org.eknet.publet.web
 
 import javax.servlet.http.HttpServletRequest
+import com.google.inject.Module
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest
  */
 trait EmptyExtension extends WebExtension {
 
+  def getModule: Option[Module] = None
   def onStartup() {}
   def onShutdown() {}
   def onBeginRequest(req: HttpServletRequest) = req

@@ -7,7 +7,7 @@ import com.orientechnologies.orient.core.Orient
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.06.12 16:51
  */
-class ShutdownListener extends EmptyExtension {
+class OrientDbExtension extends EmptyExtension {
   override def onShutdown() {
     //this really shuts down all orient databases!
     //normally, this is called within a jvm shutdown hook. but

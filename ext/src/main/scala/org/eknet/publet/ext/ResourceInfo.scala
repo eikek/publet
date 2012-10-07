@@ -1,6 +1,6 @@
 package org.eknet.publet.ext
 
-import counter.CounterExtension
+import counter.{CounterService, CounterExtension}
 import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import org.eknet.publet.vfs.Path
 import java.text.DateFormat
@@ -31,7 +31,7 @@ object ResourceInfo {
    * @return
    */
   def getAccessCount(uri: String): Long = {
-    CounterExtension.serviceOption map (_.getPageCount(uri)) getOrElse (0L)
+    CounterService.serviceOption map (_.getPageCount(uri)) getOrElse (0L)
   }
 
   /**
@@ -56,7 +56,7 @@ object ResourceInfo {
    * @return
    */
   def getLastAccess(uri: String): Long = {
-    CounterExtension.serviceOption map (_.getLastAccess(uri)) getOrElse (0L)
+    CounterService.serviceOption map (_.getLastAccess(uri)) getOrElse (0L)
   }
 
   /**
@@ -82,7 +82,7 @@ object ResourceInfo {
    * @return
    */
   def getLastAccessString(uri: String): String = {
-    CounterExtension.serviceOption map (_.getLastAccessString(uri)) getOrElse ("")
+    CounterService.serviceOption map (_.getLastAccessString(uri)) getOrElse ("")
   }
 
   /**
@@ -201,7 +201,7 @@ object ResourceInfo {
    * @return
    */
   def getChecksum(uri: String): Option[String] = {
-    CounterExtension.serviceOption flatMap (_.getMd5(uri))
+    CounterService.serviceOption flatMap (_.getMd5(uri))
   }
 
   /**

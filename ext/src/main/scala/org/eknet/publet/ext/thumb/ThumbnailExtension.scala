@@ -30,6 +30,9 @@ import org.eknet.publet.vfs.ContentResource
  */
 class ThumbnailExtension extends EmptyExtension with PubletRequestWrapper {
 
+
+  override def getModule = Some(ThumbnailModule)
+
   override def onStartup() {
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()

@@ -1,8 +1,6 @@
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.{PubletWeb, PubletWebContext, WebExtension}
-import org.eknet.publet.web.util.Key
-import java.net.{UnknownHostException, InetAddress}
+import org.eknet.publet.web.{PubletWebContext, WebExtension}
 import grizzled.slf4j.Logging
 import javax.servlet.http.HttpServletRequest
 
@@ -14,13 +12,10 @@ import javax.servlet.http.HttpServletRequest
  * @since 20.06.12 21:49
  */
 class CounterExtension extends WebExtension with Logging {
-  import CounterExtension._
 
   private val counterThread = new SaveCountActor
 
   def onStartup() {
-    val service = CounterService()
-    PubletWeb.contextMap.put(serviceKey, service)
     counterThread.start()
   }
 
@@ -28,6 +23,8 @@ class CounterExtension extends WebExtension with Logging {
     counterThread ! StopMessage
   }
 
+
+  def getModule = Some(CounterModule)
   def onBeginRequest(req: HttpServletRequest) = req
 
   def onEndRequest(req: HttpServletRequest) {
@@ -40,18 +37,6 @@ class CounterExtension extends WebExtension with Logging {
 }
 
 object CounterExtension {
-
-  private val serviceKey = Key[CounterService]("counterServiceKey")
-
-  /**
-   * Returns a instance of [[org.eknet.publet.ext.counter.CounterService]] that
-   * is cached in context scope. Use this in web environment.
-   *
-   * @return
-   */
-  def service = PubletWeb.contextMap.get(serviceKey).get
-
-  def serviceOption = PubletWeb.contextMap.get(serviceKey)
 
   def getDefaultCountingUri =
     PubletWebContext.applicationUri + PubletWebContext.getQueryString.map("?"+_).getOrElse("")

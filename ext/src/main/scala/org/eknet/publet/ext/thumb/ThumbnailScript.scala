@@ -36,7 +36,7 @@ class ThumbnailScript extends ScalaScript {
 
 
     image.flatMap(img => {
-      val thumb = Thumbnailer.service().thumbnail(img, getMaxHeight, getMaxWidth)
+      val thumb = Thumbnailer.service.thumbnail(img, getMaxHeight, getMaxWidth)
       PubletWeb.publet.rootContainer.lookup(thumb)
         .collect({case c:ContentResource => c})
     })

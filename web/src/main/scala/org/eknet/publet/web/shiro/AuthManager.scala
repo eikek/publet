@@ -43,7 +43,10 @@ class AuthManager extends PubletAuth with Logging {
   private def delegate: PubletAuth = {
     database.getOrElse {
       val db = try {
-        getPermissionXml.map(r => new XmlDatabase(r)).getOrElse(SuperUserAuth)
+        getPermissionXml.map(r => new XmlDatabase(r)).getOrElse {
+          warn("No permission.xml file found. Falling back to super-user authentication!")
+          SuperUserAuth
+        }
       } catch {
         case e: SAXParseException => {
           error("Error parsing permission xml. Fallback to superuser realm!", e)
@@ -56,7 +59,7 @@ class AuthManager extends PubletAuth with Logging {
     }
   }
 
-  def reload() {
+  private def reload() {
     database = None
   }
 
@@ -70,21 +73,27 @@ class AuthManager extends PubletAuth with Logging {
   def getPolicy(user: User) = delegate.getPolicy(user)
   def updateUser(user: User) {
     delegate.updateUser(user)
+    reload()
   }
   def updateRepository(repo: RepositoryModel) {
     delegate.updateRepository(repo)
+    reload()
   }
   def removeRepository(repoName: String) {
     delegate.removeRepository(repoName)
+    reload()
   }
   def updatePermission(perm: PermissionModel) {
     delegate.updatePermission(perm)
+    reload()
   }
   def removePermission(group: String, perm: Permission) {
     delegate.removePermission(group, perm)
+    reload()
   }
   def addResourceConstraint(rc: ResourceConstraint) {
     delegate.addResourceConstraint(rc)
+    reload()
   }
 }
 

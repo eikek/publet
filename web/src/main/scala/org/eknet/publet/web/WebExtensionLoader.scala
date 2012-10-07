@@ -20,6 +20,7 @@ import scala.collection.JavaConversions._
 import java.util.ServiceLoader
 import grizzled.slf4j.Logging
 import javax.servlet.http.HttpServletRequest
+import com.google.inject.Binder
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -72,4 +73,6 @@ object WebExtensionLoader extends Logging {
       ext.onEndRequest(req)
     })
   }
+
+  def getModules = loadExtensions.map(_.getModule).flatten
 }

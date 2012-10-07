@@ -56,7 +56,7 @@ private[counter] class SaveCountActor extends DaemonActor with Logging {
 
   private def countAccess(uri:String, info: ClientInfo) {
     try {
-      CounterExtension.service.collect(uri, info)
+      CounterService().collect(uri, info)
     }
     catch {
       case e: Exception => error("Exception while counting!", e)
