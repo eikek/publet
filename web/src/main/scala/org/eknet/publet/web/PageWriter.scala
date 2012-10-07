@@ -63,7 +63,7 @@ trait PageWriter extends Logging {
    * @param resp
    */
   def writeError(ex: Throwable, req: HttpServletRequest, resp: HttpServletResponse) {
-    if (Config.mode == "development") {
+    if (Config.mode == RunMode.development) {
       //print the exception in development mode
       try {
         writePage(RenderUtils.renderException(ex), req, resp)

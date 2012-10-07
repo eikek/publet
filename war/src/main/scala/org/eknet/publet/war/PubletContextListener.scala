@@ -17,7 +17,7 @@
 package org.eknet.publet.war
 
 import javax.servlet.{ServletContextEvent, ServletContextListener}
-import org.eknet.publet.web.{Config, PubletWeb}
+import org.eknet.publet.web.{RunMode, Config, PubletWeb}
 import java.io.File
 import grizzled.slf4j.Logging
 
@@ -41,7 +41,7 @@ class PubletContextListener extends ServletContextListener with Logging with Log
            |""".stripMargin)
     try {
       PubletWeb.initialize(sce.getServletContext, initLogging)
-      if (Config.mode == "development") {
+      if (Config.mode == RunMode.development) {
         info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))
       }
       info(">>> publet initialized.\n")

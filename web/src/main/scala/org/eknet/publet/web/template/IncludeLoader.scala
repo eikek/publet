@@ -19,7 +19,7 @@ package org.eknet.publet.web.template
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
 import xml.{Comment, NodeBuffer, XML, NodeSeq}
-import org.eknet.publet.web.{PubletWeb, PubletWebContext, Config}
+import org.eknet.publet.web.{RunMode, PubletWeb, PubletWebContext, Config}
 import org.eknet.publet.web.asset.{AssetManager, Kind}
 import scala.Some
 
@@ -156,7 +156,7 @@ class IncludeLoader {
    * @param groups
    * @return
    */
-  def loadAssets(groups: String*): NodeSeq = loadAssetGroups(groups, Config.mode != "development")
+  def loadAssets(groups: String*): NodeSeq = loadAssetGroups(groups, Config.mode != RunMode.development)
 
   def loadAssetsCompressed(groups: String*) = loadAssetGroups(groups, compressed = true)
 
