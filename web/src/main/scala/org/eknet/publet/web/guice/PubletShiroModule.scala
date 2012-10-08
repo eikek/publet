@@ -34,6 +34,9 @@ import org.apache.shiro.web.env.WebEnvironment
 import org.eknet.publet.web.util.StringMap
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
+import org.apache.shiro.authc.credential.{DefaultPasswordService, PasswordService}
+import org.apache.shiro.crypto.hash._
+import org.apache.shiro.crypto.hash.format.{Shiro1CryptFormat}
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.PubletModule]]
@@ -49,6 +52,41 @@ object PubletShiroModule extends AbstractModule {
     bindRealm.to(classOf[UsersRealm])
 
     bind(classOf[WebEnvironment]).to(classOf[GuiceWebEnvironment]).asEagerSingleton()
+  }
+
+  @Provides@Singleton@Named(Sha512Hash.ALGORITHM_NAME)
+  def createSha512PasswordService(): PasswordService = newPasswordService(Sha512Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Md5Hash.ALGORITHM_NAME)
+  def createMd5PasswordService(): PasswordService = newPasswordService(Md5Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Md2Hash.ALGORITHM_NAME)
+  def createMd2PasswordService(): PasswordService = newPasswordService(Md2Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Sha1Hash.ALGORITHM_NAME)
+  def createSha1PasswordService(): PasswordService = newPasswordService(Sha1Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Sha384Hash.ALGORITHM_NAME)
+  def createSha384PasswordService(): PasswordService = newPasswordService(Sha384Hash.ALGORITHM_NAME)
+
+  /**
+   * Creates a new [[org.apache.shiro.authc.credential.PasswordService]] using the
+   * given algorithm name. Use the constants defined in shiros concrete hash classes (extend
+   * [[org.apache.shiro.crypto.hash.SimpleHash]]), like [[org.apache.shiro.crypto.hash.Md5Hash]].
+   *
+   * @param algorithm
+   * @return
+   */
+  private[web] def newPasswordService(algorithm: String) = {
+    val ps = new DefaultPasswordService
+    val hs = new DefaultHashService()
+    val hf = new Shiro1CryptFormat
+    hs.setHashAlgorithmName(algorithm)
+    hs.setHashIterations(DefaultPasswordService.DEFAULT_HASH_ITERATIONS)
+    hs.setGeneratePublicSalt(true)
+    ps.setHashService(hs)
+    ps.setHashFormat(hf)
+    ps
   }
 
   @Provides@Singleton

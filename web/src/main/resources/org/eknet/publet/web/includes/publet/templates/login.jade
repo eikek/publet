@@ -27,7 +27,11 @@ br/
   $(document).ready(function() {
     $('#username').focus();
     var options = {
-      success: function(data) {
+      beforeSubmit: function(arr, form, options) {
+        form.mask();
+      },
+      success: function(data, status, xhr, form) {
+        form.unmask();
         var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
         if (data.success) {
           var redirect = getURLParameter("redirect")

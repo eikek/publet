@@ -17,9 +17,6 @@
 package org.eknet.publet.auth
 
 import xml.PermissionModel
-import org.apache.shiro.authc.credential.DefaultPasswordService
-import org.apache.shiro.crypto.hash.DefaultHashService
-import org.apache.shiro.crypto.hash.format.HexFormat
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -93,13 +90,4 @@ object PubletAuth {
     def addResourceConstraint(rc: ResourceConstraint) {}
   }
 
-  def encryptPassword(plainText: AnyRef, algorithm: String) = {
-    val ps = new DefaultPasswordService
-    val hs = new DefaultHashService()
-    val hf = new HexFormat
-    hs.setHashAlgorithmName(algorithm)
-    ps.setHashService(hs)
-    ps.setHashFormat(hf)
-    ps.encryptPassword(plainText)
-  }
 }

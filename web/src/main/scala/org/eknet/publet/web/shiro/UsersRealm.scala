@@ -23,8 +23,9 @@ import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.auth.{PubletAuth, Policy, User}
-import org.apache.shiro.authc.credential.{HashedCredentialsMatcher, SimpleCredentialsMatcher, CredentialsMatcher}
+import org.apache.shiro.authc.credential.{SimpleCredentialsMatcher, CredentialsMatcher}
 import com.google.inject.{Singleton, Inject}
+import org.eknet.publet.web.guice.PubletShiroModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -92,8 +93,10 @@ class UsersRealm @Inject() (val db: PubletAuth) extends AuthorizingRealm {
       } else {
         info match {
           case ui: UserAuthInfo => {
-            val matcher = ui.algorithm.map(new HashedCredentialsMatcher(_)).getOrElse(fallback)
-            matcher.doCredentialsMatch(token, info)
+            ui.algorithm.map(PubletShiroModule.newPasswordService(_)) match {
+              case Some(ps) => ps.passwordsMatch(token.getCredentials, new String(ui.getCredentials))
+              case _ => fallback.doCredentialsMatch(token, info)
+            }
           }
           case _ => fallback.doCredentialsMatch(token, info)
         }
