@@ -94,6 +94,12 @@
           /publet/assets/js/<groupname>.js
           /publet/assets/css/<groupname>.css
 
+      A compressed file of multiple groups can be requested using any file name and
+      specifying the groups as query parameters instead (in this case the name `allof.js`
+      is just ignored, but again the file extension is used to determine the resource type):
+
+          /publet/assets/js/allof.js?group=default&group=mystuff&group=imagegallery
+
       Any image and other resources defined with the group are additionally mounted to
       `/publet/assets/img` and `/publet/assets/other`, respectively such that references
       from CSS files resolve correctly. This can be changed for each resource by specifying
@@ -122,11 +128,11 @@
 
       A template can include all resources of one or more groups with a single line:
 
-          =loadAssets("group")
+          !~ loadAssets("group1", "group2")
 
       The above jade snippet calls a method that returns a bunch of `<script/>` and
       `<link/>` tags referencing all javascript and css resources belonging to the
-      given group. Just place this in the head section of the template. The method will
+      given groups. Just place this in the head section of the template. The method will
       check whether the application is running in *Development-Mode* in which case it
       returns one tag per resource. In the other case, it returns one `<script/>`
       tag referencing the compressed javascript and one `<link/>` referring to the

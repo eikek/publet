@@ -48,7 +48,7 @@ class DefaultAssetManager(publet: Publet, tempDir: File) extends GroupRegistry w
     groups.foreach(assetContainer.mount)
   }
 
-  def getCompressed(group: String, path: Option[Path], kind: Kind.KindVal): Path =  {
+  def getCompressed(group: Iterable[String], path: Option[Path], kind: Kind.KindVal): Path =  {
     val newTask = future {
       val sources = getSources(group, path, kind)
       val bytes = ConcatInputStream(sources.map(_.inputStream))
@@ -69,10 +69,10 @@ class DefaultAssetManager(publet: Publet, tempDir: File) extends GroupRegistry w
     }
   }
 
-  def getResources(group: String, path: Option[Path], kind: KindVal) = {
+  def getResources(group: Iterable[String], path: Option[Path], kind: KindVal) = {
     val sources = getSources(group, path, kind)
     sources map { s => assetContainer.pathFor(s) }
   }
 
-  private case class Key(group: String, path: Option[Path], kind: Kind.KindVal)
+  private case class Key(group: Iterable[String], path: Option[Path], kind: Kind.KindVal)
 }

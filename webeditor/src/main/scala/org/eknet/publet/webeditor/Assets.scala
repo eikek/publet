@@ -23,6 +23,7 @@ import org.eknet.publet.web.asset.{AssetCollection, Group}
 import scala.Some
 import io.Source
 import org.eknet.publet.vfs.{ContentType, Content}
+import org.eknet.publet.web.template.DefaultLayout
 
 /**
  * Asset definitions for the webeditor. JQuery is not included as requirement
@@ -60,10 +61,11 @@ object Assets extends AssetCollection {
 
   val codemirrorJquery = Group("codemirror.jquery")
     .add(resource("js/codemirror.jquery.js"))
-    .require(codemirror.name)
+    .require(codemirror.name, DefaultLayout.Assets.jquery.name)
 
   val jqueryUiWidget = Group("jquery.ui.widget")
     .add(resource("js/vendor/jquery.ui.widget.js"))
+    .require(DefaultLayout.Assets.jquery.name)
 
   val blueimpTmpl = Group("blueimp.tmpl")
     .add(resource("js/blueimp/tmpl.min.js"))
@@ -77,6 +79,7 @@ object Assets extends AssetCollection {
 
   val jqueryIframeTransport = Group("jquery.iframe-transport")
     .add(resource("js/jquery.iframe-transport.js"))
+    .require(DefaultLayout.Assets.jquery.name)
 
   val blueimpFileUpload = Group("blueimp.fileupload")
     .add(resource("img/loading.gif"))
@@ -89,12 +92,13 @@ object Assets extends AssetCollection {
     .add(resource("js/locale.js"))
     .add(resource("js/main.js"))
     .require(jqueryIframeTransport.name, jqueryUiWidget.name,
-              blueimpTmpl.name, blueimpLoadImage.name)
+              blueimpTmpl.name, blueimpLoadImage.name, DefaultLayout.Assets.jquery.name)
 
 
   val publetFileBrowser = Group("publet.webeditor.filebrowser")
     .add(resource("js/publet-browser.js").noCompress) //todo: syntax errors detected while compressing
     .add(resource("css/browser.css"))
+    .require(DefaultLayout.Assets.jquery.name)
 
   val editpageBrowser = Group("publet.webeditor.browserloader")
     .add(new SimpleContentResource("browser.js".rn, Content(generateBrowserLoadJs, ContentType.javascript)))

@@ -38,14 +38,14 @@ class GroupRegistryTest extends FunSuite with ShouldMatchers with BeforeAndAfter
   test ("merge group resources") {
     reg setup Group("test").add(resource("jquery/jquery-1.8.2.min.js"))
     reg setup Group("test").add(resource("jquery/jquery.form.js"))
-    reg.getSources("test", Some("/".p), Kind.js) should have size (2)
+    reg.getSources(Seq("test"), Some("/".p), Kind.js) should have size (2)
   }
 
   test ("merge group uses") {
     reg setup (jqueryGroup, spinGroup, loadmaskGroup, publetGroup, highlightGroup, bootstrapGroup)
     reg setup Group("default").use("bootstrap", "highlightjs")
     reg setup Group("default").use("jquery.loadmask", "publet")
-    val sources = reg.getSources("default", Some("/".p), Kind.js)
+    val sources = reg.getSources(Seq("default"), Some("/".p), Kind.js)
     sources should have size 7
   }
 
@@ -69,13 +69,66 @@ class GroupRegistryTest extends FunSuite with ShouldMatchers with BeforeAndAfter
 
     reg setup (a, b, c)
 
-    val js = reg.getSources(c.name, None, Kind.js)
+    val js = reg.getSources(Seq(c.name), None, Kind.js)
     js should have size 3
 
-    val css = reg.getSources(c.name, None, Kind.css)
+    val css = reg.getSources(Seq(c.name), None, Kind.css)
     css should have size 3
     toString
   }
 
+  test ("multiple groups resources") {
 
+    reg setup Group("a1")
+      .add(mockResource("a1resource1.js"))
+      .add(mockResource("a1resource2.js"))
+
+    reg setup Group("a2")
+      .add(mockResource("a2resource1.js"))
+      .add(mockResource("a2resource2.js"))
+      .require("a1")
+
+    reg setup Group("b1")
+      .add(mockResource("b1resource1.js"))
+      .add(mockResource("b1resource2.js"))
+      .require("a1")
+
+    reg setup Group("b2")
+      .add(mockResource("b2resource1.js"))
+      .add(mockResource("b2resource2.js"))
+      .require("b1", "a1")
+
+    val js = reg.getSources(Seq("a2", "b2"), None, Kind.js)
+    js should have size 8
+
+  }
+
+  test ("multiple groups uses") {
+
+    reg setup Group("a1")
+      .add(mockResource("a1resource1.js"))
+      .add(mockResource("a1resource2.js"))
+
+    reg setup Group("a2")
+      .add(mockResource("a2resource1.js"))
+      .add(mockResource("a2resource2.js"))
+      .require("a1")
+
+    reg setup Group("b1")
+      .add(mockResource("b1resource1.js"))
+      .add(mockResource("b1resource2.js"))
+
+    reg setup Group("b2")
+      .add(mockResource("b2resource1.js"))
+      .add(mockResource("b2resource2.js"))
+      .require("b1")
+
+    reg setup Group("def1")
+      .use("a1", "a2")
+    reg setup Group("def2")
+      .use("b2")
+
+    val js = reg.getSources(Seq("def1", "b1"), None, Kind.js)
+    js should have size 6
+  }
 }

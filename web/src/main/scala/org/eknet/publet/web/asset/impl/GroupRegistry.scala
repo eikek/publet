@@ -21,12 +21,14 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.Glob
 import org.eknet.publet.web.asset.{AssetResource, Kind, Group}
 import collection.mutable
+import org.eknet.publet.web.{RunMode, Config}
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 29.09.12 01:32
  */
-class GroupRegistry {
+class GroupRegistry extends Logging {
   private val graph = collection.mutable.Map[String, Node]()
 
   def setup(groups: Group*) {
@@ -49,7 +51,7 @@ class GroupRegistry {
    * @param path
    * @return
    */
-  def getUnknownResources(group: String, path: Option[Path]) =
+  def getUnknownResources(group: Iterable[String], path: Option[Path]) =
     collectSources(group, path, f => !Kind.values.toSet.contains(f.name.ext))
 
   /**
@@ -59,15 +61,25 @@ class GroupRegistry {
    * @param group
    * @return
    */
-  def getSources(group: String, path: Option[Path], kind: Kind.KindVal) =
+  def getSources(group: Iterable[String], path: Option[Path], kind: Kind.KindVal) =
     collectSources(group, path, f => f.name.ext == kind.ext)
 
-  private def collectSources(group: String, path: Option[Path], predicate: AssetResource => Boolean) = {
-    val root = graph.get(group).getOrElse(sys.error("Asset group '"+ group+"' not registered."))
+  private def groupNotFound[A](ret: A, names: String*): A = {
+    val msg = "Asset group '"+names.mkString(", ")+"' not registered"
+    if (Config.mode == RunMode.development)
+      throw new IllegalStateException(msg)
+    else {
+      error(msg)
+      ret
+    }
+  }
+
+  private def collectSources(groups: Iterable[String], path: Option[Path], predicate: AssetResource => Boolean) = {
+    val roots = groups.map(group => graph.get(group).getOrElse(groupNotFound(Node(Group("_")), group)))
     def collect(nodes: Set[Node]): List[Set[Node]] = {
       if (nodes.exists(!_.group.uses.isEmpty)) {
         val x = nodes.flatMap(n => n.group.uses).map(s => {
-          graph.get(s).getOrElse(sys.error("Asset group '"+ s +"' not registered."))
+          graph.get(s).getOrElse(groupNotFound(Node(Group("_")), s))
         })
         x :: collect(x)
       } else {
@@ -76,10 +88,10 @@ class GroupRegistry {
     }
     //collect minimum node list
     val nodeList = path match {
-      case Some(p) => collect(Set(root)).flatten
+      case Some(p) => (roots.toList ::: collect(roots.toSet).flatten)
         .distinct
         .filter(_.group.pathPattern.matches(p.asString))
-      case _ => collect(Set(root)).flatten
+      case _ => (roots.toList ::: collect(roots.toSet).flatten)
         .distinct
     }
 
@@ -100,12 +112,12 @@ class GroupRegistry {
         case node::ns => {
           val reqnodes = mutable.Set[Node]()
           for (after <- node.group.afters) {
-            val an = graph.get(after).getOrElse(sys.error("Group '"+after+"' not in graph"))
+            val an = graph.get(after).getOrElse(groupNotFound(Node(Group("_")), after))
             edges += Edge(an, node)
             reqnodes += an
           }
           for (before <- node.group.befores) {
-            val bn = graph.get(before).getOrElse(sys.error("Group '"+before+"' not in graph"))
+            val bn = graph.get(before).getOrElse(groupNotFound(Node(Group("_")), before))
             edges += Edge(node, bn)
             reqnodes += bn
           }

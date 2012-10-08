@@ -156,40 +156,50 @@ class IncludeLoader {
    * @param groups
    * @return
    */
-  def loadAssets(groups: String*): NodeSeq = loadAssetGroups(groups, Config.mode != RunMode.development)
+  def loadAssets(groups: String*): String = loadAssetGroups(groups, Config.mode != RunMode.development)
 
   def loadAssetsCompressed(groups: String*) = loadAssetGroups(groups, compressed = true)
 
   def loadAssetsSingle(groups: String*) = loadAssetGroups(groups, compressed = false)
 
-  private def loadAssetGroups(groups: Seq[String], compressed: Boolean): NodeSeq = {
+  private def loadAssetGroups(groups: Seq[String], compressed: Boolean): String = {
     import PubletWebContext._
     val mgr = AssetManager.service
 
-    def load(group: String): NodeBuffer = {
+    def loadAll(list: Seq[String]): String =  {
+      val buffer = StringBuilder.newBuilder
       if (compressed) {
-        <script type="text/javascript" src={ urlOf( AssetManager.assetPath+ "js/"+ group+".js?path="+ applicationUri) }></script>
-        <link rel="stylesheet" href={ urlOf( AssetManager.assetPath +"css/"+ group+".css?path="+ applicationUri ) }></link>
+        val queryString = "?path="+applicationUri +"&"+ groups.map(g => "group="+g).mkString("&")
+        buffer append "<script type=\"text/javascript\" src=\""
+        buffer append urlOf( AssetManager.assetPath+ "js/allof.js")
+        buffer append queryString
+        buffer append "\"></script>\n"
+
+        buffer append "<link rel=\"stylesheet\" href=\""
+        buffer append urlOf( AssetManager.assetPath +"css/allof.css")
+        buffer append queryString
+        buffer append  "\"></link>\n"
+
       } else {
-        val jsPath = mgr.getResources(group, Some(applicationPath), Kind.js)
-        val cssPath = mgr.getResources(group, Some(applicationPath), Kind.css)
+        val jsPath = mgr.getResources(groups, Some(applicationPath), Kind.js)
+        val cssPath = mgr.getResources(groups, Some(applicationPath), Kind.css)
 
-        new NodeBuffer() &+ (for (js <- jsPath) yield {
-          <script type="text/javascript" src={ urlOf(js) }></script>
-        }) ++ (for (css <- cssPath) yield {
-          <link rel="stylesheet" href={ urlOf(css) }></link>
-        })
+        for (js <- jsPath) {
+          buffer append "<script type=\"text/javascript\" src=\""
+          buffer append urlOf(js)
+          buffer append "\"></script>\n"
+        }
+        for (css <- cssPath) {
+          buffer append "<link rel=\"stylesheet\" href=\""
+          buffer append urlOf(css)
+          buffer append  "\"></link>\n"
+        }
       }
+
+      buffer.toString()
     }
 
-    def loadAll(list: Seq[String]): NodeBuffer =  {
-      list match {
-        case e::es => load(e) &+ loadAll(es)
-        case Nil => new NodeBuffer
-      }
-    }
-
-    new Comment("asset groups '" + groups.mkString(", ")+ "'") ++
-    loadAll(groups.toList)
+    "<!-- asses groups: " + groups.mkString("'", ", ", "'")+ " -->\n"+
+      loadAll(groups.toList) + "<!-- end asset groups -->\n"
   }
 }

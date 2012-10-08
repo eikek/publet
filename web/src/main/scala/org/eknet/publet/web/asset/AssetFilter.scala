@@ -17,29 +17,34 @@
 package org.eknet.publet.web.asset
 
 import javax.servlet._
-import org.eknet.publet.web.PubletRequestWrapper
+import org.eknet.publet.web.{RunMode, Config, PubletRequestWrapper}
 import AssetManager._
 import org.eknet.publet.vfs.{ContentType, Path}
 import org.eknet.publet.web.filter.Filters.ForwardRequest
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.09.12 18:52
  */
-class AssetFilter extends Filter with PubletRequestWrapper {
+class AssetFilter extends Filter with PubletRequestWrapper with Logging {
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     if (request.applicationUri.startsWith(groupsPath) || request.applicationUri.startsWith(compressedPath)) {
       chain.doFilter(request, response)
     } else {
-      val path = request.param("path").map(Path(_))
       val kind = request.applicationPath.name.targetType match {
         case ContentType.javascript => Some(Kind.js)
         case ContentType.css => Some(Kind.css)
         case _ => None
       }
       kind map { k =>
-        AssetManager.service.getCompressed(request.applicationPath.name.name, path, k)
+        val path = request.param("path").map(Path(_))
+        val groups = request.params.get("group").getOrElse(List()) match {
+          case Nil => List(request.applicationPath.name.name)
+          case a@_ => a
+        }
+        AssetManager.service.getCompressed(groups, path, k)
       } map { p =>
         chain.doFilter(new ForwardRequest(request.getContextPath+p.asString, request), response)
       } getOrElse {

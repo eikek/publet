@@ -43,12 +43,12 @@ trait AssetManager {
    * If this is the first time the resource is requested, it
    * is created.
    *
-   * @param group the group name
+   * @param groups a list of group names
    * @param path the path that is used to match groups
    * @param kind the type of resource, see [[org.eknet.publet.web.asset.Kind]]
    * @return
    */
-  def getCompressed(group: String, path: Option[Path], kind: Kind.KindVal): Path
+  def getCompressed(groups: Iterable[String], path: Option[Path], kind: Kind.KindVal): Path
 
 
   /**
@@ -60,7 +60,7 @@ trait AssetManager {
    * @param kind
    * @return
    */
-  def getResources(group: String, path: Option[Path], kind: Kind.KindVal): List[Path]
+  def getResources(group: Iterable[String], path: Option[Path], kind: Kind.KindVal): List[Path]
 
 }
 

@@ -56,10 +56,10 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
   test ("create simple group") {
     assetMgr setup (bootstrapGroup, jqueryGroup)
 
-    val pathCss = assetMgr.getCompressed("bootstrap", "/main/index.html".p, Kind.css)
+    val pathCss = assetMgr.getCompressed(Seq("bootstrap"), "/main/index.html".p, Kind.css)
     publet.rootContainer.lookup(pathCss) should  not be None
 
-    val pathJs = assetMgr.getCompressed("bootstrap", "/main/".p, Kind.js)
+    val pathJs = assetMgr.getCompressed(Seq("bootstrap"), "/main/".p, Kind.js)
     publet.rootContainer.lookup(pathJs) should  not be None
     println(pathCss.asString + "\n" + pathJs.asString)
   }
@@ -68,10 +68,10 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
     assetMgr setup (jqueryGroup, spinGroup, loadmaskGroup, publetGroup, highlightGroup, bootstrapGroup)
     assetMgr setup Group("default").use("bootstrap", "highlightjs", "jquery.loadmask", "publet")
 
-    val pathJs = assetMgr.getCompressed("default", "/main/".p, Kind.js)
+    val pathJs = assetMgr.getCompressed(Seq("default"), "/main/".p, Kind.js)
     publet.rootContainer.lookup(pathJs) should  not be None
 
-    val pathCss = assetMgr.getCompressed("default", "/main/index.html".p, Kind.css)
+    val pathCss = assetMgr.getCompressed(Seq("default"), "/main/index.html".p, Kind.css)
     publet.rootContainer.lookup(pathCss) should  not be None
 
     println(pathCss.asString + "\n" + pathJs.asString)
@@ -81,7 +81,7 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
     assetMgr setup (jqueryGroup, spinGroup, loadmaskGroup, publetGroup, highlightGroup, bootstrapGroup)
     assetMgr setup Group("default").use("bootstrap", "highlightjs", "jquery.loadmask", "publet")
 
-    val js = assetMgr.getResources("default", "/main".p, Kind.js)
+    val js = assetMgr.getResources(Seq("default"), "/main".p, Kind.js)
     println(js.map(_.asString).mkString("; "))
   }
 }
