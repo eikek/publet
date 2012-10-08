@@ -44,11 +44,11 @@ object Dependencies {
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle exclude("rhino", "js")
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
   val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("rhino", "js") //scala 2.9.2 only
-  val guava = "com.google.guava" % "guava" % Version.guava
-  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib")
-  val cglib = "cglib" % "cglib" % "2.2.2"
+  val guava = "com.google.guava" % "guava" % Version.guava withSources()
+  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib") withSources()
+  val cglib = "cglib" % "cglib" % "2.2.2" withSources()
   val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice withSources()
-  val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice
+  val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice withSources()
   val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty exclude("rhino", "js")
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources() exclude("rhino", "js")
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty exclude("rhino", "js")
