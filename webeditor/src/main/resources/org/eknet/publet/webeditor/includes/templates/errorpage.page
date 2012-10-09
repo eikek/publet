@@ -12,4 +12,4 @@ assetGroups: publet.webeditor.editpage
       =message
   .span4
     h3 File browser
-    #filesTree
+    #filesTree.publetBrowser

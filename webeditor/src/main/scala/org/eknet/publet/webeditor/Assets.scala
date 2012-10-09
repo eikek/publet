@@ -97,7 +97,7 @@ object Assets extends AssetCollection {
 
   val publetFileBrowser = Group("publet.webeditor.filebrowser")
     .add(resource("js/publet-browser.js").noCompress) //todo: syntax errors detected while compressing
-    .add(resource("css/browser.css"))
+    .add(resource("css/publet-browser.css"))
     .require(DefaultLayout.Assets.jquery.name)
 
   val editpageBrowser = Group("publet.webeditor.browserloader")

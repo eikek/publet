@@ -71,7 +71,7 @@ assetGroups: publet.webeditor.uploadpage
       </div>
       <div class="span3">
         <h3>File browser</h3>
-        <div id="filesTree"></div>
+        <div id="filesTree" class="publetBrowser"></div>
       </div>
     </div>
 </form>
