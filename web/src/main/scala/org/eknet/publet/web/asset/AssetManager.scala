@@ -62,6 +62,13 @@ trait AssetManager {
    */
   def getResources(group: Iterable[String], path: Option[Path], kind: Kind.KindVal): List[Path]
 
+  /**
+   * Returns all registered groups in some order.
+   *
+   * @return
+   */
+  def getGroups: Iterable[Group]
+
 }
 
 object AssetManager {

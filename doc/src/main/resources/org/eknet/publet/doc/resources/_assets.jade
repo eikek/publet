@@ -149,9 +149,18 @@
 
       Publet already has a number of resources registered, like JQuery, Bootstrap, a few
       plugins etc. All those are collected in the meta group *default* and *defaultNoHighlightJs* which
-      just excludes the library *highlightjs*. The group *default* is loaded by the default layout
-      template. You can override this or include additional groups by defining parameters. See
-      the following page template as an example:
+      just excludes the library *highlightjs*. The groups can be listed using the path `/publet/templates/assets.html`.
+      For this installation:
+
+    blockquote
+      a(href={ PubletWebContext.urlOf("/publet/templates/assets.html")}) /publet/templates/assets.html
+
+    :~markdown
+      ### Default Template
+
+      The group *default* is loaded by the default layout template. You can override this
+      or include additional groups by defining parameters. See the following page template
+      as an example:
 
           ---
           title: Asset Group Test
@@ -227,6 +236,14 @@
 .row
   .span9
     :markdown
-      Note that the attributes `defaultAssetGroup` and `assetGroups` are only defined when using
+      Note that the page attributes `defaultAssetGroup` and `assetGroups` are only valid with
       the default layout template.
+
+      You can specify values for `defaultAssetGroup` and `assetGroups` globally by defining them
+      in the `settings.properties` configuration file using the keys `publet.layout.defaultAssetGroup`
+      and `publet.layout.assetGroups`. So to globally remove syntax highlighting from all pages, define
+
+          publet.layout.defaultAssetGroup=defaultNoHighlightJs
+
+      in `settings.properties` file.
 br/

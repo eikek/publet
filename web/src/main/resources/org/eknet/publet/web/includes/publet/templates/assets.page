@@ -1,0 +1,43 @@
+---
+title: Registered Asset Groups
+
+--- name:head pipeline:jade
+:css
+  .vtop {
+    vertical-align: top;
+  }
+
+--- name:content pipeline:jade
+
+.page-header
+  h1 Registered Asset Groups
+
+- import org.eknet.publet.web.asset._
+- val mgr = AssetManager.service
+table.table.table-hover.table-bordered.table-condensed
+  thead
+    tr
+      th Group
+      th Resources
+      th Requires
+      th Uses
+  tbody
+    - for (group <- mgr.getGroups)
+      tr
+        td.vtop
+          =group.name
+          -if (group.pathPattern.pattern != "**")
+            | →
+            code=group.pathPattern.pattern
+        td
+          ul
+            - for (r <- group.resources)
+              li=r.name.fullName
+        td
+          ul
+            - for (dep <- group.afters)
+              li=dep
+        td
+          ul
+            - for (incl <- group.uses)
+              li=incl

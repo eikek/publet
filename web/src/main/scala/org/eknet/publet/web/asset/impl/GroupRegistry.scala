@@ -39,7 +39,7 @@ class GroupRegistry extends Logging {
     }
   }
 
-  def getGroups = graph.values.map(_.group).toList
+  def getGroups = graph.values.map(_.group).toList.sortBy(g => g.name)
 
   def getSourcesUnordered = graph.values.flatMap(_.group.resources)
 
