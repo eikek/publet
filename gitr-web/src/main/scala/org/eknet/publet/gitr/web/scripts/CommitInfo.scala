@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.PersonIdent
 import java.text.DateFormat
 import java.util.{Locale => JLocale, Date => JDate}
 import org.eknet.publet.web.PubletWebContext
+import xml.XML
 
 case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String, loc: JLocale) extends Ordered[CommitInfo] {
 
@@ -16,8 +17,8 @@ case class CommitInfo(name: String, path: String, container: Boolean, author: Pe
     "commitDate" -> getCommitDateAsString,
     "author" -> author.getName,
     "authorEmail" -> author.getEmailAddress,
-    "message" -> getShortMessage,
-    "fullMessage" -> fullMessage,
+    "message" -> xml.Utility.escape(getShortMessage),
+    "fullMessage" -> xml.Utility.escape(fullMessage),
     "age" -> getAge,
     "icon" -> (if (container) "icon-folder-close" else "icon-file"),
     "gravatar" -> gravatarUrl,

@@ -101,7 +101,7 @@ table.plain
     tr
       td(colspan=2)
         pre.plainPre<>
-          !~~commit.getFullMessage
+          =commit.getFullMessage
 br/
 h4.commit-group-head
   i.icon-file
