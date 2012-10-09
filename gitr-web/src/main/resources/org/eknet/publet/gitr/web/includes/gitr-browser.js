@@ -278,6 +278,17 @@
           _addDirectoryContents($this, settings.repo, settings.ref, settings.path);
         }
       });
+    },
+
+    load: function(path, ref) {
+      var settings = $(this).data('gitrRepoBrowser').settings;
+      if (path) {
+        settings.path = path;
+      }
+      if (ref) {
+        settings.ref = ref;
+      }
+      _addDirectoryContents($(this), settings.repo, settings.ref, settings.path);
     }
   };
 

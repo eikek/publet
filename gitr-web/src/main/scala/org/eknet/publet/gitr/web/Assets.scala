@@ -32,7 +32,7 @@ object Assets extends AssetCollection {
     .require(DefaultLayout.Assets.jquery.name)
     .require(DefaultLayout.Assets.bootstrap.name)
 
-  val gitrBrowser = Group("gitr-web-browser")
+  val gitrBrowser = Group("gitr-repo-browser")
     .add(resource("gitr-browser.js").noCompress) //todo: syntax errors detected while compressing
     .add(resource("gitr.css"))
     .require(DefaultLayout.Assets.jquery.name)
