@@ -49,9 +49,16 @@ See the full source of the default layout [here](../../../publet/bootstrap/boots
 
 ### Html head includes
 
-The default layout includes any `js`, `css` and `meta` files from the _special directories_.
-The `js` and `css` files are obvoius. the `meta` files are XML files that define other
-elements that should go into the html head, like `<meta/>` tags, for example.
+The default layout includes any `js`, `css` and `xml` files from the _special directories_.
+The `js` and `css` files are obvoius. the `xml` files are XML files that define other
+elements that should go into the html head, like `<meta/>` tags, for example. Those elements
+must be inside a root `head` element. For example, to include two meta tags into the page
+header, define a xml file with this content:
+
+    <head>
+      <meta name="author" content="John Doe">
+      <meta name="keywords" content="HTML, Football, Sports, Soccer">
+    </head>
 
 If you like to override some css, just place your css file into `/.allIncludes/mytheme.css`,
 for example, and it is included in every page.

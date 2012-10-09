@@ -18,9 +18,10 @@ package org.eknet.publet.web.template
 
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
-import xml.{Comment, NodeBuffer, XML, NodeSeq}
+import xml._
 import org.eknet.publet.web.{RunMode, PubletWeb, PubletWebContext, Config}
 import org.eknet.publet.web.asset.{AssetManager, Kind}
+import scala.Some
 import scala.Some
 
 
@@ -56,7 +57,7 @@ class IncludeLoader {
    */
   def loadHeadIncludes(): NodeSeq = {
     val publet = PubletWeb.publet
-    val extensions = Set("js", "css", "meta")
+    val extensions = Set("js", "css", "xml")
     val currentPath = PubletWebContext.applicationPath.parent
 
     val mainAll = (withMountedContainer(currentPath) {
@@ -82,15 +83,20 @@ class IncludeLoader {
       .map(c => t._1 / c.name.fullName)
     ).map(_.toList)
 
-    for (r <- (mainAll.getOrElse(List()) ::: incl.getOrElse(List()))) yield {
+    (for (r <- (mainAll.getOrElse(List()) ::: incl.getOrElse(List()))) yield {
       if (r.name.ext == "css") {
-          <link href={PubletWebContext.urlOf(r)} rel="stylesheet"/>
+          Seq(<link href={PubletWebContext.urlOf(r)} rel="stylesheet"/>)
       } else if (r.name.ext == "js") {
-          <script type="text/javascript" src={PubletWebContext.urlOf(r)}/>
+        Seq(<script type="text/javascript" src={PubletWebContext.urlOf(r)}/>)
       } else {
-        XML.load(publet.rootContainer.lookup(r).get.asInstanceOf[ContentResource].inputStream)
+        val root = XML.load(publet.rootContainer.lookup(r).get.asInstanceOf[ContentResource].inputStream)
+        if (root.label == "head") {
+          root.child
+        } else {
+          Text("")
+        }
       }
-    }
+    }).flatten
   }
 
   def findNextIncludes(path: Path): Option[(Path, ContainerResource)] = {
