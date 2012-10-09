@@ -18,7 +18,7 @@ package org.eknet.publet.ext.thumb
 
 import org.eknet.publet.vfs._
 import javax.imageio.ImageIO
-import java.io.{ByteArrayInputStream, File, ByteArrayOutputStream}
+import java.io.{BufferedOutputStream, ByteArrayInputStream, File, ByteArrayOutputStream}
 import Path._
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.util.concurrent
@@ -68,10 +68,11 @@ class ThumbnailerImpl(mm: MountManager, tempDir: File, options: CacheOptions) ex
     val file = thumbCache.get(key, callable {
       val img = ImageIO.read(c.inputStream)
       val scaled = ImageScaler.scaleIfNecessary(img, maxw, maxh)
-      val baos = new ByteArrayOutputStream()
-      ImageIO.write(scaled, "PNG", baos)
       val target = partition.createResource(key.targetName.p)
-      target.asInstanceOf[Writeable].writeFrom(new ByteArrayInputStream(baos.toByteArray))
+      val out = new BufferedOutputStream(target.asInstanceOf[Writeable].outputStream)
+      ImageIO.write(scaled, "PNG", out)
+      out.flush()
+      out.close()
       key.targetName.p
     })
     thumbnailPath / file
