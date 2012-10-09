@@ -33,6 +33,12 @@ object WebExtensionLoader extends Logging {
     .withFilter(ext => Config(ext.getClass.getName).getOrElse("true").toBoolean)
     .toList
 
+  /**
+   * The class names of all installed extensions.
+   *
+   */
+  lazy val extensionNames = loadExtensions.map(_.getClass.getName).sorted
+
   private def safely[A](errorMsg: => String)(body: () => A): Option[A] = {
     try {
       Some(body())
@@ -49,18 +55,18 @@ object WebExtensionLoader extends Logging {
    * Extensions can be configured to not run on startup, if the config
    * file contains an entry of the complete class name and a value of `false`
    */
-  def onStartup() {
+  private[web] def onStartup() {
     for (ext <- loadExtensions) {
       info("Installing extension: "+ ext.getClass.getName)
       safely("Error on startup for extension '"+ext.getClass+"'!")(ext.onStartup)
     }
   }
 
-  def onShutdown() {
+  private[web] def onShutdown() {
     loadExtensions.foreach(ext => safely("Error on shutdown for extension '"+ext+"'!")(ext.onShutdown))
   }
 
-  def executeBeginRequest(req: HttpServletRequest): HttpServletRequest = {
+  private[web] def executeBeginRequest(req: HttpServletRequest): HttpServletRequest = {
     loadExtensions.foldLeft(req)((r1, ext) => {
       safely("Exception invoking onBeginRequest of extension '"+ ext +"'!") { () =>
         ext.onBeginRequest(r1)
@@ -68,11 +74,12 @@ object WebExtensionLoader extends Logging {
     })
   }
 
-  def executeEndRequest(req:HttpServletRequest) {
+  private[web] def executeEndRequest(req:HttpServletRequest) {
     loadExtensions.foreach(ext => safely("Exception invoking onEndRequest of extension '"+ ext +"'!") { () =>
       ext.onEndRequest(req)
     })
   }
 
   def getModules = loadExtensions.map(_.getModule).flatten
+
 }
