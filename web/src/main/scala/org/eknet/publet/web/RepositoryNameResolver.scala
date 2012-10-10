@@ -107,7 +107,7 @@ object RepositoryNameResolver {
    * @return
    */
   def getGitRequestAction(fullUrl: String): GitAction.Value = {
-    val gitp = fullUrl.substring(Config.gitMount.length)
+    val gitp = fullUrl.substring(Config.get.gitMount.length)
     if (gitp.endsWith(gitReceivePack))
       GitAction.push
     else if (gitp.endsWith(gitUploadPack))
@@ -136,7 +136,7 @@ object RepositoryNameResolver {
    */
   def getRepositoryName(requestPath: Path, isGitRequest: Boolean): Option[RepositoryName] = {
     if (isGitRequest) {
-      val uri = requestPath.strip(Path(Config.gitMount)).toRelative
+      val uri = requestPath.strip(Path(Config.get.gitMount)).toRelative
       val name = stripGitSuffixes(uri.asString, gitSuffixes)
       val rname = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
       Some(RepositoryName(rname))

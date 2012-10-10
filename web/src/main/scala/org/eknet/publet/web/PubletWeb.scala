@@ -37,15 +37,6 @@ import inject.Injector
  */
 object PubletWeb extends Guicey with Logging {
 
-  /**
-   * ServletContext Init-parameter.
-   *
-   * Comma or semicolon separated path of filenames or URLs
-   * pointing to directories or jar files. Directories should end
-   * with '/'.
-   */
-  val customClasspathInitParam = "custom-classpath"
-
   // initialized on context startup
   private var servletContextI: WeakReference[ServletContext] = null
 
@@ -103,12 +94,12 @@ object PubletWeb extends Guicey with Logging {
     val scriptEngine = instance[PubletEngine](Names.scriptEngine)
     publet.engineManager.register("*.scala", scriptEngine)
 
-    WebExtensionLoader.onStartup()
+    instance[WebExtensionLoader].onStartup()
   }
 
 
   def destroy(sc: ServletContext) {
-    WebExtensionLoader.onShutdown()
+    instance[WebExtensionLoader].onShutdown()
     this.servletContextI.clear()
     this.servletContextI = null
   }

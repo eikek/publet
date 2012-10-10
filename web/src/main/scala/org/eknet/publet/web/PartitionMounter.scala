@@ -39,13 +39,13 @@ class PartitionMounter extends EmptyExtension with Logging {
     val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
       readPartitionConfig(PubletWeb.publetSettings)
     } else {
-      readPartitionConfig(Config)
+      readPartitionConfig(Config.get)
     }
 
     def mount(cfg: PartitionConfig): Int = cfg match {
       case PartitionConfig("fs", dir, mounts) => {
         info("Mounting fs directory '"+ dir+ "' to '"+ mounts.map(_.asString)+"'")
-        val pdir = new File(Config.configDirectory, dir)
+        val pdir = new File(Config.get.configDirectory, dir)
         val fsp = new FilesystemPartition(pdir, true)
         for (m <- mounts) publet.mountManager.mount(m, fsp)
         1

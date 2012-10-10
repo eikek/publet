@@ -51,3 +51,12 @@ Some examples clarify this:
 * `/_incl/hello.md` is hidden, because its parent directory name starts with `_`
 * `/my_page.textile` is not hidden. There is an underscore character but not at the beginning
 * `/dir1/_dir2/dir3/test.md` is hidden, because the name of the parent directory `_dir2` starts with an `_`
+
+
+## Error Pages
+
+If an HTTP error occurs, the default behaviour is to write the error into the response. This
+leads the browser to show its default error page. If you like to present a custom error page,
+create such a page in the `.allIncludes/` directory of the content root. Name the file according
+to the http error code. For example, to present a custom error page for unauthorized actions,
+create a `401.jade`.

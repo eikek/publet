@@ -18,7 +18,7 @@ package org.eknet.publet.web.shiro
 
 import collection.JavaConversions._
 import org.apache.shiro.realm.AuthorizingRealm
-import org.apache.shiro.authz.AuthorizationInfo
+import org.apache.shiro.authz.{SimpleAuthorizationInfo, AuthorizationInfo}
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
 import org.apache.shiro.SecurityUtils
@@ -26,16 +26,16 @@ import org.eknet.publet.auth.{PubletAuth, Policy, User}
 import org.apache.shiro.authc.credential.{SimpleCredentialsMatcher, CredentialsMatcher}
 import com.google.inject.{Singleton, Inject}
 import org.eknet.publet.web.guice.PubletShiroModule
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
 @Singleton
-class UsersRealm @Inject() (val db: PubletAuth) extends AuthorizingRealm {
+class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
 
   setCredentialsMatcher(new DynamicHashCredentialsMatcher())
-
 
   override def supports(token: AuthenticationToken) = {
     super.supports(token) || token.isInstanceOf[DigestAuthenticationToken]
@@ -58,7 +58,11 @@ class UsersRealm @Inject() (val db: PubletAuth) extends AuthorizingRealm {
 
   def doGetAuthorizationInfo(principals: PrincipalCollection) = {
     val login = principals.getPrimaryPrincipal.toString
-    new PolicyAuthInfo(db.findUser(login).get)
+    db.findUser(login) map { user =>
+      new PolicyAuthInfo(user)
+    } getOrElse {
+      new SimpleAuthorizationInfo()
+    }
   }
 
   class PolicyAuthInfo(user: User) extends AuthorizationInfo {

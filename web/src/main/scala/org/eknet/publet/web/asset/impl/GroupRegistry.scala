@@ -66,7 +66,7 @@ class GroupRegistry extends Logging {
 
   private def groupNotFound[A](ret: A, names: String*): A = {
     val msg = "Asset group '"+names.mkString(", ")+"' not registered"
-    if (Config.mode == RunMode.development)
+    if (Config.get.mode == RunMode.development)
       throw new IllegalStateException(msg)
     else {
       error(msg)

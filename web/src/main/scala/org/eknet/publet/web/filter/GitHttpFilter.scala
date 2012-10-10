@@ -68,7 +68,7 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper w
       if (Set("base-path", "export-all") contains name) {
         val value = Option(delegate.getInitParameter(name))
         value.getOrElse {
-          if (name == "base-path") Config.repositories.getAbsolutePath
+          if (name == "base-path") Config.get.repositories.getAbsolutePath
           else "true"
         }
       } else {
@@ -81,7 +81,7 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper w
 
   private class PathInfoServletReq(req: HttpServletRequest) extends HttpServletRequestWrapper(req) {
 
-    val gitMount = Config.gitMount
+    val gitMount = Config.get.gitMount
 
     override def getPathInfo = {
       val len = req.getContextPath.length + gitMount.length +1

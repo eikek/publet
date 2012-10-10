@@ -18,7 +18,7 @@ package org.eknet.publet.web.guice
 
 import com.google.inject._
 import name.Named
-import org.eknet.publet.web.shiro.UsersRealm
+import org.eknet.publet.web.shiro.{AuthListener, UsersRealm}
 import org.apache.shiro.realm.Realm
 import com.google.inject.multibindings.Multibinder
 import org.apache.shiro.cache.{MemoryConstrainedCacheManager, CacheManager}
@@ -37,6 +37,8 @@ import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import org.apache.shiro.authc.credential.{DefaultPasswordService, PasswordService}
 import org.apache.shiro.crypto.hash._
 import org.apache.shiro.crypto.hash.format.{Shiro1CryptFormat}
+import com.google.common.eventbus.EventBus
+import org.apache.shiro.authc.AbstractAuthenticator
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.PubletModule]]
@@ -90,24 +92,26 @@ object PubletShiroModule extends AbstractModule {
   }
 
   @Provides@Singleton
-  def createWebSecurityManager(cacheMan: CacheManager, realms: util.Set[Realm]): WebSecurityManager = {
+  def createWebSecurityManager(bus: EventBus, cacheMan: CacheManager, realms: util.Set[Realm]): WebSecurityManager = {
+    import collection.JavaConversions._
     val sm = new DefaultWebSecurityManager()
     sm.setRealms(realms)
     sm.setCacheManager(cacheMan)
+    sm.getAuthenticator.asInstanceOf[AbstractAuthenticator].setAuthenticationListeners(List(new AuthListener(bus)))
     sm
   }
 
   @Provides@Singleton
-  def createFilterChainResolver(@Named("publetServletContext") servletContext: ServletContext, @Named("loginPath") loginPath: String): FilterChainResolver = {
+  def createFilterChainResolver(@Named("publetServletContext") servletContext: ServletContext, @Named("loginPath") loginPath: String, config: Config): FilterChainResolver = {
     val resolver = new PathMatchingFilterChainResolver()
     val formauth = new FormAuthenticationFilter()
-    val loginUrl = Config("publet.urlBase").getOrElse(servletContext.getContextPath) + loginPath
+    val loginUrl = config("publet.urlBase").getOrElse(servletContext.getContextPath) + loginPath
     formauth.setLoginUrl(loginUrl)
     resolver.getFilterChainManager.addFilter("authc", formauth)
     resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
 
-    val gitPath = Path(Config.gitMount).toAbsolute.asString + "/**"
+    val gitPath = Path(config.gitMount).toAbsolute.asString + "/**"
     resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
     resolver.getFilterChainManager.createChain("/**", "anon")
     resolver

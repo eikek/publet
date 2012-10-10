@@ -35,7 +35,7 @@ import javax.servlet._
  */
 class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
 
-  private lazy val mount = Config.mainMount
+  private lazy val mount = Config.get.mainMount
 
   private lazy val defaultRedirects = Map(
     "/" -> (mount + "/"),

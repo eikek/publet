@@ -20,17 +20,17 @@ import scala.collection.JavaConversions._
 import java.util.ServiceLoader
 import grizzled.slf4j.Logging
 import javax.servlet.http.HttpServletRequest
-import com.google.inject.Binder
+import com.google.inject.{Singleton, Inject, Binder}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.05.12 15:45
  */
-object WebExtensionLoader extends Logging {
+class WebExtensionLoader(config: Config) extends Logging {
 
   private lazy val loadExtensions = ServiceLoader.load(classOf[WebExtension])
     .iterator()
-    .withFilter(ext => Config(ext.getClass.getName).getOrElse("true").toBoolean)
+    .withFilter(ext => config(ext.getClass.getName).getOrElse("true").toBoolean)
     .toList
 
   /**
@@ -82,4 +82,9 @@ object WebExtensionLoader extends Logging {
 
   def getModules = loadExtensions.map(_.getModule).flatten
 
+}
+
+object WebExtensionLoader {
+
+  def get = PubletWeb.instance[WebExtensionLoader]
 }

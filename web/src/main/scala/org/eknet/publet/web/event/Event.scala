@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.guice
-
-import com.google.inject.name
+package org.eknet.publet.web.event
 
 /**
+ * Base class for events.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 07.10.12 02:05
+ * @since 10.10.12 21:22
  */
-object Names {
-
-  val scriptEngine = annot("ScriptEngine")
-  val contentroot = annot("contentroot")
-  val servletContext = annot("publetServletContext")
-  val settings = annot("settings")
-  val config = annot("config")
-
-  implicit def annot(str: String) = name.Names.named(str)
+abstract class Event {
+  val timestamp: Long = System.currentTimeMillis()
 }

@@ -22,10 +22,13 @@ import java.io.File
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.util.AppSignature
 import com.google.inject.servlet.GuiceServletContextListener
-import com.google.inject.{AbstractModule, Stage, Guice}
+import com.google.inject.{TypeLiteral, AbstractModule, Stage, Guice}
 import org.eknet.publet.web.guice.{Names, PubletModule}
 import collection.JavaConversions._
 import ref.WeakReference
+import com.google.common.eventbus.EventBus
+import com.google.inject.matcher.Matchers
+import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,22 +37,21 @@ import ref.WeakReference
 class PubletContextListener extends GuiceServletContextListener with Logging with LoggingConfigurer {
 
   private var sc: WeakReference[ServletContext] = _
+  private var bus: EventBus = _
+  private var config: Config = _
+  private var loader: WebExtensionLoader = _
 
-  object ServletContextModule extends AbstractModule {
-    def configure() {
-      bind(classOf[ServletContext])
-        .annotatedWith(Names.servletContext)
-        .toInstance(sc())
-    }
-  }
   override def contextInitialized(sce: ServletContextEvent) {
     //eagerly setting the servletContext. All eager injections must be
     //named with "Names.servletContext"
     this.sc = new WeakReference[ServletContext](sce.getServletContext)
-    Config.setContextPath(sce.getServletContext.getContextPath)
+    this.bus = new EventBus("Publet Global EventBus")
+    this.config = new Config(sce.getServletContext.getContextPath, bus)
+    this.loader = new WebExtensionLoader(config)
     initLogging()
-
     super.contextInitialized(sce)
+    //now the injector has been created.
+
     info("""
            |
            |                   |      |        |
@@ -63,7 +65,7 @@ class PubletContextListener extends GuiceServletContextListener with Logging wit
            |""".stripMargin.replace("$v$", AppSignature.version))
     try {
       PubletWeb.initialize(sce.getServletContext)
-      if (Config.mode == RunMode.development) {
+      if (Config.get.mode == RunMode.development) {
         info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))
       }
       info(">>> publet initialized.\n")
@@ -74,13 +76,15 @@ class PubletContextListener extends GuiceServletContextListener with Logging wit
   }
 
   override def contextDestroyed(sce: ServletContextEvent) {
-    super.contextDestroyed(sce)
     PubletWeb.destroy(sce.getServletContext)
+    super.contextDestroyed(sce)
+    this.sc.clear()
+    this.config = null
   }
 
-  private def stage = if (Config.mode == RunMode.development) Stage.DEVELOPMENT else Stage.PRODUCTION
+  private def stage = if (config.mode == RunMode.development) Stage.DEVELOPMENT else Stage.PRODUCTION
   def getInjector = try {
-    Guice.createInjector(stage, ServletContextModule :: PubletModule :: WebExtensionLoader.getModules)
+    Guice.createInjector(stage, new PubletModule(sc(), Some((bus, config, loader))) :: loader.getModules)
   } catch {
     case e: Exception => error("Error creating guice module!", e); throw e
   }
@@ -92,8 +96,8 @@ class PubletContextListener extends GuiceServletContextListener with Logging wit
    *
    */
   private def initLogging() {
-    var logfile = Config.getFile("logback.xml")
-    if (!logfile.exists()) logfile = new File(Config.rootDirectory, "logback.xml")
+    var logfile = config.getFile("logback.xml")
+    if (!logfile.exists()) logfile = new File(config.rootDirectory, "logback.xml")
     configureLogging(logfile)
   }
 }

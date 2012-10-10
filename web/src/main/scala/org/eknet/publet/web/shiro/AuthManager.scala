@@ -59,7 +59,7 @@ class AuthManager extends PubletAuth with Logging {
     }
   }
 
-  private def reload() {
+  def reload() {
     database = None
   }
 

@@ -57,7 +57,10 @@ object Security extends Logging {
    *
    * @return
    */
-  def user = if (!isAuthenticated) None else Option(subject.getPrincipal).collect({case login:String=>login}).flatMap(PubletWeb.authManager.findUser)
+  def user = if (!isAuthenticated) None
+    else Option(subject.getPrincipal)
+      .collect({case login:String=>login})
+      .flatMap(PubletWeb.authManager.findUser)
 
   /**
    * Returns a [[org.eknet.publet.vfs.ChangeInfo]] object populated with data
@@ -76,7 +79,10 @@ object Security extends Logging {
    *
    * @return
    */
-  def username = user.map(_.login).getOrElse("anonymous")
+  def username = user.map(_.login).getOrElse {
+    if (isAuthenticated) subject.getPrincipal.toString
+    else "anonymous"
+  }
 
   /**
    * Returns shiros session associated to the

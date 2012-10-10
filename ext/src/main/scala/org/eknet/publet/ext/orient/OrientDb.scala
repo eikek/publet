@@ -114,7 +114,7 @@ class OrientDb(val graph: OrientGraph) extends Logging {
 object OrientDb {
 
   private val dbroot = {
-    val d = new File(Config.configDirectory, "databases")
+    val d = new File(Config.get.configDirectory, "databases")
     new File(d, "orient")
   }
 

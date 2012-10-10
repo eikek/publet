@@ -30,8 +30,9 @@ object Version {
   val scala = "2.9.2"
   val yuicompressor = "2.4.7"
   val googleClosureCompiler = "rr2079.1"
-  val guava = "12.0"
+  val guava = "13.0.1"
   val guice = "3.0"
+  val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
 }
 
 object Dependencies {
@@ -42,6 +43,7 @@ object Dependencies {
   val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
   val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle exclude("rhino", "js")
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle exclude("rhino", "js")
+  val findbugs = "com.google.code.findbugs" % "jsr305" % Version.findbugs
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
   val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("rhino", "js") //scala 2.9.2 only
   val guava = "com.google.guava" % "guava" % Version.guava withSources()
@@ -76,7 +78,7 @@ object Dependencies {
   val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("rhino", "js")
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("rhino", "js")
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j exclude("rhino", "js")
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail exclude("rhino", "js")
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail exclude("com.google.guava", "guava")
   val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor
 }
 
@@ -255,6 +257,7 @@ object Web extends Build {
        miltonApi, miltonServlet,
        yuicompressor,
        googleClosureCompiler,
+       findbugs,
        guava,
        guice,
        cglib,

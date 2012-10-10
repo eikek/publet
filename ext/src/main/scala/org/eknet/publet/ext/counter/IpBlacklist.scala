@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import org.eknet.publet.web.util.{StringMap, PropertiesMap}
+import org.eknet.publet.web.SettingsReloadedEvent
+import com.google.common.eventbus.Subscribe
 
 /**
  * Uses `ext.counter.blacklist.*` keys in the given [[org.eknet.publet.web.util.PropertiesMap]]
@@ -35,23 +37,23 @@ class IpBlacklist(m: StringMap, resolveIntervall: (Long, TimeUnit)) extends IpPr
   private val updateSpan = resolveIntervall._2.toMillis(resolveIntervall._1)
   private val nextUpdate = new AtomicLong(updateSpan + System.currentTimeMillis())
 
-  private var ipcache = loadIps
+  private var ipcache = loadIps(m)
 
-  private def loadIps = {
+  private def loadIps(m: StringMap) = {
     nextUpdate.set(System.currentTimeMillis() + updateSpan)
     Map() ++ m.blacklistHostnames
       .map(name => name.resolveIp.map(_ -> name))
       .flatten
   }
 
-  m.listener(map => {
+  def reloadIps() {
     lock.writeLock().lock()
     try {
-      ipcache = loadIps
+      ipcache = loadIps(m)
     } finally {
       lock.writeLock().unlock()
     }
-  })
+  }
 
   /**
    * Checks whether the given ip address is listed in the settings
@@ -73,7 +75,7 @@ class IpBlacklist(m: StringMap, resolveIntervall: (Long, TimeUnit)) extends IpPr
         lock.readLock().unlock()
         lock.writeLock().lock()
         try {
-          ipcache = loadIps
+          ipcache = loadIps(m)
         } finally {
           lock.readLock().lock()
           lock.writeLock().unlock()

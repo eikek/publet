@@ -20,12 +20,12 @@ This should hold web application specific information. The settings file is
 also honored by the default layout to retrieve default values.
 
 The settings file can be accessed in scripts and templates using
-`PubletWeb.publetSettings` variable which refers to an
+`PubletWeb.publetSettings` variable or `Settings.get` which refers to an
 `o.e.p.web.util.PropertiesMap` class. String values can be retrieved by
 applying a string key, for example:
 
     val stringValue: Option[String] = PubletWeb.publetSettings("applicationName")
-
+    val stringValue: Option[String] = Settings("applicationName")
 
 Note, the settings must be explcitely reloaded after making changes.
 
@@ -42,12 +42,14 @@ A (hopefully) complete `settings.properties` file is shown below.
 The location of the configuration file `publet.properties` depends on whether
 you use the war file or the standalone server.
 
-The configuration can be accessed in code using the object
+The configuration can be accessed in code using the class
 `org.eknet.publet.web.Config`. This object is also of type `o.e.p.web.util.PropertiesMap`
 (like the settings above) and string values can be accessed by applying a string key
 
     import org.eknet.publet.web.Config
     val stringValue: Option[String] = Config("webdav.enabled")
+
+The `Config` class can be injected via guice or looked up via `Config.get`.
 
 ### War
 

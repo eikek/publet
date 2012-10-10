@@ -16,11 +16,17 @@
 
 package org.eknet.publet.web
 
+import event.Event
 import java.io.{FileInputStream, File}
 import System._
 import util.PropertiesMap
 import grizzled.slf4j.Logging
 import java.nio.file.Files
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.vfs.Path
+import com.google.inject.name.Named
+import javax.servlet.ServletContext
+import com.google.inject.Inject
 
 /** Configuration file, is picked up from the configured publet directory. This is
  * either given as system property `publet.dir`, as environment variable `PUBLET_DIR`
@@ -33,7 +39,9 @@ import java.nio.file.Files
  * @since 17.04.12 09:30
  *
  */
-object Config extends PropertiesMap with Logging {
+class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(eventBus) with Logging {
+
+  private var directory: File = null
 
   /**
    * The root config directory. Usually retrieved via `publet.dir` system
@@ -58,17 +66,16 @@ object Config extends PropertiesMap with Logging {
     d
   }
 
-  private var directory: File = null
-  private[publet] def setContextPath(str: String) {
-    val norm = if (str.startsWith(File.separator)) str.substring(1) else str
-    if (!norm.isEmpty)
-      this.directory = new File(rootDirectory, norm.replace(File.separator, "-"))
-    else
-      this.directory = new File(rootDirectory, "root")
-
-    info("Loading publet.properties file from: "+ configfile.getAbsolutePath)
-    reload()
+  contextPath match {
+    case "" => this.directory = new File(rootDirectory, "root")
+    case str => this.directory = new File(rootDirectory, Path(str).segments.mkString("-"))
   }
+
+  info("Loading publet.properties file from: "+ configfile.getAbsolutePath)
+  reload()
+
+
+  protected def createEvent() = ConfigReloadedEvent(this)
 
   /**The configuration directory of the application.
    *
@@ -178,3 +185,17 @@ object Config extends PropertiesMap with Logging {
     d
   }
 }
+
+object Config {
+
+  /**
+   * Returns an instance by looking it up though the injector.
+   * @return
+   */
+  def get = PubletWeb.instance[Config]
+
+  def apply(key: String) = get(key)
+
+}
+
+case class ConfigReloadedEvent(config: Config) extends Event

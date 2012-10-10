@@ -31,7 +31,7 @@ import scala.Some
  */
 class IncludeLoader {
 
-  val allIncludesPath = Path(Config.mainMount + "/" + Publet.allIncludes)
+  val allIncludesPath = Path(Config.get.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
 
   def findInclude(name: String, mainInclude: Boolean = true): Option[Path] = {
@@ -162,7 +162,7 @@ class IncludeLoader {
    * @param groups
    * @return
    */
-  def loadAssets(groups: String*): String = loadAssetGroups(groups, Config.mode != RunMode.development)
+  def loadAssets(groups: String*): String = loadAssetGroups(groups, Config.get.mode != RunMode.development)
 
   def loadAssetsCompressed(groups: String*) = loadAssetGroups(groups, compressed = true)
 

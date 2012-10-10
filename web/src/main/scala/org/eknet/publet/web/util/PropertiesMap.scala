@@ -19,26 +19,19 @@ package org.eknet.publet.web.util
 import collection.JavaConversions._
 import java.util.Properties
 import java.io.InputStream
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.web.event.Event
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.04.12 20:05
  */
-abstract class PropertiesMap extends StringMap {
+abstract class PropertiesMap(eventBus: EventBus) extends StringMap {
 
   protected def file: Option[InputStream]
-
+  private val lock = new ReentrantReadWriteLock()
   private val props = new Properties()
-
-  private var reloadListeners: List[PropertiesMap => Unit] = Nil
-
-  def listener(l:PropertiesMap=>Unit) {
-    reloadListeners ::= l
-  }
-
-  def remove(l:PropertiesMap=>Unit) {
-    reloadListeners = reloadListeners.filterNot(_ == l)
-  }
 
   /**
    * Puts the key-value pair in the map. This value is only
@@ -47,24 +40,48 @@ abstract class PropertiesMap extends StringMap {
    * @param value
    */
   def put(key: String, value: String) {
-    props.setProperty(key, value)
+    lock.writeLock().lock()
+    try {
+      props.setProperty(key, value)
+    } finally {
+      lock.writeLock().unlock()
+    }
   }
 
-  def apply(key: String) = Option(props.getProperty(key))
+  def apply(key: String) = {
+    lock.readLock().lock()
+    try {
+      Option(props.getProperty(key))
+    } finally {
+      lock.readLock().unlock()
+    }
+  }
 
-  def keySet = props.stringPropertyNames().toSet
+  def keySet = {
+    lock.readLock().lock()
+    try {
+      props.stringPropertyNames().toSet
+    } finally {
+      lock.readLock().unlock()
+    }
+  }
 
   /**
    * Reloads all properties from the underlying file.
    *
    */
   def reload() {
-    synchronized {
+    lock.writeLock().lock()
+    try {
       props.clear()
       if (file.isDefined) props.load(file.get)
+    } finally {
+      lock.writeLock().unlock()
     }
-    reloadListeners.foreach { l => l(this) }
+    eventBus.post(createEvent())
   }
+
+  protected def createEvent(): Event
 }
 
 trait StringMap {
@@ -77,6 +94,4 @@ trait StringMap {
 
   def put(key: String, value: String)
 
-  def listener(l:PropertiesMap=>Unit)
-  def remove(l:PropertiesMap=>Unit)
 }

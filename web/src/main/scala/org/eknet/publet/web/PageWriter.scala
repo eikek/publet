@@ -42,7 +42,7 @@ trait PageWriter extends Logging {
   def getCustomErrorPage(code: Int): Option[Content] = {
     val publet = PubletWeb.publet
     val pageName = code.toString + ".html"
-    publet.process(Path(Config.mainMount +"/"+ Publet.allIncludes + pageName).toAbsolute)
+    publet.process(Path(Config.get.mainMount +"/"+ Publet.allIncludes + pageName).toAbsolute)
   }
 
   /**
@@ -63,7 +63,7 @@ trait PageWriter extends Logging {
    * @param resp
    */
   def writeError(ex: Throwable, req: HttpServletRequest, resp: HttpServletResponse) {
-    if (Config.mode == RunMode.development) {
+    if (Config.get.mode == RunMode.development) {
       //print the exception in development mode
       try {
         writePage(RenderUtils.renderException(ex), req, resp)

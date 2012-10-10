@@ -1,7 +1,7 @@
 package org.eknet.publet.web.filter
 
 import javax.servlet._
-import org.eknet.publet.web.{PubletRequestWrapper, WebExtensionLoader}
+import org.eknet.publet.web.{PubletWeb, PubletRequestWrapper, WebExtensionLoader}
 import org.fusesource.scalate.util.Logging
 
 /**
@@ -12,12 +12,12 @@ class ExtensionRequestFilter extends Filter with PubletRequestWrapper with Loggi
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-      val req = WebExtensionLoader.executeBeginRequest(request)
+      val req = PubletWeb.instance[WebExtensionLoader].executeBeginRequest(request)
       try {
         chain.doFilter(req, response)
       }
       finally {
-        WebExtensionLoader.executeEndRequest(request)
+        PubletWeb.instance[WebExtensionLoader].executeEndRequest(request)
       }
   }
 

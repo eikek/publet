@@ -17,7 +17,7 @@
 package org.eknet.publet.ext.counter
 
 import org.eknet.publet.ext.ExtDb
-import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.{SettingsReloadedEvent, Settings, PubletWeb}
 import java.util.concurrent.TimeUnit
 import org.eknet.publet.web.util.{StringMap, ClientInfo}
 import org.eknet.publet.Glob
@@ -33,16 +33,22 @@ import collection.JavaConversions._
 import ExtDb.Property._
 import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
+import com.google.common.eventbus.{Subscribe, EventBus}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap) extends CounterService {
+class CounterServiceImpl @Inject() (settings: Settings) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = ExtDb
+
+  @Subscribe
+  def reloadIps(event: SettingsReloadedEvent) {
+    ipBlacklist.reloadIps()
+  }
 
   def getPageCount(uri: String) = {
     val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri

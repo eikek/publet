@@ -31,8 +31,8 @@ object ThumbnailModule extends AbstractModule {
   }
 
   @Provides@Singleton
-  def createThumbnailer(publet: Publet): Thumbnailer = {
-    val tempDir = Config.newStaticTempDir("thumbs")
+  def createThumbnailer(publet: Publet, config: Config): Thumbnailer = {
+    val tempDir = config.newStaticTempDir("thumbs")
     val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
     val options = Config("thumbnail.maxDiskSize") flatMap (str => str match {
       case sizeRegex(num, i, p, unit) => {
