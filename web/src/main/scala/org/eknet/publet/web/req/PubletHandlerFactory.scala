@@ -47,15 +47,19 @@ class PubletHandlerFactory extends RequestHandlerFactory {
 
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {
     override def checkResourceAccess(req: HttpServletRequest) {
-      val repoModel = req.getRepositoryModel
-      val gitAction = req.getGitAction.getOrElse(GitAction.pull)
-
-      repoModel.foreach { repo =>
-        Security.checkGitAction(gitAction, repo)
-      }
-      PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
-        .filterNot(_.perm.isAnon)
+      //checks all resource permission
+      val constraints = PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
+      constraints.filterNot(_.perm.isAnon)
         .foreach(rc => Security.checkPerm(rc.perm.permString))
+
+      val gitAction = req.getGitAction.getOrElse(GitAction.pull)
+      //if given anon permission this is equally well as a git:pull permission
+      if (!constraints.exists(_.perm.isAnon) || gitAction != GitAction.pull) {
+        val repoModel = req.getRepositoryModel
+        repoModel.foreach { repo =>
+          Security.checkGitAction(gitAction, repo)
+        }
+      }
     }
 
     def onUnauthenticated(ex: UnauthenticatedException, req: HttpServletRequest, res: HttpServletResponse) {
