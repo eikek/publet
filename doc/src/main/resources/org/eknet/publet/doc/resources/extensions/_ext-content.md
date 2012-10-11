@@ -205,30 +205,13 @@ your code independent from the underlying graph database.
 
 ### API
 
-The object `OrientDb` can be used to create new databases:
+The service `OrientDbProvider` is provided to access databases using its
+`getDatabase(name: String)` method. Each database is uniquely named and
+the same database object is returned on subsequent invocations.
 
-    /**
-     * Creates a new [[com.tinkerpop.blueprints.impls.orient.OrientGraph]] instance.
-     *
-     * @param name
-     * @return
-     */
-    def newGraph(name: String): OrientGraph
+A listener is registered that will shutdown all Orient databases on application
+exit.
 
-    /**
-     * Creates a new [[org.eknet.publet.ext.orient.OrientDb]] with a new
-     * instance of a [[com.tinkerpop.blueprints.impls.orient.OrientGraph]].
-     *
-     * @param name
-     * @return
-     */
-    def newDatabase(name: String): OrientDb
-
-Databases can only be created once on application startup. A listener is
-registered that will shutdown all Orient databases on application exit.
-
-For the counter extension and for convenience, there is a database created. You
-can access it by using the `org.eknet.publet.ext.ExtDb` singleton.
 
 ## Thumbnails
 

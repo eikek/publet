@@ -26,25 +26,25 @@ import org.eknet.publet.web.Config
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 23:47
  */
-class ConfiguredScalateEngine(name: Symbol, publet: Publet) extends ScalateEngineImpl(name, ConfiguredScalateEngine.createEngine()) {
+class ConfiguredScalateEngine(name: Symbol, publet: Publet, config: Config) extends ScalateEngineImpl(name, ConfiguredScalateEngine.createEngine(config)) {
 
   VfsResourceLoader.install(engine, publet)
 
   override def setDefaultLayoutUri(uri: String) {
-    engine.layoutStrategy = new LayoutLookupStrategy(engine, uri)
+    engine.layoutStrategy = new LayoutLookupStrategy(engine, config, uri)
   }
 
 }
 
 object ConfiguredScalateEngine {
 
-  private def createEngine() = {
+  private def createEngine(config: Config) = {
     val engine = new TemplateEngine()
-    engine.workingDirectory = Config.get.newStaticTempDir("scalate")
+    engine.workingDirectory = config.newStaticTempDir("scalate")
     engine.allowCaching = true
     engine.allowReload = true
 
-    val loader = new IncludeResourceLoader(engine.resourceLoader)
+    val loader = new IncludeResourceLoader(engine.resourceLoader, config)
     engine.resourceLoader = loader
 
     new Boot(engine).run()

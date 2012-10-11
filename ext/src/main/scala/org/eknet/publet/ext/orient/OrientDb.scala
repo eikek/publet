@@ -109,34 +109,3 @@ class OrientDb(val graph: OrientGraph) extends Logging {
     }
   }
 }
-
-
-object OrientDb {
-
-  private val dbroot = {
-    val d = new File(Config.get.configDirectory, "databases")
-    new File(d, "orient")
-  }
-
-  private def databaseDir(dbname: String) = new File(dbroot, dbname)
-
-  def toOrientUri(dbname: String) = "local://"+ databaseDir(dbname).getAbsolutePath
-
-  /**
-   * Creates a new [[com.tinkerpop.blueprints.impls.orient.OrientGraph]] instance.
-   *
-   * @param name
-   * @return
-   */
-  def newGraph(name: String): OrientGraph = new OrientGraph(toOrientUri(name))
-
-  /**
-   * Creates a new [[org.eknet.publet.ext.orient.OrientDb]] with a new
-   * instance of a [[com.tinkerpop.blueprints.impls.orient.OrientGraph]].
-   *
-   * @param name
-   * @return
-   */
-  def newDatabase(name: String): OrientDb = new OrientDb(newGraph(name))
-
-}

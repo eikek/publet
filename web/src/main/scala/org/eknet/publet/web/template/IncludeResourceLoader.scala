@@ -19,7 +19,7 @@ package org.eknet.publet.web.template
 import org.fusesource.scalate.util.{Resource, ResourceLoader}
 import org.eknet.publet.vfs.ContentResource
 import org.eknet.publet.engine.scalate.TemplateResource
-import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.{Config, PubletWeb}
 
 /**
  * Scalate resource loader that looks up "special resources"
@@ -28,9 +28,9 @@ import org.eknet.publet.web.PubletWeb
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.07.12 23:24
  */
-class IncludeResourceLoader(delegate: ResourceLoader) extends ResourceLoader {
+class IncludeResourceLoader(delegate: ResourceLoader, config: Config) extends ResourceLoader {
 
-  private val includeLoader = new IncludeLoader
+  private val includeLoader = new IncludeLoader(config)
   private val specialPattern = """.*/__incl_([^/]*)$""".r
 
   def resource(uri: String): Option[Resource] = {

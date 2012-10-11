@@ -16,7 +16,6 @@
 
 package org.eknet.publet.ext
 
-import org.eknet.publet.Publet
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{Config, EmptyExtension, PubletWeb}
@@ -59,12 +58,12 @@ object MailModule extends AbstractModule {
   }
 
   @Provides@Singleton
-  def createDefaultMailer(): MailSender = {
+  def createDefaultMailer(config: Config): MailSender = {
     val sessionFactory = new DefaultSessionFactory(
-      Config("smtp.host").getOrElse("localhost"),
-      Config("smtp.port").getOrElse("-1").toInt,
-      Config("smtp.username").getOrElse(""),
-      Config("smtp.password").getOrElse("").toCharArray)
+      config("smtp.host").getOrElse("localhost"),
+      config("smtp.port").getOrElse("-1").toInt,
+      config("smtp.username").getOrElse(""),
+      config("smtp.password").getOrElse("").toCharArray)
 
     new DefaultMailSender(sessionFactory)
   }

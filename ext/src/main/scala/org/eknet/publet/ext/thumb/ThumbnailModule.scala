@@ -34,14 +34,14 @@ object ThumbnailModule extends AbstractModule {
   def createThumbnailer(publet: Publet, config: Config): Thumbnailer = {
     val tempDir = config.newStaticTempDir("thumbs")
     val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
-    val options = Config("thumbnail.maxDiskSize") flatMap (str => str match {
+    val options = config("thumbnail.maxDiskSize") flatMap (str => str match {
       case sizeRegex(num, i, p, unit) => {
         if (unit.isEmpty) Some(CacheOptions.maxSize(i.toLong))
         else Some(CacheOptions.maxSize(ByteSize.fromString(unit).toBytes(num.toDouble)))
       }
       case _ => None
     }) orElse {
-      Config("thumbnail.maxEntries") map (entr => CacheOptions.maxEntries(entr.toInt))
+      config("thumbnail.maxEntries") map (entr => CacheOptions.maxEntries(entr.toInt))
     } getOrElse(CacheOptions.getDefault)
 
     val tn = new ThumbnailerImpl(publet.mountManager, tempDir, options)

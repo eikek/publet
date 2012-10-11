@@ -124,8 +124,8 @@ class PubletModule(servletContext: ServletContext, init: Option[(EventBus, Confi
   }
 
   @Provides@Singleton
-  def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext): ScalateEngine = {
-    val e = new ConfiguredScalateEngine('wikiMain, publet)
+  def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config): ScalateEngine = {
+    val e = new ConfiguredScalateEngine('wikiMain, publet, config)
     e.engine.combinedClassPath = true
     e.engine.importStatements ++= webImports.map("import "+ _)
     e.engine.classpath = ScriptCompiler.servletPath.mkString(File.pathSeparator)
@@ -137,7 +137,7 @@ class PubletModule(servletContext: ServletContext, init: Option[(EventBus, Confi
     e.engine.bindings ++= List(
       Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true)
     )
-    e.attributes = Map("includeLoader" -> new IncludeLoader)
+    e.attributes = Map("includeLoader" -> new IncludeLoader(config))
 
     e
   }

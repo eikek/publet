@@ -18,7 +18,7 @@ package org.eknet.publet.ext.thumb
 
 import org.eknet.publet.vfs._
 import javax.imageio.ImageIO
-import java.io.{BufferedOutputStream, ByteArrayInputStream, File, ByteArrayOutputStream}
+import java.io.{BufferedOutputStream, File}
 import Path._
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.util.concurrent

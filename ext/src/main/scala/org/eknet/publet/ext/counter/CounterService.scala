@@ -1,20 +1,8 @@
 package org.eknet.publet.ext.counter
 
-import java.text.DateFormat
 import java.util
 import org.eknet.publet.web.PubletWeb
-import org.eknet.publet.ext.ExtDb
-import com.tinkerpop.blueprints.Vertex
-import org.apache.shiro.crypto.hash.Md5Hash
-import org.eknet.publet.vfs.{ContentResource, Path}
-import org.apache.shiro.util.ByteSource
-import org.apache.shiro.crypto.hash.format.HexFormat
 import org.eknet.publet.web.util.ClientInfo
-import org.eknet.publet.Glob
-import com.google.common.cache._
-import util.concurrent.TimeUnit
-import java.net.InetAddress
-import grizzled.slf4j.Logging
 import com.google.inject.ConfigurationException
 
 /**

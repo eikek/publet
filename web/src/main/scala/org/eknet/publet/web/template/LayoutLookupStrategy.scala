@@ -18,17 +18,17 @@ package org.eknet.publet.web.template
 
 import org.fusesource.scalate.{RenderContext, Template, TemplateEngine}
 import org.fusesource.scalate.layout.{DefaultLayoutStrategy, LayoutStrategy}
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.web.{Config, PubletWebContext}
 import org.eknet.publet.vfs.Path
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 23:19
  */
-class LayoutLookupStrategy(val engine: TemplateEngine, defaultLayouts: String*) extends LayoutStrategy {
+class LayoutLookupStrategy(val engine: TemplateEngine, config: Config, defaultLayouts: String*) extends LayoutStrategy {
 
   private val delegate = new DefaultLayoutStrategy(engine, defaultLayouts: _*)
-  private val loader = new IncludeLoader()
+  private val loader = new IncludeLoader(config)
 
   val layoutName = "pageLayout"
   val layoutCandidates = engine.codeGenerators.keySet.map(layoutName +"."+ _)

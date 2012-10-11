@@ -16,7 +16,6 @@
 
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.ext.ExtDb
 import org.eknet.publet.web.{SettingsReloadedEvent, Settings, PubletWeb}
 import java.util.concurrent.TimeUnit
 import org.eknet.publet.web.util.{StringMap, ClientInfo}
@@ -30,25 +29,37 @@ import java.util.Locale
 import java.text.DateFormat
 import java.util
 import collection.JavaConversions._
-import ExtDb.Property._
 import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
-import com.google.common.eventbus.{Subscribe, EventBus}
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.ext.orient.OrientDbProvider
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (settings: Settings) extends CounterService {
+class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: OrientDbProvider) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
-  private val db = ExtDb
+  private val db = dbprovider.getDatabase("extdb")
+
+  /**
+   * Node where all nodes that represent pages/resources
+   * are connected to.
+   *
+   */
+  val pagesNode = db.addReferenceVertex("pages")
+  db.graph.createKeyIndex(Property.pagePathKey, classOf[Vertex])
+
 
   @Subscribe
   def reloadIps(event: SettingsReloadedEvent) {
     ipBlacklist.reloadIps()
   }
+
+  import Property._
+  import Label._
 
   def getPageCount(uri: String) = {
     val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
@@ -131,11 +142,10 @@ class CounterServiceImpl @Inject() (settings: Settings) extends CounterService {
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx {
         val pageVertex = getOrCreatePageVertex(uriPath)
-        import ExtDb.Label._
         val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
         pageVertex.setProperty(pageCountKey, (count +1))
         pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
-        db.graph.addEdge(null, db.pagesNode, pageVertex, pageEdgeLabel)
+        db.graph.addEdge(null, pagesNode, pageVertex, pageEdgeLabel)
       }
     }
   }
@@ -175,5 +185,28 @@ class CounterServiceImpl @Inject() (settings: Settings) extends CounterService {
         }
       }
     }
+  }
+
+  object Label {
+
+    /** The label of the edge from the reference node to each uri node */
+    val pageEdgeLabel = "page"
+
+  }
+
+  object Property {
+
+    /** The property key of the uri value */
+    val pagePathKey = "page_pagePath"
+
+    /** The property key of the count value */
+    val pageCountKey = "page_accessCount"
+
+    /** The property key of the last access time value */
+    val pageLastAccessKey = "page_lastAccess"
+
+    /** The property key of the md5 checksum of a resource */
+    val pageMd5Checksum = "page_checksum"
+
   }
 }

@@ -29,9 +29,9 @@ import scala.Some
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 21:12
  */
-class IncludeLoader {
+class IncludeLoader(config: Config) {
 
-  val allIncludesPath = Path(Config.get.mainMount + "/" + Publet.allIncludes)
+  val allIncludesPath = Path(config.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
 
   def findInclude(name: String, mainInclude: Boolean = true): Option[Path] = {
