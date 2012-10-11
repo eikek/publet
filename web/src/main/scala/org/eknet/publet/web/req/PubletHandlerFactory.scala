@@ -22,7 +22,7 @@ import org.eknet.publet.web.{PageWriter, PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
-import com.google.inject.servlet.GuiceFilter
+import org.eknet.publet.auth.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -47,6 +47,12 @@ class PubletHandlerFactory extends RequestHandlerFactory {
 
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {
     override def checkResourceAccess(req: HttpServletRequest) {
+      val repoModel = req.getRepositoryModel
+      val gitAction = req.getGitAction.getOrElse(GitAction.pull)
+
+      repoModel.foreach { repo =>
+        Security.checkGitAction(gitAction, repo)
+      }
       PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
         .filterNot(_.perm.isAnon)
         .foreach(rc => Security.checkPerm(rc.perm.permString))
