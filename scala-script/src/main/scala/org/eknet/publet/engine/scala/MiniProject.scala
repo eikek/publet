@@ -17,7 +17,7 @@
 package org.eknet.publet.engine.scala
 
 import scala.collection.mutable
-import org.eknet.publet.vfs.fs.FileResource
+import org.eknet.publet.vfs.fs.{DirectoryResource, FileResource}
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Resource, ContainerResource, Path}
 import io.Source
@@ -28,6 +28,7 @@ import java.net.URL
 import tools.nsc.Global
 import tools.nsc.interpreter.AbstractFileClassLoader
 import tools.nsc.io.AbstractFile
+import tools.nsc.util.BatchSourceFile
 
 /**
  *
@@ -37,7 +38,8 @@ import tools.nsc.io.AbstractFile
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.04.12 21:39
  */
-class MiniProject(val path: Path,
+class MiniProject(val name: String,
+                  val path: Path,
                   val projectDir: ContainerResource,
                   val dependsOn: List[MiniProject],
                   publet: Publet) extends Logging {
@@ -77,18 +79,20 @@ class MiniProject(val path: Path,
       if (sourceDir.isDefined && needRecompile()) {
         val start = System.currentTimeMillis()
         val settings = ScriptCompiler.compilerSettings(AbstractFile.getDirectory(targetDir), None, Some(this))
-        settings.sourcepath.value = (path / "src/main/scala").toAbsolute.segments.mkString(File.separator)
         val reporter = new ErrorReporter(settings)
         val global = new Global(settings, reporter)
         val run = new global.Run
-        val sourceFiles = new mutable.ListBuffer[String]()
+        val sourceFiles = new mutable.ListBuffer[File]()
         projectDir.foreach("src/main/scala".p, (p, r)=> {
           if (r.name.ext=="scala" && r.isInstanceOf[FileResource]) {
-            sourceFiles.append(r.asInstanceOf[FileResource].file.getAbsolutePath)
+            sourceFiles.append(r.asInstanceOf[FileResource].file)
           }
         })
-        info("Compiling project with "+ sourceFiles.size+ " files.")
-        run.compile(sourceFiles.toList)
+        info("Compiling project '"+name+"' with "+ sourceFiles.size+ " files.")
+        run.compileSources(sourceFiles.toList.map(s => new BatchSourceFile(AbstractFile.getFile(s))))
+        if (reporter.hasErrors) {
+          throw new CompileException(path, reporter.messages.toList)
+        }
         timestamp()
         info("Done in "+ (System.currentTimeMillis()-start) +"ms")
       }
@@ -134,7 +138,7 @@ object MiniProject {
     def findProjectDir(p: Path): Option[MiniProject] = {
       val projectPath = p / Publet.includesPath / projectDir
       publet.rootContainer.lookup(projectPath) match {
-        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(projectPath, cr, root, publet))
+        case Some(cr: ContainerResource) if (cr.exists) => Some(new MiniProject(p.name.name+"Project", projectPath, cr, root, publet))
         case None => if (p.size>max) findProjectDir(p.tail) else root.headOption
       }
     }
@@ -145,7 +149,7 @@ object MiniProject {
     val path = Path(pathPrefix) / Publet.allIncludesPath / projectDir
     publet.rootContainer.lookup(path)
       .collect({case cr:ContainerResource if (cr.exists)=> cr})
-      .map(cont => List(new MiniProject(path, cont, List(), publet))).getOrElse(List())
+      .map(cont => List(new MiniProject("rootproject", path, cont, List(), publet))).getOrElse(List())
   }
 
 }

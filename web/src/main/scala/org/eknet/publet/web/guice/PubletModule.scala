@@ -17,7 +17,6 @@
 package org.eknet.publet.web.guice
 
 import com.google.inject._
-import internal.ProviderMethod
 import org.eknet.publet.web.template.{IncludeLoader, ConfiguredScalateEngine}
 import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
 import java.io.File
