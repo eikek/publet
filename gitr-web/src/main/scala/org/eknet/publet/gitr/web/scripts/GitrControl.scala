@@ -138,12 +138,12 @@ class GitrControl extends ScalaScript {
         }
         val commitIter = log.call().iterator()
         val nextPage = if (commitIter.hasNext) {
-          Some("?r="+getReponame.get+ "&page="+(page+1)+"&do=log&rev="+getRev)
+          Some("?r="+getReponame.get+ "&page="+(page+1)+"&do=log&h="+getRev)
         } else {
           None
         }
         val prevPage = if (page>1) {
-          Some("?r="+getReponame.get+ "&page="+(page-1)+"&do=log&rev="+getRev)
+          Some("?r="+getReponame.get+ "&page="+(page-1)+"&do=log&h="+getRev)
         } else {
           None
         }
