@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.ext.orient
+package org.eknet.publet.web.guice
 
-import com.google.inject._
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import java.util.ServiceLoader
+import org.eknet.publet.web.Config
+import collection.JavaConversions._
+import grizzled.slf4j.Logging
+
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 11.10.12 22:43
+ * @since 15.10.12 18:42
  */
-class OrientModule extends AbstractModule with PubletBinding with PubletModule {
+class ModuleManager(config: Config) extends Logging {
 
-  def configure() {
-    bind(classOf[OrientDbProvider]) to classOf[DefaultOrientDbProvider] in Scopes.SINGLETON
-    binder.bindEagerly[OrientDbExtension]()
-  }
+  val modules = ServiceLoader.load(classOf[PubletModule])
+    .iterator()
+    .withFilter(ext => config(ext.getClass.getName).getOrElse("true").toBoolean)
+    .toList
+
+
+  val moduleNames = modules.map(_.getClass.getName).sorted
 
 }

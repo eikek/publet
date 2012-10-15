@@ -28,7 +28,7 @@ import inject.Injector
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:40
  */
-trait Guicey {
+trait InjectorHelper {
 
   def injector: Injector
 

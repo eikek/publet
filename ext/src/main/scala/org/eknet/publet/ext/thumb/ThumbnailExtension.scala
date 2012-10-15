@@ -23,21 +23,24 @@ import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.filter.Filters
 import org.eknet.publet.vfs.ContentResource
+import com.google.inject.{Inject, Singleton}
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.PubletStartedEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.10.12 20:46
  */
-class ThumbnailExtension extends EmptyExtension with PubletRequestWrapper {
+@Singleton
+class ThumbnailExtension @Inject() (publet: Publet) extends EmptyExtension with PubletRequestWrapper {
 
-
-  override def getModule = Some(ThumbnailModule)
-
-  override def onStartup() {
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("thumb.png".rn, new ThumbnailScript))
-    PubletWeb.publet.mountManager.mount("/publet/ext/thumbnail/".p, muc)
+    publet.mountManager.mount("/publet/ext/thumbnail/".p, muc)
   }
 
   /**

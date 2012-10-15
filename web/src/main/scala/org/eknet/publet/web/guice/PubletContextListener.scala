@@ -14,44 +14,33 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.war
+package org.eknet.publet.web.guice
 
 import javax.servlet.{ServletContext, ServletContextEvent}
-import org.eknet.publet.web.{RunMode, WebExtensionLoader, Config, PubletWeb}
-import java.io.File
+import org.eknet.publet.web.{RunMode, Config, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.util.AppSignature
 import com.google.inject.servlet.GuiceServletContextListener
-import com.google.inject.{TypeLiteral, AbstractModule, Stage, Guice}
-import org.eknet.publet.web.guice.{Names, PubletModule}
-import collection.JavaConversions._
+import com.google.inject._
 import ref.WeakReference
+import org.eknet.publet.web.event.Event
 import com.google.common.eventbus.EventBus
-import com.google.inject.matcher.Matchers
-import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 10.05.12 13:01
  */
-class PubletContextListener extends GuiceServletContextListener with Logging with LoggingConfigurer {
+class PubletContextListener extends GuiceServletContextListener with Logging {
 
   private var sc: WeakReference[ServletContext] = _
-  private var bus: EventBus = _
-  private var config: Config = _
-  private var loader: WebExtensionLoader = _
 
   override def contextInitialized(sce: ServletContextEvent) {
     //eagerly setting the servletContext. All eager injections must be
     //named with "Names.servletContext"
     this.sc = new WeakReference[ServletContext](sce.getServletContext)
-    this.bus = new EventBus("Publet Global EventBus")
-    this.config = new Config(sce.getServletContext.getContextPath, bus)
-    this.loader = new WebExtensionLoader(config)
-    initLogging()
     super.contextInitialized(sce)
-    //now the injector has been created.
-
+    val bus = findInjector.getInstance(classOf[EventBus])
+    val config = findInjector.getInstance(classOf[Config])
     info("""
            |
            |                   |      |        |
@@ -64,10 +53,10 @@ class PubletContextListener extends GuiceServletContextListener with Logging wit
            |
            |""".stripMargin.replace("$v$", AppSignature.version))
     try {
-      PubletWeb.initialize(sce.getServletContext)
-      if (Config.get.mode == RunMode.development) {
+      if (config.mode == RunMode.development) {
         info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))
       }
+      bus.post(new PubletStartedEvent(sce.getServletContext))
       info(">>> publet initialized.\n")
     }
     catch {
@@ -76,28 +65,21 @@ class PubletContextListener extends GuiceServletContextListener with Logging wit
   }
 
   override def contextDestroyed(sce: ServletContextEvent) {
-    PubletWeb.destroy(sce.getServletContext)
+    val bus = findInjector.getInstance(classOf[EventBus])
+    bus.post(new PubletShutdownEvent(sce.getServletContext))
     super.contextDestroyed(sce)
     this.sc.clear()
-    this.config = null
   }
 
-  private def stage = if (config.mode == RunMode.development) Stage.DEVELOPMENT else Stage.PRODUCTION
+  def findInjector = sc().getAttribute(classOf[Injector].getName).asInstanceOf[Injector]
+
   def getInjector = try {
-    Guice.createInjector(stage, new PubletModule(sc(), Some((bus, config, loader))) :: loader.getModules)
+    Guice.createInjector(Stage.PRODUCTION, new AppModule(sc()))
   } catch {
     case e: Exception => error("Error creating guice module!", e); throw e
   }
 
-  /**
-   * Initializes logging from a "logback.xml" file in the directory
-   * which is configured for publet. In standalone-mode this file
-   * does not exist and the logging has already been initialised.
-   *
-   */
-  private def initLogging() {
-    var logfile = config.getFile("logback.xml")
-    if (!logfile.exists()) logfile = new File(config.rootDirectory, "logback.xml")
-    configureLogging(logfile)
-  }
 }
+
+case class PubletStartedEvent(sc: ServletContext) extends Event
+case class PubletShutdownEvent(sc:ServletContext) extends Event

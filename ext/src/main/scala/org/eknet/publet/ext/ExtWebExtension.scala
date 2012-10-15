@@ -21,28 +21,31 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{Config, EmptyExtension, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
-import com.google.inject.{Singleton, Provides, AbstractModule}
+import com.google.inject.{Inject, Singleton, Provides, AbstractModule}
 import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:17
  */
-class ExtWebExtension extends EmptyExtension with Logging {
+@Singleton
+class ExtWebExtension @Inject() (publet: Publet) extends Logging {
 
-  override def getModule = Some(MailModule)
-
-  override def onStartup() {
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     import ExtWebExtension.extScriptPath
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
     muc.addResource(new WebScriptResource("sendMail.json".rn, new MailContact))
     muc.addResource(new WebScriptResource("myDataUpdate.json".rn, new MyDataScript))
-    PubletWeb.publet.mountManager.mount(extScriptPath, muc)
+    publet.mountManager.mount(extScriptPath, muc)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/ext/includes")
-    PubletWeb.publet.mountManager.mount(Path("/publet/ext/includes/"), cont)
+    publet.mountManager.mount(Path("/publet/ext/includes/"), cont)
   }
 
 }
@@ -53,8 +56,9 @@ object ExtWebExtension {
 
 }
 
-object MailModule extends AbstractModule {
+class ExtraModule extends AbstractModule with PubletBinding with PubletModule {
   def configure() {
+    binder.bindEagerly[ExtWebExtension]()
   }
 
   @Provides@Singleton

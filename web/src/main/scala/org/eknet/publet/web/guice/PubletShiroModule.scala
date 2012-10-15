@@ -41,19 +41,19 @@ import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.AbstractAuthenticator
 
 /**
- * Needs services defined in [[org.eknet.publet.web.guice.PubletModule]]
+ * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
  *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 14:02
  */
-object PubletShiroModule extends AbstractModule {
+object PubletShiroModule extends AbstractModule with PubletBinding {
 
   def configure() {
-    bind(classOf[CacheManager]) to classOf[MemoryConstrainedCacheManager] in Scopes.SINGLETON
-    bind(classOf[SessionManager]) to classOf[ServletContainerSessionManager] asEagerSingleton()
-    bindRealm.to(classOf[UsersRealm])
+    binder.set[CacheManager].toType[MemoryConstrainedCacheManager] in Scopes.SINGLETON
+    binder.set[SessionManager].toType[ServletContainerSessionManager] asEagerSingleton()
+    binder.bindRealm.toType[UsersRealm]
 
-    bind(classOf[WebEnvironment]).to(classOf[GuiceWebEnvironment]).asEagerSingleton()
+    binder.set[WebEnvironment].toType[GuiceWebEnvironment].asEagerSingleton()
   }
 
   @Provides@Singleton@Named(Sha512Hash.ALGORITHM_NAME)
@@ -127,11 +127,6 @@ object PubletShiroModule extends AbstractModule {
   def getLoginPath(@Named("settings") settings: StringMap) =
     settings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
-
-  def bindRealm = {
-    val multibinder = Multibinder.newSetBinder(binder, classOf[Realm])
-    multibinder.addBinding()
-  }
 
   def bindSecurityManager(bind: AnnotatedBindingBuilder[_ >: WebSecurityManager]) {
     bind.toConstructor(classOf[DefaultWebSecurityManager].getConstructor(classOf[util.Collection[_]])).asEagerSingleton()

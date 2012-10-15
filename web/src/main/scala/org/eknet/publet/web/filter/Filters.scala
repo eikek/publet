@@ -7,6 +7,8 @@ import org.eknet.publet.web.asset.AssetFilter
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.PubletWebContext
 import com.google.inject.servlet.GuiceFilter
+import org.eknet.publet.web.guice.ExtensionManager
+import com.google.common.eventbus.EventBus
 
 /**
  *
@@ -18,7 +20,7 @@ object Filters {
 
   val blacklist = new BlacklistFilter
   val exceptionHandler = new ExceptionFilter
-  val extensionRequest = new ExtensionRequestFilter
+  def extensionRequest(extman: ExtensionManager) = new ExtensionRequestFilter(extman)
   val publet = new PubletFilter
   val redirect = new RedirectFilter
   val source = new SourceFilter

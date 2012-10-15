@@ -17,7 +17,7 @@
 package org.eknet.publet.web.guice
 
 import com.google.inject._
-import org.eknet.publet.web.template.{IncludeLoader, ConfiguredScalateEngine}
+import org.eknet.publet.web.template.{DefaultLayout, IncludeLoader, ConfiguredScalateEngine}
 import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
 import java.io.File
 import java.net.URL
@@ -26,7 +26,7 @@ import org.fusesource.scalate.Binding
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Container, ResourceName, Path}
-import org.eknet.publet.web.{WebExtensionLoader, Settings, Config}
+import org.eknet.publet.web.{PartitionMounter, PubletWeb, Settings, Config}
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
 import org.eknet.publet.partition.git.{GitPartManImpl, GitPartMan}
@@ -43,13 +43,14 @@ import com.google.common.eventbus.EventBus
 import com.google.inject.matcher.Matchers
 import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import org.eknet.publet.web.util.StringMap
-import java.util.EventListener
+import org.eknet.publet.web.req._
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.10.12 23:19
  */
-class PubletModule(servletContext: ServletContext, init: Option[(EventBus, Config, WebExtensionLoader)]) extends ServletModule {
+class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging {
 
   private val webImports = List(
     "org.eknet.publet.web.Config",
@@ -73,15 +74,15 @@ class PubletModule(servletContext: ServletContext, init: Option[(EventBus, Confi
 
 
   override def configureServlets() {
-    bind(classOf[ServletContext])
+    val eventBus = new EventBus("Publet Global EventBus")
+    val config = new Config(servletContext.getContextPath, eventBus)
+
+    binder.set[ServletContext]
       .annotatedWith(Names.servletContext)
       .toInstance(servletContext)
 
-    val eventBus = init.map(_._1).getOrElse(new EventBus("Publet Global EventBus"))
-    val config = init.map(_._2).getOrElse(new Config(servletContext.getContextPath, eventBus))
-    bind(classOf[Config]) toInstance(config)
-
-    bind(classOf[EventBus]).toInstance(eventBus)
+    binder.set[Config].toInstance(config)
+    binder.set[EventBus].toInstance(eventBus)
     bindListener(Matchers.any(), new TypeListener {
       def hear[I](`type`: TypeLiteral[I], encounter: TypeEncounter[I]) {
         encounter.register(new InjectionListener[I] {
@@ -91,9 +92,30 @@ class PubletModule(servletContext: ServletContext, init: Option[(EventBus, Confi
         })
       }
     })
-    bind(classOf[WebExtensionLoader]) toInstance(init.map(_._3).getOrElse(new WebExtensionLoader(config)))
-    bind(classOf[StringMap]) annotatedWith(Names.settings) to classOf[Settings] in Scopes.SINGLETON
+    eventBus.register(PubletWeb)
+    binder.set[StringMap].annotatedWith(Names.settings).toType[Settings] in Scopes.SINGLETON
     install(PubletShiroModule)
+
+
+    binder.set[ExtensionManager].toType[DefaultExtensionManager]
+
+    val extMan = new ModuleManager(config)
+    binder.set[ModuleManager].toInstance(extMan)
+
+    extMan.modules foreach { m =>
+      info("Installing module: %s".format(m.getClass.getName))
+      install(m)
+    }
+
+    binder.bindEagerly[DefaultLayout]()
+    binder.bindEagerly[PartitionMounter]()
+
+    binder.bindRequestHandler.toType[GitHandlerFactory]
+    binder.bindRequestHandler.toType[PubletHandlerFactory]
+    binder.bindRequestHandler.toType[WebdavHandlerFactory]
+    binder.bindRequestHandler.toType[AssetsHandlerFactory]
+
+    filter("/*") through classOf[PubletMainFilter]
   }
 
   @Provides@Singleton

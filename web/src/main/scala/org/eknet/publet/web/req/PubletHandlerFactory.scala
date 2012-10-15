@@ -23,24 +23,27 @@ import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.auth.GitAction
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.web.guice.ExtensionManager
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:29
  */
-class PubletHandlerFactory extends RequestHandlerFactory {
+@Singleton
+class PubletHandlerFactory @Inject() (extman: ExtensionManager) extends RequestHandlerFactory {
 
   def getApplicableScore(req: HttpServletRequest) = DEFAULT_MATCH
 
   def createFilter() = new SuperFilter(Seq(
       Filters.redirect,
-      Filters.guice,
       Filters.webContext,
       Filters.blacklist,
       Filters.authc,
       Filters.exceptionHandler,
       PubletAuthzFilter,
-      Filters.extensionRequest,
+      Filters.extensionRequest(extman),
       Filters.source,
       Filters.publet
     ))

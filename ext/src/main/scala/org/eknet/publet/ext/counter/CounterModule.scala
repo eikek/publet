@@ -17,13 +17,16 @@
 package org.eknet.publet.ext.counter
 
 import com.google.inject.{Scopes, AbstractModule}
+import org.eknet.publet.web.guice.{PubletBinding, PubletModule}
+import org.eknet.publet.web.WebExtension
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:48
  */
-object CounterModule extends AbstractModule {
+class CounterModule extends AbstractModule with PubletModule with PubletBinding {
   def configure() {
     bind(classOf[CounterService]) to (classOf[CounterServiceImpl]) in Scopes.SINGLETON
+    binder.bindExtension.toType[CounterExtension]
   }
 }

@@ -17,11 +17,15 @@
 package org.eknet.publet.web
 
 import grizzled.slf4j.Logging
+import guice.PubletStartedEvent
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
 import util.{StringMap, PropertiesMap}
 import org.eknet.publet.partition.git
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.Publet
+import com.google.inject.{Inject, Singleton}
 
 /**
  * Checks the `Config` and/or `Settings` file for listed partitions to mount.
@@ -29,11 +33,12 @@ import org.eknet.publet.partition.git
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.05.12 20:30
  */
-class PartitionMounter extends EmptyExtension with Logging {
+@Singleton
+class PartitionMounter @Inject() (publet: Publet, config: Config) extends Logging {
 
-  override def onStartup() {
+  @Subscribe
+  def mountPartitions(ev: PubletStartedEvent) {
 
-    val publet = PubletWeb.publet
     //by default partitions are read from settings. this can be overridden
     //in the config file so that all definitions from settings are ignored
     val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {

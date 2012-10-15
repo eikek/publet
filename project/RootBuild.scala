@@ -144,6 +144,25 @@ object RootBuild extends Build {
 
 // Sub Modules
 
+object Publet extends Build {
+
+  lazy val module = Project(
+    id = "publet",
+    base = file("publet"),
+    settings = buildSettings
+  )
+
+  lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
+    name := "publet",
+    libraryDependencies ++= deps,
+    ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
+    sourceGenerators in Compile <+= ReflectPlugin.reflect
+  )
+
+  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
+
+}
+
 object Gitr extends Build {
 
   lazy val module = Project(
@@ -178,25 +197,6 @@ object GitrWeb extends Build {
 
 }
 
-
-object Publet extends Build {
-
-  lazy val module = Project(
-    id = "publet", 
-    base = file("publet"),  
-    settings = buildSettings
-  )
-  
-  lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
-    name := "publet",
-    libraryDependencies ++= deps,
-    ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
-    sourceGenerators in Compile <+= ReflectPlugin.reflect
-  ) 
-  
-  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
-
-}
 
 object GitPart extends Build {
 

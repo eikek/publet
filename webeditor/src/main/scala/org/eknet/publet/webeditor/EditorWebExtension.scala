@@ -20,24 +20,25 @@ import actions._
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{NotFoundHandler, EmptyExtension, PubletWeb}
+import org.eknet.publet.web.NotFoundHandler
 import org.eknet.publet.webeditor.EditorPaths._
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.web.asset.AssetManager
-import com.google.inject.{Scopes, AbstractModule}
+import com.google.inject.{Inject, Singleton, Scopes, AbstractModule}
+import org.eknet.publet.web.guice.{PubletModule, PubletStartedEvent, PubletBinding}
+import org.eknet.publet.Publet
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.engine.scalate.ScalateEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 16:16
  */
-class EditorWebExtension extends EmptyExtension with Logging {
+@Singleton
+class EditorWebExtension @Inject() (publet: Publet, assetMgr: AssetManager, scalateEngine: ScalateEngine) extends Logging {
 
-  override def getModule = Some(WebeditorModule)
-
-  override def onStartup() {
-    val publet = PubletWeb.publet
-    val scalateEngine = PubletWeb.scalateEngine
-
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     val cp = new ClasspathContainer(base = "/org/eknet/publet/webeditor/includes")
     publet.mountManager.mount(editorPath, cp)
 
@@ -51,7 +52,7 @@ class EditorWebExtension extends EmptyExtension with Logging {
     val editEngine = new WebEditor('edit, scalateEngine)
     publet.engineManager.addEngine(editEngine)
 
-    AssetManager.service setup (
+    assetMgr setup (
       Assets.editpageBrowser,
       Assets.blueimpFileUpload,
       Assets.blueimpCanvasToBlob,
@@ -69,8 +70,9 @@ class EditorWebExtension extends EmptyExtension with Logging {
 
 }
 
-object WebeditorModule extends AbstractModule {
+class WebeditorModule extends AbstractModule with PubletModule with PubletBinding {
   def configure() {
-    bind(classOf[NotFoundHandler]) to classOf[CreateNewHandler] in Scopes.SINGLETON
+    binder.set[NotFoundHandler].toType[CreateNewHandler] in Scopes.SINGLETON
+    binder.bindEagerly[EditorWebExtension]()
   }
 }

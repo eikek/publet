@@ -17,17 +17,19 @@
 package org.eknet.publet.ext.thumb
 
 import com.google.inject.{Singleton, Provides, AbstractModule}
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{WebExtension, Config}
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:22
  */
-object ThumbnailModule extends AbstractModule {
+class ThumbnailModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
+    binder.bindExtension.toType[ThumbnailExtension]
   }
 
   @Provides@Singleton

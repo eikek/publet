@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.filter._
 import RequestHandlerFactory._
 import org.eknet.publet.web.PubletRequestWrapper
+import com.google.inject.Singleton
 
 /**
  * Creates a filter chain to handle webdav requests.
@@ -27,13 +28,13 @@ import org.eknet.publet.web.PubletRequestWrapper
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:35
  */
+@Singleton
 class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
 
   def getApplicableScore(req: HttpServletRequest) =
     if (req.isDavRequest) EXACT_MATCH else NO_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-    Filters.guice,
     Filters.webContext,
     Filters.authc,
     Filters.exceptionHandler,

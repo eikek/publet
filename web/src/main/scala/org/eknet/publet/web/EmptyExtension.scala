@@ -25,9 +25,6 @@ import com.google.inject.Module
  */
 trait EmptyExtension extends WebExtension {
 
-  def getModule: Option[Module] = None
-  def onStartup() {}
-  def onShutdown() {}
   def onBeginRequest(req: HttpServletRequest) = req
   def onEndRequest(req: HttpServletRequest) {}
 

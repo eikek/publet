@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.ext.orient
+package org.eknet.publet.gitr.web
 
-import com.google.inject._
+import com.google.inject.AbstractModule
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 11.10.12 22:43
+ * @since 15.10.12 19:48
  */
-class OrientModule extends AbstractModule with PubletBinding with PubletModule {
-
+class GitrWebModule extends AbstractModule with PubletBinding with PubletModule {
   def configure() {
-    bind(classOf[OrientDbProvider]) to classOf[DefaultOrientDbProvider] in Scopes.SINGLETON
-    binder.bindEagerly[OrientDbExtension]()
+    binder.bindEagerly[GitrWebExtension]()
   }
-
 }

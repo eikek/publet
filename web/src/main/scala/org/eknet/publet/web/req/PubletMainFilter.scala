@@ -16,25 +16,25 @@
 
 package org.eknet.publet.web.req
 
-import javax.servlet._
-import http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import RequestHandlerFactory._
 import grizzled.slf4j.Logging
+import com.google.inject.{Inject, Singleton}
+import javax.servlet._
+import scala.Some
+import collection.JavaConversions._
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.web.event.Event
 
 /**
- * Publet's main filter.
+ * Publet's main filter. Gets the contributed [[org.eknet.publet.web.req.RequestHandlerFactory]]
+ * injected and also the event bus to post beginRequest/endRequest events.
  *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:42
  */
-class PubletMainFilter extends Filter with Logging {
-
-  val handlerFactories = List(
-    new GitHandlerFactory,
-    new WebdavHandlerFactory,
-    new PubletHandlerFactory,
-    new AssetsHandlerFactory
-  )
+@Singleton
+class PubletMainFilter @Inject() (handlerFactories: java.util.Set[RequestHandlerFactory], bus: EventBus) extends Filter with Logging {
 
   private var handlerMap: Map[Class[_], Filter] = null
 
@@ -58,6 +58,7 @@ class PubletMainFilter extends Filter with Logging {
       }
     })
     try {
+      bus.post(new RequestStartedEvent(req))
       handlerMap.get(handler.getClass).get.doFilter(request, response, chain)
     } catch {
       case e: Throwable => {
@@ -68,6 +69,7 @@ class PubletMainFilter extends Filter with Logging {
       }
     }
     finally {
+      bus.post(new RequestEndEvent(req))
       start.foreach(s => debug("--- Request '"+req.getRequestURI+"': " + (System.currentTimeMillis()-s)+"ms"))
     }
   }
@@ -76,3 +78,7 @@ class PubletMainFilter extends Filter with Logging {
     handlerMap.values.foreach(_.destroy())
   }
 }
+
+
+case class RequestStartedEvent(req: HttpServletRequest) extends Event
+case class RequestEndEvent(req: HttpServletRequest) extends Event

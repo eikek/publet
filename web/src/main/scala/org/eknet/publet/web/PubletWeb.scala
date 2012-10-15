@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web
 
-import guice.{Guicey, Names}
+import guice.{PubletShutdownEvent, PubletStartedEvent, InjectorHelper, Names}
 import javax.servlet.ServletContext
 import org.eknet.publet.partition.git.{GitPartition, GitPartMan}
 import org.eknet.publet.gitr.GitrMan
@@ -30,12 +30,13 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
 import com.google.inject
 import inject.Injector
+import com.google.common.eventbus.Subscribe
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:02
  */
-object PubletWeb extends Guicey with Logging {
+object PubletWeb extends InjectorHelper with Logging {
 
   // initialized on context startup
   private var servletContextI: WeakReference[ServletContext] = null
@@ -85,21 +86,20 @@ object PubletWeb extends Guicey with Logging {
 
   /**
    * Initializes the web app
-   * @param sc
+   * @param sce
    */
-  def initialize(sc: ServletContext) {
-    this.servletContextI = new WeakReference[ServletContext](sc)
+  @Subscribe
+  def initialize(sce: PubletStartedEvent) {
+    this.servletContextI = new WeakReference[ServletContext](sce.sc)
 
     publet.engineManager.register("/**", scalateEngine)
     val scriptEngine = instance[PubletEngine](Names.scriptEngine)
     publet.engineManager.register("*.scala", scriptEngine)
-
-    instance[WebExtensionLoader].onStartup()
   }
 
 
-  def destroy(sc: ServletContext) {
-    instance[WebExtensionLoader].onShutdown()
+  @Subscribe
+  def destroy(sce: PubletShutdownEvent) {
     this.servletContextI.clear()
     this.servletContextI = null
   }

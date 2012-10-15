@@ -41,35 +41,8 @@ import com.google.inject.Inject
  */
 class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(eventBus) with Logging {
 
-  private var directory: File = null
+  private val directory: File = Config.configDirectory(contextPath)
 
-  /**
-   * The root config directory. Usually retrieved via `publet.dir` system
-   * property or `$PUBLET_DIR`  environment variable (in that order)
-   *
-   */
-  val rootDirectory = {
-    var dir = Option(getProperty("publet.dir")).collect({ case a:String if (!a.trim.isEmpty) => a})
-    if (!dir.isDefined) {
-      info("System property 'publet.dir' not defined.")
-      dir = Option(getenv().get("PUBLET_DIR")).collect({ case a:String if (!a.trim.isEmpty) => a})
-    }
-    if (!dir.isDefined) {
-      info("Environment variable 'PUBLET_DIR' not defined. Falling back to default.")
-      dir = Option(getProperty("user.home")+ File.separator +".publet")
-    }
-
-    val d = new File(dir.get)
-    info("Using publet directory: "+ d.getAbsolutePath)
-    if (!d.exists()) if (!d.mkdirs()) throw new RuntimeException("unable to create config dir: "+ d)
-    if (!d.isDirectory) throw new RuntimeException("Config dir is not a directory: "+d)
-    d
-  }
-
-  contextPath match {
-    case "" => this.directory = new File(rootDirectory, "root")
-    case str => this.directory = new File(rootDirectory, Path(str).segments.mkString("-"))
-  }
 
   info("Loading publet.properties file from: "+ configfile.getAbsolutePath)
   reload()
@@ -102,7 +75,7 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
 
   private lazy val tempRoot = {
     val dir = if (System.getProperty("publet.standalone") != null) {
-      new File(rootDirectory.getParentFile, "temp")
+      new File(Config.rootDirectory.getParentFile, "temp")
     } else {
       new File(directory, "temp")
     }
@@ -186,7 +159,35 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
   }
 }
 
-object Config {
+object Config extends Logging {
+
+  /**
+   * The root config directory. Usually retrieved via `publet.dir` system
+   * property or `$PUBLET_DIR`  environment variable (in that order)
+   *
+   */
+  val rootDirectory = {
+    var dir = Option(getProperty("publet.dir")).collect({ case a:String if (!a.trim.isEmpty) => a})
+    if (!dir.isDefined) {
+      info("System property 'publet.dir' not defined.")
+      dir = Option(getenv().get("PUBLET_DIR")).collect({ case a:String if (!a.trim.isEmpty) => a})
+    }
+    if (!dir.isDefined) {
+      info("Environment variable 'PUBLET_DIR' not defined. Falling back to default.")
+      dir = Option(getProperty("user.home")+ File.separator +".publet")
+    }
+
+    val d = new File(dir.get)
+    info("Using publet directory: "+ d.getAbsolutePath)
+    if (!d.exists()) if (!d.mkdirs()) throw new RuntimeException("unable to create config dir: "+ d)
+    if (!d.isDirectory) throw new RuntimeException("Config dir is not a directory: "+d)
+    d
+  }
+
+  def configDirectory(contextPath: String) = contextPath match {
+    case "" => new File(Config.rootDirectory, "root")
+    case str => new File(Config.rootDirectory, Path(str).segments.mkString("-"))
+  }
 
   /**
    * Returns an instance by looking it up though the injector.

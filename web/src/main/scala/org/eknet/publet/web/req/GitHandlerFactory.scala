@@ -23,6 +23,7 @@ import org.eknet.publet.web.{PubletRequestWrapper, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
+import com.google.inject.Singleton
 
 /**
  * Creates a filter chain to server git requests.
@@ -30,6 +31,7 @@ import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:18
  */
+@Singleton
 class GitHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
 
   def getApplicableScore(req: HttpServletRequest) =

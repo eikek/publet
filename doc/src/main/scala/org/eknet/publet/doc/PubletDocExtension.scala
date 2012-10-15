@@ -22,12 +22,17 @@ import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.asset.{AssetManager, Group, AssetCollection}
 import org.eknet.publet.web.template.DefaultLayout
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.web.guice.PubletStartedEvent
+import org.eknet.publet.Publet
+import com.google.inject.{Inject, Singleton}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 22:29
  */
-class PubletDocExtension extends EmptyExtension with Logging with AssetCollection {
+@Singleton
+class PubletDocExtension @Inject() (publet: Publet, assetMgr: AssetManager) extends Logging with AssetCollection {
 
   override def classPathBase = "/org/eknet/publet/doc/resources/_includes/"
 
@@ -36,13 +41,14 @@ class PubletDocExtension extends EmptyExtension with Logging with AssetCollectio
     .add(resource("doc.css"))
     .require(DefaultLayout.Assets.bootstrap.name)
 
-  override def onStartup() {
-    AssetManager.service setup css
-    AssetManager.service setup Group("default")
+  @Subscribe
+  def mountResources(ev: PubletStartedEvent) {
+    assetMgr setup css
+    assetMgr setup Group("default")
       .use(css.name)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/doc/resources")
-    PubletWeb.publet.mountManager.mount(Path("/publet/doc"), cont)
+    publet.mountManager.mount(Path("/publet/doc"), cont)
   }
 
 }
