@@ -16,7 +16,6 @@
 
 package org.eknet.publet.web
 
-import event.Event
 import java.io.{FileInputStream, File}
 import System._
 import util.PropertiesMap
@@ -24,9 +23,7 @@ import grizzled.slf4j.Logging
 import java.nio.file.Files
 import com.google.common.eventbus.EventBus
 import org.eknet.publet.vfs.Path
-import com.google.inject.name.Named
-import javax.servlet.ServletContext
-import com.google.inject.Inject
+import org.eknet.publet.event.Event
 
 /** Configuration file, is picked up from the configured publet directory. This is
  * either given as system property `publet.dir`, as environment variable `PUBLET_DIR`

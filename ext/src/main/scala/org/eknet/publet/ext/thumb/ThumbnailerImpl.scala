@@ -25,6 +25,7 @@ import java.util.concurrent
 import concurrent.Callable
 import com.google.common.cache._
 import util.ByteSize
+import com.google.common.eventbus.EventBus
 
 /**
  * Creating thumbnails of image resources.
@@ -32,11 +33,11 @@ import util.ByteSize
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.05.12 12:20
  */
-class ThumbnailerImpl(mm: MountManager, tempDir: File, options: CacheOptions) extends Thumbnailer {
+class ThumbnailerImpl(mm: MountManager, bus: EventBus, tempDir: File, options: CacheOptions) extends Thumbnailer {
 
   val thumbnailPath = "/publet/ext/thumbs/".p
 
-  private val partition = new FilesystemPartition(tempDir, true)
+  private val partition = new FilesystemPartition(tempDir, bus, true)
   if (mm.resolveMount(thumbnailPath) == None) {
     mm.mount(thumbnailPath, partition)
   }

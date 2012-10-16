@@ -21,6 +21,7 @@ import org.eknet.publet.web.{WebExtension, Config}
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,7 +34,7 @@ class ThumbnailModule extends AbstractModule with PubletBinding with PubletModul
   }
 
   @Provides@Singleton
-  def createThumbnailer(publet: Publet, config: Config): Thumbnailer = {
+  def createThumbnailer(publet: Publet, config: Config, bus: EventBus): Thumbnailer = {
     val tempDir = config.newStaticTempDir("thumbs")
     val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
     val options = config("thumbnail.maxDiskSize") flatMap (str => str match {
@@ -46,7 +47,7 @@ class ThumbnailModule extends AbstractModule with PubletBinding with PubletModul
       config("thumbnail.maxEntries") map (entr => CacheOptions.maxEntries(entr.toInt))
     } getOrElse(CacheOptions.getDefault)
 
-    val tn = new ThumbnailerImpl(publet.mountManager, tempDir, options)
+    val tn = new ThumbnailerImpl(publet.mountManager, bus, tempDir, options)
     tn
   }
 }

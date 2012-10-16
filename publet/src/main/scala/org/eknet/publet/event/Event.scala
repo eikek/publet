@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.event
+package org.eknet.publet.event
 
 /**
  * Base class for events.

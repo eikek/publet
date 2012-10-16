@@ -23,12 +23,19 @@ import org.eknet.publet.auth._
 import org.xml.sax.SAXParseException
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
+import com.google.inject.Singleton
+import org.eknet.publet.vfs.events.ContentWrittenEvent
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.web.filter.PostReceiveEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.05.12 23:49
  */
+@Singleton
 class AuthManager extends PubletAuth with Logging {
+
+  private var lastModification: Option[Long] = None
 
   private def getPermissionXml = {
     val permissionPath = Path(Publet.allIncludes+"config/permissions.xml").toAbsolute
@@ -37,13 +44,31 @@ class AuthManager extends PubletAuth with Logging {
       .collect({case c:ContentResource=>c})
   }
 
+  @Subscribe
+  def reloadOnChange(event: ContentWrittenEvent) {
+    if (event.resource.name.fullName == "permissions.xml") {
+      info("Reloading permissions due to file change")
+      reload()
+    }
+  }
+
+  @Subscribe
+  def reloadOnPush(event: PostReceiveEvent) {
+    getPermissionXml map { newFile =>
+      if (lastModification.getOrElse(0L) != newFile.lastModification.getOrElse(0L)) {
+        info("Reloading permissions due to file change")
+        reload()
+      }
+    }
+  }
+
   @volatile
   private var database: Option[PubletAuth] = None
 
   private def delegate: PubletAuth = {
     database.getOrElse {
       val db = try {
-        getPermissionXml.map(r => new XmlDatabase(r)).getOrElse {
+        getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r)}).getOrElse {
           warn("No permission.xml file found. Falling back to super-user authentication!")
           SuperUserAuth
         }

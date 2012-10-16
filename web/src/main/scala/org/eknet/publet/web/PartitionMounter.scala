@@ -23,7 +23,7 @@ import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
 import util.{StringMap, PropertiesMap}
 import org.eknet.publet.partition.git
-import com.google.common.eventbus.Subscribe
+import com.google.common.eventbus.{EventBus, Subscribe}
 import org.eknet.publet.Publet
 import com.google.inject.{Inject, Singleton}
 
@@ -34,7 +34,7 @@ import com.google.inject.{Inject, Singleton}
  * @since 22.05.12 20:30
  */
 @Singleton
-class PartitionMounter @Inject() (publet: Publet, config: Config) extends Logging {
+class PartitionMounter @Inject() (publet: Publet, config: Config, bus: EventBus) extends Logging {
 
   @Subscribe
   def mountPartitions(ev: PubletStartedEvent) {
@@ -51,7 +51,7 @@ class PartitionMounter @Inject() (publet: Publet, config: Config) extends Loggin
       case PartitionConfig("fs", dir, mounts) => {
         info("Mounting fs directory '"+ dir+ "' to '"+ mounts.map(_.asString)+"'")
         val pdir = new File(Config.get.configDirectory, dir)
-        val fsp = new FilesystemPartition(pdir, true)
+        val fsp = new FilesystemPartition(pdir, bus, true)
         for (m <- mounts) publet.mountManager.mount(m, fsp)
         1
       }

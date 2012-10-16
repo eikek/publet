@@ -23,21 +23,26 @@ import org.eclipse.jgit.http.server.resolver.DefaultReceivePackFactory
 import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.transport.{ReceiveCommand, PostReceiveHook, ReceivePack}
-import org.eknet.publet.gitr.{RepositoryName, GitrMan}
+import org.eknet.publet.gitr.{GitrRepository, Tandem, RepositoryName, GitrMan}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
+import com.google.common.eventbus.EventBus
+import collection.JavaConversions._
+import org.eknet.publet.auth.{RepositoryModel, GitAction}
+import org.eknet.publet.web.util.ClientInfo
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 22:56
  */
-class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper with Logging {
+class GitHttpFilter(gitr: GitrMan, bus: EventBus) extends GitFilter with PubletRequestWrapper with Logging {
 
-  class TandemUpdateHook(name: RepositoryName) extends PostReceiveHook {
+  class TandemUpdateHook(name: RepositoryName, clientInfo: ClientInfo) extends PostReceiveHook {
     def onPostReceive(rp: ReceivePack, commands: java.util.Collection[ReceiveCommand]) {
       gitr.getTandem(name).map { tandem =>
         info("Update work tree at "+ name)
         tandem.updateWorkTree()
+        bus.post(new PostReceiveEvent(rp, commands.toSeq, tandem, clientInfo))
       }
     }
   }
@@ -46,7 +51,7 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper w
     setReceivePackFactory(new DefaultReceivePackFactory() {
       override def create(req: HttpServletRequest, db: Repository) = {
         val pack = super.create(req, db)
-        pack.setPostReceiveHook(new TandemUpdateHook(req.getRepositoryName.get))
+        pack.setPostReceiveHook(new TandemUpdateHook(req.getRepositoryName.get, ClientInfo(req)))
         pack
       }
     })
@@ -57,6 +62,10 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper w
   override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     val req = new PathInfoServletReq(request)
     super.doFilter(req, response, chain)
+    bus.post(GitEvent(req.getGitAction.get,
+      gitr.get(req.getRepositoryName.get.toDotGit).get,
+      request.getRepositoryModel.get,
+      ClientInfo(request)))
   }
 
   class PubletFilterConfig(val delegate: FilterConfig) extends FilterConfig {
@@ -92,3 +101,20 @@ class GitHttpFilter(gitr: GitrMan) extends GitFilter with PubletRequestWrapper w
     override def getServletPath = Path(gitMount).toAbsolute.asString
   }
 }
+
+/**
+ * Event posted after every successful git request.
+ *
+ * @param action
+ * @param repository
+ */
+case class GitEvent(action: GitAction.Value, repository: GitrRepository, repoModel: RepositoryModel, clientInfo: ClientInfo)
+
+/**
+ * Event posted after successful receive (git push). The working copy has already been updated.
+ *
+ * @param rp
+ * @param commands
+ * @param tandem
+ */
+case class PostReceiveEvent(rp: ReceivePack, commands: Seq[ReceiveCommand], tandem: Tandem, clientInfo: ClientInfo)

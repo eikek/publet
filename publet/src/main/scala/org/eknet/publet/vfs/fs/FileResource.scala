@@ -18,23 +18,32 @@ package org.eknet.publet.vfs.fs
 
 import java.io._
 import org.eknet.publet.vfs._
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.vfs.events.{ContentWrittenEvent, ContentCreatedEvent}
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.04.12 14:06
  */
-class FileResource(f: File, root: Path)
-  extends AbstractLocalResource(f, root) with ContentResource with Modifyable with Writeable {
+class FileResource(f: File, root: Path, bus: EventBus)
+  extends AbstractLocalResource(f, root, bus) with ContentResource with Modifyable with Writeable {
 
-  def inputStream = new BufferedInputStream(new FileInputStream(file))
+  def inputStream = new FileInputStream(file)
 
-  def outputStream: OutputStream = new FileOutputStream(file)
+
+  def writeFrom(in: InputStream, changeInfo: Option[ChangeInfo]) {
+    val out = new CloseEventOutStream(new FileOutputStream(file), bus, this, changeInfo)
+    Content.copy(in, out, closeIn = false)
+  }
+
+  def outputStream: OutputStream = new CloseEventOutStream(new FileOutputStream(file), bus, this, None)
 
   override def lastModification = Some(file.lastModified())
 
   def create() {
     file.createNewFile()
+    bus.post(ContentCreatedEvent(this))
   }
 
   override def length = Some(file.length())
@@ -42,4 +51,28 @@ class FileResource(f: File, root: Path)
   def contentType = ContentType(f)
 
   override def toString = "File[" + f.toString + "]"
+
+}
+
+private[fs] class CloseEventOutStream(out: OutputStream, bus: EventBus, resource: FileResource, changeInfo: Option[ChangeInfo]) extends OutputStream {
+  def write(b: Int) {
+    out.write(b)
+  }
+
+  override def write(b: Array[Byte]) {
+    out.write(b)
+  }
+
+  override def write(b: Array[Byte], off: Int, len: Int) {
+    out.write(b, off, len)
+  }
+
+  override def flush() {
+    out.flush()
+  }
+
+  override def close() {
+    out.close()
+    bus.post(ContentWrittenEvent(resource, changeInfo))
+  }
 }

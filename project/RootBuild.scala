@@ -145,6 +145,7 @@ object RootBuild extends Build {
 
 // Sub Modules
 
+// libraries: no other module dependencies
 object Publet extends Build {
 
   lazy val module = Project(
@@ -160,7 +161,7 @@ object Publet extends Build {
     sourceGenerators in Compile <+= ReflectPlugin.reflect
   )
 
-  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
+  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, findbugs, guava, scalaTest)
 
 }
 
@@ -174,10 +175,41 @@ object Gitr extends Build {
 
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr",
+    description := "Thin layer around jgit.",
     libraryDependencies ++= deps
   ) 
 
   lazy val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
+
+}
+
+
+object Web extends Build {
+
+  lazy val module = Project(
+    id = "web",
+    base = file("web"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, ScalaScriptEngine.module, ScalateEngine.module, GitPart.module, Auth.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-web",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(servletApiProvided,
+    slf4jApi, grizzledSlf4j,
+    commonsFileUpload,
+    commonsIo,
+    jgitHttpServer,
+    shiroWeb,
+    yuicompressor,
+    googleClosureCompiler,
+    guice,
+    cglib,
+    guiceServlet,
+    guiceMultibindings,
+    scalaTest)
 
 }
 
@@ -236,36 +268,6 @@ object ScalaScriptEngine extends Build {
 
 }
 
-object Web extends Build {
-
-  lazy val module = Project(
-    id = "web", 
-    base = file("web"),
-    settings = buildProperties
-  ) dependsOn (Publet.module, ScalaScriptEngine.module, ScalateEngine.module, GitPart.module, Auth.module)
-
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-web",
-    libraryDependencies ++= deps
-  ) 
-
-  val deps = Seq(servletApiProvided,
-       slf4jApi, grizzledSlf4j,
-       commonsFileUpload,
-       commonsIo, 
-       jgitHttpServer,
-       shiroWeb,
-       yuicompressor,
-       googleClosureCompiler,
-       findbugs,
-       guava,
-       guice,
-       cglib,
-       guiceServlet,
-       guiceMultibindings,
-       scalaTest)
-
-}
 
 object Webdav extends Build {
 

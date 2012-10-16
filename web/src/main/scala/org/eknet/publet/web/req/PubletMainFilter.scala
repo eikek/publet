@@ -24,7 +24,7 @@ import javax.servlet._
 import scala.Some
 import collection.JavaConversions._
 import com.google.common.eventbus.EventBus
-import org.eknet.publet.web.event.Event
+import org.eknet.publet.event.Event
 
 /**
  * Publet's main filter. Gets the contributed [[org.eknet.publet.web.req.RequestHandlerFactory]]

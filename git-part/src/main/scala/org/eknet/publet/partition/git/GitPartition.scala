@@ -23,9 +23,10 @@ import scala.Option
 import org.apache.shiro.SecurityUtils
 import grizzled.slf4j.Logging
 import org.eknet.publet.gitr.Tandem
+import com.google.common.eventbus.EventBus
 
-class GitPartition (val tandem: Tandem)
-  extends FilesystemPartition(tandem.workTree.getWorkTree, false) with Logging {
+class GitPartition (val tandem: Tandem, val bus: EventBus)
+  extends FilesystemPartition(tandem.workTree.getWorkTree, bus, false) with Logging {
 
   def updateWorkspace():Boolean = {
     tandem.updateWorkTree()
@@ -80,8 +81,8 @@ class GitPartition (val tandem: Tandem)
 
   override def children = super.children.filterNot(_.name.name == ".git/")
 
-  override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, this)
-  override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, this)
+  override protected def newDirectory(f: File, root: Path, bus: EventBus) = GitPartition.newDirectory(f, root, this)
+  override protected def newFile(f: File, root: Path, bus: EventBus) = GitPartition.newFile(f, root, this)
 
 }
 

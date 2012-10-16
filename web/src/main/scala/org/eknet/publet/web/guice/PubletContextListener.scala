@@ -23,8 +23,8 @@ import org.eknet.publet.web.util.AppSignature
 import com.google.inject.servlet.GuiceServletContextListener
 import com.google.inject._
 import ref.WeakReference
-import org.eknet.publet.web.event.Event
 import com.google.common.eventbus.EventBus
+import org.eknet.publet.event.Event
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

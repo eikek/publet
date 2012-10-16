@@ -29,15 +29,16 @@ import org.apache.shiro.util.ByteSource
 import org.eknet.publet.web.asset.Kind.KindVal
 import Path._
 import java.io.File
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.09.12 22:09
  */
-class DefaultAssetManager(publet: Publet, tempDir: File) extends GroupRegistry with Logging with AssetManager {
+class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends GroupRegistry with Logging with AssetManager {
 
   private val fileCache: concurrent.ConcurrentMap[Key, Future[Path]] = new ConcurrentHashMap()
-  private val assetContainer = new AssetContainer(tempDir)
+  private val assetContainer = new AssetContainer(tempDir, bus)
 
   if (publet.mountManager.resolveMount(AssetManager.assetPath.p) == None) {
     publet.mountManager.mount(AssetManager.assetPath.p, assetContainer)

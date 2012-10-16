@@ -32,9 +32,7 @@ trait Writeable {
    */
   def outputStream: OutputStream
 
-  def writeFrom(in: InputStream, changeInfo: Option[ChangeInfo] = None) {
-    Content.copy(in, outputStream, closeIn = false)
-  }
+  def writeFrom(in: InputStream, changeInfo: Option[ChangeInfo] = None)
 }
 
 case class ChangeInfo(name: Option[String], email: Option[String], message: String = "")

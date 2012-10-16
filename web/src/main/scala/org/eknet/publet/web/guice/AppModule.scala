@@ -96,7 +96,6 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     binder.set[StringMap].annotatedWith(Names.settings).toType[Settings] in Scopes.SINGLETON
     install(PubletShiroModule)
 
-
     binder.set[ExtensionManager].toType[DefaultExtensionManager]
 
     val extMan = new ModuleManager(config)
@@ -106,6 +105,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       info("Installing module: %s".format(m.getClass.getName))
       install(m)
     }
+
+    binder.set[PubletAuth].toType[AuthManager] in Scopes.SINGLETON
 
     binder.bindEagerly[DefaultLayout]()
     binder.bindEagerly[PartitionMounter]()
@@ -118,13 +119,10 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
   }
 
   @Provides@Singleton
-  def createAuthManager: PubletAuth = new AuthManager
-
-  @Provides@Singleton
   def createGitrManager(config: Config): GitrMan = new GitrManImpl(config.repositories)
 
   @Provides@Singleton
-  def createGitPartitionManager(gitr: GitrMan): GitPartMan = new GitPartManImpl(gitr)
+  def createGitPartitionManager(gitr: GitrMan, bus: EventBus): GitPartMan = new GitPartManImpl(gitr, bus)
 
   @Provides@Singleton@Named("contentroot")
   def createMainPartition(gitr: GitPartMan): Container =
@@ -177,9 +175,9 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
   }
 
   @Provides@Singleton
-  def createAssetManager(publet: Publet, config: Config) = {
+  def createAssetManager(publet: Publet, config: Config, bus: EventBus) = {
     val tempDir = config.newStaticTempDir("assets")
-    val mgr: AssetManager = new DefaultAssetManager(publet, tempDir)
+    val mgr: AssetManager = new DefaultAssetManager(publet, bus, tempDir)
     mgr
   }
 

@@ -18,6 +18,7 @@ package org.eknet.publet.vfs.fs
 
 import java.io.File
 import org.eknet.publet.vfs.{ContentResource, ContainerResource, Path}
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -26,8 +27,8 @@ import org.eknet.publet.vfs.{ContentResource, ContainerResource, Path}
 trait FileResourceFactory {
 
 
-  protected def newDirectory(f: File, root: Path): ContainerResource = new DirectoryResource(f, root)
+  protected def newDirectory(f: File, root: Path, bus: EventBus): ContainerResource = new DirectoryResource(f, root, bus)
 
-  protected def newFile(f: File, root: Path): ContentResource = new FileResource(f, root)
+  protected def newFile(f: File, root: Path, bus: EventBus): ContentResource = new FileResource(f, root, bus)
 
 }
