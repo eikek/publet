@@ -32,7 +32,7 @@ trait PubletRequestWrapper {
 
 }
 class ReqUtils(val req: HttpServletRequest) extends
-    RequestAttr with RequestUrl with RequestParams with RepositoryNameResolver with WebdavRequestUtil {
+    RequestAttr with RequestUrl with RequestParams with RepositoryNameResolver {
 
   /**
    * Redirects to the login page adding the full url of

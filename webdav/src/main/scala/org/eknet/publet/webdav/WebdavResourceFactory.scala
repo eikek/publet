@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav
+package org.eknet.publet.webdav
 
 import org.eknet.publet.web.PubletWeb
 import grizzled.slf4j.Logging

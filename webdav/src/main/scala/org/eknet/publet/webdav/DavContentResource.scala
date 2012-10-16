@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav
+package org.eknet.publet.webdav
 
 import org.eknet.publet.vfs.ContentResource
 import pvfs._

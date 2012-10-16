@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav
+package org.eknet.publet.webdav
 
 import javax.servlet._
 import org.eknet.publet.web._

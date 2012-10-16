@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.ContentResource
 import com.bradmcevoy.http.{CollectionResource, CopyableResource, MoveableResource}

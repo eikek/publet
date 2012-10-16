@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

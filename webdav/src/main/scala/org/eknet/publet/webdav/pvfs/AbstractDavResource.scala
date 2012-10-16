@@ -1,7 +1,7 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import java.util
-import org.eknet.publet.web.webdav.WebdavResource
+import org.eknet.publet.webdav.WebdavResource
 import com.bradmcevoy.http.{Request, PropFindableResource, Resource}
 
 /**

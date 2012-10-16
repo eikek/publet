@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.req
+package org.eknet.publet.webdav
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.filter._
-import RequestHandlerFactory._
-import org.eknet.publet.web.PubletRequestWrapper
+import org.eknet.publet.web.{ReqUtils, PubletRequestWrapper}
 import com.google.inject.Singleton
+import org.eknet.publet.web.req.{SuperFilter, RequestHandlerFactory}
+import RequestHandlerFactory._
 
 /**
  * Creates a filter chain to handle webdav requests.
@@ -29,16 +30,18 @@ import com.google.inject.Singleton
  * @since 27.09.12 15:35
  */
 @Singleton
-class WebdavHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
+class WebdavHandlerFactory extends RequestHandlerFactory {
 
-  def getApplicableScore(req: HttpServletRequest) =
-    if (req.isDavRequest) EXACT_MATCH else NO_MATCH
+  def getApplicableScore(req: HttpServletRequest) = {
+    val requtil = new ReqUtils(req) with WebdavRequestUtil
+    if (requtil.isDavRequest) EXACT_MATCH else NO_MATCH
+  }
 
   def createFilter() = new SuperFilter(Seq(
     Filters.webContext,
     Filters.authc,
     Filters.exceptionHandler,
-    Filters.webdav
+    new WebdavFilter
   ))
 
 }

@@ -107,7 +107,8 @@ object RootBuild extends Build {
       Ext.module,
       Server.module,
       Doc.module,
-      App.module
+      App.module,
+      Webdav.module
     )
 
   val buildSettings = Project.defaultSettings ++ Seq(
@@ -254,7 +255,6 @@ object Web extends Build {
        commonsIo, 
        jgitHttpServer,
        shiroWeb,
-       miltonApi, miltonServlet,
        yuicompressor,
        googleClosureCompiler,
        findbugs,
@@ -263,8 +263,24 @@ object Web extends Build {
        cglib,
        guiceServlet,
        guiceMultibindings,
-       scalaTest) ++ miltonApiDeps
+       scalaTest)
 
+}
+
+object Webdav extends Build {
+
+  lazy val module = Project(
+    id = "webdav",
+    base = file("webdav"),
+    settings = buildProperties
+  ) dependsOn Web.module
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-webdav",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
 }
 
 object War extends Build {
@@ -277,7 +293,7 @@ object War extends Build {
     base = file("war"),
     settings = buildProperties
   ) dependsOn (Publet.module, GitPart.module, ScalateEngine.module, Web.module,
-    WebEditor.module, Ext.module, GitrWeb.module, Doc.module)
+    WebEditor.module, Ext.module, GitrWeb.module, Doc.module, Webdav.module)
 
   val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
@@ -328,7 +344,7 @@ object Ext extends Build {
     id = "ext",
     base = file("ext"),
     settings = buildProperties
-  ) dependsOn (Publet.module, Web.module)
+  ) dependsOn (Publet.module, Web.module, Webdav.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",

@@ -1,7 +1,7 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.{Container, Modifyable}
-import org.eknet.publet.web.webdav.SimpleContainer
+import org.eknet.publet.webdav.SimpleContainer
 import com.bradmcevoy.http.MakeCollectionableResource
 import com.bradmcevoy.http.exceptions.BadRequestException
 

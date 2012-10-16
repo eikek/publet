@@ -1,6 +1,6 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
-import org.eknet.publet.web.shiro.{DigestAuthenticationToken, Security}
+import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.PubletWebContext
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.UsernamePasswordToken
@@ -8,6 +8,7 @@ import grizzled.slf4j.Logging
 import com.bradmcevoy.http.{Auth, Request, DigestResource, Resource}
 import com.bradmcevoy.http.Request.Method
 import com.bradmcevoy.http.http11.auth.DigestResponse
+import org.eknet.publet.webdav.auth.DigestAuthenticationToken
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

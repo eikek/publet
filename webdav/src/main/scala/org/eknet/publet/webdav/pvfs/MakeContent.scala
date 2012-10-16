@@ -1,9 +1,9 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.{Writeable, ContentResource, Modifyable, Container}
 import java.io.InputStream
 import java.lang.Long
-import org.eknet.publet.web.webdav.WebdavResource
+import org.eknet.publet.webdav.WebdavResource
 import org.eknet.publet.web.shiro.Security
 import com.bradmcevoy.http.PutableResource
 import com.bradmcevoy.http.exceptions.BadRequestException

@@ -112,7 +112,6 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
 
     binder.bindRequestHandler.toType[GitHandlerFactory]
     binder.bindRequestHandler.toType[PubletHandlerFactory]
-    binder.bindRequestHandler.toType[WebdavHandlerFactory]
     binder.bindRequestHandler.toType[AssetsHandlerFactory]
 
     filter("/*") through classOf[PubletMainFilter]

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web
+package org.eknet.publet.webdav
 
 import javax.servlet.http.HttpServletRequest
-import util.Key
+import org.eknet.publet.web._
+import org.eknet.publet.web.util.Key
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,7 +34,7 @@ trait WebdavRequestUtil {
       case org.eknet.publet.web.util.Request => {
         //for windows clients: they probe the server with an OPTIONS request to the root
         //thus, we should let this go to milton.
-        isDavRequest(applicationUri) || (applicationPath.isRoot && req.getMethod == Method.options)
+        isDavRequest(applicationUri) || (applicationPath.isRoot && req.getMethod == Method.options.toString)
       }
     })
 

@@ -1,7 +1,7 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.{Writeable, Modifyable, ContentResource}
-import org.eknet.publet.web.webdav.{DavContainerResource, WebdavResource}
+import org.eknet.publet.webdav.{DavContainerResource, WebdavResource}
 import com.bradmcevoy.http.{CollectionResource, CopyableResource}
 import com.bradmcevoy.http.exceptions.{BadRequestException, ConflictException}
 

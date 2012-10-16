@@ -1,4 +1,4 @@
-package org.eknet.publet.web.webdav.pvfs
+package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.{Modifyable, Resource}
 import com.bradmcevoy.http.DeletableResource

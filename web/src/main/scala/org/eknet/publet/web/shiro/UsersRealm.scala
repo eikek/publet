@@ -37,10 +37,6 @@ class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends Authorizi
 
   setCredentialsMatcher(new DynamicHashCredentialsMatcher())
 
-  override def supports(token: AuthenticationToken) = {
-    super.supports(token) || token.isInstanceOf[DigestAuthenticationToken]
-  }
-
   override def assertCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) {
     super.assertCredentialsMatch(token, info)
   }
@@ -89,21 +85,16 @@ class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends Authorizi
 
   class DynamicHashCredentialsMatcher extends CredentialsMatcher {
     private val fallback = new SimpleCredentialsMatcher()
-    private val digestMatcher = new DigestCredentialsMatcher
 
     def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
-      if (token.isInstanceOf[DigestAuthenticationToken]) {
-        digestMatcher.doCredentialsMatch(token, info)
-      } else {
-        info match {
-          case ui: UserAuthInfo => {
-            ui.algorithm.map(PubletShiroModule.newPasswordService(_)) match {
-              case Some(ps) => ps.passwordsMatch(token.getCredentials, new String(ui.getCredentials))
-              case _ => fallback.doCredentialsMatch(token, info)
-            }
+      info match {
+        case ui: UserAuthInfo => {
+          ui.algorithm.map(PubletShiroModule.newPasswordService(_)) match {
+            case Some(ps) => ps.passwordsMatch(token.getCredentials, new String(ui.getCredentials))
+            case _ => fallback.doCredentialsMatch(token, info)
           }
-          case _ => fallback.doCredentialsMatch(token, info)
         }
+        case _ => fallback.doCredentialsMatch(token, info)
       }
     }
   }

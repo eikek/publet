@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.shiro
+package org.eknet.publet.webdav.auth
 
 import org.apache.shiro.authc.credential.CredentialsMatcher
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationToken}
 import org.eknet.publet.web.PubletWeb
 import com.bradmcevoy.http.http11.auth.{DigestResponse, DigestGenerator}
+import org.eknet.publet.auth.PubletAuth
+import com.google.inject.{Inject, Singleton}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.07.12 17:00
  */
-class DigestCredentialsMatcher extends CredentialsMatcher {
+@Singleton
+class DigestCredentialsMatcher @Inject() (authm: PubletAuth) extends CredentialsMatcher {
   def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
     if (token.isInstanceOf[DigestAuthenticationToken]) {
       matchDigest(token.asInstanceOf[DigestAuthenticationToken])
@@ -37,7 +40,7 @@ class DigestCredentialsMatcher extends CredentialsMatcher {
   private def matchDigest(token: DigestAuthenticationToken) = {
     val digestResp = token.getCredentials
     val diggen = new DigestGenerator
-    val user = PubletWeb.authManager.findUser(token.getPrincipal)
+    val user = authm.findUser(token.getPrincipal)
     if (user.isDefined) {
       val dig = diggen.generateDigestWithEncryptedPassword(digestResp, String.valueOf(user.get.digest))
       digestResp.getResponseDigest == dig
