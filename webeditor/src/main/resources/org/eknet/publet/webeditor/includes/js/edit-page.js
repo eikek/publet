@@ -74,7 +74,7 @@ $(function() {
     if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "htmlmixed";
     if (filetype === "css") mode = "css";
     if (filetype === "js") mode = "javascript";
-    if (filetype === "markdown" || filetype === "md" || filetype === "page") mode = "markdown";
+    if (filetype === "markdown" || filetype === "md") mode = "markdown";
     if (filetype === "xml") mode = "xml";
     return mode;
   }
