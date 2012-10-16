@@ -18,27 +18,24 @@ directory.
 
 ### Standalone
 
-After downloading the zip file unpack it somewhere. Then copy the distributed
-configuration files in `etc` folder to their correct names (and make
-appropriate changes, if needed).
+After downloading the zip file unpack it somewhere. Then start the `start.sh`
+script or on Windows double-click the `start.bat` file.
 
     unzip publet-server-<version>.zip
-    cd publet-server-<version>
-    cp etc/server.dist.properties etc/server.properties
-    cp etc/logback.dist.xml etc/logback.xml
-
-You can now start the server (make sure the port `8080` is available or change
-it in `server.properties`):
-
     sh bin/start.dist.sh
 
 Then point your browser to <http://localhost:8080/>. You can stop the server
 by pressing `CTRL+C`.
 
 Files in `etc` and `bin` always have an additional `dist` in their name. The
-idea behind that is that you can copy the files to their correct name and make
-any modifications there. When updating the installation to a new version, your
+idea behind that is that you can copy the files to their correct name (without `dist`)
+and make any modifications there. When updating the installation to a new version, your
 changes are not overwritten.
+
+By default the server port is set to `8080`. This is done via a system property
+`-Dpublet.server.port=8080` within the `start.[bat|sh]` scripts. You can safely
+remove this system property and adopt the `server.properties` file in `etc`
+directory to your needs.
 
 ## Configuration
 

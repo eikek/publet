@@ -41,7 +41,7 @@ object Main extends App with Logging {
 
     (workingDirectory / "etc" / "server.properties").asFile match {
       case f if (f.exists()) => props.load(new FileInputStream(f))
-      case _ =>
+      case f => warn("No server.properties file found: " + f.getAbsolutePath)
     }
   }
 
