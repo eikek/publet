@@ -18,7 +18,6 @@ package org.eknet.publet.ext
 
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{Config, EmptyExtension, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 import com.google.inject.{Inject, Singleton, Provides, AbstractModule}
@@ -26,6 +25,7 @@ import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactor
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
+import org.eknet.publet.web.Config
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

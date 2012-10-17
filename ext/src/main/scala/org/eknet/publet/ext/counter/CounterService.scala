@@ -1,8 +1,7 @@
 package org.eknet.publet.ext.counter
 
 import java.util
-import org.eknet.publet.web.PubletWeb
-import org.eknet.publet.web.util.ClientInfo
+import org.eknet.publet.web.util.{PubletWeb, ClientInfo}
 import com.google.inject.ConfigurationException
 
 /**

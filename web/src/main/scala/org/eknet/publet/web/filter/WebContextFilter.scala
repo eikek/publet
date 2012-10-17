@@ -17,8 +17,9 @@
 package org.eknet.publet.web.filter
 
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{PubletRequestWrapper, PubletWebContext}
 import javax.servlet._
+import org.eknet.publet.web.PubletRequestWrapper
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

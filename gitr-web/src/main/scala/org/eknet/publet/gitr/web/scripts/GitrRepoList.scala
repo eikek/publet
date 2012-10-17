@@ -21,7 +21,7 @@ import org.eknet.publet.web.shiro.Security
 import ScalaScript._
 import org.eknet.publet.auth.{GitAction, RepositoryTag}
 import org.eknet.publet.gitr.RepositoryName
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 
 class GitrRepoList extends ScalaScript {
 

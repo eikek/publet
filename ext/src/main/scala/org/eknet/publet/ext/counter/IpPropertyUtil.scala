@@ -16,12 +16,11 @@
 
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.util.{StringMap, PropertiesMap}
-import org.eknet.publet.web.PubletWeb
 import java.net.{UnknownHostException, InetAddress}
 import grizzled.slf4j.Logging
 import com.google.common.cache.{RemovalNotification, RemovalListener}
 import java.util.concurrent.Callable
+import org.eknet.publet.web.util.StringMap
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

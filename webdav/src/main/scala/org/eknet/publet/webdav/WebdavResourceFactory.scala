@@ -1,21 +1,21 @@
 package org.eknet.publet.webdav
 
-import org.eknet.publet.web.PubletWeb
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import com.bradmcevoy.http.ResourceFactory
 import com.bradmcevoy.http.exceptions.BadRequestException
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 25.06.12 21:01
  */
-class WebdavResourceFactory extends ResourceFactory with Logging {
+class WebdavResourceFactory(publet: Publet, contextPath: String) extends ResourceFactory with Logging {
 
   def getResource(host: String, path: String) = {
     val resourcePath = Path(stripContextPath(path))
 
-    PubletWeb.publet.rootContainer.lookup(resourcePath) match {
+    publet.rootContainer.lookup(resourcePath) match {
       case Some(r) => WebdavResource(r)
       case None => {
         debug("No webdav resource found for path: "+ resourcePath.asString)
@@ -26,11 +26,11 @@ class WebdavResourceFactory extends ResourceFactory with Logging {
   }
 
   private def stripContextPath(path: String): String = {
-    if (PubletWeb.contextPath.isEmpty) {
+    if (contextPath.isEmpty) {
       path
     } else {
       val npath = if (!path.startsWith("/")) "/"+path else path
-      npath.substring(PubletWeb.contextPath.length)
+      npath.substring(contextPath.length)
     }
   }
 }

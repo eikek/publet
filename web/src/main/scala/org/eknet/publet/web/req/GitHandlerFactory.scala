@@ -24,7 +24,7 @@ import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import com.google.inject.{Inject, Singleton}
-import com.google.common.eventbus.{Subscribe, EventBus}
+import com.google.common.eventbus.EventBus
 import org.eknet.publet.gitr.GitrMan
 import grizzled.slf4j.Logging
 

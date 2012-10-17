@@ -24,6 +24,7 @@ import java.io.File
 import util.{StringMap, PropertiesMap}
 import org.eknet.publet.partition.git
 import com.google.common.eventbus.{EventBus, Subscribe}
+import git.GitPartMan
 import org.eknet.publet.Publet
 import com.google.inject.{Inject, Singleton}
 
@@ -34,7 +35,7 @@ import com.google.inject.{Inject, Singleton}
  * @since 22.05.12 20:30
  */
 @Singleton
-class PartitionMounter @Inject() (publet: Publet, config: Config, bus: EventBus) extends Logging {
+class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config: Config, settings: Settings, bus: EventBus) extends Logging {
 
   @Subscribe
   def mountPartitions(ev: PubletStartedEvent) {
@@ -42,7 +43,7 @@ class PartitionMounter @Inject() (publet: Publet, config: Config, bus: EventBus)
     //by default partitions are read from settings. this can be overridden
     //in the config file so that all definitions from settings are ignored
     val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
-      readPartitionConfig(PubletWeb.publetSettings)
+      readPartitionConfig(settings)
     } else {
       readPartitionConfig(Config.get)
     }
@@ -57,7 +58,7 @@ class PartitionMounter @Inject() (publet: Publet, config: Config, bus: EventBus)
       }
       case PartitionConfig("git", dir, mounts) => {
         info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
-        val gitp = PubletWeb.gitpartman.getOrCreate(Path(dir), git.Config())
+        val gitp = gitpartman.getOrCreate(Path(dir), git.Config())
         for (m <- mounts) publet.mountManager.mount(m, gitp)
         1
       }

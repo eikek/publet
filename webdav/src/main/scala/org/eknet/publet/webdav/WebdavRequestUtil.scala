@@ -18,7 +18,7 @@ package org.eknet.publet.webdav
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web._
-import org.eknet.publet.web.util.Key
+import util.{PubletWeb, Key}
 import scala.Some
 
 /**

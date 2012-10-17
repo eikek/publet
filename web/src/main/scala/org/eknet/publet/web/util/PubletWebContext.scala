@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web
+package org.eknet.publet.web.util
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import util.{ClientInfo, Request, Key}
+import org.eknet.publet.web._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -1,3 +1,4 @@
+- import org.eknet.publet.doc.SourceHelper
 :markdown
   # Extensions
 
@@ -7,37 +8,105 @@
 
   The _web-editor_, for example, is included by using the extension concept.
 
-  ## The trait _WebExtension_
+  In order to create new extensions, you need to know a little about how components
+  are wired.
 
-  Extensions are created by extending the trait `WebExtension`. This is defined
-  as follows
+  ## Guice Modules
 
-- import org.eknet.publet.doc.SourceHelper
+  The different application components are wired using [Guice](http://code.google.com/p/google-guice/)
+  dependency injection framework. The "container" is created by creating an `Injector` at
+  application start. This injector contains the default bindings of the application and extensions
+  can contribute other bindings easily by creating a module that extends the `PubletModule`
+  trait. This trait extends the `Module` interface from guice not adding other members. It's
+  just for marking guice modules that should considered as extensions to publet.
+
+  The modules are lookup up at application start using [Java's ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html)
+  strategy. Thus, to add a new module create a file
+
+      META-INF/services/org.eknet.publet.web.guice.PubletModule
+
+  and add lines denoting the full classname of your modules. The module must have a no-arg constructor
+  in order to get instantiated. There is another trait `PubletBindings` that defines some helper
+  methods for creating bindings.
+
+  That means, that all such provided modules are automatically added to the injector. If you want to
+  prevent certain modules from being loaded, specify them in the configuration file `publet.properties`.
+  Please use the full class name of the published module class with an associated value of `false`. For
+  example, you could exclude the webeditor by specifying
+
+      org.eknet.publet.webeditor.WebeditorModule=false
+
+  in the configuration file.
+
+  This is the only way to contribute to the application, but using guice bindings it is possible
+  to contribute to existing services. There are a few hooks available:
+
+  ### Events
+
+  Publet uses an event bus to publish events. You can listen for any event just by registering
+  an object to the `EventBus` that has `@Subscribe` annotated methods expecting the desired event
+  as its only argument. Registering is quite easy, since all services created by guice are registerd
+  on the `EventBus`. Thus, you only need to create a class with the appropriate event handler methods
+  and bind them in your module.
+
+  For example, to mount additional resources into the content tree, the `PubletStartedEvent` can
+  be used. This is published once on application start.
+
+
+  ### The trait _WebExtension_
+
+  This trait can be used to intercept standard request processing. It looks as
+  follows:
+
 pre
   code.scala<>
     !~~SourceHelper.printSource("WebExtension.scala")
 
 :markdown
-  The `onStartup()` is a good place to mount partitions (like `ClasspathContainer`
-  or `MapContainer`).
+  This way you can wrap the request before it goes to the final processing phase.
 
-  ## Lookup mechanism
+  You need to bind you `WebExtension` using a `Multibinder` such that it is added to the
+  existing set of extensions. When using the helper trait `PubletBindings` this can be
+  done like that:
 
-  Publet will look for extensions on startup by using [Java's
-  ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html)
-  strategy.
+      binder.bindExtension.toType[MyWebExtension]
 
-  You can prevent certain extensions from being loaded by specifying them in the
-  configuration file `publet.properties`. Please use the full class name of the
-  published web extension class with an associated value of `false`.
+  or just use guice's `Multibinder.newSetBinder` with the type `WebExtension`.
 
-  For example, if you don't want use the provided webeditor, specifiy the
-  following line in `publet.properties`:
 
-      org.eknet.publet.webeditor.EditorWebExtension=false
+  ### RequestHandler
 
-  That will prevent the webeditor from being loaded. By default all available
-  extensions are loaded.
+  All requests are dispatched to a specific request handler that has been registered with guice. Each
+  request is handed to a `RequestHandlerFactory` in order to find a match. If a match is found, the
+  request is handed off to the handler.
+
+  You can add custom handlers by binding a `RequestHandlerFactory` in your module.
+
+      binder.bindRequestHandler.toType[GitHandlerFactory]
+
+  The trait looks like this:
+
+pre
+  code.scala<>
+    !~~SourceHelper.printSource("RequestHandlerFactory.scala")
+
+:markdown
+
+  A `RequestHandlerFactory` is asked to create a `javax.servlet.Filter` that handles a request. This
+  filter is only applied, if the request matches this handler. That is, it returns the highest score
+  for the current request. To ease writing new filters, the `SuperFilter` class can be used to create
+  a filter that itself is a filter chain. The object `Filters` collects some pre-defined filters that
+  can be reused, if applicable.
+
+  Please have a look at the provided implementations for more information.
+
+  ### Realms
+
+  The same way `WebExtension` and `RequestHandlerFactory` are contributed, you can contribute
+  shiro `Realm` objects. If you have an user database, just implement a `Realm` and bind it in
+  your module to the set of Realms.
+
+      binder.bindRealm.toType[UsersRealm]
 
 
   ## Installing Extensions

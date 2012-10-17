@@ -17,7 +17,7 @@
 package org.eknet.publet.web.asset
 
 import javax.servlet._
-import org.eknet.publet.web.{RunMode, Config, PubletRequestWrapper}
+import org.eknet.publet.web.PubletRequestWrapper
 import AssetManager._
 import org.eknet.publet.vfs.{ContentType, Path}
 import org.eknet.publet.web.filter.Filters.ForwardRequest
@@ -27,7 +27,7 @@ import grizzled.slf4j.Logging
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.09.12 18:52
  */
-class AssetFilter extends Filter with PubletRequestWrapper with Logging {
+class AssetFilter(assetMgr: AssetManager) extends Filter with PubletRequestWrapper with Logging {
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     if (request.applicationUri.startsWith(groupsPath) || request.applicationUri.startsWith(compressedPath)) {
@@ -44,7 +44,7 @@ class AssetFilter extends Filter with PubletRequestWrapper with Logging {
           case Nil => List(request.applicationPath.name.name)
           case a@_ => a
         }
-        AssetManager.service.getCompressed(groups, path, k)
+        assetMgr.getCompressed(groups, path, k)
       } map { p =>
         chain.doFilter(new ForwardRequest(request.getContextPath+p.asString, request), response)
       } getOrElse {

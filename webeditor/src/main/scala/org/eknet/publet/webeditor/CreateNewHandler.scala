@@ -21,6 +21,7 @@ import org.eknet.publet.vfs._
 import grizzled.slf4j.Logging
 import org.eknet.publet.web._
 import scala.Some
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

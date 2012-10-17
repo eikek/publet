@@ -16,8 +16,8 @@
 
 package org.eknet.publet.ext.thumb
 
-import org.eknet.publet.web.PubletWeb
 import org.eknet.publet.vfs.{Path, ContentResource}
+import org.eknet.publet.web.util.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

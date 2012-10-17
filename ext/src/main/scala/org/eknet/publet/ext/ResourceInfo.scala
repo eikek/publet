@@ -1,13 +1,13 @@
 package org.eknet.publet.ext
 
 import counter.{CounterService, CounterExtension}
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import org.eknet.publet.vfs.Path
 import java.text.DateFormat
 import java.util
 import org.eknet.publet.partition.git.GitFile
 import org.eknet.publet.auth.UserProperty
 import org.eknet.publet.vfs.util.ByteSize
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 
 /**
  * A helper class that defines method for retrieving information to

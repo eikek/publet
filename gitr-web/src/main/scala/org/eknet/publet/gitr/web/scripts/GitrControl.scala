@@ -19,12 +19,11 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import GitrControl._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.com.twitter.json.Json
 import org.eknet.publet.gitr.GitrRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.TemplateEngine
-import org.eknet.publet.web.util.RenderUtils
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext, RenderUtils}
 import org.eknet.publet.vfs.{ContentType, Path, Content}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.GitAction

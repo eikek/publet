@@ -21,9 +21,9 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import xml.{Null, Text, Attribute}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.{Resource, ContentType, ContentResource, Path}
 import org.eknet.publet.webeditor.EditorPaths
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

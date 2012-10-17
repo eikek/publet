@@ -4,19 +4,20 @@ import javax.servlet._
 import org.eknet.publet.web._
 import com.bradmcevoy.http.{Response, Request, MiltonServlet, HttpManager}
 import ref.WeakReference
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 25.06.12 21:02
  */
-class WebdavFilter extends Filter with PubletRequestWrapper {
+class WebdavFilter(publet: Publet) extends Filter with PubletRequestWrapper {
 
   private var servletContext: WeakReference[ServletContext] = null
   private var httpManager: HttpManager = null
 
   def init(filterConfig: FilterConfig) {
     this.servletContext = new WeakReference(filterConfig.getServletContext)
-    this.httpManager = new HttpManager(new WebdavResourceFactory)
+    this.httpManager = new HttpManager(new WebdavResourceFactory(publet, filterConfig.getServletContext.getContextPath))
   }
 
   def destroy() {

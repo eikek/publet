@@ -2,10 +2,10 @@ package org.eknet.publet.web.filter
 
 import org.eknet.publet.web.shiro.AuthcFilter
 import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest}
-import org.eknet.publet.web.asset.AssetFilter
+import org.eknet.publet.web.asset.{AssetManager, AssetFilter}
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.PubletWebContext
-import org.eknet.publet.web.guice.ExtensionManager
+import org.eknet.publet.web.{WebExtension, Settings, Config}
+import org.eknet.publet.Publet
 
 /**
  *
@@ -17,13 +17,13 @@ object Filters {
 
   val blacklist = new BlacklistFilter
   val exceptionHandler = new ExceptionFilter
-  def extensionRequest(extman: ExtensionManager) = new ExtensionRequestFilter(extman)
-  val publet = new PubletFilter
-  val redirect = new RedirectFilter
-  val source = new SourceFilter
+  def extensionRequest(webext: java.util.Set[WebExtension]) = new ExtensionRequestFilter(webext)
+  def publet(p: Publet) = new PubletFilter(p)
+  def redirect(config: Config, settings: Settings) = new RedirectFilter(config, settings)
+  def source(p: Publet) = new SourceFilter(p)
   val webContext = new WebContextFilter
   val authc = new AuthcFilter
-  val assets = new AssetFilter
+  def assets(assetMgr: AssetManager) = new AssetFilter(assetMgr)
 
   private[web] class ForwardRequest(uri: String, req: HttpServletRequest, clearAttributes: Boolean = true) extends HttpServletRequestWrapper(req) {
     import collection.JavaConversions._
@@ -37,6 +37,6 @@ object Filters {
     override val getRequestURI = if (!uri.startsWith("/")) "/"+uri else uri
   }
 
-  def forwardRequest(path: Path, clearAttributes: Boolean = true) =
-    new ForwardRequest(PubletWebContext.req.getContextPath+path.asString, PubletWebContext.req, clearAttributes)
+  def forwardRequest(req: HttpServletRequest, path: Path, clearAttributes: Boolean = true) =
+    new ForwardRequest(req.getContextPath+path.asString, req, clearAttributes)
 }

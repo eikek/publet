@@ -385,10 +385,14 @@ object Doc extends Build {
     name := "publet-doc",
     // add the WebExtension source file to have it available from the docs
     resourceGenerators in Compile <+= (sourceDirectory in Web.module, resourceManaged in Compile) map { (sd:File, rd: File) =>
-      val source = sd / "main" / "scala" / "org" / "eknet" / "publet" / "web" / "WebExtension.scala"
-      val target = rd / "org" / "eknet" / "publet" / "doc" / "resources" / "_sources" / "WebExtension.scala"
-      IO.copyFile(source, target)
-      Seq(target)
+      val sourceDir = sd / "main" / "scala" / "org" / "eknet" / "publet" / "web"
+      val sources = Seq(sourceDir / "WebExtension.scala", sourceDir / "req" / "RequestHandlerFactory.scala")
+      val target = rd / "org" / "eknet" / "publet" / "doc" / "resources" / "_sources"
+      sources.map( f => {
+        val targetFile = target / f.name
+        IO.copyFile(f, targetFile)
+        targetFile
+      })
     },
     libraryDependencies ++= deps
   )

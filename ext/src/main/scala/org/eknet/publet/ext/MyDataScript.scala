@@ -17,13 +17,13 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.{User, UserProperty}
 import org.eknet.publet.vfs.Content
 import com.bradmcevoy.http.http11.auth.DigestGenerator
 import org.apache.shiro.authc.credential.PasswordService
 import org.eknet.publet.webdav.WebdavResource
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

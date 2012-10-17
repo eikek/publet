@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web
+package org.eknet.publet.web.util
 
-import guice.{PubletShutdownEvent, PubletStartedEvent, InjectorHelper, Names}
 import javax.servlet.ServletContext
 import org.eknet.publet.partition.git.{GitPartition, GitPartMan}
 import org.eknet.publet.gitr.GitrMan
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Container, Path}
-import util.{StringMap, Key}
 import grizzled.slf4j.Logging
 import org.eknet.publet.auth.{PubletAuth, RepositoryModel}
 import ref.WeakReference
-import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
 import com.google.inject
 import inject.Injector
 import com.google.common.eventbus.Subscribe
+import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names, InjectorHelper}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -91,10 +89,6 @@ object PubletWeb extends InjectorHelper with Logging {
   @Subscribe
   def initialize(sce: PubletStartedEvent) {
     this.servletContextI = new WeakReference[ServletContext](sce.sc)
-
-    publet.engineManager.register("/**", scalateEngine)
-    val scriptEngine = instance[PubletEngine](Names.scriptEngine)
-    publet.engineManager.register("*.scala", scriptEngine)
   }
 
 

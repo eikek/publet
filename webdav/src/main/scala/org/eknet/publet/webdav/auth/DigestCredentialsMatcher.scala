@@ -18,7 +18,6 @@ package org.eknet.publet.webdav.auth
 
 import org.apache.shiro.authc.credential.CredentialsMatcher
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationToken}
-import org.eknet.publet.web.PubletWeb
 import com.bradmcevoy.http.http11.auth.{DigestResponse, DigestGenerator}
 import org.eknet.publet.auth.PubletAuth
 import com.google.inject.{Inject, Singleton}

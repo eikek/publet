@@ -17,7 +17,7 @@
 package org.eknet.publet.web.filter
 
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.{PubletRequestWrapper, Config, PubletWeb}
+import org.eknet.publet.web.{Settings, PubletRequestWrapper, Config}
 import javax.servlet._
 
 /**
@@ -33,9 +33,9 @@ import javax.servlet._
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 06:50
  */
-class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
+class RedirectFilter(config: Config, settings: Settings) extends Filter with Logging with PubletRequestWrapper {
 
-  private lazy val mount = Config.get.mainMount
+  private lazy val mount = config.mainMount
 
   private lazy val defaultRedirects = Map(
     "/" -> (mount + "/"),
@@ -55,17 +55,17 @@ class RedirectFilter extends Filter with Logging with PubletRequestWrapper {
    *
    * @return
    */
-  private def redirects = PubletWeb.publetSettings.keySet.filter(_.startsWith("redirect."))
+  private def redirects = settings.keySet.filter(_.startsWith("redirect."))
 
   /**
    * Returns a list of property keys from `settings.properties`
    * for those that start with `forward.`
    * @return
    */
-  private def forwards = PubletWeb.publetSettings.keySet.filter(_.startsWith("forward."))
+  private def forwards = settings.keySet.filter(_.startsWith("forward."))
 
-  private def allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), PubletWeb.publetSettings(key).get)).toMap
-  private def allForwards = defaultForwards ++ forwards.map(key => (key.substring(8), PubletWeb.publetSettings(key).get)).toMap
+  private def allRedirects = defaultRedirects ++ redirects.map(key => (key.substring(9), settings(key).get)).toMap
+  private def allForwards = defaultForwards ++ forwards.map(key => (key.substring(8), settings(key).get)).toMap
 
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     val path = req.applicationPath

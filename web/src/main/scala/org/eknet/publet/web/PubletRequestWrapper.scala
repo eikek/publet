@@ -16,9 +16,9 @@
 
 package org.eknet.publet.web
 
-import guice.PubletShiroModule
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet.{ServletResponse, ServletRequest}
+import util.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

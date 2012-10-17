@@ -18,8 +18,10 @@ package org.eknet.publet.web.filter
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import javax.servlet._
-import org.eknet.publet.web.{PageWriter, PubletRequestWrapper, PubletWeb}
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
 import org.eknet.publet.vfs.ContentType
+import org.eknet.publet.Publet
+import com.google.inject.Singleton
 
 /** Servlet that processes the resource using the engine
  * as specified with `a=` http request parameter or the
@@ -29,7 +31,8 @@ import org.eknet.publet.vfs.ContentType
  * @since 05.04.12 15:03
  *
  */
-class PubletFilter extends Filter with PageWriter with PubletRequestWrapper {
+@Singleton
+class PubletFilter(publet: Publet) extends Filter with PageWriter with PubletRequestWrapper {
 
 
   def init(filterConfig: FilterConfig) {}
@@ -47,7 +50,6 @@ class PubletFilter extends Filter with PageWriter with PubletRequestWrapper {
     val engineId = Symbol(engine)
     val path = req.applicationPath
 
-    val publet = PubletWeb.publet
     val targetType = path.name.targetType
     val someEngine = Some(publet.engineManager.getEngine(engineId).getOrElse(sys.error("No engine '"+engineId+"' available")))
     val html = publet.process(path, targetType, someEngine)
@@ -55,7 +57,6 @@ class PubletFilter extends Filter with PageWriter with PubletRequestWrapper {
   }
 
   def processDefault(req: HttpServletRequest, resp: HttpServletResponse) {
-    val publet = PubletWeb.publet
     val path = req.applicationPath
 
     val tt = if (path.name.targetType == ContentType.unknown) ContentType.html else path.name.targetType

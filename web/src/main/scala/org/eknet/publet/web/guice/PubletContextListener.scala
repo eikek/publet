@@ -17,7 +17,7 @@
 package org.eknet.publet.web.guice
 
 import javax.servlet.{ServletContext, ServletContextEvent}
-import org.eknet.publet.web.{RunMode, Config, PubletWeb}
+import org.eknet.publet.web.{RunMode, Config}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.util.AppSignature
 import com.google.inject.servlet.GuiceServletContextListener

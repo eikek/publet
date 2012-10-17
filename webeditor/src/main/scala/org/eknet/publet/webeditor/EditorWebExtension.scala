@@ -49,7 +49,7 @@ class EditorWebExtension @Inject() (publet: Publet, assetMgr: AssetManager, scal
     muc.addResource(new WebScriptResource("upload.json".rn, FileUploadHandler))
     publet.mountManager.mount(scriptPath, muc)
 
-    val editEngine = new WebEditor('edit, scalateEngine)
+    val editEngine = new WebEditor('edit, scalateEngine, publet)
     publet.engineManager.addEngine(editEngine)
 
     assetMgr setup (

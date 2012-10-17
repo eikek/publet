@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit
 import org.eclipse.jgit.lib.PersonIdent
 import java.text.DateFormat
 import java.util.{Locale => JLocale, Date => JDate}
-import org.eknet.publet.web.PubletWebContext
 import xml.XML
+import org.eknet.publet.web.util.PubletWebContext
 
 case class CommitInfo(name: String, path: String, container: Boolean, author: PersonIdent, fullMessage: String, commitTime: Int, id: String, loc: JLocale) extends Ordered[CommitInfo] {
 

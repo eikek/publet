@@ -24,13 +24,13 @@ import org.eknet.publet.gitr.GitrRepository
 import ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.{ContentType, Content, Path}
-import org.eknet.publet.web.PubletWebContext
 import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.support.StringTemplateSource
 import eu.medsea.mimeutil.MimeUtil
 import ContentType._
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.GitAction
+import org.eknet.publet.web.util.PubletWebContext
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter

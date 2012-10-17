@@ -27,7 +27,7 @@ applying a string key, for example:
     val stringValue: Option[String] = PubletWeb.publetSettings("applicationName")
     val stringValue: Option[String] = Settings("applicationName")
 
-Note, the settings must be explcitely reloaded after making changes.
+Note, the settings are reloaded automatically on each change.
 
 
 ### Reference settings file
@@ -49,7 +49,8 @@ The configuration can be accessed in code using the class
     import org.eknet.publet.web.Config
     val stringValue: Option[String] = Config("webdav.enabled")
 
-The `Config` class can be injected via guice or looked up via `Config.get`.
+The `Config` class can be injected via guice or looked up via `Config.get`. The `Config`
+object must be reloaded manually after modification.
 
 ### War
 

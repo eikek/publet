@@ -27,9 +27,9 @@ The default name is `WebDav Area`. It is currently not supported to specify
 different realm names. This realm name is used for all resources.
 
 You can disable/enable webdav support for the whole application in the
-configuration file `publet.properties`:
+configuration file `publet.properties` by disabling the webdav extension:
 
-    webdav.enabled=true
+    org.eknet.publet.webdav.WebdavModule=false
 
 If this is set to `false`, all webdav related settings are ignored, since the
 webdav filter is disabled. By default, webdav support is enabled.

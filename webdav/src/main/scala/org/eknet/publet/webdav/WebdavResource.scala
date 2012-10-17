@@ -3,7 +3,7 @@ package org.eknet.publet.webdav
 import org.eknet.publet.vfs
 import vfs.{ContainerResource, ContentResource}
 import com.bradmcevoy.http.Resource
-import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.util.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

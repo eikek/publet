@@ -26,7 +26,7 @@ import org.fusesource.scalate.Binding
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Container, ResourceName, Path}
-import org.eknet.publet.web.{PartitionMounter, PubletWeb, Settings, Config}
+import org.eknet.publet.web.{PartitionMounter, Settings, Config}
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
 import org.eknet.publet.partition.git.{GitPartManImpl, GitPartMan}
@@ -42,7 +42,7 @@ import org.eknet.publet.web.asset.AssetManager
 import com.google.common.eventbus.EventBus
 import com.google.inject.matcher.Matchers
 import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
-import org.eknet.publet.web.util.StringMap
+import org.eknet.publet.web.util.{PubletWeb, StringMap}
 import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
 
@@ -55,8 +55,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
   private val webImports = List(
     "org.eknet.publet.web.Config",
     "org.eknet.publet.web.Settings",
-    "org.eknet.publet.web.PubletWeb",
-    "org.eknet.publet.web.PubletWebContext",
+    "org.eknet.publet.web.util.PubletWeb",
+    "org.eknet.publet.web.util.PubletWebContext",
     "org.eknet.publet.web.util.AttributeMap",
     "org.eknet.publet.web.util.Key",
     "org.eknet.publet.web.shiro.Security"
@@ -96,12 +96,10 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     binder.set[StringMap].annotatedWith(Names.settings).toType[Settings] in Scopes.SINGLETON
     install(PubletShiroModule)
 
-    binder.set[ExtensionManager].toType[DefaultExtensionManager]
+    val moduleManager = new ModuleManager(config)
+    binder.set[ModuleManager].toInstance(moduleManager)
 
-    val extMan = new ModuleManager(config)
-    binder.set[ModuleManager].toInstance(extMan)
-
-    extMan.modules foreach { m =>
+    moduleManager.modules foreach { m =>
       info("Installing module: %s".format(m.getClass.getName))
       install(m)
     }
@@ -143,8 +141,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
   }
 
   @Provides@Singleton
-  def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config): ScalateEngine = {
-    val e = new ConfiguredScalateEngine('wikiMain, publet, config)
+  def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config, assetMgr: AssetManager): ScalateEngine = {
+    val e = new ConfiguredScalateEngine('wikiMain, publet, config, assetMgr)
     e.engine.combinedClassPath = true
     e.engine.importStatements ++= webImports.map("import "+ _)
     e.engine.classpath = ScriptCompiler.servletPath.mkString(File.pathSeparator)
@@ -156,8 +154,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     e.engine.bindings ++= List(
       Binding("includeLoader", "_root_."+classOf[IncludeLoader].getName, true)
     )
-    e.attributes = Map("includeLoader" -> new IncludeLoader(config))
-
+    e.attributes = Map("includeLoader" -> new IncludeLoader(config, publet, assetMgr))
+    publet.engineManager.register("/**", e)
     e
   }
 
@@ -171,6 +169,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       getCustomClasspath(servletContext), webImports ::: additionalImports)
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
 
+    publet.engineManager.register("*.scala", scalaEngine)
     scalaEngine
   }
 

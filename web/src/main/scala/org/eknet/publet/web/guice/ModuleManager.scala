@@ -20,6 +20,7 @@ import java.util.ServiceLoader
 import org.eknet.publet.web.Config
 import collection.JavaConversions._
 import grizzled.slf4j.Logging
+import com.google.inject.Module
 
 
 /**
@@ -37,3 +38,5 @@ class ModuleManager(config: Config) extends Logging {
   val moduleNames = modules.map(_.getClass.getName).sorted
 
 }
+
+trait PubletModule extends Module

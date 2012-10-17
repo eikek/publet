@@ -16,7 +16,7 @@
 
 package org.eknet.publet.ext.thumb
 
-import org.eknet.publet.web.{PubletWebContext, PubletWeb, PubletRequestWrapper, EmptyExtension}
+import org.eknet.publet.web.{PubletRequestWrapper, EmptyExtension}
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.MapContainer
@@ -51,15 +51,14 @@ class ThumbnailExtension @Inject() (publet: Publet) extends EmptyExtension with 
    * @return
    */
   override def onBeginRequest(req: HttpServletRequest) = {
-    val publet = PubletWeb.publet
-    PubletWebContext.param("thumb") match {
+    req.param("thumb") match {
       case Some(x) => {
-        publet.rootContainer.lookup(PubletWebContext.applicationPath)
+        publet.rootContainer.lookup(req.applicationPath)
           .collect({case c:ContentResource if (c.contentType.mime._1 == "image") => c})
           .map(image => {
 
-          PubletWebContext.requestMap.put(ThumbnailScript.imageResource, image)
-          Filters.forwardRequest("/publet/ext/thumbnail/thumb.png".p, false)
+          req.requestMap.put(ThumbnailScript.imageResource, image)
+          Filters.forwardRequest(req, "/publet/ext/thumbnail/thumb.png".p, false)
         }).getOrElse(req)
       }
       case None => req

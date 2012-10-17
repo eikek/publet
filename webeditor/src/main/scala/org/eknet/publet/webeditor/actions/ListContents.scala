@@ -22,8 +22,8 @@ import org.eknet.publet.Publet
 import collection.mutable
 import org.eknet.publet.vfs._
 import ScalaScript._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.webeditor.EditorPaths
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -16,44 +16,46 @@
 
 package org.eknet.publet.web.shiro
 
-import org.eknet.publet.vfs.{ContentResource, Path}
-import org.eknet.publet.web.{Config, PubletWeb}
+import org.eknet.publet.vfs.{Container, ContentResource, Path}
 import org.eknet.publet.auth.xml.{PermissionModel, XmlDatabase}
 import org.eknet.publet.auth._
 import org.xml.sax.SAXParseException
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
-import com.google.inject.Singleton
+import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.vfs.events.ContentWrittenEvent
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.filter.PostReceiveEvent
+import com.google.inject.name.Named
+import org.eknet.publet.web.Config
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.05.12 23:49
  */
 @Singleton
-class AuthManager extends PubletAuth with Logging {
+class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, config: Config) extends PubletAuth with Logging {
 
   private var lastModification: Option[Long] = None
 
   private def getPermissionXml = {
     val permissionPath = Path(Publet.allIncludes+"config/permissions.xml").toAbsolute
-    PubletWeb.contentRoot
+    contentRoot
       .lookup(permissionPath)
       .collect({case c:ContentResource=>c})
   }
 
   @Subscribe
   def reloadOnChange(event: ContentWrittenEvent) {
-    if (event.resource.name.fullName == "permissions.xml") {
-      info("Reloading permissions due to file change")
-      reload()
-    }
+    reloadIfChanged()
   }
 
   @Subscribe
   def reloadOnPush(event: PostReceiveEvent) {
+    reloadIfChanged()
+  }
+
+  def reloadIfChanged() {
     getPermissionXml map { newFile =>
       if (lastModification.getOrElse(0L) != newFile.lastModification.getOrElse(0L)) {
         info("Reloading permissions due to file change")
@@ -70,12 +72,12 @@ class AuthManager extends PubletAuth with Logging {
       val db = try {
         getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r)}).getOrElse {
           warn("No permission.xml file found. Falling back to super-user authentication!")
-          SuperUserAuth
+          new SuperUserAuth(config)
         }
       } catch {
         case e: SAXParseException => {
           error("Error parsing permission xml. Fallback to superuser realm!", e)
-          SuperUserAuth
+          new SuperUserAuth(config)
         }
       }
       this.database = Some(db)
@@ -122,9 +124,9 @@ class AuthManager extends PubletAuth with Logging {
   }
 }
 
-private object SuperUserAuth extends PubletAuth {
+private class SuperUserAuth(config: Config) extends PubletAuth {
   private def superuser = User("superadmin",
-    Config("superadminPassword").getOrElse("superadmin").toCharArray,
+    config("superadminPassword").getOrElse("superadmin").toCharArray,
     None,
     Array(),
     Set("superadmin"),
@@ -136,7 +138,7 @@ private object SuperUserAuth extends PubletAuth {
   def getAllUser = List(superuser)
   def getAllGroups = superuser.groups
   def findUser(login: String) = getAllUser.find(_.login==login)
-  def getAllPermissions = Set(PermissionModel("*", List(), List()))
+  def getAllPermissions = Set(PermissionModel.allPermission)
   def getPolicy(login: String) = findUser(login).map(getPolicy).getOrElse(Policy.Empty)
   def getPolicy(user: User) = new Policy {
     def getRoles = user.groups

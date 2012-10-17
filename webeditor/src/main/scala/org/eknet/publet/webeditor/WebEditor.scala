@@ -18,17 +18,18 @@ package org.eknet.publet.webeditor
 
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.engine.scalate.ScalateEngine
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.vfs.{Content, ContentType, ContentResource, Path}
+import org.eknet.publet.Publet
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 05:30
  */
-class WebEditor(val name: Symbol, scalateEngine: ScalateEngine) extends PubletEngine {
+class WebEditor(val name: Symbol, scalateEngine: ScalateEngine, publet: Publet) extends PubletEngine {
 
   def process(path: Path, data: ContentResource, target: ContentType) = {
-    if (!PubletWeb.publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
+    if (!publet.mountManager.resolveMount(path).map(_._2.isWriteable).getOrElse(false)) {
       val attr = Map(
       "message" -> "Content not writeable!"
       ) ++ scalateEngine.attributes

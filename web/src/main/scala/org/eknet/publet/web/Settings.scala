@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web
 
-import util.PropertiesMap
+import util.{PubletWeb, PropertiesMap}
 import org.eknet.publet.vfs.{ContentResource, Path, Container}
 import org.eknet.publet.Publet
 import com.google.common.eventbus.{Subscribe, EventBus}
@@ -43,14 +43,15 @@ class Settings @Inject() (@Named("contentroot") contentRoot: Container, eventBus
 
   @Subscribe
   def reloadOnChange(event: ContentWrittenEvent) {
-    if (event.resource.name.fullName == "settings.properties") {
-      info("Reload settings due to file change")
-      reload()
-    }
+    reloadIfChanged()
   }
 
   @Subscribe
   def reloadOnPush(event: PostReceiveEvent) {
+    reloadIfChanged()
+  }
+
+  def reloadIfChanged() {
     getSettingsResource map { newFile =>
       if (lastModification.getOrElse(0L) != newFile.lastModification.getOrElse(0L)) {
         info("Reload settings due to file change")

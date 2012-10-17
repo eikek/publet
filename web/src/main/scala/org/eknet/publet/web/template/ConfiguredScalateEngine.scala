@@ -21,30 +21,32 @@ import org.eknet.publet.Publet
 import org.eknet.publet.engine.scalate.{ScalateEngineImpl, VfsResourceLoader, ScalateEngine}
 import scalate.Boot
 import org.eknet.publet.web.Config
+import org.eknet.publet.web.asset.AssetManager
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.05.12 23:47
  */
-class ConfiguredScalateEngine(name: Symbol, publet: Publet, config: Config) extends ScalateEngineImpl(name, ConfiguredScalateEngine.createEngine(config)) {
+class ConfiguredScalateEngine(name: Symbol, publet: Publet, config: Config, assetMgr: AssetManager)
+  extends ScalateEngineImpl(name, ConfiguredScalateEngine.createEngine(config, publet, assetMgr)) {
 
   VfsResourceLoader.install(engine, publet)
 
   override def setDefaultLayoutUri(uri: String) {
-    engine.layoutStrategy = new LayoutLookupStrategy(engine, config, uri)
+    engine.layoutStrategy = new LayoutLookupStrategy(engine, new IncludeLoader(config, publet, assetMgr), uri)
   }
 
 }
 
 object ConfiguredScalateEngine {
 
-  private def createEngine(config: Config) = {
+  private def createEngine(config: Config, publet: Publet, assetMgr: AssetManager) = {
     val engine = new TemplateEngine()
     engine.workingDirectory = config.newStaticTempDir("scalate")
     engine.allowCaching = true
     engine.allowReload = true
 
-    val loader = new IncludeResourceLoader(engine.resourceLoader, config)
+    val loader = new IncludeResourceLoader(engine.resourceLoader, config, publet, assetMgr)
     engine.resourceLoader = loader
 
     new Boot(engine).run()

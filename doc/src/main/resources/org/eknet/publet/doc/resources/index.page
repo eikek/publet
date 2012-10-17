@@ -54,10 +54,6 @@ title: Publet Documentation
           i.icon-chevron-right
           | Paritions
       li
-        a(href="#webdav" data-toggle="pill")
-          i.icon-chevron-right
-          | WebDAV
-      li
         a(href="#scripts" data-toggle="pill")
           i.icon-chevron-right
           | Scala Scripts
@@ -90,7 +86,5 @@ title: Publet Documentation
         =include("_scala-scripts.md")
       .tab-pane#security
         =include("_security.md")
-      .tab-pane#webdav
-        =include("_webdav.md")
       .tab-pane#assets
         =include("_assets.jade")

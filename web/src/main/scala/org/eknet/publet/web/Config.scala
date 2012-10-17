@@ -18,7 +18,7 @@ package org.eknet.publet.web
 
 import java.io.{FileInputStream, File}
 import System._
-import util.PropertiesMap
+import util.{PubletWeb, PropertiesMap}
 import grizzled.slf4j.Logging
 import java.nio.file.Files
 import com.google.common.eventbus.EventBus

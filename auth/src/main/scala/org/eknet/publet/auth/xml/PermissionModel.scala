@@ -52,6 +52,8 @@ case class PermissionModel(perm: String, repository: List[String], roles: List[S
 
 object PermissionModel {
 
+  val allPermission = PermissionModel("*", Nil, Nil)
+
   def apply(node: Node): PermissionModel = {
     val perm = (node \ "@name").text
     val roles = (node \ "to").map(_.text).toList

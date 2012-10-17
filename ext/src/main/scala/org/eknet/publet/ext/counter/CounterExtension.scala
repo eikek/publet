@@ -1,11 +1,12 @@
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.{PubletWebContext, WebExtension}
 import grizzled.slf4j.Logging
 import javax.servlet.http.HttpServletRequest
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent}
 import com.google.inject.Singleton
+import org.eknet.publet.web.WebExtension
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * Installs the [[org.eknet.publet.ext.counter.CounterService]] and a thread that

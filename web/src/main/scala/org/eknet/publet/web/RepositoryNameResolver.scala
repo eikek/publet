@@ -16,7 +16,7 @@
 
 package org.eknet.publet.web
 
-import util.{Request, Key}
+import util.{PubletWeb, Request, Key}
 import org.eclipse.jgit.http.server.GitSmartHttpTools
 import org.eknet.publet.partition.git.GitPartition
 import org.eknet.publet.gitr.RepositoryName

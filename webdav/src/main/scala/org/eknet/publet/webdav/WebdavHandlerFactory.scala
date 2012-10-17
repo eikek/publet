@@ -19,9 +19,10 @@ package org.eknet.publet.webdav
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.filter._
 import org.eknet.publet.web.{ReqUtils, PubletRequestWrapper}
-import com.google.inject.Singleton
+import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.req.{SuperFilter, RequestHandlerFactory}
 import RequestHandlerFactory._
+import org.eknet.publet.Publet
 
 /**
  * Creates a filter chain to handle webdav requests.
@@ -30,7 +31,7 @@ import RequestHandlerFactory._
  * @since 27.09.12 15:35
  */
 @Singleton
-class WebdavHandlerFactory extends RequestHandlerFactory {
+class WebdavHandlerFactory @Inject() (publet: Publet) extends RequestHandlerFactory {
 
   def getApplicableScore(req: HttpServletRequest) = {
     val requtil = new ReqUtils(req) with WebdavRequestUtil
@@ -41,7 +42,7 @@ class WebdavHandlerFactory extends RequestHandlerFactory {
     Filters.webContext,
     Filters.authc,
     Filters.exceptionHandler,
-    new WebdavFilter
+    new WebdavFilter(publet)
   ))
 
 }

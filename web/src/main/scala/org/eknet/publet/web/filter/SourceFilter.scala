@@ -19,7 +19,8 @@ package org.eknet.publet.web.filter
 import javax.servlet._
 import http.HttpServletResponse
 import org.eknet.publet.vfs.{ContentResource, ContentType}
-import org.eknet.publet.web.{PageWriter, PubletRequestWrapper, PubletWeb}
+import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
+import org.eknet.publet.Publet
 
 /**
  * Filter that returns the resource as is if it is found. No processing necessary.
@@ -27,12 +28,12 @@ import org.eknet.publet.web.{PageWriter, PubletRequestWrapper, PubletWeb}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.05.12 14:53
  */
-class SourceFilter extends Filter with PubletRequestWrapper with PageWriter {
+class SourceFilter(publet: Publet) extends Filter with PubletRequestWrapper with PageWriter {
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     val path = request.applicationPath
-    PubletWeb.publet.rootContainer.lookup(path)
+    publet.rootContainer.lookup(path)
       .collect({case c:ContentResource=>c}) match {
         case Some(c) => {
           ServeContentResource.serveResource(c, request, response)

@@ -16,10 +16,8 @@
 
 package org.eknet.publet.web.asset
 
-import impl.DefaultAssetManager
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.util.Key
-import org.eknet.publet.web.{PubletWeb, Config, PubletWebContext}
+import org.eknet.publet.web.util.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
