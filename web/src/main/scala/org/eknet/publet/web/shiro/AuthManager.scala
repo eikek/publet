@@ -71,13 +71,19 @@ class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, confi
     database.getOrElse {
       val db = try {
         getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r)}).getOrElse {
-          warn("No permission.xml file found. Falling back to super-user authentication!")
-          new SuperUserAuth(config)
+          val msg = "No permission.xml file found."
+          config("superadminEnabled").map(_.toBoolean) match {
+            case Some(false) => warn(msg + " Super-user account disabled."); PubletAuth.Empty
+            case _ => warn(msg + " Falling back to super-user authentication!"); new SuperUserAuth(config)
+          }
         }
       } catch {
         case e: SAXParseException => {
-          error("Error parsing permission xml. Fallback to superuser realm!", e)
-          new SuperUserAuth(config)
+          val msg = "Error parsing permission xml."
+          config("superadminEnabled").map(_.toBoolean) match {
+            case Some(false) => error(msg + " Super-user account disabled."); PubletAuth.Empty
+            case _ => error(msg + " Falling back to super-user authentication!"); new SuperUserAuth(config)
+          }
         }
       }
       this.database = Some(db)
