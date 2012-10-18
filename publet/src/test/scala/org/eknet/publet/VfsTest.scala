@@ -1,5 +1,6 @@
 package org.eknet.publet
 
+import _root_.com.google.common.eventbus.EventBus
 import vfs.fs.FilesystemPartition
 import java.io.File
 import vfs.Path
@@ -14,7 +15,7 @@ object VfsTest {
   val publet = Publet()
 
   def testMount() {
-    val fs = new FilesystemPartition(new File("/home/"), false)
+    val fs = new FilesystemPartition(new File("/home/"), new EventBus(), false)
 //    fs.lookup(Path("/eike")).getOrElse(sys.error("no fs /eike"))
 
     publet.mountManager.mount(Path("/main"), fs)

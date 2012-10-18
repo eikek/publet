@@ -6,6 +6,7 @@ import java.io.{FileOutputStream, File}
 import org.eknet.publet.vfs.{Path, Content}
 import org.eknet.publet.vfs.fs.FileResource
 import xml.XmlDatabase
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -18,7 +19,7 @@ class PermissionWriteSuite extends FunSuite with ShouldMatchers with OneInstance
     temp.deleteOnExit()
     val org = getClass.getResourceAsStream("/permission.example.xml")
     Content.copy(org, new FileOutputStream(temp), true, true)
-    val source = new FileResource(temp, Path.root)
+    val source = new FileResource(temp, Path.root, new EventBus())
     new XmlDatabase(source)
   }
 

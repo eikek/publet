@@ -26,6 +26,7 @@ import java.io.File
 import java.nio.file.Files
 import ResourceHelper._
 import org.eknet.publet.Publet
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -42,7 +43,7 @@ class DefaultAssetManagerTest extends FunSuite with ShouldMatchers with BeforeAn
   before {
     publet = new PubletImpl
     tempDir = Files.createTempDirectory("testassets").toFile
-    assetMgr = new DefaultAssetManager(publet, tempDir)
+    assetMgr = new DefaultAssetManager(publet, new EventBus(), tempDir)
   }
 
   after {

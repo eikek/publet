@@ -18,31 +18,34 @@ package org.eknet.publet.web.req
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.web.filter._
-import org.eknet.publet.web.{PageWriter, PubletWebContext, PubletWeb}
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.publet.auth.GitAction
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.{WebExtension, Config, Settings, PageWriter}
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:29
  */
-class PubletHandlerFactory extends RequestHandlerFactory {
+@Singleton
+class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], config: Config, settings: Settings, publet: Publet) extends RequestHandlerFactory {
 
   def getApplicableScore(req: HttpServletRequest) = DEFAULT_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-      Filters.redirect,
-      Filters.guice,
+      Filters.redirect(config, settings),
       Filters.webContext,
       Filters.blacklist,
       Filters.authc,
       Filters.exceptionHandler,
       PubletAuthzFilter,
-      Filters.extensionRequest,
-      Filters.source,
-      Filters.publet
+      Filters.extensionRequest(webext),
+      Filters.source(publet),
+      Filters.publet(publet)
     ))
 
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {

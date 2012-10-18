@@ -27,8 +27,8 @@ import java.util
 import javax.servlet.DispatcherType
 import javax.servlet.http.HttpServlet
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
-import org.eknet.publet.war.PubletContextListener
 import org.eknet.publet.web.req.PubletMainFilter
+import org.eknet.publet.web.guice.PubletContextListener
 
 /**
  * Configures the jetty server programmatically. No web.xml is needed, use this

@@ -16,7 +16,7 @@
 
 package org.eknet.publet.war
 
-import java.io.File
+import java.io.{FileInputStream, BufferedInputStream, InputStream, File}
 import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.joran.JoranConfigurator
@@ -31,18 +31,22 @@ trait LoggingConfigurer {
 
   def configureLogging(logfile: File) {
     if (logfile.exists()) {
-      println("Configuring logging...")
-      val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-      try {
-        val configurer = new JoranConfigurator
-        configurer.setContext(context)
-
-        context.reset()
-        configurer.doConfigure(logfile)
-      } catch {
-        case e: JoranException =>
-      }
-      StatusPrinter.printInCaseOfErrorsOrWarnings(context)
+      configureLogging(new BufferedInputStream(new FileInputStream(logfile)))
     }
+  }
+
+  def configureLogging(in: InputStream)  {
+    println("Configuring logging...")
+    val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
+    try {
+      val configurer = new JoranConfigurator
+      configurer.setContext(context)
+
+      context.reset()
+      configurer.doConfigure(in)
+    } catch {
+      case e: JoranException =>
+    }
+    StatusPrinter.printInCaseOfErrorsOrWarnings(context)
   }
 }

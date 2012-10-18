@@ -18,7 +18,6 @@ package org.eknet.publet.web.util
 
 import org.eknet.publet.vfs.Content
 import org.fusesource.scalate.TemplateSource
-import org.eknet.publet.web.PubletWeb
 import java.io.{PrintWriter, StringWriter}
 
 /**

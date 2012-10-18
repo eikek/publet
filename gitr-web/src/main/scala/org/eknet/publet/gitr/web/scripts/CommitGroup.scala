@@ -18,7 +18,7 @@ package org.eknet.publet.gitr.web.scripts
 
 import collection.mutable.ListBuffer
 import java.text.{DateFormat, SimpleDateFormat}
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

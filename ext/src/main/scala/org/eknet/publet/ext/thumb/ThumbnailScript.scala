@@ -17,8 +17,7 @@
 package org.eknet.publet.ext.thumb
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
-import org.eknet.publet.web.util.Key
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext, Key}
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.vfs.ContentResource
 

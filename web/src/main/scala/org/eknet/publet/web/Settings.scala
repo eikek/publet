@@ -16,13 +16,16 @@
 
 package org.eknet.publet.web
 
-import event.Event
-import util.PropertiesMap
+import util.{PubletWeb, PropertiesMap}
 import org.eknet.publet.vfs.{ContentResource, Path, Container}
 import org.eknet.publet.Publet
-import com.google.common.eventbus.EventBus
+import com.google.common.eventbus.{Subscribe, EventBus}
 import com.google.inject.{Singleton, Inject}
 import com.google.inject.name.Named
+import org.eknet.publet.event.Event
+import org.eknet.publet.vfs.events.ContentWrittenEvent
+import grizzled.slf4j.Logging
+import org.eknet.publet.web.filter.PostReceiveEvent
 
 /**
  * Represents the `settings.properties` file.
@@ -31,13 +34,36 @@ import com.google.inject.name.Named
  * @since 10.10.12 21:27
  */
 @Singleton
-class Settings @Inject() (@Named("contentroot") contentRoot: Container, eventBus: EventBus) extends PropertiesMap(eventBus) {
+class Settings @Inject() (@Named("contentroot") contentRoot: Container, eventBus: EventBus) extends PropertiesMap(eventBus) with Logging {
+
+  private var lastModification: Option[Long] = None
 
   //initial load
   reload()
 
-  override def file = contentRoot.lookup(Path(Publet.allIncludes+"config/settings.properties"))
-    .collect({case cc: ContentResource => cc})
+  @Subscribe
+  def reloadOnChange(event: ContentWrittenEvent) {
+    reloadIfChanged()
+  }
+
+  @Subscribe
+  def reloadOnPush(event: PostReceiveEvent) {
+    reloadIfChanged()
+  }
+
+  def reloadIfChanged() {
+    getSettingsResource map { newFile =>
+      if (lastModification.getOrElse(0L) != newFile.lastModification.getOrElse(0L)) {
+        info("Reload settings due to file change")
+        reload()
+      }
+    }
+  }
+
+  private def getSettingsResource = contentRoot.lookup(Path(Publet.allIncludes+"config/settings.properties"))
+
+  override def file = getSettingsResource
+    .collect({case cc: ContentResource => lastModification = cc.lastModification; cc})
     .map(_.inputStream)
 
   protected def createEvent() = SettingsReloadedEvent(this)

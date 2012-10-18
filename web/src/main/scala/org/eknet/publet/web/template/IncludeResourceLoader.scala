@@ -19,7 +19,9 @@ package org.eknet.publet.web.template
 import org.fusesource.scalate.util.{Resource, ResourceLoader}
 import org.eknet.publet.vfs.ContentResource
 import org.eknet.publet.engine.scalate.TemplateResource
-import org.eknet.publet.web.{Config, PubletWeb}
+import org.eknet.publet.web.Config
+import org.eknet.publet.Publet
+import org.eknet.publet.web.asset.AssetManager
 
 /**
  * Scalate resource loader that looks up "special resources"
@@ -28,9 +30,9 @@ import org.eknet.publet.web.{Config, PubletWeb}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.07.12 23:24
  */
-class IncludeResourceLoader(delegate: ResourceLoader, config: Config) extends ResourceLoader {
+class IncludeResourceLoader(delegate: ResourceLoader, config: Config, publet: Publet, assetMgr: AssetManager) extends ResourceLoader {
 
-  private val includeLoader = new IncludeLoader(config)
+  private val includeLoader = new IncludeLoader(config, publet, assetMgr)
   private val specialPattern = """.*/__incl_([^/]*)$""".r
 
   def resource(uri: String): Option[Resource] = {
@@ -40,7 +42,7 @@ class IncludeResourceLoader(delegate: ResourceLoader, config: Config) extends Re
   private def specialResource(uri: String) = {
     uri match {
       case specialPattern(r) => includeLoader.findInclude(r)
-        .flatMap(p => PubletWeb.publet.rootContainer.lookup(p))
+        .flatMap(p => publet.rootContainer.lookup(p))
         .collect({ case c: ContentResource => c })
         .map(cr => new TemplateResource(uri, cr))
       case _ => None

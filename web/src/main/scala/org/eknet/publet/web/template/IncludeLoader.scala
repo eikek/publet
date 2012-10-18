@@ -19,17 +19,18 @@ package org.eknet.publet.web.template
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs._
 import xml._
-import org.eknet.publet.web.{RunMode, PubletWeb, PubletWebContext, Config}
+import org.eknet.publet.web.{RunMode, Config}
 import org.eknet.publet.web.asset.{AssetManager, Kind}
 import scala.Some
 import scala.Some
+import org.eknet.publet.web.util.PubletWebContext
 
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 21:12
  */
-class IncludeLoader(config: Config) {
+class IncludeLoader(config: Config, publet: Publet, assetMgr: AssetManager) {
 
   val allIncludesPath = Path(config.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"
@@ -56,7 +57,6 @@ class IncludeLoader(config: Config) {
    * @return
    */
   def loadHeadIncludes(): NodeSeq = {
-    val publet = PubletWeb.publet
     val extensions = Set("js", "css", "xml")
     val currentPath = PubletWebContext.applicationPath.parent
 
@@ -100,7 +100,6 @@ class IncludeLoader(config: Config) {
   }
 
   def findNextIncludes(path: Path): Option[(Path, ContainerResource)] = {
-    val publet = PubletWeb.publet
     if (path.isRoot) None
     else {
       val cand = path / Publet.includes
@@ -112,7 +111,6 @@ class IncludeLoader(config: Config) {
   }
 
   def findMainAllInclude(name: String): Option[Path] = {
-    val publet = PubletWeb.publet
     val cand = allIncludesPath / name
     publet.findSources(cand).toList match {
       case c :: cs => Some(cand.sibling(c.name.fullName).toAbsolute)
@@ -121,12 +119,10 @@ class IncludeLoader(config: Config) {
   }
 
   private def withMountedContainer[A](path: Path)(f: (Path, Container) => Option[A]) = {
-    val publet = PubletWeb.publet
     publet.mountManager.resolveMount(path).flatMap(tuple => f(tuple._1, tuple._2))
   }
 
   def findAllInclude(path: Path, name: String): Option[Path] = {
-    val publet = PubletWeb.publet
     withMountedContainer(path) {
       (path, container) =>
         val cand = path / Publet.allIncludes / name
@@ -141,14 +137,14 @@ class IncludeLoader(config: Config) {
     if (path.isRoot) None
     else {
       val cand = path / Publet.includes / name
-      PubletWeb.publet.findSources(cand).toList match {
+      publet.findSources(cand).toList match {
         case c :: cs => Some(cand.sibling(c.name.fullName))
         case _ => findInclude(path.parent, name)
       }
     }
   }
 
-  def isResourceEditable: Boolean = PubletWeb.publet.findSources(PubletWebContext.applicationPath).toList match {
+  def isResourceEditable: Boolean = publet.findSources(PubletWebContext.applicationPath).toList match {
     case c :: cs => c.isInstanceOf[Writeable]
     case _ => false
   }
@@ -170,7 +166,6 @@ class IncludeLoader(config: Config) {
 
   private def loadAssetGroups(groups: Seq[String], compressed: Boolean): String = {
     import PubletWebContext._
-    val mgr = AssetManager.service
 
     def loadAll(list: Seq[String]): String =  {
       val buffer = StringBuilder.newBuilder
@@ -187,8 +182,8 @@ class IncludeLoader(config: Config) {
         buffer append  "\"></link>\n"
 
       } else {
-        val jsPath = mgr.getResources(groups, Some(applicationPath), Kind.js)
-        val cssPath = mgr.getResources(groups, Some(applicationPath), Kind.css)
+        val jsPath = assetMgr.getResources(groups, Some(applicationPath), Kind.js)
+        val cssPath = assetMgr.getResources(groups, Some(applicationPath), Kind.css)
 
         for (js <- jsPath) {
           buffer append "<script type=\"text/javascript\" src=\""

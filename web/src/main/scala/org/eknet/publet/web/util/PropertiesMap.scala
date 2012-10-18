@@ -20,8 +20,8 @@ import collection.JavaConversions._
 import java.util.Properties
 import java.io.InputStream
 import com.google.common.eventbus.EventBus
-import org.eknet.publet.web.event.Event
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import org.eknet.publet.event.Event
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

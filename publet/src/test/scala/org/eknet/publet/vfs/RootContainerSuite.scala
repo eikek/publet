@@ -22,6 +22,7 @@ import java.io.File
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
 import scala.None
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,7 +35,7 @@ class RootContainerSuite extends FunSuite with ShouldMatchers {
     val publet = new PubletImpl
     val temp = new File("/tmp")
     val pdir = new File(temp, "artifacts/maven2")
-    val fs = new FilesystemPartition(pdir, true)
+    val fs = new FilesystemPartition(pdir, new EventBus(), true)
     publet.mountManager.mount(Path("/maven2"), fs)
 
     val r = publet.rootContainer.lookup(Path("/maven2"))

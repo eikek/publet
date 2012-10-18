@@ -19,7 +19,7 @@ package org.eknet.publet.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import ScalaScript._
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

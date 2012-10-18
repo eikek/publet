@@ -24,14 +24,15 @@ import org.eknet.publet.vfs.util.MapContainer
 import java.io.File
 import org.eknet.publet.web.asset.AssetResource
 import scala.Some
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.09.12 14:25
  */
-class AssetContainer(tempDir: File) extends MountManager with RootContainer {
+class AssetContainer(tempDir: File, bus: EventBus) extends MountManager with RootContainer {
 
-  mount("compressed".p, new FilesystemPartition(tempDir, true))
+  mount("compressed".p, new FilesystemPartition(tempDir, bus, true))
 
   def mount(g: Group) {
     g.resources.foreach(mount)

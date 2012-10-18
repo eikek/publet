@@ -21,7 +21,7 @@ import org.apache.shiro.authc.UsernamePasswordToken
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import org.apache.shiro.ShiroException
-import org.eknet.publet.web.PubletWebContext
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -17,16 +17,17 @@
 package org.eknet.publet.ext.orient
 
 import com.google.inject._
+import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.10.12 22:43
  */
-object OrientModule extends AbstractModule {
+class OrientModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
     bind(classOf[OrientDbProvider]) to classOf[DefaultOrientDbProvider] in Scopes.SINGLETON
-
+    binder.bindEagerly[OrientDbExtension]()
   }
 
 }

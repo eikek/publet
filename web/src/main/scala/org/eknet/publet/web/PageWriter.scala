@@ -22,7 +22,7 @@ import org.eknet.publet.vfs._
 import scala.Some
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
-import util.{StringMap, RenderUtils}
+import util.{PubletWebContext, PubletWeb, StringMap, RenderUtils}
 import org.eknet.publet.vfs.util.SimpleContentResource
 
 /**

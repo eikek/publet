@@ -1,8 +1,12 @@
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.{PubletWebContext, WebExtension}
 import grizzled.slf4j.Logging
 import javax.servlet.http.HttpServletRequest
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent}
+import com.google.inject.Singleton
+import org.eknet.publet.web.WebExtension
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * Installs the [[org.eknet.publet.ext.counter.CounterService]] and a thread that
@@ -11,20 +15,22 @@ import javax.servlet.http.HttpServletRequest
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 20.06.12 21:49
  */
+@Singleton
 class CounterExtension extends WebExtension with Logging {
 
   private val counterThread = new SaveCountActor
 
-  def onStartup() {
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     counterThread.start()
   }
 
-  def onShutdown() {
+  @Subscribe
+  def onShutdown(ev: PubletShutdownEvent) {
     counterThread ! StopMessage
   }
 
 
-  def getModule = Some(CounterModule)
   def onBeginRequest(req: HttpServletRequest) = req
 
   def onEndRequest(req: HttpServletRequest) {

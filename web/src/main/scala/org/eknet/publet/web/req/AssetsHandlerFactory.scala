@@ -21,20 +21,22 @@ import org.eknet.publet.web.PubletRequestWrapper
 import org.eknet.publet.web.asset.AssetManager
 import org.eknet.publet.web.req.RequestHandlerFactory._
 import org.eknet.publet.web.filter.Filters
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.09.12 10:26
  */
-class AssetsHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
+@Singleton
+class AssetsHandlerFactory @Inject() (publet: Publet, assetMgr: AssetManager) extends RequestHandlerFactory with PubletRequestWrapper {
 
   def getApplicableScore(req: HttpServletRequest) =
     if (req.applicationUri.startsWith(AssetManager.assetPath)) EXACT_MATCH else NO_MATCH
 
   def createFilter() = new SuperFilter(Seq(
-    Filters.guice,
     Filters.webContext,
-    Filters.assets,
-    Filters.source
+    Filters.assets(assetMgr),
+    Filters.source(publet)
   ))
 }

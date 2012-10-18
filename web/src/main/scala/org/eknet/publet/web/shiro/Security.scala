@@ -20,9 +20,10 @@ import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
 import org.eknet.publet.auth._
-import org.eknet.publet.web.{RepositoryNameResolver, PubletWeb, PubletWebContext}
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.vfs.ChangeInfo
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.RepositoryNameResolver
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

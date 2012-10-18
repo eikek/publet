@@ -20,17 +20,16 @@ Many wiki applications allow to extend the markup by using macros. That is
 quite handy for adding simple dynamic content. Still, when a more complex page
 is desired, the wiki syntax with many macros feels cumbersome. The macros are
 often hard to read and are most often specific to the current application. In
-those situations I often found it better to have the other way around: don't
-use wiki markup with macros, but use a template language and insert wiki
-markup in the appropriate places. Now, that's exactly what
-[Scalate](http://scalate.fusesource.org/) offers!
+those situations it's better to turn this inside out: don't use wiki markup with
+macros, but use a template language and insert wiki markup in the appropriate places.
+Now, that's exactly what [Scalate](http://scalate.fusesource.org/) offers.
 
 As said, [Scalate](http://scalate.fusesource.org/) is a template engine, thus
-you can write templates: SSP (similiar to JSP), Jade (very cool for creating
-html!), Mustache and more. All those templates can contain Scala code and also
-wiki markup which allows for a very flexible and comfortable web page design.
-If all that is too much, it's also possible to write plain HTML files. Publet
-will serve html files without further processing.
+you can write templates: SSP (similiar to JSP), Jade, Mustache and more. All
+those templates can contain Scala code and also wiki markup which allows for a
+very flexible and comfortable web page design. If all that is too much, it's also
+possible to write plain HTML files. Publet will serve html files without further
+processing.
 
 Publet adds the ability to create Scala scripts which are compiled and
 executed by publet. The scripts can return content of any type, like HTML,
@@ -46,12 +45,4 @@ easily.
 By default, resources are maintained in a git repository. This gives you
 versioning "for free". While you could edit all text resources online, you
 can also clone the git repository edit files offline and push changes back
-to the server. Publet will update its working copy after each push. A possible
-workflow could be to install publet locally, add/edit files with your favorite
-editor and verify the result locally. The collected changes can then be
-pushed to the server via git.
-
-Publet can be seen as a wiki for developers. The more interesting features are
-targeted at users that like to create (dynamic) web sites. In this respect,
-the git repository is a major part. If publet is used to create templates,
-scala and javascript code, a version control system is mandatory.
+to the server. Publet will update its working copy after each push.

@@ -23,13 +23,16 @@
     <display-name>publet</display-name>
 
     <listener>
-        <listener-class>org.eknet.publet.war.PubletContextListener</listener-class>
+        <listener-class>org.eknet.publet.war.LoggingSetup</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.eknet.publet.web.guice.PubletContextListener</listener-class>
     </listener>
 
 
     <filter>
         <filter-name>PubletMainFilter</filter-name>
-        <filter-class>org.eknet.publet.web.req.PubletMainFilter</filter-class>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>PubletMainFilter</filter-name>

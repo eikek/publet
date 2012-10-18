@@ -107,7 +107,8 @@ object RootBuild extends Build {
       Ext.module,
       Server.module,
       Doc.module,
-      App.module
+      App.module,
+      Webdav.module
     )
 
   val buildSettings = Project.defaultSettings ++ Seq(
@@ -144,6 +145,26 @@ object RootBuild extends Build {
 
 // Sub Modules
 
+// libraries: no other module dependencies
+object Publet extends Build {
+
+  lazy val module = Project(
+    id = "publet",
+    base = file("publet"),
+    settings = buildSettings
+  )
+
+  lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
+    name := "publet",
+    libraryDependencies ++= deps,
+    ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
+    sourceGenerators in Compile <+= ReflectPlugin.reflect
+  )
+
+  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, findbugs, guava, scalaTest)
+
+}
+
 object Gitr extends Build {
 
   lazy val module = Project(
@@ -154,10 +175,41 @@ object Gitr extends Build {
 
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr",
+    description := "Thin layer around jgit.",
     libraryDependencies ++= deps
   ) 
 
   lazy val deps = Seq(slf4jApi, jgit, grizzledSlf4j, scalaTest)
+
+}
+
+
+object Web extends Build {
+
+  lazy val module = Project(
+    id = "web",
+    base = file("web"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, ScalaScriptEngine.module, ScalateEngine.module, GitPart.module, Auth.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-web",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(servletApiProvided,
+    slf4jApi, grizzledSlf4j,
+    commonsFileUpload,
+    commonsIo,
+    jgitHttpServer,
+    shiroWeb,
+    yuicompressor,
+    googleClosureCompiler,
+    guice,
+    cglib,
+    guiceServlet,
+    guiceMultibindings,
+    scalaTest)
 
 }
 
@@ -178,25 +230,6 @@ object GitrWeb extends Build {
 
 }
 
-
-object Publet extends Build {
-
-  lazy val module = Project(
-    id = "publet", 
-    base = file("publet"),  
-    settings = buildSettings
-  )
-  
-  lazy val buildSettings = Project.defaultSettings ++ ReflectPlugin.allSettings ++ Seq[Project.Setting[_]](
-    name := "publet",
-    libraryDependencies ++= deps,
-    ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
-    sourceGenerators in Compile <+= ReflectPlugin.reflect
-  ) 
-  
-  lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, scalaTest)
-
-}
 
 object GitPart extends Build {
 
@@ -235,36 +268,21 @@ object ScalaScriptEngine extends Build {
 
 }
 
-object Web extends Build {
+
+object Webdav extends Build {
 
   lazy val module = Project(
-    id = "web", 
-    base = file("web"),
+    id = "webdav",
+    base = file("webdav"),
     settings = buildProperties
-  ) dependsOn (Publet.module, ScalaScriptEngine.module, ScalateEngine.module, GitPart.module, Auth.module)
+  ) dependsOn Web.module
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-web",
+    name := "publet-webdav",
     libraryDependencies ++= deps
-  ) 
+  )
 
-  val deps = Seq(servletApiProvided,
-       slf4jApi, grizzledSlf4j,
-       commonsFileUpload,
-       commonsIo, 
-       jgitHttpServer,
-       shiroWeb,
-       miltonApi, miltonServlet,
-       yuicompressor,
-       googleClosureCompiler,
-       findbugs,
-       guava,
-       guice,
-       cglib,
-       guiceServlet,
-       guiceMultibindings,
-       scalaTest) ++ miltonApiDeps
-
+  val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
 }
 
 object War extends Build {
@@ -277,7 +295,7 @@ object War extends Build {
     base = file("war"),
     settings = buildProperties
   ) dependsOn (Publet.module, GitPart.module, ScalateEngine.module, Web.module,
-    WebEditor.module, Ext.module, GitrWeb.module, Doc.module)
+    WebEditor.module, Ext.module, GitrWeb.module, Doc.module, Webdav.module)
 
   val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
@@ -328,7 +346,7 @@ object Ext extends Build {
     id = "ext",
     base = file("ext"),
     settings = buildProperties
-  ) dependsOn (Publet.module, Web.module)
+  ) dependsOn (Publet.module, Web.module, Webdav.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
@@ -367,10 +385,14 @@ object Doc extends Build {
     name := "publet-doc",
     // add the WebExtension source file to have it available from the docs
     resourceGenerators in Compile <+= (sourceDirectory in Web.module, resourceManaged in Compile) map { (sd:File, rd: File) =>
-      val source = sd / "main" / "scala" / "org" / "eknet" / "publet" / "web" / "WebExtension.scala"
-      val target = rd / "org" / "eknet" / "publet" / "doc" / "resources" / "_sources" / "WebExtension.scala"
-      IO.copyFile(source, target)
-      Seq(target)
+      val sourceDir = sd / "main" / "scala" / "org" / "eknet" / "publet" / "web"
+      val sources = Seq(sourceDir / "WebExtension.scala", sourceDir / "req" / "RequestHandlerFactory.scala")
+      val target = rd / "org" / "eknet" / "publet" / "doc" / "resources" / "_sources"
+      sources.map( f => {
+        val targetFile = target / f.name
+        IO.copyFile(f, targetFile)
+        targetFile
+      })
     },
     libraryDependencies ++= deps
   )

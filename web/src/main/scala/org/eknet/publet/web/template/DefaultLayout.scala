@@ -17,33 +17,36 @@
 package org.eknet.publet.web.template
 
 import org.eknet.publet.vfs.Path
-import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import org.eknet.publet.vfs.util.ClasspathContainer
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.asset.{AssetCollection, AssetManager, Group}
 import Path._
 import org.eknet.publet.web.template.DefaultLayout.Assets
+import org.eknet.publet.Publet
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.web.guice.PubletStartedEvent
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.engine.scalate.ScalateEngine
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 18:25
  */
-class DefaultLayout extends EmptyExtension with Logging {
+@Singleton
+class DefaultLayout @Inject() (publet: Publet, assetMgr: AssetManager, scalateEngine: ScalateEngine) extends Logging {
 
-  override def onStartup() {
-    val publ = PubletWeb.publet
-    val assetMgr = AssetManager.service
-
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     //jquery
     assetMgr setup Assets.jquery
 
     //highlightJs
-    publ.mountManager.mount("/publet/highlightjs/".p,
+    publet.mountManager.mount("/publet/highlightjs/".p,
       new ClasspathContainer(base = "/org/eknet/publet/web/includes/highlight"))
     assetMgr setup Assets.highlightjs
 
     //publet's resources
-    publ.mountManager.mount("/publet/".p,
+    publet.mountManager.mount("/publet/".p,
       new ClasspathContainer(base = "/org/eknet/publet/web/includes/publet"))
     assetMgr setup Assets.publet
 
@@ -51,11 +54,11 @@ class DefaultLayout extends EmptyExtension with Logging {
     assetMgr setup (Assets.spin, Assets.loadmask)
 
     //bootstrap
-    publ.mountManager.mount(Path("/publet/bootstrap/"),
+    publet.mountManager.mount(Path("/publet/bootstrap/"),
       new ClasspathContainer(base = "/org/eknet/publet/web/includes/bootstrap"))
     assetMgr setup Assets.bootstrap
 
-    PubletWeb.scalateEngine.setDefaultLayoutUri("/publet/bootstrap/bootstrap.single.jade")
+    scalateEngine.setDefaultLayoutUri("/publet/bootstrap/bootstrap.single.jade")
 
     //add default asset groups
     assetMgr.setup(Assets.default, Assets.defaultNoHighlightJs)

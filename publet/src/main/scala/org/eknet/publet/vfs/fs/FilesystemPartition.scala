@@ -19,12 +19,13 @@ package org.eknet.publet.vfs.fs
 import java.io.File
 import org.eknet.publet.vfs._
 import org.slf4j.LoggerFactory
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.04.12 22:53
  */
-class FilesystemPartition(val root: File, createDir: Boolean = true) extends Container with FileResourceFactory {
+class FilesystemPartition(val root: File, bus: EventBus, createDir: Boolean = true) extends Container with FileResourceFactory {
 
   private val log = LoggerFactory.getLogger(classOf[FilesystemPartition])
 
@@ -42,17 +43,17 @@ class FilesystemPartition(val root: File, createDir: Boolean = true) extends Con
 
   def children = root.listFiles().map(resourceFrom(_).get)
 
-  def content(name: String) = newFile(new File(root, name), root)
+  def content(name: String) = newFile(new File(root, name), root, bus)
 
-  def container(name: String) = newDirectory(new File(root, name), root)
+  def container(name: String) = newDirectory(new File(root, name), root, bus)
 
   def child(name: String) = resourceFrom(new File(root, name))
 
   private def resourceFrom(f: File) = if (!f.exists()) None
   else if (f.isDirectory)
-    Some(newDirectory(f, root))
+    Some(newDirectory(f, root, bus))
   else
-    Some(newFile(f, root))
+    Some(newFile(f, root, bus))
 
   lazy val isWriteable = true
 }

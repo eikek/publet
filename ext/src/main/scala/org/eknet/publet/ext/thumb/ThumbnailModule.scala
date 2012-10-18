@@ -17,21 +17,24 @@
 package org.eknet.publet.ext.thumb
 
 import com.google.inject.{Singleton, Provides, AbstractModule}
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{WebExtension, Config}
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import com.google.common.eventbus.EventBus
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:22
  */
-object ThumbnailModule extends AbstractModule {
+class ThumbnailModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
+    binder.bindExtension.toType[ThumbnailExtension]
   }
 
   @Provides@Singleton
-  def createThumbnailer(publet: Publet, config: Config): Thumbnailer = {
+  def createThumbnailer(publet: Publet, config: Config, bus: EventBus): Thumbnailer = {
     val tempDir = config.newStaticTempDir("thumbs")
     val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
     val options = config("thumbnail.maxDiskSize") flatMap (str => str match {
@@ -44,7 +47,7 @@ object ThumbnailModule extends AbstractModule {
       config("thumbnail.maxEntries") map (entr => CacheOptions.maxEntries(entr.toInt))
     } getOrElse(CacheOptions.getDefault)
 
-    val tn = new ThumbnailerImpl(publet.mountManager, tempDir, options)
+    val tn = new ThumbnailerImpl(publet.mountManager, bus, tempDir, options)
     tn
   }
 }

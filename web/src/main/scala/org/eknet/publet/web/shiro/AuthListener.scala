@@ -17,10 +17,9 @@
 package org.eknet.publet.web.shiro
 
 import com.google.common.eventbus.EventBus
-import com.google.inject.{Singleton, Inject}
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationException, AuthenticationToken, AuthenticationListener}
 import org.apache.shiro.subject.PrincipalCollection
-import org.eknet.publet.web.event.Event
+import org.eknet.publet.event.Event
 
 /**
  * Is registered on the [[org.apache.shiro.mgt.SecurityManager]] and posts all

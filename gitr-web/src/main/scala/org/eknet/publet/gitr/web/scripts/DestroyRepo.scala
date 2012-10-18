@@ -1,10 +1,10 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.{PubletWebContext, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.GitAction
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

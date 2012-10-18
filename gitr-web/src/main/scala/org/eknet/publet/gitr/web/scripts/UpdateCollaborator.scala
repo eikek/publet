@@ -3,10 +3,10 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import GitrControl._
-import org.eknet.publet.web.{PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.xml.PermissionModel
 import org.eknet.publet.auth.{Permission, GitAction}
 import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

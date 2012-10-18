@@ -16,28 +16,31 @@
 
 package org.eknet.publet.ext.thumb
 
-import org.eknet.publet.web.{PubletWebContext, PubletWeb, PubletRequestWrapper, EmptyExtension}
+import org.eknet.publet.web.{PubletRequestWrapper, EmptyExtension}
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.filter.Filters
 import org.eknet.publet.vfs.ContentResource
+import com.google.inject.{Inject, Singleton}
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.PubletStartedEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.10.12 20:46
  */
-class ThumbnailExtension extends EmptyExtension with PubletRequestWrapper {
+@Singleton
+class ThumbnailExtension @Inject() (publet: Publet) extends EmptyExtension with PubletRequestWrapper {
 
-
-  override def getModule = Some(ThumbnailModule)
-
-  override def onStartup() {
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("thumb.png".rn, new ThumbnailScript))
-    PubletWeb.publet.mountManager.mount("/publet/ext/thumbnail/".p, muc)
+    publet.mountManager.mount("/publet/ext/thumbnail/".p, muc)
   }
 
   /**
@@ -48,15 +51,14 @@ class ThumbnailExtension extends EmptyExtension with PubletRequestWrapper {
    * @return
    */
   override def onBeginRequest(req: HttpServletRequest) = {
-    val publet = PubletWeb.publet
-    PubletWebContext.param("thumb") match {
+    req.param("thumb") match {
       case Some(x) => {
-        publet.rootContainer.lookup(PubletWebContext.applicationPath)
+        publet.rootContainer.lookup(req.applicationPath)
           .collect({case c:ContentResource if (c.contentType.mime._1 == "image") => c})
           .map(image => {
 
-          PubletWebContext.requestMap.put(ThumbnailScript.imageResource, image)
-          Filters.forwardRequest("/publet/ext/thumbnail/thumb.png".p, false)
+          req.requestMap.put(ThumbnailScript.imageResource, image)
+          Filters.forwardRequest(req, "/publet/ext/thumbnail/thumb.png".p, false)
         }).getOrElse(req)
       }
       case None => req

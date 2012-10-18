@@ -20,56 +20,28 @@ import org.eknet.publet.vfs.fs.FileResource
 import java.io.{OutputStream, InputStream, File}
 import scala.Option
 import org.eknet.publet.vfs.{ChangeInfo, Content, Path}
+import com.google.common.eventbus.EventBus
 
 class GitFile(f: File,
               rootPath: Path,
-              gp: GitPartition) extends FileResource(f, rootPath) with GitFileTools {
-  override def delete() {
-    super.delete()
-    gp.commitDelete(this)
-  }
-
+              val gp: GitPartition) extends FileResource(f, rootPath, gp.bus) with GitFileTools {
 
   protected def root = gp
 
-  override def writeFrom(in: InputStream, changeInfo: Option[ChangeInfo] = None) {
-    Content.copy(in, new OutStream(super.outputStream, changeInfo), closeIn = false)
-  }
+  override protected def newDirectory(f: File, root: Path, bus: EventBus) = GitPartition.newDirectory(f, root, gp)
 
-  override def outputStream: OutputStream = {
-    new OutStream(super.outputStream)
-  }
-
-  override protected def newDirectory(f: File, root: Path) = GitPartition.newDirectory(f, root, gp)
-
-  override protected def newFile(f: File, root: Path) = GitPartition.newFile(f, root, gp)
+  override protected def newFile(f: File, root: Path, bus: EventBus) = GitPartition.newFile(f, root, gp)
 
   def lastAuthor = {
     val commit = lastCommit
     commit map (_.getAuthorIdent)
   }
 
-  private class OutStream(out:OutputStream, changeInfo: Option[ChangeInfo] = None) extends OutputStream {
+  def commitWrite(changeInfo: Option[ChangeInfo]) {
+    gp.commitWrite(this, changeInfo)
+  }
 
-    def write(b: Int) {
-      out.write(b)
-    }
-
-    override def write(b: Array[Byte]) {
-      out.write(b)
-    }
-
-    override def write(b: Array[Byte], off: Int, len: Int) {
-      out.write(b, off, len)
-    }
-
-    override def close() {
-      out.close()
-      gp.commitWrite(GitFile.this, changeInfo)
-    }
-
-    override def flush() {
-      out.flush()
-    }
+  def commitDelete() {
+    gp.commitDelete(this)
   }
 }

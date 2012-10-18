@@ -17,8 +17,8 @@
 package org.eknet.publet.webeditor.actions
 
 import org.eknet.publet.vfs.{ContentResource, Resource, Path}
-import org.eknet.publet.web.PubletWebContext
 import org.eknet.publet.webeditor.EditorPaths
+import org.eknet.publet.web.util.PubletWebContext
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

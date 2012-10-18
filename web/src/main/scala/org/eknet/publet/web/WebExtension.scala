@@ -26,32 +26,6 @@ import com.google.inject.Module
 trait WebExtension {
 
   /**
-   * Optionally contribute a guice module to the application. This
-   * is used to create the [[com.google.inject.Injector]] for the
-   * application on startup.
-   *
-   * @return
-   */
-  def getModule: Option[Module]
-
-  /**
-   * Point on which extension code is executed
-   * once per server start.
-   *
-   * It is ensured, that those are invoked
-   * _after_ [[org.eknet.publet.web.PubletWeb]]
-   * has been initialized.
-   */
-  def onStartup()
-
-  /**
-   * This method is invoked when the servlet container is
-   * shutting down.
-   *
-   */
-  def onShutdown()
-
-  /**
    * This method is invoked on the begin of each request. It allows
    * to wrap the given request. For example to forward to another
    * resource.
@@ -59,9 +33,12 @@ trait WebExtension {
    * The request at this point is already authenticated and authorized.
    * See [[org.eknet.publet.web.req.PubletHandlerFactory]] for details.
    *
-   * Requests to the git repository and to a webdav resource are
+   * Requests to the git repository and to a webdav resources are
    * not routed here.
    *
+   * If you just want to be informed, you could also subscribe to
+   * the [[org.eknet.publet.web.req.RequestStartedEvent]] or
+   * [[org.eknet.publet.web.req.RequestEndEvent]]
    */
   def onBeginRequest(req:HttpServletRequest): HttpServletRequest
 

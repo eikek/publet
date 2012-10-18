@@ -16,7 +16,6 @@
 
 package org.eknet.publet.gitr.web
 
-import org.eknet.publet.web.{EmptyExtension, PubletWeb}
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.vfs.Path._
 import org.eknet.publet.web.scripts.WebScriptResource
@@ -24,14 +23,20 @@ import org.eknet.publet.vfs.util.{UrlResource, MapContainer}
 import java.net.URL
 import scripts._
 import org.eknet.publet.web.asset.{AssetManager, Group}
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.web.guice.PubletStartedEvent
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.Publet
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.05.12 20:34
  */
-class GitrWebExtension extends EmptyExtension {
+@Singleton
+class GitrWebExtension @Inject() (publet: Publet, assetMgr: AssetManager) {
 
-  override def onStartup() {
+  @Subscribe
+  def onStartup(ev: PubletStartedEvent) {
 
     val pages = new MapContainer()
     pages.addResource(new UrlResource(toUrl("loading.gif"), "loading.gif".rn))
@@ -59,15 +64,15 @@ class GitrWebExtension extends EmptyExtension {
     pages.addResource(new WebScriptResource("destroyRepo.json".rn, new DestroyRepo()))
     pages.addResource(new WebScriptResource("transferOwnership.json".rn, new TransferOwner()))
     pages.addResource(new WebScriptResource("index.html".rn, new GitrControl()))
-    PubletWeb.publet.mountManager.mount(GitrControl.mountPoint.p, pages)
+    publet.mountManager.mount(GitrControl.mountPoint.p, pages)
 
     val gitrPath = (GitrControl.mountPoint.p / "/**").asString
-    AssetManager.service setup (
+    assetMgr setup (
       Assets.gitrBrowser.forPath(gitrPath),
       Assets.gitrListing.forPath(gitrPath),
       Assets.gitrweb.forPath(gitrPath))
 
-    AssetManager.service setup
+    assetMgr setup
       Group("default").use(Assets.gitrweb.name)
   }
 

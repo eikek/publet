@@ -17,11 +17,16 @@
 package org.eknet.publet.web
 
 import grizzled.slf4j.Logging
+import guice.PubletStartedEvent
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
 import util.{StringMap, PropertiesMap}
 import org.eknet.publet.partition.git
+import com.google.common.eventbus.{EventBus, Subscribe}
+import git.GitPartMan
+import org.eknet.publet.Publet
+import com.google.inject.{Inject, Singleton}
 
 /**
  * Checks the `Config` and/or `Settings` file for listed partitions to mount.
@@ -29,15 +34,16 @@ import org.eknet.publet.partition.git
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.05.12 20:30
  */
-class PartitionMounter extends EmptyExtension with Logging {
+@Singleton
+class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config: Config, settings: Settings, bus: EventBus) extends Logging {
 
-  override def onStartup() {
+  @Subscribe
+  def mountPartitions(ev: PubletStartedEvent) {
 
-    val publet = PubletWeb.publet
     //by default partitions are read from settings. this can be overridden
     //in the config file so that all definitions from settings are ignored
     val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
-      readPartitionConfig(PubletWeb.publetSettings)
+      readPartitionConfig(settings)
     } else {
       readPartitionConfig(Config.get)
     }
@@ -46,13 +52,13 @@ class PartitionMounter extends EmptyExtension with Logging {
       case PartitionConfig("fs", dir, mounts) => {
         info("Mounting fs directory '"+ dir+ "' to '"+ mounts.map(_.asString)+"'")
         val pdir = new File(Config.get.configDirectory, dir)
-        val fsp = new FilesystemPartition(pdir, true)
+        val fsp = new FilesystemPartition(pdir, bus, true)
         for (m <- mounts) publet.mountManager.mount(m, fsp)
         1
       }
       case PartitionConfig("git", dir, mounts) => {
         info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
-        val gitp = PubletWeb.gitpartman.getOrCreate(Path(dir), git.Config())
+        val gitp = gitpartman.getOrCreate(Path(dir), git.Config())
         for (m <- mounts) publet.mountManager.mount(m, gitp)
         1
       }

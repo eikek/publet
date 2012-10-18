@@ -21,21 +21,41 @@ import org.eknet.publet.vfs._
 import java.io.{FileOutputStream, File}
 import org.eclipse.jgit.lib.Repository
 import org.eknet.publet.gitr.{Tandem, RepositoryName, GitrMan}
+import com.google.common.eventbus.{Subscribe, EventBus}
+import org.eknet.publet.vfs.events.{ContentDeletedEvent, ContentWrittenEvent}
 
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.05.12 16:38
  */
-class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
+class GitPartManImpl(val gitr: GitrMan, bus: EventBus) extends GitPartMan {
+
+  bus.register(this)
 
   private val partitionProperty = "gitPartition"
+
+  @Subscribe
+  def updateRepository(event: ContentWrittenEvent) {
+    event.resource match {
+      case gitfile: GitFile => gitfile.commitWrite(event.changeInfo)
+      case _ =>
+    }
+  }
+
+  @Subscribe
+  def updateRepsitoryOnDelete(event: ContentDeletedEvent) {
+    event.resource match {
+      case gitfile: GitFile => gitfile.commitDelete()
+      case _ =>
+    }
+  }
 
   def getAllPartitions = {
     gitr.allRepositories(x=>true)
       .collect({case r if (r.isTandem) => gitr.getTandem(r.name)})
       .flatten
-      .map(new GitPartition(_))
+      .map(tandem => new GitPartition(tandem, bus))
   }
 
   def create(location: Path, config: Config) = {
@@ -50,7 +70,7 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
     gitconf.setBoolean("publet", null, partitionProperty, true)
     gitconf.save()
 
-    val gitp = new GitPartition(tandem)
+    val gitp = new GitPartition(tandem, bus)
     gitp
   }
 
@@ -60,8 +80,8 @@ class GitPartManImpl(val gitr: GitrMan) extends GitPartMan {
   }
 
   def get(location: Path) = {
-    gitr.getTandem(RepositoryName(location.asString)) filter (isGitPartition) map {
-      new GitPartition(_)
+    gitr.getTandem(RepositoryName(location.asString)) filter (isGitPartition) map { tandem =>
+      new GitPartition(tandem, bus)
     }
   }
 

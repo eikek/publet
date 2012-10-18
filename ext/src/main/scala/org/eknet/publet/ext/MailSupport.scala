@@ -18,7 +18,7 @@ package org.eknet.publet.ext
 
 import javax.mail.internet.InternetAddress
 import org.eknet.squaremail._
-import org.eknet.publet.web.PubletWeb
+import org.eknet.publet.web.util.PubletWeb
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

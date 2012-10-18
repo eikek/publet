@@ -16,10 +16,9 @@
 
 package org.eknet.publet.ext.counter
 
-import org.eknet.publet.web.{SettingsReloadedEvent, Settings, PubletWeb}
 import java.util.concurrent.TimeUnit
 import org.eknet.publet.web.util.{StringMap, ClientInfo}
-import org.eknet.publet.Glob
+import org.eknet.publet.{Publet, Glob}
 import org.eknet.publet.vfs.{Path, ContentResource}
 import org.apache.shiro.util.ByteSource
 import org.apache.shiro.crypto.hash.Md5Hash
@@ -33,13 +32,14 @@ import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.ext.orient.OrientDbProvider
+import org.eknet.publet.web.SettingsReloadedEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: OrientDbProvider) extends CounterService {
+class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: OrientDbProvider, publet: Publet) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = dbprovider.getDatabase("extdb")
@@ -136,7 +136,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
 
       bot || bl
     }
-    val urlmatch = PubletWeb.publetSettings("ext.counter.pattern")
+    val urlmatch = settings("ext.counter.pattern")
       .map(Glob(_).matches(uri)).getOrElse(true)
     if (!isBlacklisted && urlmatch) {
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
@@ -172,12 +172,12 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
       cs._1
     }
 
-    PubletWeb.publet.findSources(Path(uriPath)).headOption map { res =>
+    publet.findSources(Path(uriPath)).headOption map { res =>
       db.withTx {
         val pv = getOrCreatePageVertex(uriPath)
         Option(pv.getProperty(pageMd5Checksum)).map(cs => {
           val mod = Option(pv.getProperty(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
-          val cur = PubletWeb.publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
+          val cur = publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
           if (cur > mod) updateChecksum(pv, res)
           else cs.asInstanceOf[String]
         }) getOrElse {

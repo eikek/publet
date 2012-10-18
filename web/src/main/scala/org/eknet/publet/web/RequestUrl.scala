@@ -19,7 +19,7 @@ package org.eknet.publet.web
 import javax.servlet.http.HttpServletRequest
 import java.net.{URLEncoder, URLDecoder}
 import org.eknet.publet.vfs.Path
-import util.{Request, Key}
+import util.{PubletWeb, Request, Key}
 import grizzled.slf4j.Logging
 
 /**
@@ -42,8 +42,8 @@ trait RequestUrl extends Logging {
       else
         uri +":" +req.getServerPort
 
-      if (PubletWeb.contextPath.isEmpty) base
-      else base + PubletWeb.contextPath
+      if (req.getServletContext.getContextPath.isEmpty) base
+      else base + req.getServletContext.getContextPath
     }
   })
 

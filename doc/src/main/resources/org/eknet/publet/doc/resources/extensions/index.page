@@ -18,12 +18,15 @@ title: Publet Documentation
       li
         a(href="#ext" data-toggle="pill")
           i.icon-chevron-right
-          | Ext
+          | Extras
       li
         a(href="#gitrweb" data-toggle="pill")
           i.icon-chevron-right
           | GitR Web
       li
+        a(href="#webdav" data-toggle="pill")
+          i.icon-chevron-right
+          | Webdav
 
   .span10
     .tab-content
@@ -33,3 +36,5 @@ title: Publet Documentation
         =include("_ext.jade")
       .tab-pane#gitrweb
         =include("_gitrweb.md")
+      .tab-pane#webdav
+        =include("_webdav.md")

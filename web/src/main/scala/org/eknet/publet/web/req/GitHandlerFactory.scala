@@ -19,10 +19,14 @@ package org.eknet.publet.web.req
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.web.filter._
 import org.eknet.publet.auth.{GitAction, RepositoryTag}
-import org.eknet.publet.web.{PubletRequestWrapper, PubletWeb}
+import org.eknet.publet.web.PubletRequestWrapper
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
+import com.google.inject.{Inject, Singleton}
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.gitr.GitrMan
+import grizzled.slf4j.Logging
 
 /**
  * Creates a filter chain to server git requests.
@@ -30,7 +34,8 @@ import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:18
  */
-class GitHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper {
+@Singleton
+class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus) extends RequestHandlerFactory with PubletRequestWrapper with Logging {
 
   def getApplicableScore(req: HttpServletRequest) =
     if (req.isGitRequest) EXACT_MATCH else NO_MATCH
@@ -40,7 +45,7 @@ class GitHandlerFactory extends RequestHandlerFactory with PubletRequestWrapper 
       GitShiroFilter,
       Filters.exceptionHandler,
       GitAuthzFilter,
-      new GitHttpFilter(PubletWeb.gitr)
+      new GitHttpFilter(gitr, bus)
     ))
 
   object GitShiroFilter extends AuthcFilter {
