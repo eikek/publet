@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest
 import com.google.inject.Module
 
 /**
- * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.04.12 20:31
  */
 trait WebExtension {

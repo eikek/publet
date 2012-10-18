@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.Filter
 
 /**
- * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:15
  */
 trait RequestHandlerFactory {

@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServlet
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eknet.publet.web.req.PubletMainFilter
 import org.eknet.publet.web.guice.PubletContextListener
+import com.google.inject.servlet.GuiceFilter
+import org.eknet.publet.war.LoggingSetup
 
 /**
  * Configures the jetty server programmatically. No web.xml is needed, use this
@@ -73,7 +75,8 @@ class CodeWebappConfigurer(pluginDir: Option[File]) extends WebAppConfigurer {
     val sch = new ServletContextHandler(server, "/", ServletContextHandler.NO_SECURITY)
     sch.setBaseResource(baseResource)
     sch.setSessionHandler(new SessionHandler())
-    sch.addFilter(classOf[PubletMainFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
+    sch.addFilter(classOf[GuiceFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
+    sch.addEventListener(new LoggingSetup)
     sch.addEventListener(new PubletContextListener)
     val nullServletHolder = new ServletHolder()
     nullServletHolder.setServlet(new HttpServlet {})
