@@ -18,9 +18,8 @@ package org.eknet.publet.web.guice
 
 import com.google.inject._
 import name.Named
-import org.eknet.publet.web.shiro.{AuthListener, UsersRealm}
+import org.eknet.publet.web.shiro.AuthListener
 import org.apache.shiro.realm.Realm
-import com.google.inject.multibindings.Multibinder
 import org.apache.shiro.cache.{MemoryConstrainedCacheManager, CacheManager}
 import org.apache.shiro.web.mgt.{WebSecurityManager, DefaultWebSecurityManager}
 import com.google.inject.binder.AnnotatedBindingBuilder
@@ -34,12 +33,11 @@ import org.apache.shiro.web.env.WebEnvironment
 import org.eknet.publet.web.util.StringMap
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
-import org.apache.shiro.authc.credential.{DefaultPasswordService, PasswordService}
+import org.apache.shiro.authc.credential.PasswordService
 import org.apache.shiro.crypto.hash._
-import org.apache.shiro.crypto.hash.format.{Shiro1CryptFormat}
 import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.AbstractAuthenticator
-import org.eknet.publet.auth.{DefaultPasswordServiceProvider, PasswordServiceProvider}
+import org.eknet.publet.auth.{PubletAuth, UsersRealm, DefaultPasswordServiceProvider, PasswordServiceProvider}
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -53,7 +51,7 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     binder.set[PasswordServiceProvider].toType[DefaultPasswordServiceProvider] in  Scopes.SINGLETON
     binder.set[CacheManager].toType[MemoryConstrainedCacheManager] in Scopes.SINGLETON
     binder.set[SessionManager].toType[ServletContainerSessionManager] asEagerSingleton()
-    binder.bindRealm.toType[UsersRealm]
+    binder.bindRealm.toType[GuiceUserRealm]
 
     binder.set[WebEnvironment].toType[GuiceWebEnvironment].asEagerSingleton()
   }
@@ -120,3 +118,6 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     bind.toConstructor(classOf[DefaultWebSecurityManager].getConstructor(classOf[util.Collection[_]])).asEagerSingleton()
   }
 }
+
+@Singleton
+class GuiceUserRealm @Inject() (auth: PubletAuth, bus: EventBus) extends UsersRealm(auth, bus)

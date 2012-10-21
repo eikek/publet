@@ -56,7 +56,7 @@ object DigestGenerator {
    * @return
    */
   def generateDigestWithEncryptedPassword(dr: DigestResponse, a1Md5: String): String = {
-    val httpMethod: String = dr.method
+    val httpMethod: String = dr.method.toUpperCase
     val a2Md5 = encodeMethodAndUri(httpMethod, dr.uri)
     val qop: String = dr.qop
     val nonce: String = dr.nonce
@@ -77,7 +77,7 @@ object DigestGenerator {
   }
 
   private[auth] def encodeMethodAndUri(httpMethod: String, uri: String): String = {
-    val a2: String = httpMethod + ":" + uri
+    val a2: String = httpMethod.toUpperCase + ":" + uri
     md5Hex(a2)
   }
 

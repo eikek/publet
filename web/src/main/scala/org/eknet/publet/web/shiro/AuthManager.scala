@@ -70,7 +70,7 @@ class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, confi
   private def delegate: PubletAuth = {
     database.getOrElse {
       val db = try {
-        val realmNameFun = Some(() => settings("webdav.realmName").getOrElse("Webdav Area"))
+        val realmNameFun = Some(() => settings("webdav.realmName").getOrElse("WebDav Area"))
         getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r, passServProv, realmNameFun)}).getOrElse {
           val msg = "No permission.xml file found."
           config("superadminEnabled").map(_.toBoolean) match {

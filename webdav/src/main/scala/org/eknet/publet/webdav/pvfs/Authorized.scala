@@ -6,15 +6,27 @@ import org.apache.shiro.authc.UsernamePasswordToken
 import grizzled.slf4j.Logging
 import com.bradmcevoy.http.{Auth, Request, DigestResource, Resource}
 import com.bradmcevoy.http.Request.Method
-import com.bradmcevoy.http.http11.auth.DigestResponse
-import org.eknet.publet.webdav.auth.DigestAuthenticationToken
+import com.bradmcevoy.http.http11.auth.{DigestResponse => MiltonDigestResponse}
 import org.eknet.publet.web.util.PubletWebContext
+import org.eknet.publet.auth.{DigestResponse, DigestAuthenticationToken}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.06.12 19:07
  */
 trait Authorized extends Resource with Logging with DigestResource {
+
+  implicit def toDigestResponse(dr: MiltonDigestResponse): DigestResponse = new DigestResponse(
+    dr.getMethod.code,
+    dr.getUser,
+    dr.getRealm,
+    dr.getNonce,
+    dr.getUri,
+    dr.getResponseDigest,
+    dr.getQop,
+    dr.getNc,
+    dr.getCnonce
+  )
 
   /**
    * Checks permission for the current request uri.
@@ -46,7 +58,7 @@ trait Authorized extends Resource with Logging with DigestResource {
     findPrincipal
   }
 
-  private def loginDigest(req: DigestResponse) = {
+  private def loginDigest(req: MiltonDigestResponse) = {
     SecurityUtils.getSubject.login(new DigestAuthenticationToken(req))
     findPrincipal
   }
@@ -60,7 +72,7 @@ trait Authorized extends Resource with Logging with DigestResource {
     }
   }
 
-  def authenticate(digestRequest: DigestResponse) = {
+  def authenticate(digestRequest: MiltonDigestResponse) = {
     Option(SecurityUtils.getSubject.getPrincipal) match {
       case Some(p) => p
       case None => loginDigest(digestRequest)

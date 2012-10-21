@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.shiro
+package org.eknet.publet.auth
 
 import collection.JavaConversions._
 import org.apache.shiro.realm.AuthorizingRealm
 import org.apache.shiro.authz.{SimpleAuthorizationInfo, AuthorizationInfo}
-import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
-import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
+import org.apache.shiro.subject.PrincipalCollection
+import org.apache.shiro.authc.{UsernamePasswordToken, DisabledAccountException, AuthenticationToken}
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.auth.{PasswordServiceProvider, PubletAuth, Policy, User}
-import org.apache.shiro.authc.credential.{SimpleCredentialsMatcher, CredentialsMatcher}
-import com.google.inject.{Singleton, Inject}
-import org.eknet.publet.web.guice.PubletShiroModule
+import org.apache.shiro.authc.credential.SimpleCredentialsMatcher
 import com.google.common.eventbus.EventBus
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
-@Singleton
-class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
+class UsersRealm(val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
 
-  setCredentialsMatcher(new DynamicHashCredentialsMatcher())
+  setCredentialsMatcher(new CompositeCredentialsMatcher(List(
+    new DynamicHashCredentialsMatcher,
+    new DigestCredentialsMatcher(db),
+    new SimpleCredentialsMatcher
+  )))
 
-  override def assertCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) {
-    super.assertCredentialsMatch(token, info)
+  override def supports(token: AuthenticationToken) = {
+    token.isInstanceOf[DigestAuthenticationToken] || token.isInstanceOf[UsernamePasswordToken]
   }
 
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
@@ -65,7 +66,7 @@ class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends Authorizi
     def getRoles = user.groups
 
     private def policy = {
-      val op = Option(Security.session.getAttribute("policy")).map(_.asInstanceOf[Policy])
+      val op = Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
       op.getOrElse {
         val policy = db.getPolicy(user)
         SecurityUtils.getSubject.getSession.setAttribute("policy", policy)
@@ -75,28 +76,6 @@ class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends Authorizi
 
     def getStringPermissions = policy.getPermissions
     def getObjectPermissions = List()
-  }
-
-  class UserAuthInfo(user: User) extends AuthenticationInfo {
-    def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
-    def getCredentials = user.password
-    def algorithm = user.algorithm
-  }
-
-  class DynamicHashCredentialsMatcher extends CredentialsMatcher {
-    private val fallback = new SimpleCredentialsMatcher()
-
-    def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
-      info match {
-        case ui: UserAuthInfo => {
-          ui.algorithm.map(PasswordServiceProvider.newPasswordService(_)) match {
-            case Some(ps) => ps.passwordsMatch(token.getCredentials, new String(ui.getCredentials))
-            case _ => fallback.doCredentialsMatch(token, info)
-          }
-        }
-        case _ => fallback.doCredentialsMatch(token, info)
-      }
-    }
   }
 
 }

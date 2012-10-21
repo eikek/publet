@@ -67,8 +67,7 @@ Here is an example `permissions.xml` file explained:
     </publetAuth>
 
 Note, the file is inside the repository, so you can edit it like any
-other resource. But modifications are not reflected until a manual
-`reload()` is invoked on the authentication manager.
+other resource.
 
 ### User Database
 
@@ -84,7 +83,7 @@ can only be associated with groups.
 
 The `digest` property specifies the so called `HA1` value for authenticating
 using the [Digest](http://en.wikipedia.org/wiki/Digest_access_authentication)
-method. This is only used for authenticating WebDAV requests and is therefore
+method. Currently, this is only used for authenticating WebDAV requests and is therefore
 optional (if it is not present authentication does not work for WebDAV
 requests). Please refer to the WebDAV documentation for more information.
 
