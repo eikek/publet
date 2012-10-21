@@ -66,13 +66,7 @@ class MyDataScript extends ScalaScript {
   def error(msg: String) =  makeJson(Map("success"->false, "message"->msg))
 
   private def changePassword(newpassPlain: String, algorithm: String) = {
-    val user = PubletWeb.authManager.findUser(Security.username).get
-
-    val ps = PubletWeb.instance[PasswordService](algorithm)
-    val newpass = ps.encryptPassword(newpassPlain)
-    val newdigest = digestGenerator.encodePasswordInA1Format(user.login, WebdavResource.getRealmName, newpassPlain)
-    val newUser = new User(user.login, newpass.toCharArray, Some(algorithm), newdigest.toCharArray, user.groups, user.properties)
-    PubletWeb.authManager.updateUser(newUser)
+    PubletWeb.authManager.setPassword(Security.username, newpassPlain, Some(algorithm))
     success("Password updated.")
   }
 

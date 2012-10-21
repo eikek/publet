@@ -29,7 +29,7 @@ import org.apache.shiro.{ShiroException, SecurityUtils}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.05.12 21:57
  */
-class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
+class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordServiceProvider, realmNameFun: Option[() => String]) extends PubletAuth with Logging {
   private val prettyPrinter = new PrettyPrinter(90, 2)
 
   private var lastLoaded: Long = -1
@@ -111,6 +111,21 @@ class XmlDatabase(source: ContentResource) extends PubletAuth with Logging {
       write("Permission: update user "+ user.login)
     }
   }
+
+  def setPassword(login: String, plainTextPassword: String, algorithm: Option[String]) {
+    val user = findUser(login).getOrElse(sys.error("User '"+login+"' not found"))
+    val realmName = realmNameFun.map(_()).getOrElse(defaultRealmName)
+    val newdigest = DigestGenerator.encodePasswordInA1Format(user.login, realmName, plainTextPassword)
+    val newpass = algorithm.orElse(user.algorithm)
+        .map(a => passwServiceProvider.forAlgorithm(Algorithm.withName(a.toUpperCase)))
+        .map(ps => ps.encryptPassword(plainTextPassword))
+        .getOrElse(plainTextPassword)
+
+    val newUser = new User(user.login, newpass.toCharArray, algorithm.orElse(user.algorithm), newdigest.toCharArray, user.groups, user.properties)
+    updateUser(newUser)
+  }
+
+  val defaultRealmName = "Webdav Area"
 
   def updateRepository(repo: RepositoryModel) {
     synchronized {

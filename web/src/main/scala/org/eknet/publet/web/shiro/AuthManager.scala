@@ -27,14 +27,14 @@ import org.eknet.publet.vfs.events.ContentWrittenEvent
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.filter.PostReceiveEvent
 import com.google.inject.name.Named
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{Settings, Config}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.05.12 23:49
  */
 @Singleton
-class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, config: Config) extends PubletAuth with Logging {
+class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, config: Config, passServProv: PasswordServiceProvider, settings: Settings) extends PubletAuth with Logging {
 
   private var lastModification: Option[Long] = None
 
@@ -70,7 +70,8 @@ class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, confi
   private def delegate: PubletAuth = {
     database.getOrElse {
       val db = try {
-        getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r)}).getOrElse {
+        val realmNameFun = Some(() => settings("webdav.realmName").getOrElse("Webdav Area"))
+        getPermissionXml.map(r => { lastModification = r.lastModification; new XmlDatabase(r, passServProv, realmNameFun)}).getOrElse {
           val msg = "No permission.xml file found."
           config("superadminEnabled").map(_.toBoolean) match {
             case Some(false) => warn(msg + " Super-user account disabled."); PubletAuth.Empty
@@ -108,6 +109,11 @@ class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, confi
     delegate.updateUser(user)
     reload()
   }
+  def setPassword(login: String, plainTextPassword: String, algorithm: Option[String]) {
+    delegate.setPassword(login, plainTextPassword, algorithm)
+    reload()
+  }
+
   def updateRepository(repo: RepositoryModel) {
     delegate.updateRepository(repo)
     reload()
@@ -151,6 +157,7 @@ private class SuperUserAuth(config: Config) extends PubletAuth {
     def getPermissions = Set("*")
   }
   def updateUser(user: User) {}
+  def setPassword(login: String, plainTextPassword: String, algorithm: Option[String]) {}
   def updateRepository(repo: RepositoryModel) {}
   def removeRepository(repoName: String) {}
   def updatePermission(perm: PermissionModel) {}

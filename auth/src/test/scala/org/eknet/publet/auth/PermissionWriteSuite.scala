@@ -20,7 +20,7 @@ class PermissionWriteSuite extends FunSuite with ShouldMatchers with OneInstance
     val org = getClass.getResourceAsStream("/permission.example.xml")
     Content.copy(org, new FileOutputStream(temp), true, true)
     val source = new FileResource(temp, Path.root, new EventBus())
-    new XmlDatabase(source)
+    new XmlDatabase(source, new DefaultPasswordServiceProvider, None)
   }
 
   test ("Update RepositoryModel") {

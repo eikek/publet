@@ -19,7 +19,7 @@ class SimpleSuite extends FunSuite with ShouldMatchers {
       override def lastModification = Some(System.currentTimeMillis())
     }
     val source = new SimpleContentResource(ResourceName("permission.example.xml"), content)
-    new XmlDatabase(source)
+    new XmlDatabase(source, new DefaultPasswordServiceProvider, None)
   }
 
   private val policy = db.getPolicy("jdoe")

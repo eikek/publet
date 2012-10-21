@@ -39,6 +39,7 @@ import org.apache.shiro.crypto.hash._
 import org.apache.shiro.crypto.hash.format.{Shiro1CryptFormat}
 import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.AbstractAuthenticator
+import org.eknet.publet.auth.{DefaultPasswordServiceProvider, PasswordServiceProvider}
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -49,6 +50,7 @@ import org.apache.shiro.authc.AbstractAuthenticator
 object PubletShiroModule extends AbstractModule with PubletBinding {
 
   def configure() {
+    binder.set[PasswordServiceProvider].toType[DefaultPasswordServiceProvider] in  Scopes.SINGLETON
     binder.set[CacheManager].toType[MemoryConstrainedCacheManager] in Scopes.SINGLETON
     binder.set[SessionManager].toType[ServletContainerSessionManager] asEagerSingleton()
     binder.bindRealm.toType[UsersRealm]
@@ -57,39 +59,25 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
   }
 
   @Provides@Singleton@Named(Sha512Hash.ALGORITHM_NAME)
-  def createSha512PasswordService(): PasswordService = newPasswordService(Sha512Hash.ALGORITHM_NAME)
+  def createSha512PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha512Hash.ALGORITHM_NAME)
 
   @Provides@Singleton@Named(Md5Hash.ALGORITHM_NAME)
-  def createMd5PasswordService(): PasswordService = newPasswordService(Md5Hash.ALGORITHM_NAME)
+  def createMd5PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Md5Hash.ALGORITHM_NAME)
 
   @Provides@Singleton@Named(Md2Hash.ALGORITHM_NAME)
-  def createMd2PasswordService(): PasswordService = newPasswordService(Md2Hash.ALGORITHM_NAME)
+  def createMd2PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Md2Hash.ALGORITHM_NAME)
 
   @Provides@Singleton@Named(Sha1Hash.ALGORITHM_NAME)
-  def createSha1PasswordService(): PasswordService = newPasswordService(Sha1Hash.ALGORITHM_NAME)
+  def createSha1PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha1Hash.ALGORITHM_NAME)
 
   @Provides@Singleton@Named(Sha384Hash.ALGORITHM_NAME)
-  def createSha384PasswordService(): PasswordService = newPasswordService(Sha384Hash.ALGORITHM_NAME)
+  def createSha384PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha384Hash.ALGORITHM_NAME)
 
-  /**
-   * Creates a new [[org.apache.shiro.authc.credential.PasswordService]] using the
-   * given algorithm name. Use the constants defined in shiros concrete hash classes (extend
-   * [[org.apache.shiro.crypto.hash.SimpleHash]]), like [[org.apache.shiro.crypto.hash.Md5Hash]].
-   *
-   * @param algorithm
-   * @return
-   */
-  private[web] def newPasswordService(algorithm: String) = {
-    val ps = new DefaultPasswordService
-    val hs = new DefaultHashService()
-    val hf = new Shiro1CryptFormat
-    hs.setHashAlgorithmName(algorithm)
-    hs.setHashIterations(DefaultPasswordService.DEFAULT_HASH_ITERATIONS)
-    hs.setGeneratePublicSalt(true)
-    ps.setHashService(hs)
-    ps.setHashFormat(hf)
-    ps
-  }
 
   @Provides@Singleton
   def createWebSecurityManager(bus: EventBus, cacheMan: CacheManager, realms: util.Set[Realm]): WebSecurityManager = {

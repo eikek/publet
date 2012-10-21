@@ -22,7 +22,7 @@ import org.apache.shiro.authz.{SimpleAuthorizationInfo, AuthorizationInfo}
 import org.apache.shiro.subject.{SimplePrincipalCollection, PrincipalCollection}
 import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo, AuthenticationToken}
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.auth.{PubletAuth, Policy, User}
+import org.eknet.publet.auth.{PasswordServiceProvider, PubletAuth, Policy, User}
 import org.apache.shiro.authc.credential.{SimpleCredentialsMatcher, CredentialsMatcher}
 import com.google.inject.{Singleton, Inject}
 import org.eknet.publet.web.guice.PubletShiroModule
@@ -89,7 +89,7 @@ class UsersRealm @Inject() (val db: PubletAuth, bus: EventBus) extends Authorizi
     def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
       info match {
         case ui: UserAuthInfo => {
-          ui.algorithm.map(PubletShiroModule.newPasswordService(_)) match {
+          ui.algorithm.map(PasswordServiceProvider.newPasswordService(_)) match {
             case Some(ps) => ps.passwordsMatch(token.getCredentials, new String(ui.getCredentials))
             case _ => fallback.doCredentialsMatch(token, info)
           }

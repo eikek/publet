@@ -19,7 +19,7 @@ object XmlParserTest {
       override def lastModification = Some(System.currentTimeMillis())
     }
     val source = new SimpleContentResource(ResourceName("permission.example.xml"), content)
-    val pa = new XmlDatabase(source)
+    val pa = new XmlDatabase(source, new DefaultPasswordServiceProvider, None)
     val pp = new PrettyPrinter(90, 2)
     val policy = pa.getPolicy("jdoe")
     println(policy.getPermissions)

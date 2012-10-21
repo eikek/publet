@@ -52,7 +52,21 @@ trait PubletAuth {
   def getPolicy(login: String): Policy
   def getPolicy(user: User): Policy
 
+  /**
+   * Updates the user with the same login as the user
+   * given with all of the given information.
+   * @param user
+   */
   def updateUser(user: User)
+
+  /**
+   * A convenience method to set a new password for the
+   * given user.
+   *
+   * @param login
+   * @param plainTextPassword
+   */
+  def setPassword(login: String, plainTextPassword: String, algorithm: Option[String])
 
   /**
    * Replaces any existing model with the given model, if
@@ -82,6 +96,7 @@ object PubletAuth {
     def getAllRepositories = Seq[RepositoryModel]()
     def getAllGroups = Set()
     def updateUser(user: User) {}
+    def setPassword(login: String, plainTextPassword: String, algorithm: Option[String]) {}
     def updateRepository(repo: RepositoryModel) {}
     def removeRepository(repoName: String) {}
     def updatePermission(perm: PermissionModel) {}
