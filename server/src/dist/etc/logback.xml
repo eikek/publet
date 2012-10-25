@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Logback configuration.
+  -
+  - Please see the following documentation:
+  -  * http://logback.qos.ch/manual/configuration.html
+  -  * http://logback.qos.ch/manual/appenders.html
+ -->
 <configuration scan="true">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -37,8 +44,8 @@
     </appender>
     -->
 
-    <!-- activate for debugging output -->
-    <!--<logger name="org.eknet.publet" level="DEBUG"/>-->
+    <!-- change level to DEBUG for debugging output
+    <logger name="org.eknet.publet" level="DEBUG">  -->
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

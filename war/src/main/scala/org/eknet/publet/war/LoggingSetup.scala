@@ -27,12 +27,15 @@ import java.io.{FileInputStream, File}
 class LoggingSetup extends ServletContextListener with LoggingConfigurer {
 
   def contextInitialized(sce: ServletContextEvent) {
-    configureLogging(logfile(sce.getServletContext.getContextPath).map(f => new FileInputStream(f))
-      .getOrElse(getClass.getResourceAsStream("/logback.xml")))
+    if (System.getProperty("logback.configurationFile") == null) {
+      configureLogging(logfile(sce.getServletContext.getContextPath).map(f => new FileInputStream(f))
+        .getOrElse(getClass.getResourceAsStream("/logback.xml")))
+    }
   }
 
   def logfile(contextPath: String) = optFile(new File(Config.configDirectory(contextPath), "logback.xml"))
     .orElse(optFile(new File(Config.rootDirectory, "logback.xml")))
+    .orElse(optFile(new File(new File("etc"), "logback.xml")))
 
   private def optFile(f: File): Option[File] = if (f.exists()) Some(f) else None
 

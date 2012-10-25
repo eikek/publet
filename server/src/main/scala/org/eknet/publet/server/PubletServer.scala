@@ -30,22 +30,7 @@ import FileHelper._
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 30.06.12 21:19
  */
-class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Logging with LoggingConfigurer {
-
-  //configure logging
-  file("etc" / "logback.xml") match {
-    case f if (f.exists()) => {
-      configureLogging(f)
-      info("Configured logging from file: "+ f)
-    }
-    case _ => file("logback.xml") match {
-      case f if (f.exists()) => {
-        configureLogging(f)
-        info("Configured logging from file: "+ f)
-      }
-      case _ =>
-    }
-  }
+class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Logging {
 
   val varDir = file("var")
   if (!varDir.exists) {

@@ -38,9 +38,6 @@ class PubletContextListener extends GuiceServletContextListener with Logging {
     //eagerly setting the servletContext. All eager injections must be
     //named with "Names.servletContext"
     this.sc = new WeakReference[ServletContext](sce.getServletContext)
-    super.contextInitialized(sce)
-    val bus = findInjector.getInstance(classOf[EventBus])
-    val config = findInjector.getInstance(classOf[Config])
     info("""
            |
            |                   |      |        |
@@ -52,6 +49,10 @@ class PubletContextListener extends GuiceServletContextListener with Logging {
            |    starting ...
            |
            |""".stripMargin.replace("$v$", AppSignature.version))
+    super.contextInitialized(sce)
+    val bus = findInjector.getInstance(classOf[EventBus])
+    val config = findInjector.getInstance(classOf[Config])
+
     try {
       if (config.mode == RunMode.development) {
         info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))

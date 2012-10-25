@@ -9,7 +9,10 @@
 # find working dir and cd into it
 cd `dirname $0`/..
 
-JAVA_OPTS="-server -Xmx512M -Djava.awt.headless=true -jar -Dpublet.server.port=8080 -Djava.io.tmpdir=temp"
+JAVA_OPTS="-server -Xmx512M -Djava.awt.headless=true -jar \
+ -Dpublet.server.port=8080 \
+ -Djava.io.tmpdir=`pwd`/temp \
+ -Dlogback.configurationFile=`pwd`/etc/logback.xml"
 java $JAVA_OPTS bin/publet-server.jar --start
 
 cd -
