@@ -47,7 +47,8 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
 
   protected def createEvent() = ConfigReloadedEvent(this)
 
-  /**The configuration directory of the application.
+  /**
+   * The configuration directory of this application.
    *
    * @return
    */
@@ -78,7 +79,28 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
     }
     if (!dir.exists()) if (!dir.mkdirs()) sys.error("Cannot create temp directory: "+ dir.getAbsolutePath)
     if (!dir.isDirectory) sys.error("Temp directory is not a directory:" + dir.getAbsolutePath)
-    info("Using temporary directory root to: "+ dir.getAbsolutePath)
+    info("Java temp directory is: "+ System.getProperty("java.io.tmpdir"))
+    info("Using temporary directory: "+ dir.getAbsolutePath)
+    dir
+  }
+
+  /**
+   * Returns a new directory inside publets config directory
+   * with the given name. It is created, if it does not exist
+   * yet.
+   *
+   * This can be used to persist working data.
+   *
+   * @param name
+   */
+  def workDir(name: String) = synchronized {
+    val dir = getFile(name)
+    if (!dir.exists()) {
+      dir.mkdirs()
+    }
+    if (!dir.isDirectory)
+      sys.error(dir.getAbsolutePath+ " is not a directory!")
+
     dir
   }
 
@@ -101,7 +123,7 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
    * @param name
    * @return
    */
-  def newStaticTempDir(name: String): File = {
+  def newStaticTempDir(name: String): File = synchronized {
     val t = new File(tempRoot, name)
     if (!t.exists()) t.mkdirs()
     t
