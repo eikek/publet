@@ -13,7 +13,7 @@ object Version {
   val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
-  val squaremail = "1.0.1"
+  val squaremail = "1.0.2"
   val jgit = "2.0.0.201206130900-r"
   val shiro = "1.2.1"
   val scalaTest = "2.0.M2"
