@@ -47,7 +47,6 @@ class OrientDb(val graph: OrientGraph) extends Logging {
 
   private def executeTx[A](f: => A): A = {
     if (!txthread.get()) {
-      graph.startTransaction()
       txthread.set(true)
       try {
         val r = f
