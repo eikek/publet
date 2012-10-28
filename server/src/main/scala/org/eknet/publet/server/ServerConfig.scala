@@ -99,6 +99,20 @@ trait ServerConfig {
    */
   def workingDirectory: String
 
+  /**
+   * The thread pool size of the worker threads for one connector.
+   * Default is 20.
+   *
+   * @return
+   */
+  def connectorThreads: Int
+
+  /**
+   * Milliseconds to wait for graceful shutdown.
+   * Default is 5000.
+   * @return
+   */
+  def gracefulShutdownTimeout: Int
 }
 
 object ServerConfig {
@@ -112,19 +126,50 @@ object ServerConfig {
   val propertySslBindAddress = "publet.server.secureBindAddress"
   val propertyContextPath = "publet.server.contextPath"
   val propertyWorkingDirectory = "publet.server.workingDirectory"
+  val propertyConnectorThreads = "publet.server.connectorThreads"
+  val propertyGracefulShutdownTimeout = "publet.server.gracefulShutdownTimeout"
 }
 
 class DefaultConfig extends ServerConfig {
-  def port:Option[Int] = None
-  def securePort:Option[Int] = None
-  def keystorePath:String = ""
-  def keystorePassword:String = ""
-  def shutdownPort:Int = 8099
-  def ajpPort:Option[Int] = None
-  def sslBindAddress:Option[String] = None
-  def bindAddress:Option[String] = None
-  def contextPath = "/"
-  def workingDirectory = ""
+
+  private var _port: Option[Int] = None
+  private var _securePort: Option[Int] = None
+  private var _keystorePath = ""
+  private var _keystorePassword = ""
+  private var _shutdownPort = 8099
+  private var _ajpPort: Option[Int] = None
+  private var _bindAddress: Option[String] = None
+  private var _sslBindAddress: Option[String] = None
+  private var _contextPath = "/"
+  private var _workdingDirectory = ""
+  private var _connectorThreads = 20
+  private var _gracefulShutdownTimeout = 5000
+
+  def port:Option[Int] = _port
+  def securePort:Option[Int] = _securePort
+  def keystorePath:String = _keystorePath
+  def keystorePassword:String = _keystorePassword
+  def shutdownPort:Int = _shutdownPort
+  def ajpPort:Option[Int] = _ajpPort
+  def sslBindAddress:Option[String] = _sslBindAddress
+  def bindAddress:Option[String] = _bindAddress
+  def contextPath = _contextPath
+  def workingDirectory = _workdingDirectory
+  def connectorThreads = _connectorThreads
+  def gracefulShutdownTimeout = _gracefulShutdownTimeout
+
+  def setPort(p: Option[Int]) { this._port = p }
+  def setSecurePort(p: Option[Int]) { this._securePort = p }
+  def setKeystorePath(p: String) { this._keystorePath = p }
+  def setKeystorePassword(p: String) { this._keystorePassword = p }
+  def setShutdownPort(p: Int) { this._shutdownPort = p }
+  def setAjpPort(p: Option[Int]) { this._ajpPort = p }
+  def setBindAddress(a: Option[String]) {this._bindAddress = a}
+  def setSslBindAddress(a: Option[String]) { this._sslBindAddress = a }
+  def setWorkingDirectory(wd: String) { this._workdingDirectory = wd }
+  def setContextPath(cp: String) {this._contextPath = cp}
+  def setConnectorThreads(tc: Int) {this._connectorThreads = tc}
+  def setGracefulShutdownTimeout(t: Int) { this._gracefulShutdownTimeout = t }
 }
 
 /**
@@ -147,6 +192,8 @@ trait SyspropConfig extends ServerConfig {
   abstract override def bindAddress = sysprop(propertyBindAddress) orElse (super.bindAddress)
   abstract override def contextPath = sysprop(propertyContextPath) getOrElse(super.contextPath)
   abstract override def workingDirectory = sysprop(propertyWorkingDirectory) getOrElse(super.workingDirectory)
+  abstract override def connectorThreads = syspropInt(propertyConnectorThreads) getOrElse(super.connectorThreads)
+  abstract override def gracefulShutdownTimeout = syspropInt(propertyGracefulShutdownTimeout) getOrElse(super.gracefulShutdownTimeout)
 
   private def sysprop(name: String): Option[String] = Option(System.getProperty(name))
   private def syspropInt(name: String): Option[Int] = sysprop(name).map(_.toInt)
@@ -176,4 +223,6 @@ trait PropertiesConfig extends ServerConfig {
   abstract override def bindAddress = property(propertyBindAddress) orElse (super.bindAddress)
   abstract override def contextPath = property(propertyContextPath) getOrElse(super.contextPath)
   abstract override def workingDirectory = property(propertyWorkingDirectory) getOrElse(super.workingDirectory)
+  abstract override def connectorThreads = intProperty(propertyConnectorThreads) getOrElse(super.connectorThreads)
+  abstract override def gracefulShutdownTimeout = intProperty(propertyGracefulShutdownTimeout) getOrElse(super.gracefulShutdownTimeout)
 }

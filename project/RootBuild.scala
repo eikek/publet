@@ -23,7 +23,7 @@ object Version {
   val orientdb = "1.0.1"
   val blueprints = "2.0.0"
   val milton = "1.8.1.3"
-  val ccodec = "1.4"
+  val ccodec = "1.5"
   val jdom = "1.1"
   val jetty = "8.1.7.v20120910"
   val bouncyCastle = "1.46"

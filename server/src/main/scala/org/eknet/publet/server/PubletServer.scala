@@ -25,6 +25,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.eclipse.jetty.ajp.Ajp13SocketConnector
 import FileHelper._
+import org.eclipse.jetty.util.component.LifeCycle
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,31 +33,37 @@ import FileHelper._
  */
 class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Logging {
 
-  val varDir = file("var")
-  if (!varDir.exists) {
-    if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
+  val varDir = {
+    val varDir = file("var")
+    if (!varDir.exists) {
+      if (!varDir.mkdirs()) sys.error("Cannot create var directory: "+ varDir.getAbsolutePath)
+    }
+    varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + varDir.getAbsolutePath)
   }
-  varDir.ensuring(f => f.canWrite, "Cannot write to working dir: " + varDir.getAbsolutePath)
 
   //properties to properly init the Config object
   System.setProperty("publet.dir", file("var").getAbsolutePath)
   System.setProperty("publet.standalone", "true")
 
-  val server = new Server
-  server setGracefulShutdown (8000)
-  server setSendServerVersion false
-  server setSendDateHeader true
-  server setStopAtShutdown true
+  val server = {
+    val server = new Server
+    server setGracefulShutdown (config.gracefulShutdownTimeout)
+    server setSendServerVersion false
+    server setSendDateHeader true
+    server setStopAtShutdown true
 
-  config.port map (port => { server addConnector (createConnector(port)) })
-  config.securePort map (port => {
-    val conn = createSslConnector(port, config.keystorePath, config.keystorePassword)
-    server.addConnector(conn)
-  })
-  config.ajpPort map (port => server.addConnector(createAjpConnector(port)))
+    config.port map (port => { server addConnector (createConnector(port)) })
+    config.securePort map (port => {
+      val conn = createSslConnector(port, config.keystorePath, config.keystorePassword)
+      server.addConnector(conn)
+    })
+    config.ajpPort map (port => server.addConnector(createAjpConnector(port)))
 
-  //configure the webapp
-  setter.configure(server, config)
+    //configure the webapp
+    setter.configure(server, config)
+    server
+  }
+
 
   def start() {
     startInBackground()
@@ -73,11 +80,19 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
     server.stop()
   }
 
+  def addLifecycleListener(listener: LifeCycle.Listener) {
+    server.addLifeCycleListener(listener)
+  }
+
+  def removeLifecycleListener(listener: LifeCycle.Listener) {
+    server.removeLifeCycleListener(listener)
+  }
+
   def createConnector(port: Int): Connector = {
     info(">>> Creating http connector for port "+ port+"; bind="+config.bindAddress)
     val conn = new SelectChannelConnector
     conn.setSoLingerTime(-1)
-    conn.setThreadPool(new QueuedThreadPool(20))
+    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
     conn.setPort(port)
     conn.setMaxIdleTime(30000)
     config.bindAddress map (conn.setHost(_))
@@ -102,7 +117,7 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
 
     val conn = new SslSelectChannelConnector(fac)
     conn.setSoLingerTime(-1)
-    conn.setThreadPool(new QueuedThreadPool(20))
+    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
     conn.setMaxIdleTime(30000)
     conn.setPort(port)
     config.sslBindAddress map (conn.setHost(_))
@@ -112,7 +127,7 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
   def createAjpConnector(port: Int): Connector = {
     info(">>> Creating AJP connector for port: "+ port)
     val conn = new Ajp13SocketConnector
-    conn.setThreadPool(new QueuedThreadPool(20))
+    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
     conn.setPort(port)
     conn
   }
