@@ -53,8 +53,8 @@ trait PubletAuth {
   def getPolicy(user: User): Policy
 
   /**
-   * Updates the user with the same login as the user
-   * given with all of the given information.
+   * Either replaces any existing user (with same login)
+   * with the given one, or adds it to the list of users.
    * @param user
    */
   def updateUser(user: User)

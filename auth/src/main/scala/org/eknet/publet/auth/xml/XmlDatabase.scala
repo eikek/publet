@@ -98,12 +98,6 @@ class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordService
     }
   }
 
-  /**
-   * Either replaces any existing user (with same login)
-   * with the given one, or adds it to the list of users.
-   *
-   * @param user
-   */
   def updateUser(user: User) {
     synchronized {
       val newList = (users - user) + user

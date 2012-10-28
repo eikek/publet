@@ -55,7 +55,7 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
   def configDirectory = directory
 
   /**
-   * The directory content root.
+   * The root directory containing all repositories
    */
   def repositories = subdir("repositories")
 
@@ -63,11 +63,19 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
    * publet global configuration file `publet.properties`
    *
    */
-  lazy val configfile = {
+  private lazy val configfile = configFile("publet.properties")
+
+  /**
+   * Creates a file beneath the `etc` directory, if in standalone
+   * mode or inside the publet directory.
+   * @param name
+   * @return
+   */
+  def configFile(name: String) = {
     if (System.getProperty("publet.standalone") != null) {
-      new File(new File("etc"), "publet.properties")
+      new File(new File("etc"), name)
     } else {
-      new File(directory, "publet.properties")
+      getFile(name)
     }
   }
 
@@ -94,14 +102,7 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
    * @param name
    */
   def workDir(name: String) = synchronized {
-    val dir = getFile(name)
-    if (!dir.exists()) {
-      dir.mkdirs()
-    }
-    if (!dir.isDirectory)
-      sys.error(dir.getAbsolutePath+ " is not a directory!")
-
-    dir
+    subdir(name)
   }
 
   /**
