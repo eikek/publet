@@ -31,7 +31,7 @@ import collection.JavaConversions._
 import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
-import org.eknet.publet.ext.orient.OrientDbProvider
+import org.eknet.publet.ext.orient.{RichVertex, GraphDbProvider}
 import org.eknet.publet.web.SettingsReloadedEvent
 
 /**
@@ -39,27 +39,30 @@ import org.eknet.publet.web.SettingsReloadedEvent
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: OrientDbProvider, publet: Publet) extends CounterService {
+class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: GraphDbProvider, publet: Publet) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = dbprovider.getDatabase("extdb")
+  private implicit val graph = db.graph
+  import org.eknet.publet.ext.orient.GraphDsl._
+  import Property._
+  import Label._
 
   /**
    * Node where all nodes that represent pages/resources
    * are connected to.
    *
    */
-  val pagesNode = db.addReferenceVertex("pages")
-  db.graph.createKeyIndex(Property.pagePathKey, classOf[Vertex])
+  val pagesNode = vertex("pages", "pages", {v =>
+    db.referenceNode --> "pages" --> v
+    db.graph.createKeyIndex(Property.pagePathKey, classOf[Vertex])
+  })
 
 
   @Subscribe
   def reloadIps(event: SettingsReloadedEvent) {
     ipBlacklist.reloadIps()
   }
-
-  import Property._
-  import Label._
 
   def getPageCount(uri: String) = {
     val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
@@ -75,9 +78,8 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
   def getLastAccess(uri: String) = {
     val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
     db.withTx{
-      val vertices = db.graph.getVertices(pagePathKey, uriPath)
-      Option(vertices)
-        .flatMap(_.headOption)
+      vertices(pagePathKey, uriPath)
+        .headOption
         .map(_.getProperty(pageLastAccessKey).asInstanceOf[Long])
         .getOrElse(0L)
     }
@@ -85,26 +87,26 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
 
   def getUrisByAccess: List[(String, Long)] = {
     db.withTx {
-      db.graph.getVertices.filter(v => v.getProperty(pagePathKey) != null).toList.sortWith((v1, v2) => {
-        val l0 = v1.getProperty(pageLastAccessKey).asInstanceOf[Long]
-        val l1 = v2.getProperty(pageLastAccessKey).asInstanceOf[Long]
+      vertices.filter(v => v(pagePathKey) != null).toList.sortWith((v1, v2) => {
+        val l0 = v1(pageLastAccessKey).asInstanceOf[Long]
+        val l1 = v2(pageLastAccessKey).asInstanceOf[Long]
         l0.compareTo(l1) > 0
       }).map(v => (
-        v.getProperty(pagePathKey).asInstanceOf[String],
-        v.getProperty(pageLastAccessKey).asInstanceOf[Long])
+        v(pagePathKey).asInstanceOf[String],
+        v(pageLastAccessKey).asInstanceOf[Long])
       )
     }
   }
 
   def getUrisByCount: List[(String, Long)] = {
     db.withTx {
-      db.graph.getVertices.filter(v => v.getProperty(pagePathKey) != null).toList.sortWith((v1, v2) => {
-        val l0 = v1.getProperty(pageCountKey).asInstanceOf[Long]
-        val l1 = v2.getProperty(pageCountKey).asInstanceOf[Long]
+      vertices.filter(v => v(pagePathKey) != null).toList.sortWith((v1, v2) => {
+        val l0 = v1(pageCountKey).asInstanceOf[Long]
+        val l1 = v2(pageCountKey).asInstanceOf[Long]
         l0.compareTo(l1) > 0
       }).map(v => (
-        v.getProperty(pagePathKey).asInstanceOf[String],
-        v.getProperty(pageCountKey).asInstanceOf[Long])
+        v(pagePathKey).asInstanceOf[String],
+        v(pageCountKey).asInstanceOf[Long])
       )
     }
   }
@@ -118,12 +120,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     df.format(getLastAccess(uri))
   }
 
-  private def getOrCreatePageVertex(uriPath: String) = db.graph.getVertices(pagePathKey, uriPath).headOption getOrElse {
-    val pv = db.graph.addVertex()
-    pv.setProperty(pagePathKey, uriPath)
-    pv.setProperty(pageCountKey, 0L)
-    pv
-  }
+  private def pageVertex(uriPath: String) = vertex(pagePathKey, uriPath, v => v(pageCountKey) = Long.box(0))
 
   def collect(uri: String, info: ClientInfo) {
     def isBlacklisted: Boolean = {
@@ -141,11 +138,11 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     if (!isBlacklisted && urlmatch) {
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx {
-        val pageVertex = getOrCreatePageVertex(uriPath)
-        val count = pageVertex.getProperty(pageCountKey).asInstanceOf[Long]
-        pageVertex.setProperty(pageCountKey, (count +1))
-        pageVertex.setProperty(pageLastAccessKey, System.currentTimeMillis())
-        db.graph.addEdge(null, pagesNode, pageVertex, pageEdgeLabel)
+        val pvertex = pageVertex(uriPath)
+        val count: Long = pvertex.get(pageCountKey)
+        pvertex(pageCountKey) = count +1
+        pvertex(pageLastAccessKey) = System.currentTimeMillis()
+        pagesNode --> pageEdgeLabel --> pvertex
       }
     }
   }
@@ -167,16 +164,16 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     /** Updates the checksum property with a new checksum of the given resource */
     def updateChecksum(pv: Vertex, res: ContentResource): String = {
       val cs = createChecksum(res)
-      pv.setProperty(pageMd5Checksum, cs._1)
-      pv.setProperty(lastmod, cs._2)
+      pv(pageMd5Checksum) = cs._1
+      pv(lastmod) = cs._2
       cs._1
     }
 
     publet.findSources(Path(uriPath)).headOption map { res =>
       db.withTx {
-        val pv = getOrCreatePageVertex(uriPath)
-        Option(pv.getProperty(pageMd5Checksum)).map(cs => {
-          val mod = Option(pv.getProperty(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
+        val pv = pageVertex(uriPath)
+        Option(pv(pageMd5Checksum)).map(cs => {
+          val mod = Option(pv(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
           val cur = publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
           if (cur > mod) updateChecksum(pv, res)
           else cs.asInstanceOf[String]

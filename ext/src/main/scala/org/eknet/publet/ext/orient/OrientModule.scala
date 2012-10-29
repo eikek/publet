@@ -26,8 +26,8 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 class OrientModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
-    bind(classOf[OrientDbProvider]) to classOf[DefaultOrientDbProvider] in Scopes.SINGLETON
-    binder.bindEagerly[OrientDbExtension]()
+    bind(classOf[GraphDbProvider]) to classOf[DefaultGraphDbProvider] in Scopes.SINGLETON
+    binder.bindEagerly[OrientDbShutdownHook]()
   }
 
 }

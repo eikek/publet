@@ -13,7 +13,7 @@ import grizzled.slf4j.Logging
  * @since 23.06.12 16:51
  */
 @Singleton
-class OrientDbExtension extends Logging {
+class OrientDbShutdownHook extends Logging {
 
   @Subscribe
   def onShutdown(ev: PubletShutdownEvent) {

@@ -23,19 +23,20 @@ import collection.mutable
 import actors.Future
 import actors.Futures._
 import java.util.concurrent.ConcurrentHashMap
+import com.tinkerpop.blueprints.impls.orient.OrientGraph
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.10.12 22:32
  */
-trait OrientDbProvider {
+trait GraphDbProvider {
 
   /**
    * Create
    * @param name
    * @return
    */
-  def getDatabase(name: String): OrientDb
+  def getDatabase(name: String): GraphDb
 
   /**
    * Converts the database name into an uri that can be used with Orient Databases.
@@ -51,23 +52,23 @@ trait OrientDbProvider {
    * @param name
    * @return
    */
-  def newGraph(name: String): OrientGraph
+  def newGraph(name: String): BlueprintGraph
 
   /**
-   * Creates a new [[org.eknet.publet.ext.orient.OrientDb]] with a new
+   * Creates a new [[org.eknet.publet.ext.orient.GraphDb]] with a new
    * instance of a [[com.tinkerpop.blueprints.impls.orient.OrientGraph]].
    *
    * @param name
    * @return
    */
-  def newDatabase(name: String): OrientDb
+  def newDatabase(name: String): GraphDb
 
 }
 
 @Singleton
-class DefaultOrientDbProvider @Inject() (config: Config) extends OrientDbProvider {
+class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider {
 
-  private val dbs = new ConcurrentHashMap[String, Future[OrientDb]]()
+  private val dbs = new ConcurrentHashMap[String, Future[GraphDb]]()
 
   /**
    * Returns a database for the given name. If it already exists, the same instance
@@ -96,8 +97,8 @@ class DefaultOrientDbProvider @Inject() (config: Config) extends OrientDbProvide
 
   def toOrientUri(dbname: String) = "local://"+ databaseDir(config, dbname).getAbsolutePath
 
-  def newGraph(name: String): OrientGraph = new OrientGraph(toOrientUri(name))
+  def newGraph(name: String): BlueprintGraph = new OrientGraph(toOrientUri(name)) with BlueprintGraph
 
-  def newDatabase(name: String): OrientDb = new OrientDb(newGraph(name))
+  def newDatabase(name: String): GraphDb = new GraphDb(newGraph(name))
 
 }
