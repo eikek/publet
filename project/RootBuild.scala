@@ -33,6 +33,7 @@ object Version {
   val guava = "13.0.1"
   val guice = "3.0"
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
+  val scue = "1.0.0-SNAPSHOT"
 }
 
 object Dependencies {
@@ -73,6 +74,7 @@ object Dependencies {
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate exclude("rhino", "js")
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate exclude("rhino", "js")
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources() exclude("rhino", "js")
+  val scue = "org.eknet.scue" %% "scue" % Version.scue
   val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources() exclude("rhino", "js")
   val servletApiProvided = servletApi % "provided" exclude("rhino", "js")
   val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("rhino", "js")
@@ -353,7 +355,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   ) 
 
-  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons)
+  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons, scue)
 
 }
 

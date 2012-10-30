@@ -27,12 +27,12 @@ import com.tinkerpop.blueprints.Vertex
 import java.util.Locale
 import java.text.DateFormat
 import java.util
-import collection.JavaConversions._
 import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
-import org.eknet.publet.ext.orient.{RichVertex, GraphDbProvider}
 import org.eknet.publet.web.SettingsReloadedEvent
+import org.eknet.publet.ext.orient.GraphDbProvider
+import org.eknet.scue._
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -44,7 +44,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = dbprovider.getDatabase("extdb")
   private implicit val graph = db.graph
-  import org.eknet.publet.ext.orient.GraphDsl._
+  import GraphDsl._
   import Property._
   import Label._
 
@@ -67,9 +67,8 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
   def getPageCount(uri: String) = {
     val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
     db.withTx {
-      val vertices = db.graph.getVertices(pagePathKey, uriPath)
-      Option(vertices)
-        .flatMap(_.headOption)
+      vertices(pagePathKey, uriPath)
+        .headOption
         .map(_.getProperty(pageCountKey).asInstanceOf[Long])
         .getOrElse(0L)
     }
