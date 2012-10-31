@@ -3,6 +3,7 @@ package org.eknet.publet.ext.orient
 import com.tinkerpop.blueprints.Vertex
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException
 import org.fusesource.scalate.util.Logging
+import org.eknet.scue.GraphDsl
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -51,7 +52,7 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
   private def executeOpt[A](count: Int, max: Int, f:BlueprintGraph => A): A = {
     if (count >= max) sys.error("Too many ("+max+") concurrent modifications.")
     try {
-      withTx(f(graph))
+      GraphDsl.withTx(f(graph))(graph)
     }
     catch {
       case e: OConcurrentModificationException => {
