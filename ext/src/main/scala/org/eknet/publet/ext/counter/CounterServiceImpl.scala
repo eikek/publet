@@ -45,17 +45,17 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
   private val db = dbprovider.getDatabase("extdb")
   private implicit val graph = db.graph
   import GraphDsl._
-  import Property._
-  import Label._
+  import Properties._
+  import Labels._
 
   /**
    * Node where all nodes that represent pages/resources
    * are connected to.
    *
    */
-  val pagesNode = vertex("pages", "pages", {v =>
+  val pagesNode = vertex("pages" := "pages", {v =>
     db.referenceNode --> "pages" --> v
-    db.graph.createKeyIndex(Property.pagePathKey, classOf[Vertex])
+    db.graph.createKeyIndex(Properties.pagePathKey, classOf[Vertex])
   })
 
 
@@ -69,7 +69,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     db.withTx {
       vertices(pagePathKey, uriPath)
         .headOption
-        .map(_.getProperty(pageCountKey).asInstanceOf[Long])
+        .flatMap(_.get(pageCountKey))
         .getOrElse(0L)
     }
   }
@@ -79,29 +79,29 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     db.withTx{
       vertices(pagePathKey, uriPath)
         .headOption
-        .map(_.getProperty(pageLastAccessKey).asInstanceOf[Long])
+        .flatMap(_.get(pageLastAccessKey))
         .getOrElse(0L)
     }
   }
 
   def getUrisByAccess: List[(String, Long)] = {
     db.withTx {
-      vertices.filter(v => v(pagePathKey) != null).toList.sortWith((v1, v2) => {
-        val l0 = v1(pageLastAccessKey).asInstanceOf[Long]
-        val l1 = v2(pageLastAccessKey).asInstanceOf[Long]
+      vertices.filter(v => v(pagePathKey).isDefined).toList.sortWith((v1, v2) => {
+        val l0: Long = v1.get(pageLastAccessKey).getOrElse(0)
+        val l1: Long = v2.get(pageLastAccessKey).getOrElse(0)
         l0.compareTo(l1) > 0
       }).map(v => (
-        v(pagePathKey).asInstanceOf[String],
-        v(pageLastAccessKey).asInstanceOf[Long])
-      )
+        v.get[String](pagePathKey).get,
+        v.get[Long](pageLastAccessKey).get
+      ))
     }
   }
 
   def getUrisByCount: List[(String, Long)] = {
     db.withTx {
-      vertices.filter(v => v(pagePathKey) != null).toList.sortWith((v1, v2) => {
-        val l0 = v1(pageCountKey).asInstanceOf[Long]
-        val l1 = v2(pageCountKey).asInstanceOf[Long]
+      vertices.filter(v => v(pagePathKey).isDefined).toList.sortWith((v1, v2) => {
+        val l0: Long = v1.get(pageCountKey).getOrElse(0)
+        val l1: Long = v2.get(pageCountKey).getOrElse(0)
         l0.compareTo(l1) > 0
       }).map(v => (
         v(pagePathKey).asInstanceOf[String],
@@ -119,7 +119,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     df.format(getLastAccess(uri))
   }
 
-  private def pageVertex(uriPath: String) = vertex(pagePathKey, uriPath, v => v(pageCountKey) = Long.box(0))
+  private def pageVertex(uriPath: String) = vertex(pagePathKey := uriPath, v => pagesNode --> pageEdgeLabel --> v)
 
   def collect(uri: String, info: ClientInfo) {
     def isBlacklisted: Boolean = {
@@ -138,10 +138,9 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx {
         val pvertex = pageVertex(uriPath)
-        val count: Long = pvertex.get(pageCountKey)
+        val count: Long = pvertex.get(pageCountKey).getOrElse(0)
         pvertex(pageCountKey) = count +1
         pvertex(pageLastAccessKey) = System.currentTimeMillis()
-        pagesNode --> pageEdgeLabel --> pvertex
       }
     }
   }
@@ -171,7 +170,7 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     publet.findSources(Path(uriPath)).headOption map { res =>
       db.withTx {
         val pv = pageVertex(uriPath)
-        Option(pv(pageMd5Checksum)).map(cs => {
+        pv(pageMd5Checksum).map(cs => {
           val mod = Option(pv(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
           val cur = publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
           if (cur > mod) updateChecksum(pv, res)
@@ -183,14 +182,14 @@ class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbpr
     }
   }
 
-  object Label {
+  object Labels {
 
     /** The label of the edge from the reference node to each uri node */
     val pageEdgeLabel = "page"
 
   }
 
-  object Property {
+  object Properties {
 
     /** The property key of the uri value */
     val pagePathKey = "page_pagePath"

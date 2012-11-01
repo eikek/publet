@@ -1,6 +1,5 @@
 package org.eknet.publet.ext.orient
 
-import com.tinkerpop.blueprints.Vertex
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException
 import org.fusesource.scalate.util.Logging
 import org.eknet.scue.GraphDsl
@@ -70,27 +69,13 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
   }
 
   /**
-   * Creates a new vertex and adds it to the reference node using
-   * the given label to name the edge. The direction is from the
-   * reference node to the new node.
-   *
-   * @param label
-   * @return
-   */
-  def addReferenceVertex(label: String): Vertex = {
-    withTx { implicit graph =>
-      referenceNode --> label -->| newVertex
-    }
-  }
-
-  /**
    * The reference node that is created on first access.
    *
    */
   lazy val referenceNode = {
     val referenceProperty = "6b67f6429706419098b4f02923a5a9d5"
     withTx { implicit graph:BlueprintGraph =>
-      vertex(referenceProperty, Int.box(0))
+      vertex(referenceProperty := 0)
     }
   }
 }
