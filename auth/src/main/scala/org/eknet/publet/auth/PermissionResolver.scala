@@ -16,29 +16,19 @@
 
 package org.eknet.publet.auth
 
-import scala.xml.Node
+import org.apache.shiro.authz.permission.WildcardPermissionResolver
 
 /**
- *
- * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 11.05.12 11:18
+ * @author Eike Kettner eike.kettner@gmail.com
+ * @since 02.11.12 23:04
  */
+class PermissionResolver extends WildcardPermissionResolver {
 
-case class RepositoryModel(name: String, tag: RepositoryTag.Value, owner: String) {
-
-  def toXml = {
-    <repository name={name} tag={tag.toString} owner={owner}/>
+  override def resolvePermission(permissionString: String) = {
+    if (permissionString.startsWith("resource"))
+      new ResourcePermission(permissionString)
+    else
+      super.resolvePermission(permissionString)
   }
 
-  def hasOwner = !owner.isEmpty
-}
-
-object RepositoryModel {
-
-  def apply(repoNode: Node): RepositoryModel = {
-    val name = (repoNode \ "@name").text
-    val tag = RepositoryTag.withName((repoNode \ "@tag").toString())
-    val owner = (repoNode \ "@owner").text
-    RepositoryModel(name, tag, owner)
-  }
 }

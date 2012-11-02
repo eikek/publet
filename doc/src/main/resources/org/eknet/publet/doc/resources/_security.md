@@ -12,6 +12,91 @@ permissions are checked on each request to the resource. Obviously it wouldn't
 make sense to restrict resources in an open repository, as it can be cloned by
 anybody. Thus, to make use of URL restrictions, use a closed repositories.
 
+## Permissions
+
+A resource is located by its URL which is internally mapped to a path in
+the content tree. A resource is by default access protected,
+which means you need explicit rights for accessing it.
+
+You can associate resource permissions to groups of the form
+
+    resource:read,write,delete,create:/path/pattern/**,/path/*/pattern/**
+
+The above defines the permissions to read, write, delete and create resources
+that match the patterns /path/pattern/** or /path/*/pattern/**. A shorter version
+would be
+
+    resource:*:/path/pattern/**,/path/*/pattern/**
+
+A permission that would grant all access actions to all resources looks likt this
+
+    resource:*:/**
+
+or
+
+    resource:*:**
+
+Note the double '*' characters. While the actions read, write, delete and create
+are used by publet, you can also define other actions and check them.
+
+You can furthermore define to skip whole authentication machinery for a url pattern:
+
+    <pattern name="/public/**" perm="anon" />
+
+With the above definition in place, requests to resources below /public/ are served
+without authorization or authentication. The "anon" string is not a permission to
+shiro, but it completely skips the authentication and authorization filters.
+
+If the resource is coming from a git repository, things are a bit more complicated
+since now the repository state and two other permissions come into play. There is
+the `git:pull` and `git:push` permission which (in context of resource access) are
+just groupings of the already known permissions. So `git:push` groups create, write
+and delete while `git:pull` is the same as read. In context of a git repository every
+user with `git:pull` permissions can clone a repository, so the user can access any
+resource within it.
+
+By default, a repository is _open_ if not otherwise defined. That means that every
+user can clone the repository. More precise it defines to skip access checks for the
+repository. It is compares therefore to the "anon" special permission for resources.
+
+Since the repository is considered open, if undefined, the following possibilities
+can occur when requesting a resource.
+
+
+        repo      perm        | canRead?   canWrite?
+        ----------------------|---------------------
+        open      write|push  |  yes        yes
+        closed    write|push  |  yes        yes
+        open      read|pull   |  yes        no
+        closed    read|pull   |  yes        no
+        open       -          |  yes        no
+        closed     -          |  no         no
+        open       anon       |  yes        no
+        closed     anon       |  yes        no
+
+
+## Permission Strings
+
+Permission strings are used as described in shiro's [manual](http://shiro.apache.org/permissions.html).
+There exist predefined permission patterns:
+
+    git:<git-action>:<reponame>
+    resource:<resource-action>:<uri-pattern>
+
+where the following actions exists:
+
+    git-action = push, pull, createown, createroot, delete, edit
+    resource-action = read, write, delete
+
+The the implications exists:
+
+* `git:pull:<repo>` -> `resource:read:<pattern>` if `pattern` points to a resource inside the git repository `repo`.
+* `git:push:<repo>` -> `resource:write,delete,create:<patern>` if `pattern` points to a resource inside the git repository `repo`.
+
+The permissions `createown` and `createroot` allow to create a git repository, either below its own user name or
+as a root repository.
+
+
 These rules are specified in one xml file on a specific location
 
     /.allIncludes/config/permissions.xml
@@ -33,9 +118,12 @@ Here is an example `permissions.xml` file explained:
        - any duplicates are ignored, the first entry wins.
       -->
       <users>
-        <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" algorithm="md5" digest="abcdef">
+        <user login="jdoe">
           <fullName>John Doe</fullName>
           <email>jdoe@mail.com</email>
+          <password>098f6bcd4621d373cade4e832627b4f6</password>
+          <algorithm>md5</algorithm>
+          <digest>abcdef</digest>
           <group>wikiuser</group>
           <group>editor</group>
         </user>
@@ -48,21 +136,24 @@ Here is an example `permissions.xml` file explained:
         <repository name="contentroot" tag="closed"/>
       </repositories>
 
-      <!-- Defines permissions and associates them to roles -->
+      <!-- Defines permissions and associates them to groups -->
       <permissions>
-        <!-- allows many on and to tags -->
-        <grant name="PULL">
-          <on>contentroot</on>
-          <on>wikis/mywiki</on>
+        <!-- allows many perm and to tags; information is collected from all grant tags -->
+        <grant>
           <to>manager</to>
           <to>editor</to>
+          <perm>git:pull:*</perm>
+          <perm>resource:*:*</perm>
+        </grant>
+        <grant>
           <to>coders</to>
+          <perm>resource:read:/**</perm>
         </grant>
       </permissions>
 
       <resourceConstraints>
-        <pattern name="/c/**" perm="anon"/>
         <pattern name="/sec/**" perm="superperm"/>
+        <pattern name="/**" perm="anon"/>
       </resourceConstraints>
     </publetAuth>
 

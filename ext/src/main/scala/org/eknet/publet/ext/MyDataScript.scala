@@ -18,12 +18,10 @@ package org.eknet.publet.ext
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.{User, UserProperty}
+import org.eknet.publet.auth.user.{User, UserProperty}
 import org.eknet.publet.vfs.Content
-import com.bradmcevoy.http.http11.auth.DigestGenerator
-import org.apache.shiro.authc.credential.PasswordService
-import org.eknet.publet.webdav.WebdavResource
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.auth.Algorithm
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,8 +30,6 @@ import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 class MyDataScript extends ScalaScript {
 
   import ScalaScript._
-
-  private val digestGenerator = new DigestGenerator
 
   def serve(): Option[Content] = {
     if (!Security.isAuthenticated) {
@@ -66,14 +62,16 @@ class MyDataScript extends ScalaScript {
   def error(msg: String) =  makeJson(Map("success"->false, "message"->msg))
 
   private def changePassword(newpassPlain: String, algorithm: String) = {
-    PubletWeb.authManager.setPassword(Security.username, newpassPlain, Some(algorithm))
+    PubletWeb.authManager.setPassword(Security.username, newpassPlain, Some(Algorithm.withName(algorithm)))
     success("Password updated.")
   }
 
   private def changeUserData(fullName: String, email: String) = {
     val user = PubletWeb.authManager.findUser(Security.username).get
-    val props = user.properties + (UserProperty.fullName.toString -> fullName) + (UserProperty.email.toString -> email)
-    val newUser = new User(user.login, user.password, user.algorithm, user.digest, user.groups, props)
+    val props = user.properties +
+      (UserProperty.fullName -> fullName) +
+      (UserProperty.email -> email)
+    val newUser = new User(user.login, props)
     PubletWeb.authManager.updateUser(newUser)
     success("User data updated.")
   }
@@ -82,8 +80,8 @@ class MyDataScript extends ScalaScript {
     val user = PubletWeb.authManager.findUser(Security.username).get
     makeJson(Map(
       "success" -> true,
-      "fullName" -> (user.getProperty(UserProperty.fullName).getOrElse("")),
-      "email" -> (user.getProperty(UserProperty.email).getOrElse(""))
+      "fullName" -> (user.get(UserProperty.fullName).getOrElse("")),
+      "email" -> (user.get(UserProperty.email).getOrElse(""))
     ))
   }
 

@@ -26,9 +26,9 @@ import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext, RenderUtils}
 import org.eknet.publet.vfs.{ContentType, Path, Content}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
 import org.eknet.publet.gitr.RepositoryName
 import scala.Some
+import org.eknet.publet.auth.repository.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

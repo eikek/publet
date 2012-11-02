@@ -5,9 +5,12 @@
    - any duplicates are ignored, the first entry wins.
   -->
   <users>
-    <user login="jdoe" password="098f6bcd4621d373cade4e832627b4f6" digest="efd" algorithm="md5">
+    <user login="jdoe">
       <fullName>John Doe</fullName>
       <email>jdoe@mail.com</email>
+      <password>098f6bcd4621d373cade4e832627b4f6</password>
+      <digest>efd</digest>
+      <algorithm>md5</algorithm>
       <group>wikiuser</group>
       <group>editor</group>
     </user>
@@ -22,18 +25,17 @@
 
   <!-- Defines permissions and associates them to roles -->
   <permissions>
-    <!-- allows many on and to tags -->
-    <grant name="PULL">
-      <on>contentroot</on>
-      <on>wikis/mywiki</on>
+    <!-- allows many to and perm tags -->
+    <grant>
       <to>manager</to>
       <to>editor</to>
       <to>coders</to>
+      <perm>resource:*:/devel/projectb/**</perm>
+      <perm>git:push,pull:projectb</perm>
     </grant>
   </permissions>
 
-  <resourceConstraints>
-    <pattern name="/c/**" perm="anon"/>
-    <pattern name="/sec/**" perm="superperm"/>
-  </resourceConstraints>
+  <anonymous>
+    <pattern>/public/**</pattern>
+  </anonymous>
 </publetAuth>

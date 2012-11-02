@@ -18,6 +18,7 @@ package org.eknet.publet.auth
 
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.subject.SimplePrincipalCollection
+import org.eknet.publet.auth.user.{UserProperty, User}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,6 +26,6 @@ import org.apache.shiro.subject.SimplePrincipalCollection
  */
 final case class UserAuthInfo(user: User) extends AuthenticationInfo {
   def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
-  def getCredentials = user.password
-  def algorithm = user.algorithm
+  def getCredentials = user.get(UserProperty.password).orNull
+  def algorithm: Option[String] = user.get(UserProperty.algorithm)
 }

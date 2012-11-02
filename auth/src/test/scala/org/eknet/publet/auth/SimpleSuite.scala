@@ -5,6 +5,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.eknet.publet.vfs.{ResourceName, ContentType, Content}
 import org.eknet.publet.vfs.util.SimpleContentResource
 import xml.XmlDatabase
+import org.eknet.publet.auth.user.User
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -22,27 +23,26 @@ class SimpleSuite extends FunSuite with ShouldMatchers {
     new XmlDatabase(source, new DefaultPasswordServiceProvider, None)
   }
 
-  private val policy = db.getPolicy("jdoe")
-
   test ("user list") {
-    db.getAllUser should equal(Seq(User("jdoe",
-      "098f6bcd4621d373cade4e832627b4f6".toCharArray,
-      Some("md5"),
-      "efd".toCharArray,
-      Set("wikiuser", "editor"),
-      Map("fullName" -> "John Doe",
-          "email" -> "jdoe@mail.com")))
-    )
+    import org.eknet.publet.auth.user.UserProperty._
+
+    val user = User("jdoe", Map(fullName -> "John Doe",
+        password -> "098f6bcd4621d373cade4e832627b4f6",
+        email -> "jdoe@mail.com",
+        algorithm -> "md5",
+        digest -> "efd"))
+
+    db.getGroups("jdoe") should be (Set("wikiuser", "editor"))
+
+    db.allUser should have size (1)
+    db.allUser.head should be (user)
+
   }
 
-  test ("repository owner permission") {
-    policy.getPermissions should equal (
-      Set("pull:wikis/mywiki",
-        "pull:contentroot",
-        "push:wikis/mywiki",
-        "push:jdoe/dotfiles",
-        "gitadmin:wikis/mywiki",
-        "gitadmin:jdoe/dotfiles")
+  test ("get permissions") {
+    db.getPermissions("jdoe") should equal (
+      Set("resource:*:/devel/projectb/**",
+        "git:push,pull:projectb")
     )
   }
 

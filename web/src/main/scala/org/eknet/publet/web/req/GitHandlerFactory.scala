@@ -18,7 +18,7 @@ package org.eknet.publet.web.req
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.web.filter._
-import org.eknet.publet.auth.{GitAction, RepositoryTag}
+import org.eknet.publet.auth.repository.{GitAction, RepositoryTag}
 import org.eknet.publet.web.PubletRequestWrapper
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter, Security}

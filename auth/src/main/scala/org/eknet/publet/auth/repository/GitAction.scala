@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
-
-import scala.xml.Node
-
+package org.eknet.publet.auth.repository
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 24.05.12 17:13
+ * @since 16.05.12 23:58
  */
-case class ResourceConstraint(uriPattern: String, perm: Permission) {
-  def toXml = <pattern name={uriPattern} perm={perm.permString}/>
-}
-
-object ResourceConstraint {
-
-  def apply(node: Node): ResourceConstraint = {
-    val uri = (node \ "@name").text
-    val perm = (node \"@perm").text
-    ResourceConstraint(uri, Permission(perm, None))
-  }
+object GitAction extends Enumeration {
+  val pull, push = Value
+  val gitadmin, gitcreate, gitcreateRoot = Value
 }

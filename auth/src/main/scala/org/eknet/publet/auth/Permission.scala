@@ -20,11 +20,38 @@ package org.eknet.publet.auth
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 10.05.12 17:20
  */
-case class Permission(perm: String, repository: Option[String]) {
+case class Permission(domain: String, action: Set[String], inst: Set[String]) {
+  import Permission._
 
-  val anonString = "anon"
+  override def toString = domain + setToString(action) + setToString(inst)
 
-  def permString = perm + repository.map(":"+_).getOrElse("")
+  private def setToString(set: Set[String]) =
+    if (set.isEmpty) "" else partDivider+set.mkString(subpartDivider)
 
-  def isAnon = perm == anonString
+}
+object Permission {
+
+  val wildcardToken = "*"
+  val partDivider = ":"
+  val subpartDivider = ","
+
+  val all = Set(wildcardToken)
+
+  val gitDomain = "git"
+  val resourceDomain = "resource"
+
+  private val regex = """([^:,]+)(:([^:]+))?(:([^:]+))?""".r
+
+  def apply(domain: String, action: String, inst: String):Permission = Permission(domain, Set(action), Set(inst))
+  def apply(str: String): Permission = {
+    str match {
+      case regex(domain, _, action, _, inst) => {
+        val act = Option(action).map(_.split(subpartDivider).toSet).getOrElse(Set[String]())
+        val ins = Option(inst).map(_.split(subpartDivider).toSet).getOrElse(Set[String]())
+        new Permission(domain, act, ins)
+      }
+      case _ => sys.error("Invalid permission string: "+ str)
+    }
+  }
+  def forGit(action:Set[String], repos: Set[String]) = Permission(gitDomain, action, repos)
 }

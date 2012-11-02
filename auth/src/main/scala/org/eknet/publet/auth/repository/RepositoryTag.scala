@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.repository
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 10.05.12 14:43
+ * @since 09.05.12 23:33
  */
-case class ResourceRestriction(
-    repository: String,
-    pattern: String,
-    permissions: Set[String]
-)
+object RepositoryTag extends Enumeration {
+
+  val open = Value("open")
+  val closed = Value("closed")
+}

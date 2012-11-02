@@ -3,10 +3,11 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import GitrControl._
-import org.eknet.publet.auth.xml.PermissionModel
-import org.eknet.publet.auth.{Permission, GitAction}
+import org.eknet.publet.auth.repository.GitAction
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.auth.xml.PermissionModel
+import org.eknet.publet.auth.Permission
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -23,10 +24,11 @@ class UpdateCollaborator extends ScalaScript {
           val action = GitAction.withName(pm.toLowerCase)
           val remove = PubletWebContext.param("do").getOrElse("add")
           if (remove == "add") {
-            authm.updatePermission(PermissionModel(action.toString, List(rm.name), List(gn)))
+            //TODO
+//            authm.updatePermission(PermissionModel(action.toString, List(rm.name), List(gn)))
             success("Permission successflly updated.")
           } else {
-            authm.removePermission(gn, Permission(action.toString, Some(rm.name)))
+//            authm.removePermission(gn, Permission(action.toString, Some(rm.name)))
             success("Permission successflly removed.")
           }
         })

@@ -18,12 +18,13 @@ package org.eknet.publet.auth
 
 import org.apache.shiro.authc.credential.CredentialsMatcher
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationToken}
+import org.eknet.publet.auth.user.UserProperty
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.07.12 17:00
  */
-class DigestCredentialsMatcher(authm: PubletAuth) extends CredentialsMatcher {
+class DigestCredentialsMatcher(authm: DefaultAuthStore) extends CredentialsMatcher {
 
   def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
     if (token.isInstanceOf[DigestAuthenticationToken]) {
@@ -37,7 +38,7 @@ class DigestCredentialsMatcher(authm: PubletAuth) extends CredentialsMatcher {
     val digestResp = token.getCredentials
     val user = authm.findUser(token.getPrincipal)
     if (user.isDefined) {
-      val dig = DigestGenerator.generateDigestWithEncryptedPassword(digestResp, String.valueOf(user.get.digest))
+      val dig = DigestGenerator.generateDigestWithEncryptedPassword(digestResp, user.get.get(UserProperty.digest).getOrElse(""))
       digestResp.responseDigest == dig
     } else {
       false

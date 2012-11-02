@@ -322,7 +322,7 @@ object Auth extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(slf4jApi, grizzledSlf4j, shiro, scalaTest)
+  val deps = Seq(slf4jApi, grizzledSlf4j, shiro, guice, scalaTest)
 }
 
 object WebEditor extends Build {

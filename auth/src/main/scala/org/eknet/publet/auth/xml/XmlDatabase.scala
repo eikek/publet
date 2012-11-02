@@ -17,204 +17,76 @@
 package org.eknet.publet.auth.xml
 
 
-import scala.xml.{PrettyPrinter, XML}
-import org.eknet.publet.vfs.{ChangeInfo, Writeable, ContentResource}
-import java.io.ByteArrayInputStream
+import org.eknet.publet.vfs._
 import org.eknet.publet.auth._
 import grizzled.slf4j.Logging
-import org.eknet.publet.Glob
-import org.apache.shiro.{ShiroException, SecurityUtils}
+import org.eknet.publet.{Publet, Glob}
+import org.eknet.publet.auth.user.{UserStore, User}
+import org.eknet.publet.auth.repository.RepositoryStore
+import com.google.inject.{Inject, Singleton}
+import org.eknet.publet.auth.repository.RepositoryModel
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.vfs.events.ContentWrittenEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.05.12 21:57
  */
-class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordServiceProvider, realmNameFun: Option[() => String]) extends PubletAuth with Logging {
-  private val prettyPrinter = new PrettyPrinter(90, 2)
+class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordServiceProvider, realmNameFun: Option[() => String])
+    extends UserStore with RepositoryStore with Logging {
 
-  private var lastLoaded: Long = -1
-  protected var users: Set[User] = Set()
-  protected var repositories:Set[RepositoryModel] = Set()
-  protected var permissions:Set[PermissionModel] = Set()
-  protected var resourceConstraints: List[ResourceConstraint] = List()
+  // TODO implement write
+  val data = new XmlData(source)
 
-  load()
-
-  /**Reloads database from file, if it has been modified
-   * since.
-   */
-  protected def load() {
-    info("LOADING XML permissions file...")
-    val lastMod = source.lastModification.getOrElse(-1L)
-    if (lastMod > lastLoaded) {
-      lastLoaded = lastMod
-      val rootElem = XML.load(source.inputStream)
-      users = (rootElem \ "users" \ "user").map(User(_)).toSet
-      repositories = (rootElem \ "repositories" \ "repository").map(RepositoryModel(_)).toSet
-      permissions = (rootElem \ "permissions" \ "grant").map(PermissionModel(_)).toSet
-      resourceConstraints = (rootElem \ "resourceConstraints" \ "pattern").map(ResourceConstraint(_)).toList
-    }
+  @Subscribe
+  def reloadOnChange(event: ContentWrittenEvent) {
+    data.reloadIfChanged()
   }
 
-  private def write(message: String) {
-    source match {
-      case ws: Writeable => synchronized {
-        load()
-        val bin = new ByteArrayInputStream(prettyPrinter.format(toXml).getBytes("UTF-8"))
-        val user = getCurrentUser.map { u =>
-          new ChangeInfo(u.getProperty(UserProperty.fullName), u.getProperty(UserProperty.email), message) }
-        ws.writeFrom(bin, user)
-        lastLoaded = source.lastModification.getOrElse(-1L)
-      }
-      case _ =>
-    }
+  //repository
+  def findRepository(name: String): Option[RepositoryModel] =
+    data.repositories.get(name)
+
+  def allRepositories = data.repositories.values
+
+  def repositoriesByOwner(owner: String) = data.repositories.values.filter(rm => rm.owner == owner)
+
+  def updateRepository(rm: RepositoryModel) = null
+
+  def removeRepository(name: String) = null
+
+  //user
+  def findUser(login: String) = data.users.get(login)
+
+  def allUser = data.users.values
+
+  def userOfGroups(groups: String*) = {
+    val test = groups.toSet
+    data.groups.flatMap(t => if (test.subsetOf(t._2)) Some(t._1) else None)
+      .map(findUser(_).get)
   }
 
-  private def toXml = {
-    <publetAuth>
-      <users>
-        { users.map(_.toXml) }
-      </users>
-      <repositories>
-        { repositories.map(_.toXml) }
-      </repositories>
-      <permissions>
-        { permissions.map(_.toXml) }
-      </permissions>
-      <resourceConstraints>
-        { resourceConstraints.map(_.toXml) }
-      </resourceConstraints>
-    </publetAuth>
-  }
+  def updateUser(user: User) = null
 
-  private def getCurrentUser = {
-    try {
-      Option(SecurityUtils.getSubject.getPrincipal) flatMap { p =>
-        if (p != null) findUser(p.toString)
-        else None
-      }
-    } catch {
-      case e: ShiroException => None
-    }
-  }
+  def removeUser(login: String) = null
 
-  def updateUser(user: User) {
-    synchronized {
-      val newList = (users - user) + user
-      this.users = newList
-      write("Permission: update user "+ user.login)
-    }
-  }
+  def addPermission(login: String, perm: String) {}
 
-  def setPassword(login: String, plainTextPassword: String, algorithm: Option[String]) {
-    val user = findUser(login).getOrElse(sys.error("User '"+login+"' not found"))
-    val realmName = realmNameFun.map(_()).getOrElse(defaultRealmName)
-    val newdigest = DigestGenerator.encodePasswordInA1Format(user.login, realmName, plainTextPassword)
-    val newpass = algorithm.orElse(user.algorithm)
-        .map(a => passwServiceProvider.forAlgorithm(Algorithm.withName(a.toUpperCase)))
-        .map(ps => ps.encryptPassword(plainTextPassword))
-        .getOrElse(plainTextPassword)
+  def dropPermission(login: String, perm: String) {}
 
-    val newUser = new User(user.login, newpass.toCharArray, algorithm.orElse(user.algorithm), newdigest.toCharArray, user.groups, user.properties)
-    updateUser(newUser)
-  }
+  def getPermissions(login: String) = getGroups(login).flatMap(g => data.permissions.get(g).getOrElse(Set[String]()))
 
-  val defaultRealmName = "Webdav Area"
+  def addGroup(login: String, group: String) {}
 
-  def updateRepository(repo: RepositoryModel) {
-    synchronized {
-      val newList = repositories.filter(_.name != repo.name) + repo
-      this.repositories = newList
-      write("Permission: Update repository " +repo.name)
-    }
-  }
+  def dropGroup(login: String, group: String) {}
 
+  def getGroups(login: String) = data.groups.get(login).getOrElse(Set())
 
-  def removeRepository(repoName: String) {
-    val name = if (repoName.endsWith(".git")) repoName.substring(0, repoName.length-4) else repoName
-    synchronized {
-      val newList = repositories.filterNot(_.name == name)
-      this.repositories = newList
-      write("Permission: Remove repository "+ name)
-    }
-  }
+  def anonPatterns = data.anonPatterns.map(Glob(_))
 
-  def updatePermission(perm: PermissionModel) {
-    synchronized {
-      val newList = permissions + perm
-      this.permissions = newList
-      write("Permission: Update permission model: "+ perm)
-    }
-  }
+  def addAnonPattern(pattern: Glob) {}
 
-  def removePermission(group: String, perm: Permission) {
-    synchronized {
-      def groupPermFilter(pm:PermissionModel) = pm.perm == perm.perm && pm.roles.contains(group)
+  def removeAnonPattern(pattern: Glob) {}
 
-      val transformed = permissions.withFilter(groupPermFilter)
-        .map(pm => PermissionModel(pm.perm, pm.repository, pm.roles.filterNot(_ == group)))
-        .filterNot(_.roles.isEmpty)
-
-      val newlist =  permissions.filterNot(groupPermFilter) ++ transformed
-      this.permissions = newlist
-      write("Permission: Remove permission '"+perm+"' for group '"+group+"'")
-    }
-  }
-
-  def addResourceConstraint(rc: ResourceConstraint) {
-    synchronized {
-      val newList = rc :: resourceConstraints
-      this.resourceConstraints = newList
-      write("Permission: Add resource constraint: "+ rc)
-    }
-  }
-
-
-  def getResourceConstraints(uri: String) = {
-    resourceConstraints.find( rc => {
-      val glob = Glob(rc.uriPattern)
-      glob.matches(uri)
-    })
-  }
-
-  def findUser(login: String) = users.find(_.login == login)
-
-  def findRepository(name: String) = repositories.find(_.name == name)
-
-  def getAllUser = users.toSeq
-
-  def getAllRepositories = repositories.toSeq
-
-  def getAllPermissions = permissions
-
-  def getAllGroups = {
-    val permGroups = permissions flatMap (_.roles)
-    val userGroups = users flatMap (_.groups)
-    userGroups ++ permGroups
-  }
-
-  def getPolicy(login: String) = {
-    val user = findUser(login).get
-    getPolicy(user)
-  }
-
-  def getPolicy(user: User) = new Policy {
-    def getRoles = user.groups
-    def getPermissions = (standardPermissions ++ repositoryOwnerPerms)
-      .map(_.permString)
-      .toSet
-
-    private def repositoryOwnerPerms = getAllRepositories
-      .filter(_.owner == user.login)
-      .flatMap(rm => List(Permission(GitAction.push.toString, Some(rm.name)),
-          Permission(GitAction.gitadmin.toString, Some(rm.name))))
-      .toSet
-
-    private def standardPermissions = permissions
-      .filter(!_.roles.toSet.intersect(user.groups).isEmpty)
-      .flatMap(_.toPermissions.values)
-      .flatten
-
-    override def toString = "Policy{user="+user.login+"}"
-  }
+  def containsAnonPattern(pattern: Glob) = data.anonPatterns.contains(pattern.pattern)
 }

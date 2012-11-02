@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.guice
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 16.05.12 23:58
+ * @since 01.11.12 19:10
  */
-object GitAction extends Enumeration {
-  val pull, push = Value
-  val gitadmin, gitcreate, gitcreateRoot = Value
+class AuthModule {
+
 }

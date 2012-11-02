@@ -74,4 +74,25 @@ class GlobSuite extends FunSuite with ShouldMatchers {
     Glob("**/name/*") matches ("/hallo/test/s22/name/h.txt") should be (true)
     Glob("**/name/*") matches ("/hallo/test/s22/name/dev/h.txt") should be (false)
   }
+
+  test ("simple implies") {
+    Glob("/dev/**").implies(Glob("/dev/ab/**")) should be (true)
+    Glob("/dev/**").implies(Glob("/ab/**")) should be (false)
+
+    Glob("/?b/home/**").implies(Glob("/ab/home/tests/**")) should be (true)
+    Glob("/?b/home/**").implies(Glob("/ab/home/**")) should be (true)
+
+    Glob("/ab/*/c").implies(Glob("/?b/*/c")) should be (false)
+    Glob("/a?/*/c").implies(Glob("/ab/*/c")) should be (true)
+
+    Glob("**/name/*.pdf").implies(Glob("/one/two/name/**")) should be (false)
+    Glob("/*/*/name/*.pdf").implies(Glob("/one/two/name/*.pdf")) should be (true)
+    Glob("**/name/*.pdf").implies(Glob("/one/name/*.pdf")) should be (true)
+
+    Glob("/aa/bb/cc").implies(Glob("/aa/bb/cc")) should be (true)
+    Glob("/aa/bb/cc").implies(Glob("/aa/abb/cc")) should be (false)
+
+    Glob("/**").implies(Glob("**")) should be (false)
+    Glob("**").implies(Glob("**")) should be (true)
+  }
 }

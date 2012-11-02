@@ -19,7 +19,7 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import ScalaScript._
-import org.eknet.publet.auth.{GitAction, RepositoryTag}
+import org.eknet.publet.auth.repository.{GitAction, RepositoryTag}
 import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 

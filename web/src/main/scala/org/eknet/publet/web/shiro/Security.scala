@@ -24,6 +24,8 @@ import org.apache.shiro.SecurityUtils
 import org.eknet.publet.vfs.ChangeInfo
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.RepositoryNameResolver
+import org.eknet.publet.auth.repository.{RepositoryModel, GitAction, RepositoryTag}
+import org.eknet.publet.auth.user.UserProperty
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -71,7 +73,7 @@ object Security extends Logging {
    * @return
    */
   def changeInfo(message: String) = user.map( u=> {
-    new ChangeInfo(u.getProperty(UserProperty.fullName), u.getProperty(UserProperty.email), message)
+    new ChangeInfo(u.get(UserProperty.fullName), u.get(UserProperty.email), message)
   })
 
   /**
@@ -213,13 +215,14 @@ object Security extends Logging {
     lazy val hasPull = repoModel map { repoModel =>
       Security.hasGitAction(GitAction.pull, repoModel)
     }
-
-    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {
-      if (rc.perm.isAnon) true
-      else Security.hasPerm(rc.perm.permString)
-    }) getOrElse {
-      hasPull getOrElse (true)
-    }
+true
+    //TODO
+//    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {
+//      if (rc.perm.isAnon) true
+//      else Security.hasPerm(rc.perm.permString)
+//    }) getOrElse {
+//      hasPull getOrElse (true)
+//    }
   }
 
 }

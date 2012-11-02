@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.repository
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 09.05.12 23:33
+ * @since 01.11.12 16:57
  */
-object RepositoryTag extends Enumeration {
+trait RepositoryStore {
 
-  val open = Value("open")
-  val closed = Value("closed")
+  def findRepository(name: String): Option[RepositoryModel]
+
+  def allRepositories: Iterable[RepositoryModel]
+
+  def repositoriesByOwner(owner: String): Iterable[RepositoryModel]
+
+  def updateRepository(rm: RepositoryModel): Option[RepositoryModel]
+
+  def removeRepository(name: String): Option[RepositoryModel]
 }

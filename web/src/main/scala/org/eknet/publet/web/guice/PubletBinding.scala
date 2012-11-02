@@ -22,6 +22,9 @@ import com.google.inject.{Binder, Key, AbstractModule}
 import org.eknet.publet.web.WebExtension
 import org.eknet.publet.web.req.RequestHandlerFactory
 import com.google.inject.binder.{AnnotatedBindingBuilder, LinkedBindingBuilder}
+import org.eknet.publet.auth.user.UserStore
+import org.eknet.publet.auth.repository.RepositoryStore
+import org.eknet.publet.auth.resource.ResourceConstraintStore
 
 /**
  *
@@ -42,6 +45,9 @@ trait PubletBinding {
     def bindRequestHandler = setBind[RequestHandlerFactory]
     def bindExtension = setBind[WebExtension]
     def bindRealm = setBind[Realm]
+    def bindUserStore = setBind[UserStore]
+    def bindRepositoryStore = setBind[RepositoryStore]
+    def bindConstraintStore = setBind[ResourceConstraintStore]
 
     def bindEagerly[A: Manifest]() {
       val clazz = manifest[A].erasure.asInstanceOf[Class[A]]

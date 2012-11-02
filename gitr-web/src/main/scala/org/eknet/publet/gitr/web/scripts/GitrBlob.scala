@@ -22,7 +22,7 @@ import GitrControl._
 import org.eknet.publet.vfs.ContentType
 import org.eknet.publet.web.{ErrorResponse, StreamResponse}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
+import org.eknet.publet.auth.repository.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

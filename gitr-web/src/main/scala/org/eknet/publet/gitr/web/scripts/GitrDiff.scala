@@ -5,8 +5,8 @@ import GitrControl._
 import java.io.ByteArrayOutputStream
 import org.eknet.publet.vfs.{ContentType, Content}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
 import org.eknet.publet.web.util.PubletWebContext
+import org.eknet.publet.auth.repository.GitAction
 
 /**
  * Formats the diff in html code that is loaded from

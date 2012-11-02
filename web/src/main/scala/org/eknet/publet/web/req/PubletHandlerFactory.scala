@@ -21,11 +21,11 @@ import org.eknet.publet.web.filter._
 import RequestHandlerFactory._
 import org.eknet.publet.web.shiro.{AuthzFilter, Security}
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
-import org.eknet.publet.auth.GitAction
 import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.{WebExtension, Config, Settings, PageWriter}
 import org.eknet.publet.Publet
+import org.eknet.publet.auth.repository.GitAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -51,18 +51,20 @@ class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], confi
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {
     override def checkResourceAccess(req: HttpServletRequest) {
       //checks all resource permission
-      val constraints = PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
-      constraints.filterNot(_.perm.isAnon)
-        .foreach(rc => Security.checkPerm(rc.perm.permString))
+
+      // TODO
+//      val constraints = PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
+//      constraints.filterNot(_.perm.isAnon)
+//        .foreach(rc => Security.checkPerm(rc.perm.permString))
 
       val gitAction = req.getGitAction.getOrElse(GitAction.pull)
       //if given anon permission this is equally well as a git:pull permission
-      if (!constraints.exists(_.perm.isAnon) || gitAction != GitAction.pull) {
-        val repoModel = req.getRepositoryModel
-        repoModel.foreach { repo =>
-          Security.checkGitAction(gitAction, repo)
-        }
-      }
+//      if (!constraints.exists(_.perm.isAnon) || gitAction != GitAction.pull) {
+//        val repoModel = req.getRepositoryModel
+//        repoModel.foreach { repo =>
+//          Security.checkGitAction(gitAction, repo)
+//        }
+//      }
     }
 
     def onUnauthenticated(ex: UnauthenticatedException, req: HttpServletRequest, res: HttpServletResponse) {

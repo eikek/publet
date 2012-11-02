@@ -29,8 +29,8 @@ import org.fusesource.scalate.support.StringTemplateSource
 import eu.medsea.mimeutil.MimeUtil
 import ContentType._
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.GitAction
 import org.eknet.publet.web.util.PubletWebContext
+import org.eknet.publet.auth.repository.GitAction
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter

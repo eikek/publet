@@ -37,7 +37,9 @@ import org.apache.shiro.authc.credential.PasswordService
 import org.apache.shiro.crypto.hash._
 import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.AbstractAuthenticator
-import org.eknet.publet.auth.{PubletAuth, UsersRealm, DefaultPasswordServiceProvider, PasswordServiceProvider}
+import org.eknet.publet.auth.{DefaultAuthStore, UsersRealm, DefaultPasswordServiceProvider, PasswordServiceProvider}
+import org.eknet.publet.auth.user.UserStore
+import org.eknet.publet.auth.xml.XmlDatabase
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -51,7 +53,8 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     binder.set[PasswordServiceProvider].toType[DefaultPasswordServiceProvider] in  Scopes.SINGLETON
     binder.set[CacheManager].toType[MemoryConstrainedCacheManager] in Scopes.SINGLETON
     binder.set[SessionManager].toType[ServletContainerSessionManager] asEagerSingleton()
-    binder.bindRealm.toType[GuiceUserRealm]
+    binder.bindRealm.toType[UsersRealm]
+    bind(classOf[DefaultAuthStore]) in Scopes.SINGLETON
 
     binder.set[WebEnvironment].toType[GuiceWebEnvironment].asEagerSingleton()
   }
@@ -118,6 +121,3 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     bind.toConstructor(classOf[DefaultWebSecurityManager].getConstructor(classOf[util.Collection[_]])).asEagerSingleton()
   }
 }
-
-@Singleton
-class GuiceUserRealm @Inject() (auth: PubletAuth, bus: EventBus) extends UsersRealm(auth, bus)

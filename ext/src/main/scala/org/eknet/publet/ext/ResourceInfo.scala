@@ -5,9 +5,9 @@ import org.eknet.publet.vfs.Path
 import java.text.DateFormat
 import java.util
 import org.eknet.publet.partition.git.GitFile
-import org.eknet.publet.auth.UserProperty
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
+import org.eknet.publet.auth.user.UserProperty
 
 /**
  * A helper class that defines method for retrieving information to
@@ -178,8 +178,8 @@ object ResourceInfo {
 
     email.flatMap (mail => {
       PubletWeb.authManager
-        .getAllUser
-        .find(_.getProperty(UserProperty.email).exists(_ == mail))}
+        .allUser
+        .find(_.get(UserProperty.email).exists(_ == mail))}
     ).map(_.login)
   }
 

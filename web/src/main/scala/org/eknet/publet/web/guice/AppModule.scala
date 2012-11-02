@@ -31,7 +31,6 @@ import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
 import org.eknet.publet.partition.git.{GitPartManImpl, GitPartMan}
 import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
-import org.eknet.publet.auth.PubletAuth
 import org.eknet.publet.web.shiro.AuthManager
 import javax.servlet.ServletContext
 import com.google.inject.servlet.ServletModule
@@ -45,6 +44,7 @@ import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import org.eknet.publet.web.util.{PubletWeb, StringMap}
 import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
+import org.eknet.publet.auth.DefaultAuthStore
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -103,8 +103,6 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       info("Installing module: %s".format(m.getClass.getName))
       install(m)
     }
-
-    binder.set[PubletAuth].toType[AuthManager] in Scopes.SINGLETON
 
     binder.bindEagerly[DefaultLayout]()
     binder.bindEagerly[PartitionMounter]()

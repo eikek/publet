@@ -19,7 +19,7 @@ package org.eknet.publet
 import org.eknet.publet.Glob.{Token, Lexer}
 
 /**
- * Super simple ant-style glob impl for matching paths. It only supports the following three
+ * Simple ant-style glob impl for matching paths. It only supports the following three
  *
  * * `*` matches any chars up to the next path separator or string
  * * `?` matches excatly one char
@@ -33,6 +33,38 @@ final case class Glob(pattern: String) extends Ordered[Glob] {
 
   private val separatorString = "/"
   private val lexed = new Lexer(separatorString).split(pattern)
+
+  /**
+   * Checks whether this glob implies the given glob. If `true`
+   * then this glob produces a super set of strings of those
+   * of the given glob.
+   *
+   * @param other
+   * @return
+   */
+  def implies(other: Glob): Boolean = {
+    def streamImplies(tokens: List[Token], others: List[Token]): Boolean = {
+      (tokens, others) match {
+        case (t::ts, o::os) => {
+          if (t.implies(o)) {
+            val nextTokens = if (t.name != "**" || o.name == "**" || ts.headOption==os.headOption) ts else tokens
+            streamImplies(nextTokens, os)
+          } else {
+            if (t.name.length < o.name.length) {
+              val nextOthers = o.name.splitAt(t.name.length)
+                .productIterator.map(a => Glob.createToken(a+"", separatorString)).toList ::: os
+              streamImplies(tokens, nextOthers)
+            } else {
+              false
+            }
+          }
+        }
+        case (Nil, Nil) => true
+        case _ => false
+      }
+    }
+    streamImplies(lexed, other.lexed)
+  }
 
   /**
    * Matches the string against the pattern of this glob.
@@ -63,7 +95,10 @@ final case class Glob(pattern: String) extends Ordered[Glob] {
     result.fold(p => throw new GlobParseException(str, str.length-p.length), s=>true)
   }
 
-  def compare(that: Glob) = pattern.length.compare(that.pattern.length)
+  def compare(that: Glob) = pattern.length.compare(that.pattern.length) match {
+    case 0 => pattern.compare(that.pattern)
+    case x => x
+  }
 
   private def consume(str: String, tokens: List[Token]): Either[String, String] = {
     tokens match {
@@ -105,6 +140,17 @@ object Glob {
       }
       Right(str.substring(name.length), next)
     }
+
+    def implies(other: Token): Boolean
+
+  }
+
+  private def createToken(name: String, sep: String): Token = name match {
+    case "**" => KleeneStar2(sep)
+    case "*" => KleeneStar(sep)
+    case "?" => OneChar
+    case `sep` => Separator(sep)
+    case _ => Word(name)
   }
 
   /** A plain string without wildcards */
@@ -114,6 +160,10 @@ object Glob {
       case _ => List(tok, this)
     }
     def reverse:Token = Word(name.reverse)
+    def implies(other: Token) = other match {
+      case word: Word => word.name == name
+      case _ => false
+    }
   }
 
   /** The `?` wildcard */
@@ -121,12 +171,71 @@ object Glob {
     def :: (tok: Token): List[Token] = List(tok, this)
     def reverse = this
 
+    def implies(other: Token): Boolean = other match {
+      case word: Word => word.name.length == 1
+      case `OneChar` => true
+    }
     override def consume(str: String, next: List[Token]) = {
       if (str.length > 0) Right(str.substring(1), next)
       else Left(str)
     }
 
     override def toString = "OneChar(?)"
+  }
+
+  /** The `*` wildcard. */
+  private case class KleeneStar(sep: String) extends Token("*") {
+    override def :: (tok:Token):List[Token] = tok match {
+      case KleeneStar(`sep`) => List(KleeneStar2(sep))
+      case _ => List(tok, this)
+    }
+
+    def implies(other: Token): Boolean = other match {
+      case word: Word => true
+      case `OneChar` => true
+      case KleeneStar(`sep`) => true
+      case _ => false
+    }
+    def reverse = this
+    override def consume(str: String, next: List[Token]) = {
+      val nextString = { //either up to the next path separator if avail, or next token string
+        if (str.indexOf(sep) > 0) sep
+        else next.headOption.map(_.name).getOrElse(sep)
+      }
+      val n = str.indexOf(nextString)
+      if (n > 0) Right(str.substring(n), next)
+      else Right("", next)
+    }
+    override def toString = "KleeneStar(*)"
+  }
+
+  /** The `**` wildcard */
+  private case class KleeneStar2(sep: String) extends Token("**") {
+    def :: (tok: Token): List[Token] = List(tok, this)
+    def reverse = this
+
+    def implies(other: Token) = true
+
+    override def consume(str: String, next: List[Token]) = {
+      next match {
+        case Nil => Right("", next)
+        case c::cs => {
+          if (c == Separator(sep)) consume(str, cs)
+          else {
+            val ind = str.indexOf(c.name)
+            if (ind > 0) Right(str.substring(ind), next)
+            else Right("", next)
+          }
+        }
+      }
+    }
+    override def toString = "KleeneStar2(**)"
+  }
+
+  private case class Separator(separatorString: String) extends Token(separatorString) {
+    def :: (tok: Token): List[Token] = List(tok, this)
+    def implies(other: Token) = other == this
+    def reverse = this
   }
 
   /** Splits the pattern into a list of tokens. */
@@ -138,64 +247,13 @@ object Glob {
         .map(_.reverse)
     }
 
-    private def token(name: String): Token = name match {
-      case "**" => KleeneStar2
-      case "*" => KleeneStar
-      case "?" => OneChar
-      case `separatorString` => Separator()
-      case _ => Word(name)
-    }
+    private def token(name: String) = createToken(name, separatorString)
 
     private def prepend(list: List[Token], token: Token): List[Token] = {
       list match {
         case c::cs => (token :: c) ::: cs
         case Nil => List(token)
       }
-    }
-
-    /** The `*` wildcard. */
-    private object KleeneStar extends Token("*") {
-      override def :: (tok:Token):List[Token] = tok match {
-        case KleeneStar => List(KleeneStar2)
-        case _ => List(tok, this)
-      }
-      def reverse = this
-      override def consume(str: String, next: List[Token]) = {
-        val nextString = { //either up to the next path separator if avail, or next token string
-          if (str.indexOf(separatorString) > 0) separatorString
-          else next.headOption.map(_.name).getOrElse(separatorString)
-        }
-        val n = str.indexOf(nextString)
-        if (n > 0) Right(str.substring(n), next)
-        else Right("", next)
-      }
-      override def toString = "KleeneStar(*)"
-    }
-
-    /** The `**` wildcard */
-    private object KleeneStar2 extends Token("**") {
-      def :: (tok: Token): List[Token] = List(tok, this)
-      def reverse = this
-
-      override def consume(str: String, next: List[Token]) = {
-        next match {
-          case Nil => Right("", next)
-          case c::cs => {
-            if (c == Separator()) consume(str, cs)
-            else {
-              val ind = str.indexOf(c.name)
-              if (ind > 0) Right(str.substring(ind), next)
-              else Right("", next)
-            }
-          }
-        }
-      }
-      override def toString = "KleeneStar2(**)"
-    }
-
-    private case class Separator() extends Token(separatorString) {
-      def :: (tok: Token): List[Token] = List(tok, this)
-      def reverse = this
     }
   }
 }

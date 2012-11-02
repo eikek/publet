@@ -12,16 +12,16 @@ class GetGroupInfo extends ScalaScript {
 
   def serve() = {
     Security.checkAuthenticated()
-    val allGroups = PubletWeb.authManager.getAllGroups
+    val allGroups = Set[String]() // TODO PubletWeb.authManager.getAllGroups
     val repoGroups = GitrControl.getRepositoryModelFromParam map { r =>
       PubletWeb.authManager
-        .getAllPermissions
-        .withFilter(_.repository.contains(r.name))
-        .flatMap(r => r.roles.map(g=>Map("permission"->r.perm, "group" -> g)))
+//        .getAllPermissions
+//        .withFilter(_.repository.contains(r.name))
+//        .flatMap(r => r.roles.map(g=>Map("permission"->r.perm, "group" -> g)))
     }
 
     import ScalaScript._
-    repoGroups.flatMap(v => makeJson(Map("collaborators" -> v.toList))) orElse {
+    repoGroups.flatMap(v => makeJson(Map("collaborators" -> v))) orElse {
       makeJson(allGroups.toList)
     }
   }

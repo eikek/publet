@@ -12,6 +12,6 @@ class GetLogins extends ScalaScript {
   def serve() = {
     Security.checkAuthenticated()
     import ScalaScript._
-    makeJson(PubletWeb.authManager.getAllUser.map(_.login).toList)
+    makeJson(PubletWeb.authManager.allUser.map(_.login).toList)
   }
 }

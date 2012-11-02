@@ -21,22 +21,28 @@ import org.apache.shiro.realm.AuthorizingRealm
 import org.apache.shiro.authz.{SimpleAuthorizationInfo, AuthorizationInfo}
 import org.apache.shiro.subject.PrincipalCollection
 import org.apache.shiro.authc.{UsernamePasswordToken, DisabledAccountException, AuthenticationToken}
-import org.apache.shiro.SecurityUtils
+import org.apache.shiro.{authz, SecurityUtils}
 import org.apache.shiro.authc.credential.SimpleCredentialsMatcher
 import com.google.common.eventbus.EventBus
 import scala.Some
+import org.eknet.publet.auth.user.User
+import org.apache.shiro.authz.permission.WildcardPermission
+import com.google.inject.{Singleton, Inject}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
-class UsersRealm(val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
+@Singleton
+class UsersRealm @Inject() (val db: DefaultAuthStore, bus: EventBus) extends AuthorizingRealm {
 
   setCredentialsMatcher(new CompositeCredentialsMatcher(List(
     new DynamicHashCredentialsMatcher,
     new DigestCredentialsMatcher(db),
     new SimpleCredentialsMatcher
   )))
+
+  setPermissionResolver(new PermissionResolver)
 
   override def supports(token: AuthenticationToken) = {
     token.isInstanceOf[DigestAuthenticationToken] || token.isInstanceOf[UsernamePasswordToken]
@@ -53,8 +59,8 @@ class UsersRealm(val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
     }
   }
 
-  def doGetAuthorizationInfo(principals: PrincipalCollection) = {
-    val login = principals.getPrimaryPrincipal.toString
+  def doGetAuthorizationInfo(principals: PrincipalCollection): AuthorizationInfo = {
+    val login = getAvailablePrincipal(principals).toString
     db.findUser(login) map { user =>
       new PolicyAuthInfo(user)
     } getOrElse {
@@ -63,19 +69,37 @@ class UsersRealm(val db: PubletAuth, bus: EventBus) extends AuthorizingRealm {
   }
 
   class PolicyAuthInfo(user: User) extends AuthorizationInfo {
-    def getRoles = user.groups
 
-    private def policy = {
-      val op = Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
-      op.getOrElse {
-        val policy = db.getPolicy(user)
-        SecurityUtils.getSubject.getSession.setAttribute("policy", policy)
-        policy
+    private def buildPolicy() = {
+      import org.eknet.publet.auth.repository.GitAction._
+      // get all permission strings.
+      val permset = collection.mutable.Set[String]()
+      for (rm <- db.allRepositories if (rm.owner == user.login))
+        permset += Permission.forGit(Permission.all, Set(rm.name)).toString
+
+      val dbperms = db.getPermissions(user.login)
+      dbperms.foreach(p =>  permset += p)
+
+      for (perm <- dbperms if (perm.startsWith(Permission.gitDomain+Permission.partDivider))) {
+        if (perm.substring(4).contains(push.toString))
+          permset += perm.replace(push.toString, pull.toString)
       }
+      Policy(Set(), permset.toSet, db.getGroups(user.login))
     }
 
-    def getStringPermissions = policy.getPermissions
-    def getObjectPermissions = List()
+    private def policy = {
+      Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
+        .getOrElse {
+          val policy = buildPolicy()
+          SecurityUtils.getSubject.getSession.setAttribute("policy", policy)
+          policy
+        }
+    }
+
+    def getRoles = policy.groups
+    def getStringPermissions = policy.stringPerms
+    def getObjectPermissions = policy.objPerms
   }
 
+  case class Policy(objPerms: Set[authz.Permission], stringPerms: Set[String], groups: Set[String])
 }

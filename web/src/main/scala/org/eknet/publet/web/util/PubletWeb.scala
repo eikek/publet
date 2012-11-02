@@ -22,13 +22,14 @@ import org.eknet.publet.gitr.GitrMan
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Container, Path}
 import grizzled.slf4j.Logging
-import org.eknet.publet.auth.{PubletAuth, RepositoryModel}
+import org.eknet.publet.auth.repository.{RepositoryTag, RepositoryModel}
 import ref.WeakReference
 import org.eknet.publet.engine.scalate.ScalateEngine
 import com.google.inject
 import inject.Injector
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names, InjectorHelper}
+import org.eknet.publet.auth.DefaultAuthStore
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -58,11 +59,11 @@ object PubletWeb extends InjectorHelper with Logging {
   def gitr: GitrMan = instance[GitrMan]
   def gitpartman: GitPartMan = instance[GitPartMan]
   def contentRoot = instance[Container](Names.contentroot)
-  def authManager = instance[PubletAuth]
+  def authManager = instance[DefaultAuthStore]
   def publetSettings = instance[StringMap](Names.settings)
 
   /**
-   * Returns the [[org.eknet.publet.auth.RepositoryModel]] of the
+   * Returns the [[org.eknet.publet.auth.repository.RepositoryModel]] of the
    * repository which contains the resource of the given path. If
    * the resource is not within a git repository, [[scala.None]]
    * is returned.
@@ -76,7 +77,7 @@ object PubletWeb extends InjectorHelper with Logging {
       .collect({ case t: GitPartition => t })
       .map(_.tandem.name)
     gitrepo.map { name =>
-      authManager.getRepository(name.name)
+      authManager.findRepository(name.name).getOrElse(RepositoryModel(name.name, RepositoryTag.open, ""))
     }
   }
 

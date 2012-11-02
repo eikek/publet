@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
-
+package org.eknet.publet.auth.repository
 
 /**
- * A policy is a set of permissions reduced to a
- * single user.
  *
+ * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
+ * @since 11.05.12 11:18
  */
-trait Policy {
 
-  def getRoles: Set[String]
+case class RepositoryModel(name: String, tag: RepositoryTag.Value, owner: String) {
 
-  def getPermissions: Set[String]
-
-}
-
-object Policy {
-
-  lazy val Empty: Policy = new Policy {
-    def getRoles = Set()
-    def getPermissions = Set()
-  }
-
+  def hasOwner = !owner.isEmpty
 }

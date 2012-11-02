@@ -28,7 +28,7 @@ import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import com.google.common.eventbus.EventBus
 import collection.JavaConversions._
-import org.eknet.publet.auth.{RepositoryModel, GitAction}
+import org.eknet.publet.auth.repository.{RepositoryModel, GitAction}
 import org.eknet.publet.web.util.ClientInfo
 
 /**

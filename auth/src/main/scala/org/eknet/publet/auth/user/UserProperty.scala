@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.user
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -22,7 +22,7 @@ package org.eknet.publet.auth
  */
 object UserProperty extends Enumeration {
 
-  val fullName, email, enabled = Value
+  val fullName, email, enabled, password, digest, algorithm = Value
 
   def exists(name: String): Boolean = values.exists(_.toString == name)
 }
