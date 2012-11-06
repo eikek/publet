@@ -22,9 +22,7 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
 import util.{StringMap, PropertiesMap}
-import org.eknet.publet.partition.git
 import com.google.common.eventbus.{EventBus, Subscribe}
-import git.GitPartMan
 import org.eknet.publet.Publet
 import com.google.inject.{Inject, Singleton}
 
@@ -35,19 +33,12 @@ import com.google.inject.{Inject, Singleton}
  * @since 22.05.12 20:30
  */
 @Singleton
-class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config: Config, settings: Settings, bus: EventBus) extends Logging {
+class PartitionMounter @Inject() (publet: Publet, config: Config, settings: Settings, bus: EventBus) extends Logging {
 
   @Subscribe
   def mountPartitions(ev: PubletStartedEvent) {
 
-    //by default partitions are read from settings. this can be overridden
-    //in the config file so that all definitions from settings are ignored
-    val configs = if (Config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
-      readPartitionConfig(settings)
-    } else {
-      readPartitionConfig(Config.get)
-    }
-
+    val configs = PartitionMounter.configs(config, settings)
     def mount(cfg: PartitionConfig): Int = cfg match {
       case PartitionConfig("fs", dir, mounts) => {
         info("Mounting fs directory '"+ dir+ "' to '"+ mounts.map(_.asString)+"'")
@@ -56,12 +47,12 @@ class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config
         for (m <- mounts) publet.mountManager.mount(m, fsp)
         1
       }
-      case PartitionConfig("git", dir, mounts) => {
-        info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
-        val gitp = gitpartman.getOrCreate(Path(dir), git.Config())
-        for (m <- mounts) publet.mountManager.mount(m, gitp)
-        1
-      }
+//      case PartitionConfig("git", dir, mounts) => {
+//        info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
+//        val gitp = gitpartman.getOrCreate(Path(dir), git.Config())
+//        for (m <- mounts) publet.mountManager.mount(m, gitp)
+//        1
+//      }
       case PartitionConfig(kind, _, _) => {
         error("Uknown partition type '"+ kind +"' !")
         0
@@ -73,6 +64,25 @@ class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config
 
   }
 
+
+
+}
+
+case class PartitionConfig(kind: String, directory: String, mounts: List[Path])
+
+object PartitionMounter extends Logging {
+
+  /** by default partitions are read from settings. this can be overridden
+    * in the config file so that all definitions from settings are ignored
+    * @param config
+    * @param settings
+    * @return
+    */
+  def configs(config: Config, settings: Settings) = if (config("applyPartitionSettings").map(_.toBoolean).getOrElse(true)) {
+    PartitionMounter.readPartitionConfig(settings)
+  } else {
+    PartitionMounter.readPartitionConfig(Config.get)
+  }
 
   /**
    * Extracts the partition configuration from a properties file. The configuration
@@ -128,6 +138,4 @@ class PartitionMounter @Inject() (publet: Publet, gitpartman: GitPartMan, config
 
     recurseRead(0)
   }
-
-  case class PartitionConfig(kind: String, directory: String, mounts: List[Path])
 }

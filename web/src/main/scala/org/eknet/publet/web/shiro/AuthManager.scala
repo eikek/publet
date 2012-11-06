@@ -21,8 +21,6 @@ import org.eknet.publet.auth._
 import grizzled.slf4j.Logging
 import org.eknet.publet.Publet
 import com.google.inject.{Inject, Singleton}
-import com.google.common.eventbus.Subscribe
-import org.eknet.publet.web.filter.PostReceiveEvent
 import com.google.inject.name.Named
 import org.eknet.publet.web.{Settings, Config}
 
@@ -33,10 +31,10 @@ import org.eknet.publet.web.{Settings, Config}
 @Singleton
 class AuthManager @Inject() (@Named("contentroot") contentRoot: Container, config: Config, passServProv: PasswordServiceProvider, settings: Settings) extends Logging {
 //TODO
-  @Subscribe
-  def reloadOnPush(event: PostReceiveEvent) {
+//  @Subscribe
+//  def reloadOnPush(event: PostReceiveEvent) {
     //reloadIfChanged()
-  }
+//  }
   private def getPermissionXml = {
     val permissionPath = Path(Publet.allIncludes+"config/permissions.xml").toAbsolute
 //    container

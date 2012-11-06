@@ -19,21 +19,17 @@ package org.eknet.publet.web.shiro
 import org.eknet.publet.vfs.Path
 import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
-import org.eknet.publet.auth._
 import org.apache.shiro.SecurityUtils
-import org.eknet.publet.vfs.ChangeInfo
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
-import org.eknet.publet.web.RepositoryNameResolver
-import org.eknet.publet.auth.repository.{RepositoryModel, GitAction, RepositoryTag}
 import org.eknet.publet.auth.user.UserProperty
+import org.eknet.publet.vfs.ChangeInfo
+import org.eknet.publet.auth.PermissionBuilder
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.05.12 18:52
  */
-object Security extends Logging {
-
-  def pathPermission(action: String, path: Path) = path.segments.mkString(action+":", ":", "")
+object Security extends Logging with PermissionBuilder {
 
   /**Returns whether the shiro request filter is enabled for this request.
    * Note, that any access to the shiro subsystem is forbidden if this returns
@@ -99,48 +95,8 @@ object Security extends Logging {
     subject.checkPermission(perm)
   }
 
-  def checkPerm(action: String, path: Path) {
-    checkPerm(pathPermission(action, path))
-  }
-
-  def checkGitAction(action: GitAction.Value, model: RepositoryModel) {
-    if (model.tag != RepositoryTag.open || action != GitAction.pull) {
-      //not checking pull, if push is granted: TODO use implies relation on Permission!
-      if (action != GitAction.pull || !hasGitAction(GitAction.push, model)) {
-        val perm = action.toString +":"+ model.name
-        checkPerm(perm)
-      }
-    }
-  }
-
-  def hasGitAction(action: GitAction.Value, model: RepositoryModel): Boolean = {
-    if (model.tag == RepositoryTag.open && action == GitAction.pull)
-      true
-    else {
-      //not checking pull, if push is granted: TODO use implies relation on Permission!
-      if (action != GitAction.pull || !hasGitAction(GitAction.push, model)) {
-        val perm = action.toString +":"+ model.name
-        hasPerm(perm)
-      } else {
-        true
-      }
-    }
-  }
-
-  def hasGitAction(action: GitAction.Value): Boolean = {
-    val repoModel = PubletWebContext.getRepositoryModel
-    if (repoModel.isDefined) {
-      hasGitAction(action, repoModel.get)
-    } else {
-      true
-    }
-  }
-
-  def checkGitAction(action: GitAction.Value) {
-    val repoModel = PubletWebContext.getRepositoryModel
-    if (repoModel.isDefined) {
-      checkGitAction(action, repoModel.get)
-    }
+  def checkResourcePerm(action: String, path: Path) {
+    checkPerm(resource grant(action) on path.asString)
   }
 
   def hasPerm(perm: String): Boolean = {
@@ -148,7 +104,7 @@ object Security extends Logging {
   }
 
   def hasPerm(action: String, path: Path): Boolean = {
-    hasPerm(pathPermission(action, path))
+    hasPerm(resource grant(action) on path.asString)
   }
 
   /**
@@ -165,7 +121,8 @@ object Security extends Logging {
    * @param resourcePath
    */
   def hasWritePermission(resourcePath: Path): Boolean = {
-    writePermissionCheck(resourcePath)(hasGitAction, hasPerm)
+//    writePermissionCheck(resourcePath)(hasGitAction, hasPerm)
+    false
   }
 
   /**
@@ -175,18 +132,18 @@ object Security extends Logging {
    * @param resourcePath
    */
   def checkWritePermission(resourcePath: Path) {
-    writePermissionCheck(resourcePath)(checkGitAction, checkPerm)
+//    writePermissionCheck(resourcePath)(checkGitAction, checkPerm)
   }
 
-  private def writePermissionCheck[A](resource:Path)(gf:(GitAction.Value, RepositoryModel)=>A, rf:String=>A): A = {
-    val gp = PubletWeb.getRepositoryModel(resource) map { model =>
-      gf(GitAction.push, model)
-    }
-    gp getOrElse {
-      val perm = "write:"+ resource.segments.mkString(":")
-      rf(perm)
-    }
-  }
+//  private def writePermissionCheck[A](uri:Path)(gf:(GitAction.Action, RepositoryModel)=>A, rf:String=>A): A = {
+//    val gp = PubletWeb.getRepositoryModel(uri) map { model =>
+//      gf(GitAction.push, model)
+//    }
+//    gp getOrElse {
+//      val perm = resource grant("write") on uri.asString
+//      rf(perm)
+//    }
+//  }
 
   /**
    * Returns whether the current request can access the resource at
@@ -208,13 +165,13 @@ object Security extends Logging {
    * @return
    */
   def hasReadPermission(applicationUri: String): Boolean = {
-    lazy val repoModel = RepositoryNameResolver
-      .getRepositoryName(Path(applicationUri), isGitRequest = false)
-      .map(name => PubletWeb.authManager.getRepository(name.name))
-
-    lazy val hasPull = repoModel map { repoModel =>
-      Security.hasGitAction(GitAction.pull, repoModel)
-    }
+//    lazy val repoModel = RepositoryNameResolver
+//      .getRepositoryName(Path(applicationUri), isGitRequest = false)
+//      .map(name => PubletWeb.authManager.getRepository(name))
+//
+//    lazy val hasPull = repoModel map { repoModel =>
+//      Security.hasGitAction(GitAction.pull, repoModel)
+//    }
 true
     //TODO
 //    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {

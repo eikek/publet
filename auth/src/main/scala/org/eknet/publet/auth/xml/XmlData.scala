@@ -19,7 +19,6 @@ package org.eknet.publet.auth.xml
 import scala.xml.Elem
 import org.eknet.publet.auth.user.User
 import org.eknet.publet.vfs.ContentResource
-import org.eknet.publet.auth.repository.RepositoryModel
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
@@ -32,7 +31,6 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
 
   private var _users = Map[String, User]()
   private var _groups = Map[String, Set[String]]()
-  private var _repositories = Map[String, RepositoryModel]()
   private var _permissions = Map[String, Set[String]]()
   private var _anonPatterns = List[String]()
 
@@ -51,11 +49,6 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
       })
       this._users = umap.toMap
       this._groups = gmap.toMap
-
-      this._repositories = (rootElem \ "repositories" \ "repository")
-        .map(Serializer.repositoryFromXml(_))
-        .map(rm => rm.name -> rm)
-        .toMap
 
       val pmap = collection.mutable.Map[String, Set[String]]()
       (rootElem \ "permissions" \ "grant")
@@ -90,9 +83,6 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
     <users>
       { _users.values.map(u => Serializer.userToXml(u, _groups.get(u.login).getOrElse(Set()))) }
     </users>
-    <repositories>
-      { _repositories.values.map(rm => Serializer.repositoryToXml(rm)) }
-    </repositories>
     <permissions>
       { for (g <- _permissions.keys) yield {
            <grant><to>{g}</to>{ _permissions.get(g).get.map(perm => <perm>{perm}</perm>)}</grant>
@@ -107,7 +97,6 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
 
   def users = _users
   def groups = _groups
-  def repositories = _repositories
   def permissions = _permissions
   def anonPatterns = _anonPatterns
 }

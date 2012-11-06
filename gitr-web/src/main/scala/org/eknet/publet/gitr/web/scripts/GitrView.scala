@@ -20,7 +20,6 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.treewalk.filter.PathFilter
 import collection.mutable.ListBuffer
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.gitr.GitrRepository
 import ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.{ContentType, Content, Path}
@@ -28,9 +27,10 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.support.StringTemplateSource
 import eu.medsea.mimeutil.MimeUtil
 import ContentType._
-import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.util.PubletWebContext
-import org.eknet.publet.auth.repository.GitAction
+import org.eknet.publet.gitr.GitRequestUtils
+import org.eknet.publet.gitr.auth.GitAction
+import org.eknet.gitr.GitrRepository
 
 // Returns a json array containing a tree of a repository
 // Expects the following parameter
@@ -41,7 +41,7 @@ import org.eknet.publet.auth.repository.GitAction
 class GitrView extends ScalaScript {
 
   def serve() = {
-    getRepositoryModelFromParam.map(Security.checkGitAction(GitAction.pull, _))
+    getRepositoryModelFromParam.map(GitRequestUtils.checkGitAction(GitAction.pull, _))
     getRepositoryFromParam match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))
       case Some(repo) => getAction match {
@@ -146,7 +146,7 @@ class GitrView extends ScalaScript {
       if (nonText || mimetype.startsWith("image")) {
         //provide download link or show image
         val url = PubletWebContext.urlOf(GitrControl.mountPoint+"/gitrblob?"+ rParam +
-          "="+repo.name.name+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
+          "="+repo.name.nameDotGit+"&"+hParam+"="+getRev+"&"+pParam+"="+file.asString)
         makeJson {
           resultBase ++ Seq("mimeType" -> mimetype, "url"->url)
         }

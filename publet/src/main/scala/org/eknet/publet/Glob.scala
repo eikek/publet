@@ -35,38 +35,6 @@ final case class Glob(pattern: String) extends Ordered[Glob] {
   private val lexed = new Lexer(separatorString).split(pattern)
 
   /**
-   * Checks whether this glob implies the given glob. If `true`
-   * then this glob produces a super set of strings of those
-   * of the given glob.
-   *
-   * @param other
-   * @return
-   */
-  def implies(other: Glob): Boolean = {
-    def streamImplies(tokens: List[Token], others: List[Token]): Boolean = {
-      (tokens, others) match {
-        case (t::ts, o::os) => {
-          if (t.implies(o)) {
-            val nextTokens = if (t.name != "**" || o.name == "**" || ts.headOption==os.headOption) ts else tokens
-            streamImplies(nextTokens, os)
-          } else {
-            if (t.name.length < o.name.length) {
-              val nextOthers = o.name.splitAt(t.name.length)
-                .productIterator.map(a => Glob.createToken(a+"", separatorString)).toList ::: os
-              streamImplies(tokens, nextOthers)
-            } else {
-              false
-            }
-          }
-        }
-        case (Nil, Nil) => true
-        case _ => false
-      }
-    }
-    streamImplies(lexed, other.lexed)
-  }
-
-  /**
    * Matches the string against the pattern of this glob.
    *
    * Returns `false` if it doesn't match and `true` if it does.
@@ -141,8 +109,6 @@ object Glob {
       Right(str.substring(name.length), next)
     }
 
-    def implies(other: Token): Boolean
-
   }
 
   private def createToken(name: String, sep: String): Token = name match {
@@ -160,10 +126,6 @@ object Glob {
       case _ => List(tok, this)
     }
     def reverse:Token = Word(name.reverse)
-    def implies(other: Token) = other match {
-      case word: Word => word.name == name
-      case _ => false
-    }
   }
 
   /** The `?` wildcard */
@@ -171,10 +133,6 @@ object Glob {
     def :: (tok: Token): List[Token] = List(tok, this)
     def reverse = this
 
-    def implies(other: Token): Boolean = other match {
-      case word: Word => word.name.length == 1
-      case `OneChar` => true
-    }
     override def consume(str: String, next: List[Token]) = {
       if (str.length > 0) Right(str.substring(1), next)
       else Left(str)
@@ -190,12 +148,6 @@ object Glob {
       case _ => List(tok, this)
     }
 
-    def implies(other: Token): Boolean = other match {
-      case word: Word => true
-      case `OneChar` => true
-      case KleeneStar(`sep`) => true
-      case _ => false
-    }
     def reverse = this
     override def consume(str: String, next: List[Token]) = {
       val nextString = { //either up to the next path separator if avail, or next token string
@@ -213,8 +165,6 @@ object Glob {
   private case class KleeneStar2(sep: String) extends Token("**") {
     def :: (tok: Token): List[Token] = List(tok, this)
     def reverse = this
-
-    def implies(other: Token) = true
 
     override def consume(str: String, next: List[Token]) = {
       next match {
@@ -234,7 +184,6 @@ object Glob {
 
   private case class Separator(separatorString: String) extends Token(separatorString) {
     def :: (tok: Token): List[Token] = List(tok, this)
-    def implies(other: Token) = other == this
     def reverse = this
   }
 

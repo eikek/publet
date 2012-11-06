@@ -16,10 +16,52 @@
 
 package org.eknet.publet.auth.guice
 
+import com.google.inject.{Singleton, Provides, Scopes, AbstractModule}
+import org.eknet.publet.auth._
+import org.eknet.guice.squire.SquireModule
+import org.apache.shiro.cache.{MemoryConstrainedCacheManager, CacheManager}
+import org.apache.shiro.realm.Realm
+import com.google.inject.name.Named
+import org.apache.shiro.crypto.hash._
+import org.apache.shiro.authc.credential.PasswordService
+import org.apache.shiro.authz.permission.PermissionResolver
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 01.11.12 19:10
  */
-class AuthModule {
+class AuthModule extends AbstractModule with SquireModule {
+
+  def configure() {
+    bind[PasswordServiceProvider].to[DefaultPasswordServiceProvider].as[Singleton]()
+    bind[CacheManager].to[MemoryConstrainedCacheManager].in(Scopes.SINGLETON)
+
+    bind[PermissionResolver].to[DefaultPermissionResolver]
+    setOf[Realm].add[UsersRealm]
+    setOf[PermissionResolver].add[ResourcePermissionResolver]
+  }
+
+  @Singleton
+  @Provides
+  @Named(Sha512Hash.ALGORITHM_NAME)
+  def createSha512PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha512Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Md5Hash.ALGORITHM_NAME)
+  def createMd5PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Md5Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Md2Hash.ALGORITHM_NAME)
+  def createMd2PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Md2Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Sha1Hash.ALGORITHM_NAME)
+  def createSha1PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha1Hash.ALGORITHM_NAME)
+
+  @Provides@Singleton@Named(Sha384Hash.ALGORITHM_NAME)
+  def createSha384PasswordService(): PasswordService =
+    PasswordServiceProvider.newPasswordService(Sha384Hash.ALGORITHM_NAME)
+
 
 }

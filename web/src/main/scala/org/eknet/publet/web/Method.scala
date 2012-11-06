@@ -16,29 +16,35 @@
 
 package org.eknet.publet.web
 
+import java.util.Locale
+
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.05.12 19:20
  */
 object Method extends Enumeration {
 
-  val options = Value("OPTIONS")
-  val head = Value("HEAD")
-  val get = Value("GET")
-  val post = Value("POST")
-  val delete = Value("DELETE")
-  val propfind = Value("PROPFIND")
-  val proppatch = Value("PROPPATCH")
-  val mkcol = Value("MKCOL")
-  val mkcalendar = Value("MKCALENDAR")
-  val copy = Value("COPY")
-  val move = Value("MOVE")
-  val lock = Value("LOCK")
-  val unlock = Value("UNLOCK")
-  val put = Value("PUT")
-  val trace = Value("TRACE")
-  val acl = Value("ACL")
-  val connect = Value("CONNECT")
-  val report = Value("REPORT")
+  val options = MethodValue("OPTIONS")
+  val head = MethodValue("HEAD")
+  val get = MethodValue("GET")
+  val post = MethodValue("POST", write = true)
+  val delete = MethodValue("DELETE", write = true)
+  val propfind = MethodValue("PROPFIND")
+  val proppatch = MethodValue("PROPPATCH", write = true)
+  val mkcol = MethodValue("MKCOL", write = true)
+  val mkcalendar = MethodValue("MKCALENDAR", write = true)
+  val copy = MethodValue("COPY", write = true)
+  val move = MethodValue("MOVE", write = true)
+  val lock = MethodValue("LOCK", write = true)
+  val unlock = MethodValue("UNLOCK", write = true)
+  val put = MethodValue("PUT", write = true)
+  val trace = MethodValue("TRACE")
+  val acl = MethodValue("ACL", write = true)
+  val connect = MethodValue("CONNECT", write = true)
+  val report = MethodValue("REPORT")
 
+  def forName(name: String): Method.MethodValue =
+    withName(name.toUpperCase(Locale.ROOT)).asInstanceOf[MethodValue]
+
+  case class MethodValue(name: String, write: Boolean = false) extends Val(name)
 }

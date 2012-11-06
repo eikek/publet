@@ -39,7 +39,7 @@ class SourceFilter(publet: Publet) extends Filter with PubletRequestWrapper with
           ServeContentResource.serveResource(c, request, response)
         }
         case _=> {
-          if (!request.isGitRequest && path.name.targetType == ContentType.unknown) {
+          if (path.name.targetType == ContentType.unknown) {
             writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
           } else {
             chain.doFilter(request, response)

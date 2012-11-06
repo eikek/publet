@@ -20,15 +20,14 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.RenderUtils._
 import GitrControl._
 import org.eknet.publet.com.twitter.json.Json
-import org.eknet.publet.gitr.GitrRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext, RenderUtils}
 import org.eknet.publet.vfs.{ContentType, Path, Content}
-import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.gitr.RepositoryName
 import scala.Some
-import org.eknet.publet.auth.repository.GitAction
+import org.eknet.gitr.{GitrMan, GitrRepository, RepositoryName}
+import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, GitAction}
+import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,19 +40,19 @@ class GitrControl extends ScalaScript {
       case None => repositoryListing
       case Some(model) => getAction match {
         case "log" => {
-          Security.checkGitAction(GitAction.pull, model)
+          GitRequestUtils.checkGitAction(GitAction.pull, model)
           logView
         }
         case "commit" => {
-          Security.checkGitAction(GitAction.pull, model)
+          GitRequestUtils.checkGitAction(GitAction.pull, model)
           commitContents
         }
         case "admin" => {
-          Security.checkGitAction(GitAction.gitadmin, model)
+          GitRequestUtils.checkGitAction(GitAction.edit, model)
           repositoryAdmin
         }
         case _ => {
-          Security.checkGitAction(GitAction.pull, model)
+          GitRequestUtils.checkGitAction(GitAction.pull, model)
           sourceView
         }
       }
@@ -183,13 +182,13 @@ object GitrControl {
   lazy val mountPoint = PubletWeb.publetSettings("gitr.mountpoint").getOrElse("/gitr")
 
   /** Permission granted to administrate the repository (incl. delete) */
-  val adminPerm = GitAction.gitadmin.toString
+  val adminPerm = GitAction.edit.name
 
   /** Permission granted to allow creation of new repositories. */
-  val createPerm = GitAction.gitcreate.toString
+  val createPerm = GitAction.create.name
 
   /** Permission granted to allow creation of new root repositories */
-  val createRootPerm = GitAction.gitcreateRoot.toString
+  val createRootPerm = GitAction.createRoot.name
 
   val gitradminTemplate = mountPoint+"/_gitradmin.page"
   val gitrrepoAdminTemplate = mountPoint+"/_repoadmin.page"
@@ -217,8 +216,8 @@ object GitrControl {
   }
   def getAction = PubletWebContext.param(doParam).getOrElse("source")
 
-  def getRepositoryFromParam = PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.gitr.get(RepositoryName(repoName)))
-  def getRepositoryModelFromParam = PubletWebContext.param(rParam).map(PubletWeb.authManager.getRepository)
+  def getRepositoryFromParam = PubletWebContext.param(rParam) flatMap (repoName => PubletWeb.instance[GitrMan].get(RepositoryName(repoName)))
+  def getRepositoryModelFromParam = PubletWebContext.param(rParam).map(n=>PubletWeb.instance[DefaultRepositoryStore].getRepository(RepositoryName(n)))
 
   def getCommitFromRequest(repo:GitrRepository): Option[RevCommit] = {
     val param = getRev

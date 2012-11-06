@@ -19,15 +19,16 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import ScalaScript._
-import org.eknet.publet.auth.repository.{GitAction, RepositoryTag}
-import org.eknet.publet.gitr.RepositoryName
+import org.eknet.publet.gitr.auth.{GitAction, DefaultRepositoryStore, RepositoryTag}
 import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
+import org.eknet.gitr.{GitrMan, RepositoryName}
+import org.eknet.publet.gitr.GitRequestUtils
 
 class GitrRepoList extends ScalaScript {
 
-  val authM = PubletWeb.authManager
+  val authM = PubletWeb.instance[DefaultRepositoryStore]
 
-  def getRepositoryModel(name: String) = authM.getRepository(name)
+  def getRepositoryModel(name: String) = authM.getRepository(RepositoryName(name))
 
   /**
    * Returns only open repos. Used with filter="open"
@@ -66,8 +67,8 @@ class GitrRepoList extends ScalaScript {
   private def filterCollabs(name: String)(r: RepositoryName): Boolean = {
     val login = Security.username
     val model = getRepositoryModel(r.name)
-    def hasPull = Security.hasGitAction(GitAction.pull, model)
-    def hasPush = Security.hasGitAction(GitAction.push, model)
+    def hasPull = GitRequestUtils.hasGitAction(GitAction.pull, model)
+    def hasPush = GitRequestUtils.hasGitAction(GitAction.push, model)
 
     // all repos with explicit permissions = all closed with pull rights and all with push rights (unowned)
     model.owner != login && r.segments.last.startsWith(name) &&
@@ -94,7 +95,7 @@ class GitrRepoList extends ScalaScript {
       else filterOpen(name)_
     }
 
-    makeJson(PubletWeb.gitr.allRepositories(repoFilter)
+    makeJson(PubletWeb.instance[GitrMan].allRepositories(repoFilter)
       .map(r => (r, getRepositoryModel(r.name.name)))
       .map(t => new RepositoryInfo(t._1, t._2))
       .toList.sorted

@@ -17,9 +17,8 @@
 package org.eknet.publet.auth
 
 import com.google.inject.{Singleton, Inject}
-import org.eknet.publet.auth.repository.{RepositoryTag, RepositoryModel, RepositoryStore}
 import java.util
-import org.eknet.publet.auth.user.{UserProperty, User, UserStore}
+import org.eknet.publet.auth.user.{PermissionStore, UserProperty, User, UserStore}
 import org.eknet.publet.Glob
 import java.util.Locale
 
@@ -28,42 +27,16 @@ import java.util.Locale
  * @since 01.11.12 18:10
  */
 @Singleton
-class DefaultAuthStore @Inject() (repoStore: util.Set[RepositoryStore],
-                                  userStore: util.Set[UserStore],
+class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
+                                  permStore: util.Set[PermissionStore],
                                   passwordProvider: PasswordServiceProvider)
-      extends UserStore with RepositoryStore {
+      extends UserStore with PermissionStore {
 
   import collection.JavaConversions._
 
   type RealmnameProvider = Unit => String
 
   var realmnameProvider: RealmnameProvider = Unit => "WebDav Area"
-
-  // repository store
-  private def normalizeReponame(name: String) = if (name.endsWith(".git")) name.substring(0, name.length-4) else name
-
-  def findRepository(name: String) = {
-    val n = normalizeReponame(name)
-    repoStore.foldLeft(None:Option[RepositoryModel])((el, store) => if (el.isDefined) el else store.findRepository(n))
-  }
-
-  def getRepository(name: String) = findRepository(name).getOrElse(RepositoryModel(name, RepositoryTag.open, ""))
-
-  def allRepositories = repoStore.flatMap(rs => rs.allRepositories)
-  def repositoriesByOwner(owner: String) = repoStore.flatMap(rs => rs.repositoriesByOwner(owner))
-
-  def findRepositoryStore(name: String) =
-    repoStore.foldLeft(None:Option[RepositoryStore])((el, store) => if (el.isDefined) el else {
-      if (store.findRepository(normalizeReponame(name)).isDefined) Some(store)
-      else None
-    })
-
-
-  def updateRepository(rm: RepositoryModel) =
-    findRepositoryStore(rm.name).flatMap(store => store.updateRepository(rm))
-
-  def removeRepository(name: String) =
-    findRepositoryStore(name).flatMap(store => store.removeRepository(normalizeReponame(name)))
 
   // user store
   def findUser(login: String) =
@@ -118,15 +91,15 @@ class DefaultAuthStore @Inject() (repoStore: util.Set[RepositoryStore],
   }
 
   def addPermission(login: String, perm: String) {
-    findUserStore(login) map { store => store.addPermission(login, perm) }
+    permStore.headOption map { store => store.addPermission(login, perm) }
   }
 
   def dropPermission(login: String, perm: String) {
-    findUserStore(login) map { store => store.dropPermission(login, perm) }
+    permStore.foreach(store => store.dropPermission(login, perm))
   }
 
   def getPermissions(login: String) =
-    findUserStore(login) map { store => store.getPermissions(login) } getOrElse(Set())
+    permStore.flatMap(store => store.getPermissions(login)).toSet
 
   def addGroup(login: String, group: String) {
     findUserStore(login) map { store => store.addGroup(login, group) }

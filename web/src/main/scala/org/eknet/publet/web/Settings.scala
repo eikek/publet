@@ -25,7 +25,6 @@ import com.google.inject.name.Named
 import org.eknet.publet.event.Event
 import org.eknet.publet.vfs.events.ContentWrittenEvent
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.filter.PostReceiveEvent
 
 /**
  * Represents the `settings.properties` file.
@@ -46,10 +45,10 @@ class Settings @Inject() (@Named("contentroot") contentRoot: Container, eventBus
     reloadIfChanged()
   }
 
-  @Subscribe
-  def reloadOnPush(event: PostReceiveEvent) {
-    reloadIfChanged()
-  }
+//  @Subscribe
+//  def reloadOnPush(event: PostReceiveEvent) {
+//    reloadIfChanged()
+//  }
 
   def reloadIfChanged() {
     getSettingsResource map { newFile =>

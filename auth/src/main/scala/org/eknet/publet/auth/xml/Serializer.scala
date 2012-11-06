@@ -18,7 +18,6 @@ package org.eknet.publet.auth.xml
 
 import org.eknet.publet.auth.user.{UserProperty, User}
 import scala.xml.{Node, Elem}
-import org.eknet.publet.auth.repository.{RepositoryTag, RepositoryModel}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -60,14 +59,4 @@ object Serializer {
     PermissionModel(groups.toSet, perms.toSet)
   }
 
-  def repositoryToXml(rm: RepositoryModel) = {
-      <repository name={rm.name} tag={rm.tag.toString} owner={rm.owner}/>
-  }
-
-  def repositoryFromXml(repoNode: Node): RepositoryModel = {
-    val name = (repoNode \ "@name").text
-    val tag = RepositoryTag.withName((repoNode \ "@tag").toString())
-    val owner = (repoNode \ "@owner").text
-    RepositoryModel(name, tag, owner)
-  }
 }

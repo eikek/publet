@@ -138,13 +138,6 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
    */
   def mainMount = apply("publet.mainMount").getOrElse("main")
 
-  /**
-   * Returns the configured string where the GitServlet
-   * is listening.
-   *
-   * @return
-   */
-  def gitMount = apply("publet.gitMount").getOrElse("git")
 
   /**
    * Returns the current mode the application is in, which is either

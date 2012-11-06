@@ -82,8 +82,6 @@ trait RequestUrl extends Logging {
   /** The full uri to this request. With parameters, without contextPath */
   def fullUrl = attr(fullUrlKey).get
 
-  def isGitRequest = applicationUri.startsWith("/"+Config.get.gitMount+"/")
-
   private val resourceUri = Key("applicationSourceUri", {
     case Request => {
       PubletWeb.publet.findSources(applicationPath).toList match {

@@ -16,10 +16,11 @@
 
 package org.eknet.publet.gitr.web.scripts
 
-import org.eknet.publet.gitr.GitrRepository
-import org.eknet.publet.auth.repository.{RepositoryModel, GitAction}
 import org.eknet.publet.web.shiro.Security
 import org.eclipse.jgit.lib.Constants
+import org.eknet.gitr.GitrRepository
+import org.eknet.publet.gitr.auth.{GitAction, RepositoryModel}
+import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,7 +29,7 @@ import org.eclipse.jgit.lib.Constants
 class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) extends Ordered[RepositoryInfo] {
 
   val name = repo.name
-  val gitUrl = GitrControl.getCloneUrl(repo.name.name)
+  val gitUrl = GitrControl.getCloneUrl(repo.name.nameDotGit)
   val owner = model.owner
   val description = repo.getDescription.getOrElse("")
   private val lastCommitDate = {
@@ -44,14 +45,14 @@ class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) extends Or
 
   lazy val toMap: Map[String, Any] = {
     Map(
-      "name" -> (name.strip.segments.last),
+      "name" -> (name.segments.last),
       "fullName" -> name.name,
       "giturl" -> gitUrl,
       "owner" -> owner,
       "owned" -> (owner == Security.username),
       "tag" -> (model.tag.toString),
       "description" -> description,
-      "push" -> (Security.hasGitAction(GitAction.push, model))
+      "push" -> (GitRequestUtils.hasGitAction(GitAction.push, model))
     )
   }
 

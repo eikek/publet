@@ -76,23 +76,23 @@ class GlobSuite extends FunSuite with ShouldMatchers {
   }
 
   test ("simple implies") {
-    Glob("/dev/**").implies(Glob("/dev/ab/**")) should be (true)
-    Glob("/dev/**").implies(Glob("/ab/**")) should be (false)
+    Glob("/dev/**").matches("/dev/ab/**") should be (true)
+    Glob("/dev/**").matches("/ab/**") should be (false)
 
-    Glob("/?b/home/**").implies(Glob("/ab/home/tests/**")) should be (true)
-    Glob("/?b/home/**").implies(Glob("/ab/home/**")) should be (true)
+    Glob("/?b/home/**").matches("/ab/home/tests/**") should be (true)
+    Glob("/?b/home/**").matches("/ab/home/**") should be (true)
 
-    Glob("/ab/*/c").implies(Glob("/?b/*/c")) should be (false)
-    Glob("/a?/*/c").implies(Glob("/ab/*/c")) should be (true)
+    Glob("/ab/*/c").matches("/?b/*/c") should be (false)
+    Glob("/a?/*/c").matches("/ab/*/c") should be (true)
 
-    Glob("**/name/*.pdf").implies(Glob("/one/two/name/**")) should be (false)
-    Glob("/*/*/name/*.pdf").implies(Glob("/one/two/name/*.pdf")) should be (true)
-    Glob("**/name/*.pdf").implies(Glob("/one/name/*.pdf")) should be (true)
+    Glob("**/name/*.pdf").matches("/one/two/name/**") should be (false)
+    Glob("/*/*/name/*.pdf").matches("/one/two/name/*.pdf") should be (true)
+    Glob("**/name/*.pdf").matches("/one/name/*.pdf") should be (true)
 
-    Glob("/aa/bb/cc").implies(Glob("/aa/bb/cc")) should be (true)
-    Glob("/aa/bb/cc").implies(Glob("/aa/abb/cc")) should be (false)
+    Glob("/aa/bb/cc").matches("/aa/bb/cc") should be (true)
+    Glob("/aa/bb/cc").matches("/aa/abb/cc") should be (false)
 
-    Glob("/**").implies(Glob("**")) should be (false)
-    Glob("**").implies(Glob("**")) should be (true)
+    Glob("/**").matches("**") should be (false)
+    Glob("**").matches("**") should be (true)
   }
 }

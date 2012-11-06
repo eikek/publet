@@ -16,15 +16,11 @@
 
 package org.eknet.publet.web.guice
 
-import com.google.inject.multibindings.Multibinder
 import org.apache.shiro.realm.Realm
-import com.google.inject.{Binder, Key, AbstractModule}
 import org.eknet.publet.web.WebExtension
 import org.eknet.publet.web.req.RequestHandlerFactory
-import com.google.inject.binder.{AnnotatedBindingBuilder, LinkedBindingBuilder}
 import org.eknet.publet.auth.user.UserStore
-import org.eknet.publet.auth.repository.RepositoryStore
-import org.eknet.publet.auth.resource.ResourceConstraintStore
+import org.eknet.guice.squire.SquireModule
 
 /**
  *
@@ -32,37 +28,13 @@ import org.eknet.publet.auth.resource.ResourceConstraintStore
  * @since 15.10.12 13:03
  * 
  */
-trait PubletBinding {
+trait PubletBinding extends SquireModule {
 
-  class HBindingBuilder[A](val bb: LinkedBindingBuilder[A]) {
-    def toType[B <: A: Manifest] = bb.to(manifest[B].erasure.asInstanceOf[Class[B]])
-  }
-  implicit def bb2Hbb[A](bb: LinkedBindingBuilder[A]): HBindingBuilder[A] = new HBindingBuilder[A](bb)
-  implicit def hbb2bb[A](hbb: HBindingBuilder[A]): LinkedBindingBuilder[A] = hbb.bb
+  def bindRequestHandler = setOf[RequestHandlerFactory]
+  def bindExtension = setOf[WebExtension]
+  def bindRealm = setOf[Realm]
+  def bindUserStore = setOf[UserStore]
 
-  class HModule(binder: Binder) {
-
-    def bindRequestHandler = setBind[RequestHandlerFactory]
-    def bindExtension = setBind[WebExtension]
-    def bindRealm = setBind[Realm]
-    def bindUserStore = setBind[UserStore]
-    def bindRepositoryStore = setBind[RepositoryStore]
-    def bindConstraintStore = setBind[ResourceConstraintStore]
-
-    def bindEagerly[A: Manifest]() {
-      val clazz = manifest[A].erasure.asInstanceOf[Class[A]]
-      binder.bind(clazz).asEagerSingleton()
-    }
-
-
-    def setBind[T: Manifest] = new HBindingBuilder[T](Multibinder
-      .newSetBinder(binder, manifest[T].erasure.asInstanceOf[Class[T]]).addBinding())
-
-    def set[T: Manifest]: AnnotatedBindingBuilder[T] = binder.bind(manifest[T].erasure.asInstanceOf[Class[T]])
-    def set[T](key: Key[T]): LinkedBindingBuilder[T] = binder.bind(key)
-  }
-
-  implicit def toHBinder(b:Binder) = new HModule(b)
 }
 
 

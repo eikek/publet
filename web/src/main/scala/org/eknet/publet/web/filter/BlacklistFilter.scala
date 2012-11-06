@@ -33,14 +33,12 @@ class BlacklistFilter extends Filter with PubletRequestWrapper with Logging with
   def init(filterConfig: FilterConfig) {}
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    if (!request.isGitRequest) {
-      val path = request.applicationPath
-      val underscoreSegment = path.segments.find(_.startsWith("_"))
-      if (underscoreSegment.isDefined) {
-        info("Blacklist-Filter wiping: "+ path.asString)
-        writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
-        response.flushBuffer()
-      }
+    val path = request.applicationPath
+    val underscoreSegment = path.segments.find(_.startsWith("_"))
+    if (underscoreSegment.isDefined) {
+      info("Blacklist-Filter wiping: "+ path.asString)
+      writeError(HttpServletResponse.SC_NOT_FOUND, request, response)
+      response.flushBuffer()
     }
     if (!response.isCommitted) {
       chain.doFilter(request, response)

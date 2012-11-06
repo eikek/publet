@@ -58,7 +58,7 @@ object ExtWebExtension {
 
 class ExtraModule extends AbstractModule with PubletBinding with PubletModule {
   def configure() {
-    binder.bindEagerly[ExtWebExtension]()
+    bind[ExtWebExtension].asEagerSingleton()
   }
 
   @Provides@Singleton

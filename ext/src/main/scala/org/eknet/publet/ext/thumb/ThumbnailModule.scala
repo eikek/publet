@@ -30,7 +30,7 @@ import com.google.common.eventbus.EventBus
 class ThumbnailModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
-    binder.bindExtension.toType[ThumbnailExtension]
+    bindExtension.add[ThumbnailExtension]
   }
 
   @Provides@Singleton

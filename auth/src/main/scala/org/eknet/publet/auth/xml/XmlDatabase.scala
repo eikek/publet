@@ -22,9 +22,7 @@ import org.eknet.publet.auth._
 import grizzled.slf4j.Logging
 import org.eknet.publet.{Publet, Glob}
 import org.eknet.publet.auth.user.{UserStore, User}
-import org.eknet.publet.auth.repository.RepositoryStore
 import com.google.inject.{Inject, Singleton}
-import org.eknet.publet.auth.repository.RepositoryModel
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.vfs.events.ContentWrittenEvent
 
@@ -33,7 +31,7 @@ import org.eknet.publet.vfs.events.ContentWrittenEvent
  * @since 17.05.12 21:57
  */
 class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordServiceProvider, realmNameFun: Option[() => String])
-    extends UserStore with RepositoryStore with Logging {
+    extends UserStore with Logging {
 
   // TODO implement write
   val data = new XmlData(source)
@@ -42,18 +40,6 @@ class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordService
   def reloadOnChange(event: ContentWrittenEvent) {
     data.reloadIfChanged()
   }
-
-  //repository
-  def findRepository(name: String): Option[RepositoryModel] =
-    data.repositories.get(name)
-
-  def allRepositories = data.repositories.values
-
-  def repositoriesByOwner(owner: String) = data.repositories.values.filter(rm => rm.owner == owner)
-
-  def updateRepository(rm: RepositoryModel) = null
-
-  def removeRepository(name: String) = null
 
   //user
   def findUser(login: String) = data.users.get(login)

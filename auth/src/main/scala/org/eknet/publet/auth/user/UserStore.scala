@@ -49,10 +49,6 @@ trait UserStore {
 
   def removeUser(login: String): Option[User]
 
-  def addPermission(login: String, perm: String)
-  def dropPermission(login: String, perm: String)
-  def getPermissions(login: String): Set[String]
-
   def addGroup(login: String, group: String)
   def dropGroup(login: String, group: String)
   def getGroups(login: String): Set[String]

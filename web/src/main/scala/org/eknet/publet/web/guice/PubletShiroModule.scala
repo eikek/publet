@@ -50,35 +50,12 @@ import org.eknet.publet.auth.xml.XmlDatabase
 object PubletShiroModule extends AbstractModule with PubletBinding {
 
   def configure() {
-    binder.set[PasswordServiceProvider].toType[DefaultPasswordServiceProvider] in  Scopes.SINGLETON
-    binder.set[CacheManager].toType[MemoryConstrainedCacheManager] in Scopes.SINGLETON
-    binder.set[SessionManager].toType[ServletContainerSessionManager] asEagerSingleton()
-    binder.bindRealm.toType[UsersRealm]
+    bind[SessionManager].to[ServletContainerSessionManager] asEagerSingleton()
+
     bind(classOf[DefaultAuthStore]) in Scopes.SINGLETON
 
-    binder.set[WebEnvironment].toType[GuiceWebEnvironment].asEagerSingleton()
+    bind[WebEnvironment].to[GuiceWebEnvironment].asEagerSingleton()
   }
-
-  @Provides@Singleton@Named(Sha512Hash.ALGORITHM_NAME)
-  def createSha512PasswordService(): PasswordService =
-    PasswordServiceProvider.newPasswordService(Sha512Hash.ALGORITHM_NAME)
-
-  @Provides@Singleton@Named(Md5Hash.ALGORITHM_NAME)
-  def createMd5PasswordService(): PasswordService =
-    PasswordServiceProvider.newPasswordService(Md5Hash.ALGORITHM_NAME)
-
-  @Provides@Singleton@Named(Md2Hash.ALGORITHM_NAME)
-  def createMd2PasswordService(): PasswordService =
-    PasswordServiceProvider.newPasswordService(Md2Hash.ALGORITHM_NAME)
-
-  @Provides@Singleton@Named(Sha1Hash.ALGORITHM_NAME)
-  def createSha1PasswordService(): PasswordService =
-    PasswordServiceProvider.newPasswordService(Sha1Hash.ALGORITHM_NAME)
-
-  @Provides@Singleton@Named(Sha384Hash.ALGORITHM_NAME)
-  def createSha384PasswordService(): PasswordService =
-    PasswordServiceProvider.newPasswordService(Sha384Hash.ALGORITHM_NAME)
-
 
   @Provides@Singleton
   def createWebSecurityManager(bus: EventBus, cacheMan: CacheManager, realms: util.Set[Realm]): WebSecurityManager = {
@@ -100,8 +77,8 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
 
-    val gitPath = Path(config.gitMount).toAbsolute.asString + "/**"
-    resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
+//    val gitPath = Path(config.gitMount).toAbsolute.asString + "/**"
+//    resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
     resolver.getFilterChainManager.createChain("/**", "anon")
     resolver
   }

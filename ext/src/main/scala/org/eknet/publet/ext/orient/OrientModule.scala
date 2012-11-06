@@ -27,7 +27,7 @@ class OrientModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
     bind(classOf[GraphDbProvider]) to classOf[DefaultGraphDbProvider] in Scopes.SINGLETON
-    binder.bindEagerly[OrientDbShutdownHook]()
+    bind[OrientDbShutdownHook].asEagerSingleton()
   }
 
 }

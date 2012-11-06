@@ -20,7 +20,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.matchers.ShouldMatchers
 import org.apache.shiro.mgt.{DefaultSecurityManager, SecurityManager}
 import org.apache.shiro.realm.AuthorizingRealm
-import org.apache.shiro.subject.PrincipalCollection
+import org.apache.shiro.subject.{Subject, PrincipalCollection}
 import org.apache.shiro.authc.{UsernamePasswordToken, SimpleAccount, AuthenticationToken}
 import org.apache.shiro.authz.{Permission => ShiroPermission}
 import org.apache.shiro.SecurityUtils
@@ -33,27 +33,26 @@ class PermissionTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
   import collection.JavaConversions._
 
   var securityManager: SecurityManager = _
+  var subject: Subject = _
 
   before {
     securityManager = new DefaultSecurityManager(new TestRealm)
     SecurityUtils.setSecurityManager(securityManager)
+    subject = SecurityUtils.getSubject
+    subject.login(new UsernamePasswordToken("test", "test"))
   }
 
   test ("resource implies") {
-    val subject = SecurityUtils.getSubject
-    subject.login(new UsernamePasswordToken("test", "test"))
-
     subject.isPermitted("resource:write:/aa/uu/test.pdf") should be (true)
     subject.isPermitted("resource:read:/aa/bb/test.pdf") should be (false)
     subject.isPermitted("resource:read,create:/aa/uu/admiral.pdf") should be (true)
 
     subject.isPermitted("resource:delete:/cc/a/d/doc.pdf,/cc/b/d/doc.pdf,/cc/y/e/zonk.xml") should be (true)
     subject.isPermitted("resource:write:/cc/a/d/doc.pdf,/cc/b/d/doc.pdf,/cc/y/e/zonk.xml") should be (false)
-
   }
 
   class TestRealm extends AuthorizingRealm {
-    setPermissionResolver(new PermissionResolver)
+    setPermissionResolver(new ResourcePermissionResolver)
     def account = {
       val acc = new SimpleAccount("test", "test", "test")
       acc.setRoles(Set("manager", "developer"))

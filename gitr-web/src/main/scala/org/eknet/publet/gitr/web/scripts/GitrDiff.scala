@@ -6,7 +6,8 @@ import java.io.ByteArrayOutputStream
 import org.eknet.publet.vfs.{ContentType, Content}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.util.PubletWebContext
-import org.eknet.publet.auth.repository.GitAction
+import org.eknet.publet.gitr.auth.GitAction
+import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * Formats the diff in html code that is loaded from
@@ -19,7 +20,7 @@ class GitrDiff extends ScalaScript {
 
   def serve() = {
     getRepositoryFromParam flatMap ( repo => {
-      getRepositoryModelFromParam.map(Security.checkGitAction(GitAction.pull, _))
+      getRepositoryModelFromParam.map(GitRequestUtils.checkGitAction(GitAction.pull, _))
       getCommitFromRequest(repo) map ( commit => {
         val baos = new ByteArrayOutputStream()
         val df = new HtmlDiffFormatter(baos)

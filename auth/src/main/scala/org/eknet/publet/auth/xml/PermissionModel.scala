@@ -16,19 +16,9 @@
 
 package org.eknet.publet.auth.xml
 
-import collection.mutable
-import scala.xml.{Node, Elem}
-import org.eknet.publet.auth.Permission
-
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.05.12 19:20
  */
-case class PermissionModel(groups: Set[String], perms: Set[String]) {
-
-  def toPermissions: Map[String, Set[Permission]] = {
-    val tuples = for (g <- groups) yield g -> perms.map(Permission(_))
-    tuples.toMap
-  }
-}
+case class PermissionModel(groups: Set[String], perms: Set[String])
 

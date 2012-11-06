@@ -26,7 +26,7 @@ import org.apache.shiro.authc.credential.SimpleCredentialsMatcher
 import com.google.common.eventbus.EventBus
 import scala.Some
 import org.eknet.publet.auth.user.User
-import org.apache.shiro.authz.permission.WildcardPermission
+import org.apache.shiro.authz.permission.{PermissionResolver, WildcardPermission}
 import com.google.inject.{Singleton, Inject}
 
 /**
@@ -34,7 +34,7 @@ import com.google.inject.{Singleton, Inject}
  * @since 22.04.12 08:14
  */
 @Singleton
-class UsersRealm @Inject() (val db: DefaultAuthStore, bus: EventBus) extends AuthorizingRealm {
+class UsersRealm @Inject() (val db: DefaultAuthStore, resolver:PermissionResolver, bus: EventBus) extends AuthorizingRealm {
 
   setCredentialsMatcher(new CompositeCredentialsMatcher(List(
     new DynamicHashCredentialsMatcher,
@@ -42,7 +42,7 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, bus: EventBus) extends Aut
     new SimpleCredentialsMatcher
   )))
 
-  setPermissionResolver(new PermissionResolver)
+  setPermissionResolver(resolver)
 
   override def supports(token: AuthenticationToken) = {
     token.isInstanceOf[DigestAuthenticationToken] || token.isInstanceOf[UsernamePasswordToken]
@@ -71,19 +71,10 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, bus: EventBus) extends Aut
   class PolicyAuthInfo(user: User) extends AuthorizationInfo {
 
     private def buildPolicy() = {
-      import org.eknet.publet.auth.repository.GitAction._
-      // get all permission strings.
       val permset = collection.mutable.Set[String]()
-      for (rm <- db.allRepositories if (rm.owner == user.login))
-        permset += Permission.forGit(Permission.all, Set(rm.name)).toString
-
       val dbperms = db.getPermissions(user.login)
       dbperms.foreach(p =>  permset += p)
 
-      for (perm <- dbperms if (perm.startsWith(Permission.gitDomain+Permission.partDivider))) {
-        if (perm.substring(4).contains(push.toString))
-          permset += perm.replace(push.toString, pull.toString)
-      }
       Policy(Set(), permset.toSet, db.getGroups(user.login))
     }
 

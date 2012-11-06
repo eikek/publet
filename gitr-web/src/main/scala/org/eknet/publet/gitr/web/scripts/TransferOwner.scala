@@ -1,23 +1,26 @@
 package org.eknet.publet.gitr.web.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.auth.repository.{RepositoryModel, GitAction}
-import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.gitr.RepositoryName
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, RepositoryModel, GitAction}
+import org.eknet.gitr.{GitrMan, RepositoryName}
+import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.06.12 21:19
  */
 class TransferOwner extends ScalaScript {
+
+  def repoStore = PubletWeb.instance[DefaultRepositoryStore]
+
   def serve() = {
     import ScalaScript._
     import GitrControl._
 
     getRepositoryFromParam flatMap (repo => {
       val model = getRepositoryModelFromParam.get
-      Security.checkGitAction(GitAction.gitadmin, model)
+      GitRequestUtils.checkGitAction(GitAction.edit, model)
 
       PubletWebContext.param("owner") flatMap (newOwner => {
 
@@ -27,13 +30,13 @@ class TransferOwner extends ScalaScript {
             // need to move possibly
             val newsegs = repo.name.segments.map(n => if (n == model.owner) newOwner else n)
             val newName = RepositoryName(newsegs)
-            PubletWeb.gitr.rename(repo.name, newName)
+            PubletWeb.instance[GitrMan].rename(repo.name, newName)
 
             // need to change owner permission
-            PubletWeb.authManager.removeRepository(model.name)
+            repoStore.removeRepository(model.name)
 
-            val newmodel = RepositoryModel(newName.strip.name, model.tag, newOwner)
-            PubletWeb.authManager.updateRepository(newmodel)
+            val newmodel = RepositoryModel(newName, model.tag, newOwner)
+            PubletWeb.instance[DefaultRepositoryStore].updateRepository(newmodel)
 
             makeJson(Map("success" -> true,
               "message" -> "Successfully moved ownership!",

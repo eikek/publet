@@ -23,7 +23,7 @@ import org.eknet.publet.web._
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:35
  */
-object PubletWebContext extends RequestAttr with RequestParams with RequestUrl with RepositoryNameResolver {
+object PubletWebContext extends RequestAttr with RequestParams with RequestUrl {
 
   private case class Cycle(req: HttpServletRequest, res: HttpServletResponse)
   private val threadCycle = new ThreadLocal[Cycle]

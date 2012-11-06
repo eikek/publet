@@ -32,7 +32,7 @@ final case class ResourcePermission(str: String) extends WildcardPermission(str)
 
   import collection.JavaConversions._
 
-  if (!str.startsWith("resource:"))
+  if (!ResourcePermission.isValid(str))
     sys.error("Not a resource permission: "+ str)
 
   def actions = getParts.drop(1).headOption.map(_.toSet)
@@ -64,11 +64,23 @@ final case class ResourcePermission(str: String) extends WildcardPermission(str)
    */
   private def patternsImplies(patterns: List[String], others: List[String]):Boolean = {
     (patterns, others) match {
-      case (p::ps, o::os) => if (Glob(p).implies(Glob(o))) true
+      case (p::ps, o::os) => if (Glob(p).matches(o)) true
         else patternsImplies(patterns, os) || patternsImplies(ps, others)
 
       case _ => false
     }
   }
+
+}
+
+object ResourcePermission {
+
+  /**
+   * The domain "resource"
+   */
+  val domain = "resource"
+
+
+  def isValid(str: String) = str.startsWith(domain+PermissionBuilder.partDivider)
 
 }

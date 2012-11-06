@@ -12,7 +12,7 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 class WebdavModule extends AbstractModule with PubletBinding with PubletModule {
 
   def configure() {
-    binder.bindRequestHandler.toType[WebdavHandlerFactory]
+    bindRequestHandler.add[WebdavHandlerFactory]
   }
 
 }

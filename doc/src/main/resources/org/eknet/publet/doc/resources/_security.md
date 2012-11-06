@@ -1,16 +1,202 @@
 # Security
 
-Publet implements a simple security strategy using [Apache Shiro](http://shiro.apache.org).
+Publet implements a security strategy using [Apache Shiro](http://shiro.apache.org).
 
-Resources may be maintained in a git repository. A repository can be _open_ or _closed_. An
-open repository can be cloned by anybody, while closed repositories need explicit _pull_
-permission for cloning and any other read access. Write access will always be protected by
-checking an explicit _push_ permission.
+Publet is a web application that serves resources from a configured content tree. The content
+tree is a collection of _partitions_. A partition is a special container that is said to "own"
+(in a security sense) its child resources and can introduce its own security scheme. That is
+necessary, since it might be accessed by other protocols that publet is not aware of.
 
-Furthermore, restriction on resources can be defined by URL patterns. These
-permissions are checked on each request to the resource. Obviously it wouldn't
-make sense to restrict resources in an open repository, as it can be cloned by
-anybody. Thus, to make use of URL restrictions, use a closed repositories.
+The publet server, of course, does not need to honor partition access conditions. It could very
+well decide to still serve this resource, but not the other. In particular, if a partition denies
+access to the current subject, it is assumed that the subject is not able to access *any* resource
+in that partition. That means, if the publet server decides to still deliver the resource, it can be
+sure that this is the only way for the current subject. On the other hand, if a partition grants
+access, then the current subject can access *all* resources in this partition in some other way. In
+this case, it makes no sense to obey any other restrictions. This idea is the basis of publet's
+`resource` permissions.
+
+## Git Partition
+
+Publet comes with one such concrete partition: the git partition. It is a container of resources
+that is backed by a git repository. The git repository can also be accessed by the git command
+line client (or any other git client, of course). The git servlet provided by JGit is taking care
+of those requests.
+
+The security scheme for git repositories is quite simple. A git permission is marked by the `git`
+domain and can be granted to repositories. Repositories are identified by its names (without the .git
+extension). The following actions are known to publet:
+
+* push, pull -- means read and write access to a repository
+* admin -- for editing repository attributes
+* create, createRoot -- for creating new repositories, either below the own username only or at a place of choice
+
+It is (currently) not possible to define finer grained privileges, like by branch.
+
+The permissions are checked against a repository model, which is defined in some database. A
+repository model provides the following information
+
+* name -- the repository name, used for identifying
+* tag -- can be _open_ or _closed_
+* owner -- the username of the owner of this repository
+
+The repository tag describes whether this is an open or closed repository. Open repositories can be
+read by everyone, no matter if authenticated or not. Closed repositories always require either pull
+or push permissions.
+
+The repository owner is always granted all repository permissions implicitely (which are pull, push and admin).
+
+## Resource Permissions
+
+Resource permissions apply to the publet web server and they can be used to overrule the partition
+security schemes as described above.
+
+A resource permission is marked by the `resource` domain and can be granted for a specific set
+of resources identified by its paths in the content tree. The resource set is defined conveniently
+by using globs, `/main/priv/**` for example means "any resource below `/main/priv/`". The possible
+actions are `read` and `write`, while `write` includes the deletion of existing and creation of
+new resources.
+
+Resource permissions can be used to widen the access scope implied by a partition.
+
+
+
+
+
+When publet
+is requested to serve a resource, it finds the partition the resource belongs to, and can asks
+whether it is allowed to read/write the resource.
+
+
+
+
+## Repositories
+
+A git repository can have one of two states: _open_ or _closed_. For open repositories
+read access will not be checked, but write access is always checked. For closed repositories
+one needs explicit permission for reading and writing. That refers to the repository as a
+whole -- it affects all resources in it. It is not possible to authorize git requests on branches
+or other finer granularity. That implies, that any resource from an _open_ repository can be
+accessed by everybody. The following actions are defined:
+
+* `pull` -- means read access, checked only for closed repositories, when cloning or pulling
+* `push` -- means write access, checked on push
+* `admin` -- for editing open/closed state and other repository attributes
+
+The next two are related to creating new repositories:
+
+* `create` -- for creating a new personal git repository. The repository is created inside the namespace of the current user.
+* `createRoot` -- for creating new git repositories in the root of the repository tree.
+
+Furthermore, a git repository can have an owner. This owner always has pull, push and admin
+privileges granted implicitely.
+
+When accessing resources over the web, more granular access checks are possible. Restricting read access
+makes obviously only sense for resources coming from closed git repositories or non git repositories. Usually, you
+might want to have a closed repository, but open up certain paths to the public.
+
+Permissions for the resource domain can be used to grant `read` and `write` privileges for a set of
+resources. The set is described via a glob pattern - like `/aa/bb/**` or `/aa/*/*.pdf`. This allows
+to grant certain users read/write privileges to a chosen part of a repository.
+
+Finally, to open up a set of resources to the public, it is possible to define two sets of resource
+sets: one for restricted and one for anonymous access. On each request (to a non-open repository),
+the url is first matched against the defined set of restricted resource patterns. If no match is found,
+the url is matched against the defined anonymous set of patterns. If a match is found, the request
+is served, otherwise the read or write action is checked against the current subject.
+
+Examples
+
+
+1. allow sub paths
+<repository name="contentroot" tag="closed"/>    - close the repository
+<resources>
+  <open>/main/public/**</open>                   - open up everything below /main/public/. access to other
+</resources>                                       resources is checked by default.
+
+2. explicit deny
+<repository name="contentroot" tag="closed"/>    - close the repository
+<resources>
+  <open>/main/**</open>                          - open up everything below /main/, but
+  <restrict>/main/members/**</restrict>          - restrict access to everything below /main/members/
+</resources>
+<grant>                                          - all "developers" are able to access /main/mebers/**
+  <perm>resource:read:/main/members/**</perm>
+  <to>developers</to>
+</grant>
+
+3. selective
+<repository name="contentroot" tag="closed"/>    - close the repository
+<resources>
+  <open>/main/**</open>
+  <restrict>/main/projectx/**</restrict>
+  <restrict by="chefaction">                     - access to everything below /main/projectx/chefsonly
+    /main/projectx/chefsonly/**                    is restricted by checking a resource permission using the
+  </restrict>                                      given part "checkaction".
+</resources>
+<grant>                                          - all "developers" are able to access /main/projectx/**
+  <perm>resource:read:/main/projectx/**</perm>
+  <to>developers</to>
+</grant>
+<grant>                                          - all "managers" are also able to access /main/projectx/chefsonly/**
+  <perm>resource:read:/main/projectx/**</perm>
+  <perm>resource:chefaction:/main/projectx/chefsonly/**</perm>
+  <to>managers</to>
+</grant>
+
+4. more selective
+<repository name="contentroot" tag="closed"/>    - close the repository
+<resources>
+  <open>/main/**</open>
+  <restrict>/main/projectx/**</restrict>
+  <restrict by="chefaction" on="write">          - protect write access by checking "chefaction" againts the url
+    /main/projectx/chefsonly/**                    read access is not affected by this rule
+  </restrict>
+</resources>
+<grant>                                          - all "developers" are able to read and write /main/projectx/**
+  <perm>resource:read,write:/main/projectx/**</perm>
+  <to>developers</to>
+</grant>
+<grant>                                          - all "managers" are able to access /main/projectx/chefsonly/**
+  <perm>resource:chefaction:/main/projectx/chefsonly/**</perm>
+  <perm>resource:read,write:/main/projectx/**</perm>
+  <to>managers</to>
+</grant>
+
+
+The order of <restrict> and <open> definitions does not matter. If a resource matches one of the resticted
+patterns, the corresponding permission is checked. It is also checked if there is no match in the set of
+open patterns. Basically on each access, the git permission is checked first (if applicable) and if that
+returns a positive response, access is granted. Only if the "global" access to the git repository is denied,
+the resource permissions are used to "overwrite" the restrictions.
+
+## What happens
+
+when a requests hits the server.
+
+GET: /main/projectx/index.html
+
+1. if (is git repo && (is open || check pull) SERVE else
+2. rset = restriction patterns for read
+   for r <- rset check("resource"+ action(r)+":"+url)
+3. if (!rset.isEmpty) SERVE, else:
+     aset = open patterns
+     if (url in aset) SERVE else
+4. check("resource:read:"+url)
+
+
+PUT: /main/projectx/image.png
+
+1. if (is git repo && has push) SERVE, else
+2. rset = restriction patterns for write
+   for r <- rset check("resource"+ action(r)+":"+url)
+   if (!rset.isEmpty) SERVE, else
+3. check("resource:write:"+url)
+
+The first line on both examples refer to the git repository. It is always asked first, because
+it controls all its contents. That means, if the parent of all resources grants access, that it
+must be assumed that there may be another way to retrieve the content (which is true for git
+repositories). Thus it makes no sense to have a greater restriction now.
 
 ## Permissions
 
@@ -97,6 +283,18 @@ The permissions `createown` and `createroot` allow to create a git repository, e
 as a root repository.
 
 
+---
+
+Resources may be maintained in a git repository. A repository can be _open_ or _closed_. An
+open repository can be cloned by anybody, while closed repositories need explicit _pull_
+permission for cloning and any other read access. Write access will always be protected by
+checking an explicit _push_ permission.
+
+Furthermore, restriction on resources can be defined by URL patterns. These
+permissions are checked on each request to the resource. Obviously it wouldn't
+make sense to restrict resources in an open repository, as it can be cloned by
+anybody. Thus, to make use of URL restrictions, use a closed repositories.
+
 These rules are specified in one xml file on a specific location
 
     /.allIncludes/config/permissions.xml
@@ -147,6 +345,10 @@ Here is an example `permissions.xml` file explained:
         </grant>
         <grant>
           <to>coders</to>
+          <perm>resource:read:/**</perm>
+        </grant>
+        <grant>
+          <to>anonymous</to>
           <perm>resource:read:/**</perm>
         </grant>
       </permissions>

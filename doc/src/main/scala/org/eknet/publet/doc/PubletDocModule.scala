@@ -23,8 +23,8 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.10.12 19:17
  */
-class PubletDocModule extends AbstractModule with PubletBinding with PubletModule {
+class PubletDocModule extends AbstractModule with PubletModule with PubletBinding {
   def configure() {
-    binder.bindEagerly[PubletDocExtension]()
+    bind[PubletDocExtension].asEagerSingleton()
   }
 }

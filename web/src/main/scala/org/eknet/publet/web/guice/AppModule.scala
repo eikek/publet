@@ -29,9 +29,6 @@ import org.eknet.publet.vfs.{Container, ResourceName, Path}
 import org.eknet.publet.web.{PartitionMounter, Settings, Config}
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
-import org.eknet.publet.partition.git.{GitPartManImpl, GitPartMan}
-import org.eknet.publet.gitr.{GitrMan, GitrManImpl}
-import org.eknet.publet.web.shiro.AuthManager
 import javax.servlet.ServletContext
 import com.google.inject.servlet.ServletModule
 import com.google.inject.name.Named
@@ -44,13 +41,13 @@ import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import org.eknet.publet.web.util.{PubletWeb, StringMap}
 import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
-import org.eknet.publet.auth.DefaultAuthStore
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.10.12 23:19
  */
-class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging {
+class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging with SquireModule {
 
   private val webImports = List(
     "org.eknet.publet.web.Config",
@@ -61,7 +58,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     "org.eknet.publet.web.util.Key",
     "org.eknet.publet.web.shiro.Security"
   )
-  private val contentRootRepo = Path("contentroot")
+
 
   /**
    * ServletContext Init-parameter.
@@ -77,12 +74,13 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     val eventBus = new EventBus("Publet Global EventBus")
     val config = new Config(servletContext.getContextPath, eventBus)
 
-    binder.set[ServletContext]
+    bind[ServletContext]
       .annotatedWith(Names.servletContext)
       .toInstance(servletContext)
 
-    binder.set[Config].toInstance(config)
-    binder.set[EventBus].toInstance(eventBus)
+    bind[Config].toInstance(config)
+    bind[EventBus].toInstance(eventBus)
+
     bindListener(Matchers.any(), new TypeListener {
       def hear[I](`type`: TypeLiteral[I], encounter: TypeEncounter[I]) {
         encounter.register(new InjectionListener[I] {
@@ -93,36 +91,26 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       }
     })
     eventBus.register(PubletWeb)
-    binder.set[StringMap].annotatedWith(Names.settings).toType[Settings] in Scopes.SINGLETON
+    bind[StringMap].annotatedWith(Names.settings).to[Settings] in Scopes.SINGLETON
     install(PubletShiroModule)
 
     val moduleManager = new ModuleManager(config)
-    binder.set[ModuleManager].toInstance(moduleManager)
+    bind[ModuleManager].toInstance(moduleManager)
 
     moduleManager.modules foreach { m =>
       info("Installing module: %s".format(m.getClass.getName))
       install(m)
     }
 
-    binder.bindEagerly[DefaultLayout]()
-    binder.bindEagerly[PartitionMounter]()
 
-    binder.bindRequestHandler.toType[GitHandlerFactory]
-    binder.bindRequestHandler.toType[PubletHandlerFactory]
-    binder.bindRequestHandler.toType[AssetsHandlerFactory]
+    bind[DefaultLayout].asEagerSingleton()
+    bind[PartitionMounter].asEagerSingleton()
+
+    bindRequestHandler.add[PubletHandlerFactory]
+    bindRequestHandler.add[AssetsHandlerFactory]
 
     filter("/*") through classOf[PubletMainFilter]
   }
-
-  @Provides@Singleton
-  def createGitrManager(config: Config): GitrMan = new GitrManImpl(config.repositories)
-
-  @Provides@Singleton
-  def createGitPartitionManager(gitr: GitrMan, bus: EventBus): GitPartMan = new GitPartManImpl(gitr, bus)
-
-  @Provides@Singleton@Named("contentroot")
-  def createMainPartition(gitr: GitPartMan): Container =
-    gitr.getOrCreate(contentRootRepo, org.eknet.publet.partition.git.Config(None))
 
   @Provides@Singleton
   def createPublet(@Named("contentroot") mainPartition: Container, config: Config) = {

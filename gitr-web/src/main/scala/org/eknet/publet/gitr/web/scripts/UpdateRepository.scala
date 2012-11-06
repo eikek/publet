@@ -3,9 +3,9 @@ package org.eknet.publet.gitr.web.scripts
 import org.eknet.publet.engine.scala.ScalaScript
 import ScalaScript._
 import GitrControl._
-import org.eknet.publet.auth.repository.{RepositoryModel, GitAction, RepositoryTag}
-import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, RepositoryModel, GitAction, RepositoryTag}
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,9 +15,10 @@ class UpdateRepository extends ScalaScript {
 
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
-      Security.checkGitAction(GitAction.gitadmin, rm)
+      GitRequestUtils.checkGitAction(GitAction.edit, rm)
       PubletWebContext.param("repoState") flatMap ( state => {
-        PubletWeb.authManager.updateRepository(RepositoryModel(rm.name, RepositoryTag.withName(state), rm.owner))
+        PubletWeb.instance[DefaultRepositoryStore]
+          .updateRepository(RepositoryModel(rm.name, RepositoryTag.withName(state), rm.owner))
         makeJson(Map("success"->true, "message"->"Repository successfully updated."))
       })
     }

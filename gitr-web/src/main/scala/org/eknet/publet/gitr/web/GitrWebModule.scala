@@ -25,6 +25,6 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
  */
 class GitrWebModule extends AbstractModule with PubletBinding with PubletModule {
   def configure() {
-    binder.bindEagerly[GitrWebExtension]()
+    bind[GitrWebExtension].asEagerSingleton()
   }
 }
