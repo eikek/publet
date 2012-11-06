@@ -18,7 +18,7 @@ package org.eknet.publet.auth
 
 import org.apache.shiro.authc.credential.CredentialsMatcher
 import org.apache.shiro.authc.{AuthenticationInfo, AuthenticationToken}
-import org.eknet.publet.auth.user.UserProperty
+import org.eknet.publet.auth.store.{DefaultAuthStore, UserProperty}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -26,7 +26,7 @@ import com.google.inject
 import inject.Injector
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names, InjectorHelper}
-import org.eknet.publet.auth.DefaultAuthStore
+import org.eknet.publet.auth.store.DefaultAuthStore
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

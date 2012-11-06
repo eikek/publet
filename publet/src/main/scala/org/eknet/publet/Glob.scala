@@ -82,6 +82,8 @@ final case class Glob(pattern: String) extends Ordered[Glob] {
 
 object Glob {
 
+  implicit def stringToGlob(str: String) = Glob(str)
+
   private abstract class Token(val name: String) {
     def :: (tok: Token): List[Token]
     def reverse: Token

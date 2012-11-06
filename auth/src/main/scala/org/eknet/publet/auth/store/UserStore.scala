@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth.user
+package org.eknet.publet.auth.store
 
 import org.eknet.publet.auth.Algorithm
 import org.eknet.publet.Glob
@@ -53,8 +53,4 @@ trait UserStore {
   def dropGroup(login: String, group: String)
   def getGroups(login: String): Set[String]
 
-  def anonPatterns: List[Glob]
-  def addAnonPattern(pattern: Glob)
-  def removeAnonPattern(pattern: Glob)
-  def containsAnonPattern(pattern: Glob): Boolean
 }

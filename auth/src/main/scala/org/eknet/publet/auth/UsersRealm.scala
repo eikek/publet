@@ -25,7 +25,7 @@ import org.apache.shiro.{authz, SecurityUtils}
 import org.apache.shiro.authc.credential.SimpleCredentialsMatcher
 import com.google.common.eventbus.EventBus
 import scala.Some
-import org.eknet.publet.auth.user.User
+import org.eknet.publet.auth.store.{DefaultAuthStore, User}
 import org.apache.shiro.authz.permission.{PermissionResolver, WildcardPermission}
 import com.google.inject.{Singleton, Inject}
 
@@ -72,7 +72,7 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, resolver:PermissionResolve
 
     private def buildPolicy() = {
       val permset = collection.mutable.Set[String]()
-      val dbperms = db.getPermissions(user.login)
+      val dbperms = db.getUserPermissions(user)
       dbperms.foreach(p =>  permset += p)
 
       Policy(Set(), permset.toSet, db.getGroups(user.login))

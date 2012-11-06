@@ -26,5 +26,7 @@ object ResourceAction extends Enumeration {
   val write = Action("write")
   val all = Action("*")
 
+  def forName(name: String): Action = withName(name.toLowerCase).asInstanceOf[Action]
+
   case class Action(name: String) extends Val(name)
 }

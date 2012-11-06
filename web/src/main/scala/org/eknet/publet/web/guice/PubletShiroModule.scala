@@ -20,26 +20,21 @@ import com.google.inject._
 import name.Named
 import org.eknet.publet.web.shiro.AuthListener
 import org.apache.shiro.realm.Realm
-import org.apache.shiro.cache.{MemoryConstrainedCacheManager, CacheManager}
 import org.apache.shiro.web.mgt.{WebSecurityManager, DefaultWebSecurityManager}
 import com.google.inject.binder.AnnotatedBindingBuilder
 import java.util
 import org.apache.shiro.web.filter.mgt.{FilterChainResolver, PathMatchingFilterChainResolver}
 import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
-import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.Config
 import javax.servlet.ServletContext
 import org.apache.shiro.web.env.WebEnvironment
 import org.eknet.publet.web.util.StringMap
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
-import org.apache.shiro.authc.credential.PasswordService
-import org.apache.shiro.crypto.hash._
 import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.AbstractAuthenticator
-import org.eknet.publet.auth.{DefaultAuthStore, UsersRealm, DefaultPasswordServiceProvider, PasswordServiceProvider}
-import org.eknet.publet.auth.user.UserStore
-import org.eknet.publet.auth.xml.XmlDatabase
+import org.eknet.publet.auth.store.{DefaultAuthStore, UserStore}
+import org.apache.shiro.cache.CacheManager
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]

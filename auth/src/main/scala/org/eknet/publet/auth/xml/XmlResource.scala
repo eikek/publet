@@ -20,7 +20,7 @@ import org.eknet.publet.vfs.{Path, ChangeInfo, Writeable, ContentResource}
 import grizzled.slf4j.Logging
 import scala.xml.{Elem, PrettyPrinter, XML}
 import java.io.ByteArrayInputStream
-import org.eknet.publet.auth.user.{User, UserProperty}
+import org.eknet.publet.auth.store.{User, UserProperty}
 import org.eknet.publet.Publet
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.vfs.events.ContentWrittenEvent
@@ -58,7 +58,6 @@ abstract class XmlResource(source: ContentResource) extends Logging {
   def write(currentUser: Option[User], message: String) {
     source match {
       case ws: Writeable => {
-        load()
         val bin = new ByteArrayInputStream(prettyPrinter.format(toXml).getBytes("UTF-8"))
         val user = currentUser.map { u =>
           new ChangeInfo(u.get(UserProperty.fullName), u.get(UserProperty.email), message) }

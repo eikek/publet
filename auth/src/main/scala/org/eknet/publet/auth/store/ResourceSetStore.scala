@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth.user
+package org.eknet.publet.auth.store
+
+import org.eknet.publet.Glob
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 10.05.12 14:40
+ * @since 06.11.12 21:20
  */
-object UserProperty extends Enumeration {
+trait ResourceSetStore {
 
-  val fullName, email, enabled, password, digest, algorithm = Value
+  def restrictedResources: Set[ResourcePatternDef]
+  def updateRestrictedResource(rdef: ResourcePatternDef): Option[ResourcePatternDef]
+  def removeRestrictedResource(pattern: Glob): Option[ResourcePatternDef]
 
-  def exists(name: String): Boolean = values.exists(_.toString == name)
+  def anonPatterns: List[Glob]
+  def addAnonPattern(pattern: Glob)
+  def removeAnonPattern(pattern: Glob)
 }

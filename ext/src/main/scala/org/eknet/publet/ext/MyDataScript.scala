@@ -18,7 +18,7 @@ package org.eknet.publet.ext
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.user.{User, UserProperty}
+import org.eknet.publet.auth.store.{User, UserProperty}
 import org.eknet.publet.vfs.Content
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.Algorithm

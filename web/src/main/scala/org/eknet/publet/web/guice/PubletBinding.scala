@@ -19,7 +19,7 @@ package org.eknet.publet.web.guice
 import org.apache.shiro.realm.Realm
 import org.eknet.publet.web.WebExtension
 import org.eknet.publet.web.req.RequestHandlerFactory
-import org.eknet.publet.auth.user.UserStore
+import org.eknet.publet.auth.store.UserStore
 import org.eknet.guice.squire.SquireModule
 
 /**

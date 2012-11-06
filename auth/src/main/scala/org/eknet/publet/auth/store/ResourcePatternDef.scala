@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.store
 
-import org.apache.shiro.authc.AuthenticationInfo
-import org.apache.shiro.subject.SimplePrincipalCollection
-import org.eknet.publet.auth.store.{UserProperty, User}
+import org.eknet.publet.Glob
+import org.eknet.publet.auth.ResourceAction
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 21.10.12 23:40
+ * @since 06.11.12 21:21
  */
-final case class UserAuthInfo(user: User) extends AuthenticationInfo {
-  def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
-  def getCredentials = user.get(UserProperty.password).orNull
-  def algorithm: Option[String] = user.get(UserProperty.algorithm)
+case class ResourcePatternDef(pattern: Glob, by:String, on: ResourceAction.Action) {
+
+}
+
+object ResourcePatternDef {
+
+  def apply(pattern: Glob): ResourcePatternDef = ResourcePatternDef(pattern, "", ResourceAction.all)
 }

@@ -35,7 +35,13 @@
     </grant>
   </permissions>
 
-  <anonymous>
-    <pattern>/public/**</pattern>
-  </anonymous>
+  <resources>
+    <open>/public/**</open>
+    <restricted>
+        /dev/aa/project/**
+    </restricted>
+    <restricted on="write" by="secperm">
+        /dev/bb/**
+    </restricted>
+  </resources>
 </publetAuth>

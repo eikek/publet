@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth.user
+package org.eknet.publet.auth.store
 
 import UserProperty._
 import org.eknet.publet.auth.{DigestGenerator, Algorithm}

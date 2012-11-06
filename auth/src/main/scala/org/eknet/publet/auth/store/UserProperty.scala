@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth.user
+package org.eknet.publet.auth.store
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 06.11.12 00:09
+ * @since 10.05.12 14:40
  */
-trait PermissionStore {
+object UserProperty extends Enumeration {
 
-  def addPermission(login: String, perm: String)
-  def dropPermission(login: String, perm: String)
-  def getPermissions(login: String): Set[String]
+  val fullName, email, enabled, password, digest, algorithm = Value
 
+  def exists(name: String): Boolean = values.exists(_.toString == name)
 }

@@ -21,7 +21,7 @@ import grizzled.slf4j.Logging
 import org.apache.shiro.authz.UnauthenticatedException
 import org.apache.shiro.SecurityUtils
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
-import org.eknet.publet.auth.user.UserProperty
+import org.eknet.publet.auth.store.UserProperty
 import org.eknet.publet.vfs.ChangeInfo
 import org.eknet.publet.auth.PermissionBuilder
 

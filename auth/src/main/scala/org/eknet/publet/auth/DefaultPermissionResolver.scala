@@ -25,7 +25,6 @@ import org.apache.shiro.authz.Permission
  * @since 02.11.12 23:04
  */
 class DefaultPermissionResolver(resolver: util.Set[PermissionResolver]) extends WildcardPermissionResolver {
-  import PermissionBuilder._
   import collection.JavaConversions._
 
   override def resolvePermission(permissionString: String) = {

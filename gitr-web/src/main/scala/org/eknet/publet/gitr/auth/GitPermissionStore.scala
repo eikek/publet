@@ -16,7 +16,7 @@
 
 package org.eknet.publet.gitr.auth
 
-import org.eknet.publet.auth.user.{PermissionStore, UserStore}
+import org.eknet.publet.auth.store.{User, PermissionStore, UserStore}
 import org.eknet.publet.auth.PermissionBuilder._
 import org.eknet.publet.auth.PermissionBuilder
 
@@ -27,15 +27,17 @@ import org.eknet.publet.auth.PermissionBuilder
 class GitPermissionStore(db: RepositoryStore) extends PermissionStore with GitPermissionBuilder {
   import GitAction._
 
-  def getPermissions(login: String) = {
+  def getPermissions(groups: String*) = Set[String]()
+
+  def getUserPermissions(user: User) = {
     val permset = collection.mutable.Set[String]()
-    for (rm <- db.allRepositories if (rm.owner == login)) {
+    for (rm <- db.allRepositories if (rm.owner == user.login)) {
       permset += git.action(pull,push,edit) on rm.name
     }
     permset.toSet
   }
 
-  def addPermission(login: String, perm: String) {}
+  def addPermission(groups: String, perm: String) {}
 
-  def dropPermission(login: String, perm: String) {}
+  def dropPermission(groups: String, perm: String) {}
 }

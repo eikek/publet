@@ -21,19 +21,19 @@ import org.eknet.publet.vfs._
 import org.eknet.publet.auth._
 import grizzled.slf4j.Logging
 import org.eknet.publet.{Publet, Glob}
-import org.eknet.publet.auth.user.{UserStore, User}
+import org.eknet.publet.auth.store._
 import com.google.inject.{Inject, Singleton}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.vfs.events.ContentWrittenEvent
+import org.eknet.publet.vfs.events.ContentWrittenEvent
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.05.12 21:57
  */
-class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordServiceProvider, realmNameFun: Option[() => String])
-    extends UserStore with Logging {
+class XmlDatabase(source: ContentResource) extends UserStore with PermissionStore with ResourceSetStore with Logging {
 
-  // TODO implement write
   val data = new XmlData(source)
 
   @Subscribe
@@ -56,11 +56,14 @@ class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordService
 
   def removeUser(login: String) = null
 
-  def addPermission(login: String, perm: String) {}
+  def addPermission(group: String, perm: String) {}
 
-  def dropPermission(login: String, perm: String) {}
+  def dropPermission(group: String, perm: String) {}
 
-  def getPermissions(login: String) = getGroups(login).flatMap(g => data.permissions.get(g).getOrElse(Set[String]()))
+  def getUserPermissions(user: User) = Set[String]()
+
+  def getPermissions(groups: String*) =
+    groups.flatMap(g => data.permissions.get(g).getOrElse(Set[String]())).toSet
 
   def addGroup(login: String, group: String) {}
 
@@ -75,4 +78,10 @@ class XmlDatabase(source: ContentResource, passwServiceProvider: PasswordService
   def removeAnonPattern(pattern: Glob) {}
 
   def containsAnonPattern(pattern: Glob) = data.anonPatterns.contains(pattern.pattern)
+
+  def restrictedResources = null
+
+  def updateRestrictedResource(rdef: ResourcePatternDef) = null
+
+  def removeRestrictedResource(pattern: Glob) = null
 }

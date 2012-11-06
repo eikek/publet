@@ -6,7 +6,7 @@ import java.text.DateFormat
 import java.util
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
-import org.eknet.publet.auth.user.UserProperty
+import org.eknet.publet.auth.store.UserProperty
 import org.eknet.publet.gitr.partition.GitFile
 
 /**

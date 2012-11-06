@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.auth.store
 
 import com.google.inject.{Singleton, Inject}
 import java.util
-import org.eknet.publet.auth.user.{PermissionStore, UserProperty, User, UserStore}
-import org.eknet.publet.Glob
 import java.util.Locale
+import org.eknet.publet.Glob
+import org.eknet.publet.auth.{DigestGenerator, Algorithm, PasswordServiceProvider}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,8 +29,9 @@ import java.util.Locale
 @Singleton
 class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
                                   permStore: util.Set[PermissionStore],
+                                  resourceStore: util.Set[ResourceSetStore],
                                   passwordProvider: PasswordServiceProvider)
-      extends UserStore with PermissionStore {
+      extends UserStore with PermissionStore with ResourceSetStore {
 
   import collection.JavaConversions._
 
@@ -90,16 +91,19 @@ class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
     }
   }
 
-  def addPermission(login: String, perm: String) {
-    permStore.headOption map { store => store.addPermission(login, perm) }
+  def addPermission(group: String, perm: String) {
+    permStore.headOption map { store => store.addPermission(group, perm) }
   }
 
-  def dropPermission(login: String, perm: String) {
-    permStore.foreach(store => store.dropPermission(login, perm))
+  def dropPermission(group: String, perm: String) {
+    permStore.foreach(store => store.dropPermission(group, perm))
   }
 
-  def getPermissions(login: String) =
-    permStore.flatMap(store => store.getPermissions(login)).toSet
+  def getPermissions(group: String*) =
+    permStore.flatMap(store => store.getPermissions(group: _*)).toSet
+
+  def getUserPermissions(user: User) =
+    getGroups(user.login).flatMap(group => getPermissions(group)) ++ permStore.flatMap(_.getUserPermissions(user))
 
   def addGroup(login: String, group: String) {
     findUserStore(login) map { store => store.addGroup(login, group) }
@@ -112,15 +116,34 @@ class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
   def getGroups(login: String) =
     findUserStore(login) map { store => store.getGroups(login) } getOrElse(Set())
 
-  def anonPatterns = userStore.toList.flatMap(store => store.anonPatterns)
+  def anonPatterns = resourceStore.toList.flatMap(store => store.anonPatterns)
 
   def addAnonPattern(pattern: Glob) {
-    userStore.headOption.map(store => store.addAnonPattern(pattern))
+    resourceStore.headOption.map(store => store.addAnonPattern(pattern))
   }
 
   def removeAnonPattern(pattern: Glob) {
-    userStore.find(store => store.containsAnonPattern(pattern)).map(_.removeAnonPattern(pattern))
+    resourceStore.map(_.removeAnonPattern(pattern))
   }
 
-  def containsAnonPattern(pattern: Glob) = userStore.foldLeft(false)((b, store) => if (b) true else store.containsAnonPattern(pattern))
+  def restrictedResources = resourceStore.flatMap(store => store.restrictedResources).toSet
+
+  def updateRestrictedResource(rdef: ResourcePatternDef) = {
+    resourceStore.find(store => store.restrictedResources.contains(rdef))
+      .orElse(resourceStore.headOption)
+      .flatMap(store => store.updateRestrictedResource(rdef))
+  }
+
+  def removeRestrictedResource(pattern: Glob) = {
+    def recursiveDo(list: List[ResourceSetStore]): Option[ResourcePatternDef] = {
+      list match {
+        case a::as => a.removeRestrictedResource(pattern) match {
+          case v@Some(r) => v
+          case None => recursiveDo(as)
+        }
+        case _ => None
+      }
+    }
+    recursiveDo(resourceStore.toList)
+  }
 }
