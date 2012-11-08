@@ -115,8 +115,8 @@ title: Gitr Repository Admin
     });
   });
 --- name:content pipeline:jade
-- import org.eknet.publet.auth.RepositoryModel
-- import org.eknet.publet.auth.RepositoryTag
+- import org.eknet.publet.gitr.auth.RepositoryModel
+- import org.eknet.publet.gitr.auth.RepositoryTag
 -@ val repositoryModel: Option[RepositoryModel] = None
 
 =include("_repoHead.jade")
@@ -136,7 +136,7 @@ hr/
       li
         h4 Back Links
       li
-        a(href={"?r="+repositoryModel.map(_.name +".git").getOrElse("")}) Sources
+        a(href={"?r="+repositoryModel.map(_.name.fullNameDotGit).getOrElse("")}) Sources
       li
         a(href=".") Repositories
   .span9

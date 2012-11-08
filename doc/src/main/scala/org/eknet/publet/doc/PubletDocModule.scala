@@ -18,14 +18,13 @@ package org.eknet.publet.doc
 
 import com.google.inject.AbstractModule
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.10.12 19:17
  */
-class PubletDocModule extends AbstractModule with PubletModule with PubletBinding {
-
-  override def binder() = super.binder()
+class PubletDocModule extends SquireModule with PubletModule with PubletBinding {
 
   def configure() {
     bind[PubletDocExtension].asEagerSingleton()

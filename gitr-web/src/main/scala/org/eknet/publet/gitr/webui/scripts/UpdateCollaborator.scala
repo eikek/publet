@@ -15,7 +15,7 @@ class UpdateCollaborator extends ScalaScript {
 
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
-      GitRequestUtils.checkGitAction(GitAction.edit, rm)
+      GitrControl.checkGitAction(GitAction.admin, rm)
       PubletWebContext.param("groupName") flatMap ( gn => {
         PubletWebContext.param("permissionName") flatMap (pm => {
           val authm = PubletWeb.authManager

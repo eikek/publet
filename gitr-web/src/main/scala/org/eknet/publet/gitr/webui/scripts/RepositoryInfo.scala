@@ -52,7 +52,7 @@ class RepositoryInfo(repo:GitrRepository, val model: RepositoryModel) extends Or
       "owned" -> (owner == Security.username),
       "tag" -> (model.tag.toString),
       "description" -> description,
-      "push" -> (GitRequestUtils.hasGitAction(GitAction.push, model))
+      "push" -> (GitrControl.hasGitAction(GitAction.push, model))
     )
   }
 

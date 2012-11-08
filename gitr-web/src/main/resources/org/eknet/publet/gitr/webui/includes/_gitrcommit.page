@@ -45,7 +45,7 @@ title: Gitr Web
     });
   });
 --- name:content pipeline:jade
-- import org.eknet.publet.gitr._
+- import org.eknet.gitr.PathModel
 - import java.text.DateFormat
 - import org.eclipse.jgit.revwalk.RevCommit
 -@ val commit: RevCommit = null

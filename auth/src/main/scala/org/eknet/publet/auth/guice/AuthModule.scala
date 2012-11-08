@@ -51,6 +51,8 @@ class AuthModule extends SquireModule {
     setOf[ResourceSetStore].add[XmlDatabase]
 
     setOf[AuthenticationListener].add[AuthListener].in(Scopes.SINGLETON)
+
+    bind[ResourcePermissionResolver].in(Scopes.SINGLETON)
   }
 
   @Singleton

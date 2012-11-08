@@ -18,7 +18,7 @@ package org.eknet.publet.gitr
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.{Config, RequestAttr, RequestUrl}
-import org.eknet.publet.gitr.auth.{GitPermissionBuilder, RepositoryModel, GitAction}
+import org.eknet.publet.gitr.auth.{RepositoryTag, GitPermissionBuilder, RepositoryModel, GitAction}
 import org.eknet.publet.web.shiro.Security
 
 /**
@@ -34,10 +34,18 @@ object GitRequestUtils extends GitPermissionBuilder {
 
   def gitMount(config: Config) = config("publet.gitMount").getOrElse("git")
 
+
   def checkGitAction(action: GitAction.Action, model: RepositoryModel) {
-    Security.checkPerm(git action(action) on model.name)
+    if (model.tag != RepositoryTag.open || action != GitAction.pull) {
+      Security.checkPerm(git action(action) on model.name)
+    }
   }
+
   def hasGitAction(action: GitAction.Action, model: RepositoryModel): Boolean = {
-    Security.hasPerm(git action(action) on model.name)
+    if (model.tag == RepositoryTag.open && action == GitAction.pull) {
+      true
+    } else {
+      Security.hasPerm(git action(action) on model.name)
+    }
   }
 }

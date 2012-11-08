@@ -32,3 +32,12 @@ trait ResourceSetStore {
   def addAnonPattern(pattern: Glob)
   def removeAnonPattern(pattern: Glob)
 }
+
+class ResourceSetStoreAdapter extends ResourceSetStore {
+  def restrictedResources = Set[ResourcePatternDef]()
+  def updateRestrictedResource(rdef: ResourcePatternDef) = None
+  def removeRestrictedResource(pattern: Glob) = None
+  def anonPatterns = List[Glob]()
+  def addAnonPattern(pattern: Glob) {}
+  def removeAnonPattern(pattern: Glob) {}
+}

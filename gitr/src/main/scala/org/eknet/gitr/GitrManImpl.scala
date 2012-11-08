@@ -34,18 +34,22 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
   }
   if (!root.isDirectory) sys.error("Not a directory: " + root)
 
-  private def repoFile(name: RepositoryName) = new File(root, name.segments.mkString(File.separator))
+  private def repoFile(name: RepositoryName) = new File(root, name.pathDotGit)
+  private def workTree(name: RepositoryName) = new File(root, name.path)
 
   def exists(name: RepositoryName) = repoFile(name).exists()
 
   def get(name: RepositoryName) = {
-    val file = repoFile(name)
+    val file = repoFile(name) match {
+      case f if (!f.exists()) => workTree(name)
+      case f => f
+    }
     if (!file.exists()) None
     else Some(GitrRepository(Git.open(file).getRepository, name))
   }
 
   def create(name: RepositoryName, bare: Boolean) = {
-    val file = repoFile(name)
+    val file = if (bare) repoFile(name) else workTree(name)
     if (file.exists()) sys.error("Repository '" + name + "' already exists")
     val repo = Git.init().setBare(bare).setDirectory(file).call().getRepository
     emit(GitrRepository(repo, name))
@@ -70,7 +74,7 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
     if (repo.isTandem) {
       val td = getTandem(name).get
       removeDir(repoFile(td.bare.name))
-      removeDir(repoFile(td.workTree.name))
+      removeDir(workTree(td.workTree.name))
     } else {
       removeDir(repoFile(name))
     }
@@ -100,7 +104,7 @@ class GitrManImpl(root: File) extends GitrMan with GitrManListenerSupport with G
 
   def clone(source: RepositoryName, target: RepositoryName, bare: Boolean) = {
     val repo = get(source).get
-    val file = repoFile(target)
+    val file = if (bare) repoFile(target) else workTree(target)
     if (file.exists()) sys.error("Repository '" + target + "' already exists")
     val cloned = Git.cloneRepository()
       .setBare(bare)

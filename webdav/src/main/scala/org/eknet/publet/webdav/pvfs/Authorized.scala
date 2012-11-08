@@ -42,7 +42,7 @@ trait Authorized extends Resource with Logging with DigestResource {
       Security.hasWritePermission(PubletWebContext.applicationPath)
     } else {
       trace("WebDAV: authorize read!")
-      Security.hasReadPermission(PubletWebContext.applicationUri)
+      Security.hasReadPermission(PubletWebContext.applicationPath)
     }
   }
 
@@ -65,7 +65,7 @@ trait Authorized extends Resource with Logging with DigestResource {
 
   private def findPrincipal = {
     val p = SecurityUtils.getSubject.getPrincipal
-    if (p == null && Security.hasReadPermission(PubletWebContext.applicationUri)) {
+    if (p == null && Security.hasReadPermission(PubletWebContext.applicationPath)) {
       "anonymous" //must return something in order to allow anonymous access
     } else {
       p
@@ -89,7 +89,7 @@ trait Authorized extends Resource with Logging with DigestResource {
       !Security.hasWritePermission(PubletWebContext.applicationPath)
     } else {
       trace("WebDAV: authorize read!")
-      !Security.hasReadPermission(PubletWebContext.applicationUri)
+      !Security.hasReadPermission(PubletWebContext.applicationPath)
     }
   }
 }

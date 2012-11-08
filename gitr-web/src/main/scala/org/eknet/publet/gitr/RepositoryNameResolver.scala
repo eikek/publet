@@ -64,7 +64,7 @@ trait RepositoryNameResolver {
     }
   })
 
-  def isGitRequest = applicationUri.startsWith("/"+Config("publet.gitMount").getOrElse("git")+"/")
+  def isGitRequest = applicationUri.startsWith("/"+GitRequestUtils.gitMount(Config.get)+"/")
 
   /**Returns the action of the current request regarding the git
    * repository. It is either `pull` or `push` and only refers

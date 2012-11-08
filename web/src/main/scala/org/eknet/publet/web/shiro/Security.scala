@@ -23,7 +23,7 @@ import org.apache.shiro.SecurityUtils
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.auth.store.UserProperty
 import org.eknet.publet.vfs.ChangeInfo
-import org.eknet.publet.auth.PermissionBuilder
+import org.eknet.publet.auth.{ResourcePermissionService, ResourceAction, PermissionBuilder}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -99,30 +99,21 @@ object Security extends Logging with PermissionBuilder {
     checkPerm(resource grant(action) on path.asString)
   }
 
+  def checkResourcePerm(action: ResourceAction.Action, path: Path) {
+    checkPerm(resource action(action) on path.asString)
+  }
+
   def hasPerm(perm: String): Boolean = {
     isAuthenticated && subject.isPermitted(perm)
   }
 
-  def hasPerm(action: String, path: Path): Boolean = {
+  def hasResourcePerm(action: String, path: Path): Boolean = {
     hasPerm(resource grant(action) on path.asString)
   }
 
-  /**
-   * Checks whether the current user has write permission to the
-   * resource at the specified path.
-   *
-   * If the path points to a resource in a git repository, this
-   * will check whether `push` permission to the repository is granted
-   * to the current user. If the resource is not inside a git repository
-   * a generated permission `write:[ppath]` is checked, where `ppath` is
-   * the `resourcePath` where each path delimiter `/` is replaced by a
-   * colon.
-   *
-   * @param resourcePath
-   */
+
   def hasWritePermission(resourcePath: Path): Boolean = {
-//    writePermissionCheck(resourcePath)(hasGitAction, hasPerm)
-    false
+    PubletWeb.instance[ResourcePermissionService].get.isWritePermitted(resourcePath)
   }
 
   /**
@@ -132,54 +123,12 @@ object Security extends Logging with PermissionBuilder {
    * @param resourcePath
    */
   def checkWritePermission(resourcePath: Path) {
-//    writePermissionCheck(resourcePath)(checkGitAction, checkPerm)
+    PubletWeb.instance[ResourcePermissionService].get.checkWrite(resourcePath)
   }
 
-//  private def writePermissionCheck[A](uri:Path)(gf:(GitAction.Action, RepositoryModel)=>A, rf:String=>A): A = {
-//    val gp = PubletWeb.getRepositoryModel(uri) map { model =>
-//      gf(GitAction.push, model)
-//    }
-//    gp getOrElse {
-//      val perm = resource grant("write") on uri.asString
-//      rf(perm)
-//    }
-//  }
 
-  /**
-   * Returns whether the current request can access the resource at
-   * the specified uri.
-   *
-   * The request is allowed, if the resource is explicitely marked
-   * with an `anon` permission. If it is marked with another permission,
-   * it checks the permission against the principal of the current request.
-   *
-   * If no permission is specified, it is checked whether the resource
-   * belongs to a git repository. If it is an open git repository, access
-   * is granted. Otherwise `pull` permission is checked.
-   *
-   * If the resource it not marked with an explicit permission and neither
-   * belongs to a git repository, it is considered an open resource and
-   * any request may access it.
-   *
-   * @param applicationUri
-   * @return
-   */
-  def hasReadPermission(applicationUri: String): Boolean = {
-//    lazy val repoModel = RepositoryNameResolver
-//      .getRepositoryName(Path(applicationUri), isGitRequest = false)
-//      .map(name => PubletWeb.authManager.getRepository(name))
-//
-//    lazy val hasPull = repoModel map { repoModel =>
-//      Security.hasGitAction(GitAction.pull, repoModel)
-//    }
-true
-    //TODO
-//    PubletWeb.authManager.getResourceConstraints(applicationUri).map(rc => {
-//      if (rc.perm.isAnon) true
-//      else Security.hasPerm(rc.perm.permString)
-//    }) getOrElse {
-//      hasPull getOrElse (true)
-//    }
+  def hasReadPermission(resourcePath: Path): Boolean = {
+    PubletWeb.instance[ResourcePermissionService].get.isReadPermitted(resourcePath)
   }
 
 }

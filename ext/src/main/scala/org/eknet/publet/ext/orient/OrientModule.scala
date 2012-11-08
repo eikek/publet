@@ -18,14 +18,13 @@ package org.eknet.publet.ext.orient
 
 import com.google.inject._
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.10.12 22:43
  */
-class OrientModule extends AbstractModule with PubletBinding with PubletModule {
-
-  override def binder() = super.binder()
+class OrientModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GraphDbProvider].to[DefaultGraphDbProvider] in Scopes.SINGLETON

@@ -26,13 +26,14 @@ import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web._
 import org.eknet.publet.Publet
 import org.apache.shiro.SecurityUtils
+import org.eknet.publet.auth.ResourcePermissionService
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 27.09.12 15:29
  */
 @Singleton
-class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], config: Config, settings: Settings, publet: Publet) extends RequestHandlerFactory {
+class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], config: Config, settings: Settings, publet: Publet, permService: ResourcePermissionService) extends RequestHandlerFactory {
 
   def getApplicableScore(req: HttpServletRequest) = DEFAULT_MATCH
 
@@ -49,26 +50,12 @@ class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], confi
     ))
 
   object PubletAuthzFilter extends AuthzFilter(redirectToLoginPage = true) with PageWriter {
-    override def checkResourceAccess(req: HttpServletRequest) {
-      //checks all resource permission
+    override def checkAccess(req: HttpServletRequest) {
       val method = Method.forName(req.getMethod)
       if (method.write)
-        SecurityUtils.getSubject.checkPermission("resource:write:"+req.applicationUri)
+        permService.checkWrite(req.applicationPath)
       else
-        SecurityUtils.getSubject.checkPermission("resource:read:"+req.applicationUri)
-      // TODO
-//      val constraints = PubletWeb.authManager.getResourceConstraints(PubletWebContext.applicationUri)
-//      constraints.filterNot(_.perm.isAnon)
-//        .foreach(rc => Security.checkPerm(rc.perm.permString))
-
-//      val gitAction = req.getGitAction.getOrElse(GitAction.pull)
-      //if given anon permission this is equally well as a git:pull permission
-//      if (!constraints.exists(_.perm.isAnon) || gitAction != GitAction.pull) {
-//        val repoModel = req.getRepositoryModel
-//        repoModel.foreach { repo =>
-//          Security.checkGitAction(gitAction, repo)
-//        }
-//      }
+        permService.checkRead(req.applicationPath)
     }
 
     def onUnauthenticated(ex: UnauthenticatedException, req: HttpServletRequest, res: HttpServletResponse) {

@@ -26,6 +26,7 @@ import com.google.common.eventbus.Subscribe
 import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -56,9 +57,7 @@ object ExtWebExtension {
 
 }
 
-class ExtraModule extends AbstractModule with PubletBinding with PubletModule {
-
-  override def binder() = super.binder()
+class ExtraModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()

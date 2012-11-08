@@ -28,7 +28,8 @@ import org.eknet.guice.squire.SquireBinder
  * @since 15.10.12 13:03
  * 
  */
-trait PubletBinding extends SquireBinder {
+trait PubletBinding {
+  this: SquireBinder =>
 
   def bindRequestHandler = setOf[RequestHandlerFactory]
   def bindExtension = setOf[WebExtension]

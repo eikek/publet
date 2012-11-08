@@ -1,6 +1,6 @@
-- import org.eknet.publet.auth.RepositoryModel
-- import org.eknet.publet.auth.RepositoryTag
-- import org.eknet.publet.auth.GitAction
+- import org.eknet.publet.gitr.auth.RepositoryModel
+- import org.eknet.publet.gitr.auth.RepositoryTag
+- import org.eknet.publet.gitr.auth.GitAction
 -@ val repositoryModel: Option[RepositoryModel] = None
 -@ val currentHead: String = ""
 
@@ -19,12 +19,12 @@
       - if (owner != Security.username)
         span.label.label-info =owner
       h2
-        =repositoryModel.get.name
+        =repositoryModel.get.name.name
         | @
         span#currentHead
           =currentHead
     .span7
       ul.nav.nav-pills.pull-right
-        - if (Security.hasGitAction(GitAction.gitadmin, repositoryModel.get))
+        - if (Security.hasPerm("git:" + GitAction.admin.name+":"+ repositoryModel.get.name.name))
           li
-            a(href={"?r=" +repositoryModel.get.name+ ".git&do=admin"}) Admin
+            a(href={"?r=" +repositoryModel.get.name.fullNameDotGit+ "&do=admin"}) Admin

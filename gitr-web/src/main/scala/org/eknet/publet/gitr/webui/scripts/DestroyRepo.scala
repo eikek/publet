@@ -19,7 +19,7 @@ class DestroyRepo extends ScalaScript with Logging {
 
     getRepositoryFromParam flatMap ( repo => {
       val model = getRepositoryModelFromParam.get
-      GitRequestUtils.checkGitAction(GitAction.edit, model)
+      GitrControl.checkGitAction(GitAction.admin, model)
       try {
         PubletWeb.instance[GitrMan].get.delete(repo.name)
         PubletWeb.instance[DefaultRepositoryStore].get.removeRepository(repo.name)

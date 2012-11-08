@@ -54,3 +54,14 @@ trait UserStore {
   def getGroups(login: String): Set[String]
 
 }
+
+class UserStoreAdapter extends UserStore {
+  def findUser(login: String):Option[User] = None
+  def allUser: Iterable[User] = Nil
+  def userOfGroups(groups: String*): Iterable[User] = Nil
+  def updateUser(user: User): Option[User] = None
+  def removeUser(login: String): Option[User] = None
+  def addGroup(login: String, group: String) {}
+  def dropGroup(login: String, group: String) {}
+  def getGroups(login: String) = Set[String]()
+}

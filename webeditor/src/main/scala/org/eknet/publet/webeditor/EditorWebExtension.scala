@@ -29,6 +29,7 @@ import org.eknet.publet.web.guice.{PubletModule, PubletStartedEvent, PubletBindi
 import org.eknet.publet.Publet
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.engine.scalate.ScalateEngine
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -70,8 +71,8 @@ class EditorWebExtension @Inject() (publet: Publet, assetMgr: AssetManager, scal
 
 }
 
-class WebeditorModule extends AbstractModule with PubletModule with PubletBinding {
-  override def binder() = super.binder()
+class WebeditorModule extends SquireModule with PubletModule with PubletBinding {
+
   def configure() {
     bind[NotFoundHandler].to[CreateNewHandler] in Scopes.SINGLETON
     bind[EditorWebExtension].asEagerSingleton()

@@ -20,7 +20,7 @@ class TransferOwner extends ScalaScript {
 
     getRepositoryFromParam flatMap (repo => {
       val model = getRepositoryModelFromParam.get
-      GitRequestUtils.checkGitAction(GitAction.edit, model)
+      GitrControl.checkGitAction(GitAction.admin, model)
 
       PubletWebContext.param("owner") flatMap (newOwner => {
 

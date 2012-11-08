@@ -20,9 +20,9 @@ highlightTheme: magula
   });
 
 --- name:content pipeline:jade
-- import org.eknet.publet.gitr.web.scripts.CommitInfo
-- import org.eknet.publet.gitr.web.scripts.CommitGroup
-- import org.eknet.publet.gitr.web.scripts.GitrControl._
+- import org.eknet.publet.gitr.webui.scripts.CommitInfo
+- import org.eknet.publet.gitr.webui.scripts.CommitGroup
+- import org.eknet.publet.gitr.webui.scripts.GitrControl._
 -@ val commits: List[CommitGroup] = List()
 -@ val nextPage: Option[String] = None
 -@ val prevPage: Option[String] = None

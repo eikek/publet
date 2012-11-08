@@ -24,11 +24,16 @@ import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authz.{UnauthorizedException, UnauthenticatedException}
 import org.eknet.gitr.GitrMan
 import org.eknet.publet.gitr.auth.{GitPermissionBuilder, GitAction, RepositoryTag}
-import org.eknet.publet.web.PubletRequestWrapper
+import org.eknet.publet.web.{Config, PubletRequestWrapper}
 import org.eknet.publet.web.filter._
 import org.eknet.publet.web.req.RequestHandlerFactory._
 import org.eknet.publet.web.req.{SuperFilter, RequestHandlerFactory}
 import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter}
+import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
+import org.apache.shiro.web.filter.mgt.{PathMatchingFilterChainResolver, FilterChainResolver}
+import javax.servlet.{ServletResponse, ServletRequest}
+import org.eknet.publet.web.util.{Request, Key}
+import org.eknet.publet.vfs.Path
 
 /**
  * Creates a filter chain to server git requests.
@@ -37,7 +42,7 @@ import org.eknet.publet.web.shiro.{AuthzFilter, AuthcFilter}
  * @since 27.09.12 15:18
  */
 @Singleton
-class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus) extends RequestHandlerFactory with PubletRequestWrapper with Logging {
+class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus, config: Config) extends RequestHandlerFactory with PubletRequestWrapper with Logging {
 
   import org.eknet.publet.gitr.GitRequestUtils._
 
@@ -53,6 +58,21 @@ class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus) extends Request
     ))
 
   object GitShiroFilter extends AuthcFilter {
+
+    private val resolver = {
+      val resolver = new PathMatchingFilterChainResolver()
+      resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
+      val gitPath = Path(GitRequestUtils.gitMount(config)) / "**"
+      resolver.getFilterChainManager.createChain(gitPath.toAbsolute.asString, "authcBasic")
+      setFilterChainResolver(resolver)
+      resolver
+    }
+
+    override def init() {
+      super.init()
+      setFilterChainResolver(resolver)
+    }
+
     override def isEnabled(request: HttpServletRequest) = {
       val action = request.getGitAction
       val tag = request.getRepositoryModel
@@ -66,7 +86,7 @@ class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus) extends Request
 
   object GitAuthzFilter extends AuthzFilter with GitPermissionBuilder {
 
-    override def checkResourceAccess(req: HttpServletRequest) {
+    override def checkAccess(req: HttpServletRequest) {
       val gitAction = req.getGitAction.getOrElse(GitAction.pull)
       val repoModel = req.getRepositoryModel
       repoModel.foreach { repo =>
@@ -83,5 +103,6 @@ class GitHandlerFactory @Inject() (gitr: GitrMan, bus: EventBus) extends Request
       res.sendError(HttpServletResponse.SC_UNAUTHORIZED)
     }
   }
+
 
 }

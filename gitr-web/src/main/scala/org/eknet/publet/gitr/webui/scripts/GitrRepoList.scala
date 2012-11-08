@@ -95,7 +95,8 @@ class GitrRepoList extends ScalaScript {
       else filterOpen(name)_
     }
 
-    makeJson(PubletWeb.instance[GitrMan].get.allRepositories(repoFilter)
+    val list = PubletWeb.instance[GitrMan].get.allRepositories(repoFilter)
+    makeJson(list
       .map(r => (r, getRepositoryModel(r.name.name)))
       .map(t => new RepositoryInfo(t._1, t._2))
       .toList.sorted

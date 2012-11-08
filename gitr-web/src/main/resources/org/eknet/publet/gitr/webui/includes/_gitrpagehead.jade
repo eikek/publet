@@ -1,5 +1,5 @@
-- import org.eknet.publet.auth.RepositoryModel
-- import org.eknet.publet.auth.RepositoryTag
+- import org.eknet.publet.gitr.auth.RepositoryModel
+- import org.eknet.publet.gitr.auth.RepositoryTag
 -@ val repositoryModel: Option[RepositoryModel] = None
 -@ val revisions: String = ""
 -@ val currentHead: String = ""
@@ -13,9 +13,9 @@
       button.btn#searchRev(type="submit") Go
     ul.nav.nav-pills.pull-right
       li
-        a(href={"?r="+repositoryModel.get.name+".git"}) Source
+        a(href={"?r="+repositoryModel.get.name.fullNameDotGit}) Source
       li
-        a(href={"?r="+repositoryModel.get.name+".git&do=log"}) Log
+        a(href={"?r="+repositoryModel.get.name.fullNameDotGit+"&do=log"}) Log
       li
         a(href="./") Repositories
 :javascript

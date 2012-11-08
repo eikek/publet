@@ -16,6 +16,8 @@
 
 package org.eknet.gitr
 
+import java.io.File
+
 /**
  * A name of a repository. Can be a simple name
  * or a path, where segments must be separated
@@ -34,6 +36,12 @@ final class RepositoryName(reponame: String) {
   val segments = name.split("/")
 
   val nameDotGit = name +".git"
+
+  val fullName = segments.mkString("/")
+  val fullNameDotGit = fullName +".git"
+
+  val path = segments.mkString(File.separator)
+  val pathDotGit = path + ".git"
 
   override def equals(o: Any) = o match {
     case orn: RepositoryName => name == orn.name

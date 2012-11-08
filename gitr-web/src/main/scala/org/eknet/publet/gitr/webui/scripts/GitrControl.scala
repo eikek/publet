@@ -26,8 +26,9 @@ import org.eknet.publet.web.util.{PubletWeb, PubletWebContext, RenderUtils}
 import org.eknet.publet.vfs.{ContentType, Path, Content}
 import scala.Some
 import org.eknet.gitr.{GitrMan, GitrRepository, RepositoryName}
-import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, GitAction}
-import org.eknet.publet.gitr.GitRequestUtils
+import org.eknet.publet.gitr.auth.{RepositoryModel, DefaultRepositoryStore, GitAction}
+import org.eknet.publet.gitr.{RepositoryService, GitRequestUtils}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -48,7 +49,7 @@ class GitrControl extends ScalaScript {
           commitContents
         }
         case "admin" => {
-          GitRequestUtils.checkGitAction(GitAction.edit, model)
+          GitRequestUtils.checkGitAction(GitAction.admin, model)
           repositoryAdmin
         }
         case _ => {
@@ -60,11 +61,7 @@ class GitrControl extends ScalaScript {
   }
 
   def renderEmptyRepoPage(): Option[Content] = {
-    val repo = getRepositoryFromParam.map(r => {
-      val last = r.name.segments.last
-      last.substring(0, last.length-4) //without .git
-    })
-    renderTemplate(gitremptyRepoTemplate, repoHeadMap ++ Map("repoName"->(repo.getOrElse(""))))
+    renderTemplate(gitremptyRepoTemplate, repoHeadMap)
   }
 
   def repoHeadMap: Map[String, Any] = {
@@ -182,7 +179,7 @@ object GitrControl {
   lazy val mountPoint = PubletWeb.publetSettings("gitr.mountpoint").getOrElse("/gitr")
 
   /** Permission granted to administrate the repository (incl. delete) */
-  val adminPerm = GitAction.edit.name
+  val adminPerm = GitAction.admin.name
 
   /** Permission granted to allow creation of new repositories. */
   val createPerm = GitAction.create.name
@@ -231,8 +228,20 @@ object GitrControl {
   }
   lazy val wikiExtensions = ContentType.markdown.extensions ++ ContentType.textile.extensions
 
-  def getCloneUrl(repoName: String) = {
-    val name = if (repoName.endsWith(".git")) repoName else repoName+".git"
-    PubletWebContext.urlOf("/git/"+ name)
+  def getCloneUrl(repoName: RepositoryName) = {
+    val url = PubletWebContext.urlOf("/git/"+ repoName.fullNameDotGit)
+    if (Security.isAuthenticated) {
+      url.replaceFirst("://", "://"+ Security.username+"@")
+    } else {
+      url
+    }
+  }
+
+  def checkGitAction(action: GitAction.Action, model: RepositoryModel) {
+    GitRequestUtils.checkGitAction(action, model)
+  }
+
+  def hasGitAction(action: GitAction.Action, model: RepositoryModel) = {
+    GitRequestUtils.hasGitAction(action, model)
   }
 }

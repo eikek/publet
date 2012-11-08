@@ -5,8 +5,8 @@ highlightTheme: magula
 --- name:content pipeline:jade
 =include("_gitrpagehead.jade")
 
-- import org.eknet.publet.gitr.web.scripts.GitrControl
-- import org.eknet.publet.auth.RepositoryModel
+- import org.eknet.publet.gitr.webui.scripts.GitrControl
+- import org.eknet.publet.gitr.auth.RepositoryModel
 -@ val repositoryModel: Option[RepositoryModel] = None
 -@ val repoName: String = ""
 h2 This repository is empty
@@ -21,7 +21,7 @@ h2 This repository is empty
 
   pre<>
     !~~"$ git clone " + GitrControl.getCloneUrl(repositoryModel.get.name)
-    !~~"$ cd " + repoName
+    !~~"$ cd " + repositoryModel.get.name.name
   :markdown
 
     ### Existing repository

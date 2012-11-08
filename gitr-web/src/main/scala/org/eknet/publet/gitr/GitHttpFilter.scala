@@ -65,7 +65,7 @@ class GitHttpFilter(gitr: GitrMan, bus: EventBus) extends GitFilter with PubletR
     val req = new PathInfoServletReq(request)
     super.doFilter(req, response, chain)
     bus.post(GitEvent(req.getGitAction.get,
-      gitr.get(req.getRepositoryName.get.nameDotGit).get,
+      gitr.get(req.getRepositoryName.get).get,
       req.getRepositoryModel.get,
       ClientInfo(request)))
   }

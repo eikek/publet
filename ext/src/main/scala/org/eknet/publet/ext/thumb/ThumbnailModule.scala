@@ -22,14 +22,13 @@ import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import com.google.common.eventbus.EventBus
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:22
  */
-class ThumbnailModule extends AbstractModule with PubletBinding with PubletModule {
-
-  override def binder() = super.binder()
+class ThumbnailModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bindExtension.add[ThumbnailExtension]

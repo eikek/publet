@@ -15,7 +15,7 @@ object TreeInfo {
       .collect({ case r: ContainerResource => r})
       .map(_.children)
       .getOrElse(List())
-      .collect({ case r if (Security.hasReadPermission((path / r).toAbsolute.asString)) => r})
+      .collect({ case r if (Security.hasReadPermission((path / r).toAbsolute)) => r})
   }
 
   def children(path: Path): List[_ <: Resource] = {

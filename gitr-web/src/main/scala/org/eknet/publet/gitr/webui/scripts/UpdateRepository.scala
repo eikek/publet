@@ -15,7 +15,7 @@ class UpdateRepository extends ScalaScript {
 
   def serve() = {
     getRepositoryModelFromParam flatMap { rm =>
-      GitRequestUtils.checkGitAction(GitAction.edit, rm)
+      GitrControl.checkGitAction(GitAction.admin, rm)
       PubletWebContext.param("repoState") flatMap ( state => {
         PubletWeb.instance[DefaultRepositoryStore].get
           .updateRepository(RepositoryModel(rm.name, RepositoryTag.withName(state), rm.owner))

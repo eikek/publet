@@ -16,36 +16,37 @@
 
 package org.eknet.publet.gitr
 
-import com.google.inject.{Scopes, Singleton, Provides, AbstractModule}
-import org.eknet.guice.squire.SquireBinder
+import com.google.inject._
+import org.eknet.guice.squire.{SquireModule, SquireBinder}
 import org.eknet.publet.web.Config
 import org.eknet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.gitr.partition.{GitPartManImpl, GitPartMan}
 import com.google.inject.name.Named
 import org.eknet.publet.vfs.{Path, Container}
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
-import org.eknet.publet.auth.store.PermissionStore
+import org.eknet.publet.auth.store.{ResourceSetStore, ResourceSetStoreAdapter, PermissionStore}
 import org.eknet.publet.gitr.auth._
 import org.apache.shiro.authz.permission.PermissionResolver
+import org.eknet.publet.gitr.webui.scripts.GitrControl
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.11.12 19:36
  */
-class GitrModule extends AbstractModule with PubletModule with SquireBinder with PubletBinding {
+class GitrModule extends SquireModule with PubletModule with PubletBinding {
 
   private val contentRootRepo = Path("contentroot")
-
-  override def binder() = super.binder()
 
   def configure() {
     bind[GitPartMan].to[GitPartManImpl].as[Singleton]()
     bindRequestHandler.add[GitHandlerFactory]
+    bind[RepositoryService].in(Scopes.SINGLETON)
 
     bind[DefaultRepositoryStore].in(Scopes.SINGLETON)
     setOf[RepositoryStore].add[XmlRepositoryStore].in(Scopes.SINGLETON)
     setOf[PermissionStore].add[GitPermissionStore].in(Scopes.SINGLETON)
     setOf[PermissionResolver].add[GitPermissionResolver].in(Scopes.SINGLETON)
+    setOf[ResourceSetStore].add[GitrResourcePatterns].in(Scopes.SINGLETON)
   }
 
   @Provides@Singleton
@@ -55,4 +56,9 @@ class GitrModule extends AbstractModule with PubletModule with SquireBinder with
   def createMainPartition(gitr: GitPartMan): Container =
     gitr.getOrCreate(contentRootRepo, org.eknet.publet.gitr.partition.Config(None))
 
+}
+
+@Singleton
+class GitrResourcePatterns @Inject() (config: Config) extends ResourceSetStoreAdapter {
+  override def anonPatterns = List(GitrControl.mountPoint+"/**")
 }

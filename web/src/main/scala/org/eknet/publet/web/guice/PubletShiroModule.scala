@@ -33,7 +33,9 @@ import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import com.google.common.eventbus.EventBus
 import org.apache.shiro.authc.{AuthenticationListener, AbstractAuthenticator}
 import org.apache.shiro.cache.CacheManager
-import org.eknet.publet.auth.guice.AuthModule
+import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.auth.store.{UserStore, PermissionStore, ResourceSetStore}
+import org.eknet.publet.web.shiro.SuperadminStore
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -41,13 +43,17 @@ import org.eknet.publet.auth.guice.AuthModule
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 14:02
  */
-object PubletShiroModule extends AbstractModule with PubletBinding {
-
-  override def binder() = super.binder()
+object PubletShiroModule extends SquireModule with PubletBinding {
 
   def configure() {
-    bind[SessionManager].to[ServletContainerSessionManager] asEagerSingleton()
+    bind[SessionManager].to[ServletContainerSessionManager].asEagerSingleton()
     bind[WebEnvironment].to[GuiceWebEnvironment].asEagerSingleton()
+
+    setOf[ResourceSetStore].add[DefaultResourcePatterns].in(Scopes.SINGLETON)
+
+    bind[SuperadminStore].in(Scopes.SINGLETON)
+    setOf[PermissionStore].add[SuperadminStore]
+    setOf[UserStore].add[SuperadminStore]
   }
 
   @Provides@Singleton
@@ -69,8 +75,6 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
     resolver.getFilterChainManager.addFilter("authcBasic", new BasicHttpAuthenticationFilter)
     resolver.getFilterChainManager.addFilter("anon", new AnonymousFilter)
 
-//    val gitPath = Path(config.gitMount).toAbsolute.asString + "/**"
-//    resolver.getFilterChainManager.createChain(gitPath, "authcBasic")
     resolver.getFilterChainManager.createChain("/**", "anon")
     resolver
   }

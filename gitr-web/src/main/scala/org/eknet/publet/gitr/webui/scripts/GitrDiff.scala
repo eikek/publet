@@ -20,7 +20,7 @@ class GitrDiff extends ScalaScript {
 
   def serve() = {
     getRepositoryFromParam flatMap ( repo => {
-      getRepositoryModelFromParam.map(GitRequestUtils.checkGitAction(GitAction.pull, _))
+      getRepositoryModelFromParam.map(GitrControl.checkGitAction(GitAction.pull, _))
       getCommitFromRequest(repo) map ( commit => {
         val baos = new ByteArrayOutputStream()
         val df = new HtmlDiffFormatter(baos)

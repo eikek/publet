@@ -31,7 +31,7 @@ abstract class AuthzFilter(val redirectToLoginPage: Boolean = true) extends Filt
   def doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
     try {
       if (AuthcFilter.authenticationEnabled(req)) {
-        checkResourceAccess(req)
+        checkAccess(req)
       }
       chain.doFilter(req, resp)
 
@@ -74,7 +74,7 @@ abstract class AuthzFilter(val redirectToLoginPage: Boolean = true) extends Filt
    *
    * @param req
    */
-  def checkResourceAccess(req: HttpServletRequest) {}
+  def checkAccess(req: HttpServletRequest) {}
 
   def init(filterConfig: FilterConfig) {}
   def destroy() {}

@@ -21,16 +21,18 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.Config
-import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, RepositoryModel, GitAction}
+import org.eknet.publet.gitr.auth._
 import org.eknet.gitr.RepositoryName
 import org.eknet.publet.gitr.partition.GitPartition
+import org.eknet.publet.web.shiro.Security
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.11.12 19:37
  */
 @Singleton
-class RepositoryService @Inject() (publet: Publet, config: Config, authm: DefaultRepositoryStore) {
+class RepositoryService @Inject() (publet: Publet, config: Config, authm: DefaultRepositoryStore) extends GitPermissionBuilder {
 
   private val gitReceivePack = "/" + GitSmartHttpTools.RECEIVE_PACK
   private val gitUploadPack = "/" + GitSmartHttpTools.UPLOAD_PACK

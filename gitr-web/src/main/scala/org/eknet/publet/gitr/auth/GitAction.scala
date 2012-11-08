@@ -24,7 +24,7 @@ object GitAction extends Enumeration {
 
   val pull = Action("pull")
   val push = Action("push")
-  val edit = Action("edit")
+  val admin = Action("edit")
   val create = Action("create")
   val createRoot = Action("createroot")
 

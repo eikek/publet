@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.auth
+package org.eknet.publet.web.guice
+
+import org.eknet.publet.auth.store.{ResourceSetStoreAdapter, ResourcePatternDef, ResourceSetStore}
+import org.eknet.publet.Glob
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 03.11.12 19:41
+ * @since 08.11.12 18:17
  */
-object ResourceAction extends Enumeration {
+class DefaultResourcePatterns extends ResourceSetStoreAdapter {
 
-  val read = Action("read")
-  val write = Action("write")
-  val all = Action("*")
+  override def anonPatterns = List[Glob](
+    "/publet/**"
+  )
 
-  def forName(name: String): Action = withName(name.toLowerCase).asInstanceOf[Action]
-
-  case class Action(name: String) extends Val(name) {
-    def contains(action: Action) = if (this == all) true else this == action
-  }
 }

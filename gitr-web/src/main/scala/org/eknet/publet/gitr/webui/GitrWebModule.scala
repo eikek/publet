@@ -18,13 +18,13 @@ package org.eknet.publet.gitr.webui
 
 import com.google.inject.AbstractModule
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.10.12 19:48
  */
-class GitrWebModule extends AbstractModule with PubletBinding with PubletModule {
-  override def binder() = super.binder()
+class GitrWebModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GitrWebExtension].asEagerSingleton()

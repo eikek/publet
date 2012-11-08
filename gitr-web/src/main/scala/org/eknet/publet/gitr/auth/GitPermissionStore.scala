@@ -34,7 +34,7 @@ class GitPermissionStore @Inject() (db: DefaultRepositoryStore) extends Permissi
   def getUserPermissions(user: User) = {
     val permset = collection.mutable.Set[String]()
     for (rm <- db.allRepositories if (rm.owner == user.login)) {
-      permset += git.action(pull,push,edit) on rm.name
+      permset += git.action(pull,push,admin) on rm.name
     }
     permset.toSet
   }
