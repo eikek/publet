@@ -49,5 +49,5 @@ object Thumbnailer {
    *
    * @return
    */
-  def service = PubletWeb.instance[Thumbnailer]
+  def service = PubletWeb.instance[Thumbnailer].get
 }

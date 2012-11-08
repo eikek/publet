@@ -71,6 +71,7 @@ class EditorWebExtension @Inject() (publet: Publet, assetMgr: AssetManager, scal
 }
 
 class WebeditorModule extends AbstractModule with PubletModule with PubletBinding {
+  override def binder() = super.binder()
   def configure() {
     bind[NotFoundHandler].to[CreateNewHandler] in Scopes.SINGLETON
     bind[EditorWebExtension].asEagerSingleton()

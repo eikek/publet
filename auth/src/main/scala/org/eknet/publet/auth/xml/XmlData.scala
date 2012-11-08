@@ -19,9 +19,10 @@ package org.eknet.publet.auth.xml
 import scala.xml.{Node, Elem}
 import org.eknet.publet.auth.store.{ResourcePatternDef, UserProperty, User}
 import org.eknet.publet.vfs.ContentResource
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import org.eknet.publet.auth.ResourceAction
 import org.eknet.publet.Glob
+import collection.mutable
+import org.apache.shiro.SecurityUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,77 +30,63 @@ import org.eknet.publet.Glob
  */
 class XmlData(source: ContentResource) extends XmlResource(source) {
 
-  private val lock = new ReentrantReadWriteLock()
+  private var _data = new Data
 
-  private var _users = Map[String, User]()
-  private var _groups = Map[String, Set[String]]()
-  private var _permissions = Map[String, Set[String]]()
-  private var _anonPatterns = List[String]()
-  private var _restricted = List[ResourcePatternDef]()
+  class Data {
+    var users = Map[String, User]()
+    var groups = Map[String, Set[String]]()
+    var permissions = Map[String, Set[String]]()
+    var anonPatterns = List[String]()
+    var restricted = List[ResourcePatternDef]()
+  }
 
   reload()
 
   def onLoad(rootElem: Elem) {
-    lock.writeLock().lock()
-    try {
-      val umap = collection.mutable.Map[String, User]()
-      val gmap = collection.mutable.Map[String, Set[String]]()
+    withWriteLock {
+      val data = new Data
+      val umap = mutable.Map[String, User]()
+      val gmap = mutable.Map[String, Set[String]]()
       (rootElem \ "users" \ "user").map(un => {
         val user = userFromXml(un)
         val groups = groupsFromXml(un)
         umap.put(user.login, user)
         gmap.put(user.login, groups)
       })
-      this._users = umap.toMap
-      this._groups = gmap.toMap
+      data.users = umap.toMap
+      data.groups = gmap.toMap
 
-      val pmap = collection.mutable.Map[String, Set[String]]()
+      val pmap = mutable.Map[String, Set[String]]()
       (rootElem \ "permissions" \ "grant")
         .map(pnm => permissionFromXml(pnm))
         .foreach(pm => {
           for (g <-pm.groups) {
-            val set = pmap.get(g).getOrElse(Set[String]()) ++ pm.perms
+            val set = data.permissions.get(g).getOrElse(Set[String]()) ++ pm.perms
             pmap.put(g, set)
           }
       })
-      this._permissions = pmap.toMap
+      data.permissions = pmap.toMap
 
-      this._anonPatterns = (rootElem \ "resources" \ "open")
-        .map(_.text).toList
+      data.anonPatterns ++= (rootElem \ "resources" \ "open").map(_.text).toList
+      data.restricted ++= (rootElem \ "resources" \ "restricted").map(restrictedFromXml).toList
 
-      this._restricted = (rootElem \ "resources" \ "restricted")
-        .map(restrictedFromXml).toList
-
-    } finally {
-      lock.writeLock().unlock()
-    }
-  }
-
-
-  override def write(currentUser: Option[User], message: String) {
-    lock.writeLock().lock()
-    try {
-      super.write(currentUser, message)
-    } finally {
-      lock.writeLock().unlock()
+      this._data = data
     }
   }
 
   def toXml = <publetAuth>
     <users>
-      { _users.values.map(u => userToXml(u, _groups.get(u.login).getOrElse(Set()))) }
+      { _data.users.values.map(u => userToXml(u, _data.groups.get(u.login).getOrElse(Set()))) }
     </users>
     <permissions>
-      { for (g <- _permissions.keys) yield {
-           <grant><to>{g}</to>{ _permissions.get(g).get.map(perm => <perm>{perm}</perm>)}</grant>
+      { for (g <- _data.permissions.keys) yield {
+           <grant><to>{g}</to>{ _data.permissions.get(g).get.map(perm => <perm>{perm}</perm>)}</grant>
         }
       }
     </permissions>
     <resources>
-      {
-      _anonPatterns.map(rc => <open>{rc}</open> )
-      _restricted.map(r => restrictedToXml(r) )
-      }
+      { _data.anonPatterns.map(rc => <open>{rc}</open> ) }
+      { _data.restricted.map(r => restrictedToXml(r) ) }
     </resources>
   </publetAuth>
 
@@ -161,9 +148,18 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
     }
   }
 
-  def users = _users
-  def groups = _groups
-  def permissions = _permissions
-  def anonPatterns = _anonPatterns
-  def restrictedPatterns = _restricted
+  def users = withReadLock( _data.users )
+  def groups = withReadLock( _data.groups )
+  def permissions = withReadLock( _data.permissions )
+  def anonPatterns = withReadLock( _data.anonPatterns )
+  def restrictedPatterns = withReadLock( _data.restricted )
+
+  def modify[A](f: (Data) => A): A = {
+    withWriteLock {
+      val r = f(_data)
+      val login = SecurityUtils.getSubject.getPrincipal.toString
+      write(users.get(login), "Writing auth data.")
+      r
+    }
+  }
 }

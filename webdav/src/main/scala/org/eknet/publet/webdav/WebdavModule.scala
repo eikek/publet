@@ -11,6 +11,8 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
  */
 class WebdavModule extends AbstractModule with PubletBinding with PubletModule {
 
+  override def binder() = super.binder()
+
   def configure() {
     bindRequestHandler.add[WebdavHandlerFactory]
   }

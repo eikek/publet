@@ -19,12 +19,14 @@ package org.eknet.publet.gitr.auth
 import org.eknet.publet.auth.store.{User, PermissionStore, UserStore}
 import org.eknet.publet.auth.PermissionBuilder._
 import org.eknet.publet.auth.PermissionBuilder
+import com.google.inject.{Inject, Singleton}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.11.12 22:47
  */
-class GitPermissionStore(db: RepositoryStore) extends PermissionStore with GitPermissionBuilder {
+@Singleton
+class GitPermissionStore @Inject() (db: DefaultRepositoryStore) extends PermissionStore with GitPermissionBuilder {
   import GitAction._
 
   def getPermissions(groups: String*) = Set[String]()

@@ -206,7 +206,7 @@ object Config extends Logging {
    * Returns an instance by looking it up though the injector.
    * @return
    */
-  def get = PubletWeb.instance[Config]
+  def get = PubletWeb.instance[Config].get
 
   def apply(key: String) = get(key)
 

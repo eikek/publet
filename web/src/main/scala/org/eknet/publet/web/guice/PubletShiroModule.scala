@@ -18,23 +18,22 @@ package org.eknet.publet.web.guice
 
 import com.google.inject._
 import name.Named
-import org.eknet.publet.web.shiro.AuthListener
 import org.apache.shiro.realm.Realm
 import org.apache.shiro.web.mgt.{WebSecurityManager, DefaultWebSecurityManager}
 import com.google.inject.binder.AnnotatedBindingBuilder
 import java.util
 import org.apache.shiro.web.filter.mgt.{FilterChainResolver, PathMatchingFilterChainResolver}
 import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticationFilter, FormAuthenticationFilter}
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{Settings, Config}
 import javax.servlet.ServletContext
 import org.apache.shiro.web.env.WebEnvironment
 import org.eknet.publet.web.util.StringMap
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import com.google.common.eventbus.EventBus
-import org.apache.shiro.authc.AbstractAuthenticator
-import org.eknet.publet.auth.store.{DefaultAuthStore, UserStore}
+import org.apache.shiro.authc.{AuthenticationListener, AbstractAuthenticator}
 import org.apache.shiro.cache.CacheManager
+import org.eknet.publet.auth.guice.AuthModule
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -44,21 +43,19 @@ import org.apache.shiro.cache.CacheManager
  */
 object PubletShiroModule extends AbstractModule with PubletBinding {
 
+  override def binder() = super.binder()
+
   def configure() {
     bind[SessionManager].to[ServletContainerSessionManager] asEagerSingleton()
-
-    bind(classOf[DefaultAuthStore]) in Scopes.SINGLETON
-
     bind[WebEnvironment].to[GuiceWebEnvironment].asEagerSingleton()
   }
 
   @Provides@Singleton
-  def createWebSecurityManager(bus: EventBus, cacheMan: CacheManager, realms: util.Set[Realm]): WebSecurityManager = {
-    import collection.JavaConversions._
+  def createWebSecurityManager(bus: EventBus, cacheMan: CacheManager, realms: util.Set[Realm], listeners: util.Set[AuthenticationListener]): WebSecurityManager = {
     val sm = new DefaultWebSecurityManager()
     sm.setRealms(realms)
     sm.setCacheManager(cacheMan)
-    sm.getAuthenticator.asInstanceOf[AbstractAuthenticator].setAuthenticationListeners(List(new AuthListener(bus)))
+    sm.getAuthenticator.asInstanceOf[AbstractAuthenticator].setAuthenticationListeners(listeners)
     sm
   }
 
@@ -85,7 +82,7 @@ object PubletShiroModule extends AbstractModule with PubletBinding {
    * @return
    */
   @Provides@Singleton@Named("loginPath")
-  def getLoginPath(@Named("settings") settings: StringMap) =
+  def getLoginPath(settings: Settings) =
     settings("publet.loginUrl").getOrElse("/publet/templates/login.html")
 
 

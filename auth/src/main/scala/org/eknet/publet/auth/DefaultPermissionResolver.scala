@@ -19,12 +19,14 @@ package org.eknet.publet.auth
 import org.apache.shiro.authz.permission.{PermissionResolver, WildcardPermissionResolver}
 import java.util
 import org.apache.shiro.authz.Permission
+import com.google.inject.{Inject, Singleton}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.11.12 23:04
  */
-class DefaultPermissionResolver(resolver: util.Set[PermissionResolver]) extends WildcardPermissionResolver {
+@Singleton
+class DefaultPermissionResolver @Inject() (resolver: util.Set[PermissionResolver]) extends WildcardPermissionResolver {
   import collection.JavaConversions._
 
   override def resolvePermission(permissionString: String) = {

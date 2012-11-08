@@ -25,8 +25,10 @@ import org.eknet.publet.web.WebExtension
  * @since 07.10.12 02:48
  */
 class CounterModule extends AbstractModule with PubletModule with PubletBinding {
+  override def binder() = super.binder()
+
   def configure() {
-    bind(classOf[CounterService]) to (classOf[CounterServiceImpl]) in Scopes.SINGLETON
+    bind[CounterService].to[CounterServiceImpl].in(Scopes.SINGLETON)
     bindExtension.add[CounterExtension]
   }
 }

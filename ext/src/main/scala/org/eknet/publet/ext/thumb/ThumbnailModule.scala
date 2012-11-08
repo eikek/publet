@@ -29,6 +29,8 @@ import com.google.common.eventbus.EventBus
  */
 class ThumbnailModule extends AbstractModule with PubletBinding with PubletModule {
 
+  override def binder() = super.binder()
+
   def configure() {
     bindExtension.add[ThumbnailExtension]
   }

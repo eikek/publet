@@ -27,7 +27,7 @@ object Method extends Enumeration {
   val options = MethodValue("OPTIONS")
   val head = MethodValue("HEAD")
   val get = MethodValue("GET")
-  val post = MethodValue("POST", write = true)
+  val post = MethodValue("POST")
   val delete = MethodValue("DELETE", write = true)
   val propfind = MethodValue("PROPFIND")
   val proppatch = MethodValue("PROPPATCH", write = true)

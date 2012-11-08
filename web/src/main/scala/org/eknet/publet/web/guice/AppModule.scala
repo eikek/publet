@@ -41,13 +41,14 @@ import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import org.eknet.publet.web.util.{PubletWeb, StringMap}
 import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
-import org.eknet.guice.squire.SquireModule
+import org.eknet.guice.squire.SquireBinder
+import org.eknet.publet.auth.guice.AuthModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.10.12 23:19
  */
-class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging with SquireModule {
+class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging with SquireBinder {
 
   private val webImports = List(
     "org.eknet.publet.web.Config",
@@ -59,6 +60,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     "org.eknet.publet.web.shiro.Security"
   )
 
+
+  override def binder() = super.binder()
 
   /**
    * ServletContext Init-parameter.
@@ -91,7 +94,9 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       }
     })
     eventBus.register(PubletWeb)
-    bind[StringMap].annotatedWith(Names.settings).to[Settings] in Scopes.SINGLETON
+    bind[Settings].in(Scopes.SINGLETON)
+
+    install(new AuthModule)
     install(PubletShiroModule)
 
     val moduleManager = new ModuleManager(config)

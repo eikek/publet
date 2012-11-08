@@ -30,7 +30,7 @@ import java.util
 import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
-import org.eknet.publet.web.SettingsReloadedEvent
+import org.eknet.publet.web.{Settings, SettingsReloadedEvent}
 import org.eknet.publet.ext.orient.GraphDbProvider
 import org.eknet.scue._
 
@@ -39,7 +39,7 @@ import org.eknet.scue._
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (@Named("settings") settings: StringMap, dbprovider: GraphDbProvider, publet: Publet) extends CounterService {
+class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvider, publet: Publet) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val db = dbprovider.getDatabase("extdb")

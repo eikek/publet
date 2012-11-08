@@ -25,14 +25,16 @@ import org.eknet.publet.engine.scalate.ScalateEngine
 import com.google.inject
 import inject.Injector
 import com.google.common.eventbus.Subscribe
-import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names, InjectorHelper}
+import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names}
 import org.eknet.publet.auth.store.DefaultAuthStore
+import org.eknet.publet.web.Settings
+import org.eknet.guice.squire.LookupSquire
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.12 20:02
  */
-object PubletWeb extends InjectorHelper with Logging {
+object PubletWeb extends LookupSquire with Logging {
 
   // initialized on context startup
   private var servletContextI: WeakReference[ServletContext] = null
@@ -51,11 +53,11 @@ object PubletWeb extends InjectorHelper with Logging {
       .getOrElse(sys.error("No Injector available in servletContext!")).asInstanceOf[Injector]
   } getOrElse(sys.error("No ServletContext has been set!"))
 
-  def publet = instance[Publet]
-  def scalateEngine = instance[ScalateEngine]
-  def contentRoot = instance[Container](Names.contentroot)
-  def authManager = instance[DefaultAuthStore]
-  def publetSettings = instance[StringMap](Names.settings)
+  def publet = instance[Publet].get
+  def scalateEngine = instance[ScalateEngine].get
+  def contentRoot = instance[Container].annotatedWith(Names.contentroot)
+  def authManager = instance[DefaultAuthStore].get
+  def publetSettings = instance[Settings].get
 
 
   // ~~~ servlet context listener

@@ -16,7 +16,7 @@
 
 package org.eknet.publet.auth.guice
 
-import com.google.inject.{Singleton, Provides, Scopes, AbstractModule}
+import com.google.inject.{Singleton, Provides, Scopes}
 import org.eknet.publet.auth._
 import org.eknet.guice.squire.SquireModule
 import org.apache.shiro.cache.{MemoryConstrainedCacheManager, CacheManager}
@@ -25,20 +25,32 @@ import com.google.inject.name.Named
 import org.apache.shiro.crypto.hash._
 import org.apache.shiro.authc.credential.PasswordService
 import org.apache.shiro.authz.permission.PermissionResolver
+import org.eknet.publet.auth.store.{DefaultAuthStore, ResourceSetStore, PermissionStore, UserStore}
+import org.eknet.publet.auth.xml.XmlDatabase
+import org.apache.shiro.authc.AuthenticationListener
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 01.11.12 19:10
  */
-class AuthModule extends AbstractModule with SquireModule {
+class AuthModule extends SquireModule {
 
   def configure() {
     bind[PasswordServiceProvider].to[DefaultPasswordServiceProvider].as[Singleton]()
     bind[CacheManager].to[MemoryConstrainedCacheManager].in(Scopes.SINGLETON)
 
+    bind[DefaultAuthStore] in Scopes.SINGLETON
+
     bind[PermissionResolver].to[DefaultPermissionResolver]
     setOf[Realm].add[UsersRealm]
     setOf[PermissionResolver].add[ResourcePermissionResolver]
+
+    bind[XmlDatabase].in(Scopes.SINGLETON)
+    setOf[UserStore].add[XmlDatabase]
+    setOf[PermissionStore].add[XmlDatabase]
+    setOf[ResourceSetStore].add[XmlDatabase]
+
+    setOf[AuthenticationListener].add[AuthListener].in(Scopes.SINGLETON)
   }
 
   @Singleton

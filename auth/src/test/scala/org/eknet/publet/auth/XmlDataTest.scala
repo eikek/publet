@@ -1,20 +1,21 @@
 package org.eknet.publet.auth
 
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite}
 import org.scalatest.matchers.ShouldMatchers
 import java.io.{FileOutputStream, File}
 import org.eknet.publet.vfs.{ContentResource, Path, Content}
 import org.eknet.publet.vfs.fs.FileResource
 import org.eknet.publet.auth.xml.{XmlData, XmlDatabase}
 import com.google.common.eventbus.EventBus
-import org.eknet.publet.auth.store.{UserProperty, ResourcePatternDef}
+import org.eknet.publet.auth.store.{User, UserProperty, ResourcePatternDef}
 import org.eknet.publet.Glob
+import org.apache.shiro.mgt.DefaultSecurityManager
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 16.06.12 18:14
  */
-class XmlDataTest extends FunSuite with ShouldMatchers with OneInstancePerTest {
+class XmlDataTest extends FunSuite with ShouldMatchers with OneInstancePerTest with BeforeAndAfter with SecurityManagerMock {
 
   val db = {
     val temp = File.createTempFile("perm.db", ".xml")
@@ -28,7 +29,6 @@ class XmlDataTest extends FunSuite with ShouldMatchers with OneInstancePerTest {
   test ("read anon patterns") {
     db.anonPatterns should have size (1)
     db.anonPatterns.head should be ("/public/**")
-    println(db.toXml)
   }
 
   test ("read restricted patterns") {
@@ -68,5 +68,66 @@ class XmlDataTest extends FunSuite with ShouldMatchers with OneInstancePerTest {
     jdoe.get(UserProperty.enabled) should be (None)
     jdoe.isEnabled should be (true)
     jdoe.get(UserProperty.password) should be (Some("098f6bcd4621d373cade4e832627b4f6"))
+  }
+
+  test ("update user") {
+    db.modify { data =>
+      data.users = data.users + ("jack" -> new User("jack",
+        Map(UserProperty.password -> "hallo",
+            UserProperty.fullName -> "Jack White")))
+    }
+
+    db.users should have size (2)
+
+    val xmldb2 = new XmlData(db.source)
+    xmldb2.users should have size (2)
+    val jack = xmldb2.users.get("jack").get
+    jack.get(UserProperty.fullName) should be (Some("Jack White"))
+    jack.get(UserProperty.password) should be (Some("hallo"))
+    jack.get(UserProperty.algorithm) should be (None)
+    jack.get(UserProperty.digest) should be (None)
+    jack.get(UserProperty.email) should be (None)
+
+  }
+
+  test ("update group") {
+    db.modify { data =>
+      val g = data.groups.get("jdoe").getOrElse(Set[String]())
+      data.groups = data.groups + ("jdoe" -> (g + "manager"))
+    }
+
+    db.groups should have size (1)
+    db.groups.get("jdoe") should be (Some(Set("wikiuser", "editor", "manager")))
+
+    val xmldb2 = new XmlData(db.source)
+    xmldb2.groups should have size (1)
+    xmldb2.groups.get("jdoe") should be (Some(Set("wikiuser", "editor", "manager")))
+  }
+
+  test ("update permission") {
+    db.modify { data =>
+      val set = data.permissions.get("editor").get
+      data.permissions = data.permissions + ("editor" -> (set + "git:pull:projectx"))
+    }
+
+    val expected = Set("resource:*:/devel/projectb/**", "git:push,pull:projectb", "git:pull:projectx")
+    db.permissions.get("editor") should be (Some(expected))
+
+    val xmldb2 = new XmlData(db.source)
+    xmldb2.permissions.get("editor") should be (Some(expected))
+  }
+
+  test ("update patterns") {
+    db.modify { data =>
+      data.anonPatterns = "/sic/public/**" :: data.anonPatterns
+      data.restricted = ResourcePatternDef("/dev/mods/**", "modperm", ResourceAction.write) :: data.restricted
+    }
+
+    db.anonPatterns should have size (2)
+    db.restrictedPatterns should have size (3)
+
+    val xmldb2 = new XmlData(db.source)
+    xmldb2.anonPatterns should contain ("/sic/public/**")
+    xmldb2.restrictedPatterns should contain (ResourcePatternDef("/dev/mods/**", "modperm", ResourceAction.write))
   }
 }

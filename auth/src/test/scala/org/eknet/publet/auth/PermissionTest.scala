@@ -29,18 +29,7 @@ import org.apache.shiro.SecurityUtils
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 02.11.12 19:46
  */
-class PermissionTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
-  import collection.JavaConversions._
-
-  var securityManager: SecurityManager = _
-  var subject: Subject = _
-
-  before {
-    securityManager = new DefaultSecurityManager(new TestRealm)
-    SecurityUtils.setSecurityManager(securityManager)
-    subject = SecurityUtils.getSubject
-    subject.login(new UsernamePasswordToken("test", "test"))
-  }
+class PermissionTest extends FunSuite with ShouldMatchers with BeforeAndAfter with SecurityManagerMock {
 
   test ("resource implies") {
     subject.isPermitted("resource:write:/aa/uu/test.pdf") should be (true)
@@ -51,18 +40,4 @@ class PermissionTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
     subject.isPermitted("resource:write:/cc/a/d/doc.pdf,/cc/b/d/doc.pdf,/cc/y/e/zonk.xml") should be (false)
   }
 
-  class TestRealm extends AuthorizingRealm {
-    setPermissionResolver(new ResourcePermissionResolver)
-    def account = {
-      val acc = new SimpleAccount("test", "test", "test")
-      acc.setRoles(Set("manager", "developer"))
-      acc.setStringPermissions(Set("resource:read:/aa/bb/cc/**",
-        "resource:*:/aa/uu/**",
-        "resource:read,delete:/cc/*/d/**,/cc/*/e/**"))
-      acc
-    }
-
-    def doGetAuthenticationInfo(token: AuthenticationToken) = account
-    def doGetAuthorizationInfo(principals: PrincipalCollection) = account
-  }
 }

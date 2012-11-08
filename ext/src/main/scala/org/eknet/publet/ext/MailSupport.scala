@@ -38,7 +38,7 @@ trait MailSupport {
 
   class EasyMail(mail: MailMessage) {
     def send() {
-      PubletWeb.instance[MailSender].send(mail)
+      PubletWeb.instance[MailSender].get.send(mail)
     }
 
     def to(em: InternetAddress) = {

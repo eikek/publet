@@ -25,5 +25,5 @@ import org.eknet.publet.vfs.Container
 trait Authorizable {
   this: Container =>
 
-  def isAuthorized: Boolean
+  def isAuthorized(action: ResourceAction.Action): Boolean
 }

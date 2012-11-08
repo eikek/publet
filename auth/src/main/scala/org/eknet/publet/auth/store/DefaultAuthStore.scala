@@ -27,10 +27,7 @@ import org.eknet.publet.auth.{DigestGenerator, Algorithm, PasswordServiceProvide
  * @since 01.11.12 18:10
  */
 @Singleton
-class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
-                                  permStore: util.Set[PermissionStore],
-                                  resourceStore: util.Set[ResourceSetStore],
-                                  passwordProvider: PasswordServiceProvider)
+class DefaultAuthStore @Inject() (passwordProvider: PasswordServiceProvider)
       extends UserStore with PermissionStore with ResourceSetStore {
 
   import collection.JavaConversions._
@@ -38,6 +35,25 @@ class DefaultAuthStore @Inject() (userStore: util.Set[UserStore],
   type RealmnameProvider = Unit => String
 
   var realmnameProvider: RealmnameProvider = Unit => "WebDav Area"
+
+  private var userStore: util.Set[UserStore] = util.Collections.emptySet()
+  private var permStore: util.Set[PermissionStore] = util.Collections.emptySet()
+  private var resourceStore: util.Set[ResourceSetStore] = util.Collections.emptySet()
+
+  @Inject(optional = true)
+  def setUserStore(store: util.Set[UserStore]) {
+    this.userStore = store
+  }
+
+  @Inject(optional = true)
+  def setPermStore(store: util.Set[PermissionStore]) {
+    this.permStore = store
+  }
+
+  @Inject(optional = true)
+  def setResourceStore(store: util.Set[ResourceSetStore]) {
+    this.resourceStore = store
+  }
 
   // user store
   def findUser(login: String) =

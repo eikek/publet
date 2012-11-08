@@ -78,7 +78,7 @@ object CounterService {
    *
    * @return
    */
-  def apply(): CounterService = PubletWeb.instance[CounterService]
+  def apply(): CounterService = PubletWeb.instance[CounterService].get
 
   def serviceOption = {
     try {

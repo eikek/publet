@@ -20,7 +20,7 @@ import org.apache.shiro.realm.Realm
 import org.eknet.publet.web.WebExtension
 import org.eknet.publet.web.req.RequestHandlerFactory
 import org.eknet.publet.auth.store.UserStore
-import org.eknet.guice.squire.SquireModule
+import org.eknet.guice.squire.SquireBinder
 
 /**
  *
@@ -28,7 +28,7 @@ import org.eknet.guice.squire.SquireModule
  * @since 15.10.12 13:03
  * 
  */
-trait PubletBinding extends SquireModule {
+trait PubletBinding extends SquireBinder {
 
   def bindRequestHandler = setOf[RequestHandlerFactory]
   def bindExtension = setOf[WebExtension]

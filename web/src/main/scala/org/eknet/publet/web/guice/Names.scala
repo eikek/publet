@@ -27,7 +27,6 @@ object Names {
   val scriptEngine = annot("ScriptEngine")
   val contentroot = annot("contentroot")
   val servletContext = annot("publetServletContext")
-  val settings = annot("settings")
   val config = annot("config")
 
   implicit def annot(str: String) = name.Names.named(str)

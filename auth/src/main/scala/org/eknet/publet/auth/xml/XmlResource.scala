@@ -24,13 +24,15 @@ import org.eknet.publet.auth.store.{User, UserProperty}
 import org.eknet.publet.Publet
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.vfs.events.ContentWrittenEvent
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 01.11.12 22:36
  */
-abstract class XmlResource(source: ContentResource) extends Logging {
+abstract class XmlResource(val source: ContentResource) extends Logging {
 
+  private val lock = new ReentrantReadWriteLock()
   private val prettyPrinter = new PrettyPrinter(90, 2)
   private var lastModification: Option[Long] = None
 
@@ -57,7 +59,7 @@ abstract class XmlResource(source: ContentResource) extends Logging {
 
   def write(currentUser: Option[User], message: String) {
     source match {
-      case ws: Writeable => {
+      case ws: Writeable => withWriteLock {
         val bin = new ByteArrayInputStream(prettyPrinter.format(toXml).getBytes("UTF-8"))
         val user = currentUser.map { u =>
           new ChangeInfo(u.get(UserProperty.fullName), u.get(UserProperty.email), message) }
@@ -69,4 +71,24 @@ abstract class XmlResource(source: ContentResource) extends Logging {
   }
 
   def toXml: Elem
+
+
+  def withReadLock[A](f: => A): A = {
+    lock.readLock().lock()
+    try {
+      f
+    } finally {
+      lock.readLock().unlock()
+    }
+  }
+
+  def withWriteLock[A](f: => A): A = {
+    lock.writeLock().lock()
+    try {
+      f
+    } finally {
+      lock.writeLock().unlock()
+    }
+  }
+
 }

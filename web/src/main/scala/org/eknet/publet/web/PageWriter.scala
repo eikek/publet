@@ -97,11 +97,11 @@ trait PageWriter extends Logging {
 
   def createNew(path: Path, req: HttpServletRequest, resp: HttpServletResponse) {
     val notFoundHandler = {
-      val settings = PubletWeb.instance[StringMap]("settings")
+      val settings = PubletWeb.instance[StringMap].named("settings")
       settings("publet.service.notFoundHandlerNamed").map { name =>
-        PubletWeb.instance[NotFoundHandler](name)
+        PubletWeb.instance[NotFoundHandler].named(name)
       } getOrElse {
-        PubletWeb.instance[NotFoundHandler]
+        PubletWeb.instance[NotFoundHandler].get
       }
     }
     notFoundHandler.resourceNotFound(path, req, resp)

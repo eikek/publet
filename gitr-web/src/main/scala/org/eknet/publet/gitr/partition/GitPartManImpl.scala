@@ -24,6 +24,7 @@ import org.eknet.publet.vfs._
 import org.eknet.publet.vfs.events.{ContentDeletedEvent, ContentWrittenEvent}
 import com.google.inject.{Inject, Singleton}
 import org.eknet.gitr.{Tandem, RepositoryName, GitrMan}
+import org.eknet.publet.gitr.auth.DefaultRepositoryStore
 
 
 /**
@@ -36,6 +37,13 @@ class GitPartManImpl @Inject() (val gitr: GitrMan, bus: EventBus) extends GitPar
   bus.register(this)
 
   private val partitionProperty = "gitPartition"
+
+  private var _repoStore: DefaultRepositoryStore = null
+
+  @Inject
+  def setRepoStore(rs: DefaultRepositoryStore) {
+    this._repoStore = rs
+  }
 
   @Subscribe
   def updateRepository(event: ContentWrittenEvent) {
@@ -57,7 +65,7 @@ class GitPartManImpl @Inject() (val gitr: GitrMan, bus: EventBus) extends GitPar
     gitr.allRepositories(x=>true)
       .collect({case r if (r.isTandem) => gitr.getTandem(r.name)})
       .flatten
-      .map(tandem => new GitPartition(tandem, bus))
+      .map(tandem => new GitPartition(tandem, bus, _repoStore))
   }
 
   def create(location: Path, config: Config) = {
@@ -72,7 +80,7 @@ class GitPartManImpl @Inject() (val gitr: GitrMan, bus: EventBus) extends GitPar
     gitconf.setBoolean("publet", null, partitionProperty, true)
     gitconf.save()
 
-    val gitp = new GitPartition(tandem, bus)
+    val gitp = new GitPartition(tandem, bus, _repoStore)
     gitp
   }
 
@@ -83,7 +91,7 @@ class GitPartManImpl @Inject() (val gitr: GitrMan, bus: EventBus) extends GitPar
 
   def get(location: Path) = {
     gitr.getTandem(RepositoryName(location.asString)) filter (isGitPartition) map { tandem =>
-      new GitPartition(tandem, bus)
+      new GitPartition(tandem, bus, _repoStore)
     }
   }
 

@@ -116,7 +116,7 @@ object RootBuild extends Build {
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-parent",
     libraryDependencies ++= deps
-  ) ++ container.deploy("/app" -> War.module, "/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)
+  ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.0.0-SNAPSHOT",
@@ -461,6 +461,6 @@ object GuiceSquire extends Build {
   )
 
   val deps = Seq(
-    slf4jApi, guice, guiceMultibindings
+    slf4jApi, guice, guiceMultibindings, scalaTest
   )
 }

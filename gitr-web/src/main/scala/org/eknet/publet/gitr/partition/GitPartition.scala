@@ -24,16 +24,48 @@ import org.apache.shiro.SecurityUtils
 import grizzled.slf4j.Logging
 import com.google.common.eventbus.EventBus
 import org.eknet.gitr.Tandem
+import org.eknet.publet.auth.{ResourceAction, Authorizable}
+import org.eknet.publet.auth.ResourceAction.Action
+import org.eknet.publet.gitr.auth.{GitPermissionBuilder, RepositoryTag, DefaultRepositoryStore}
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.gitr.auth.GitAction._
+import org.eknet.publet.vfs.ChangeInfo
+import org.eknet.publet.auth.ResourceAction.Action
+import scala.Some
 
-class GitPartition (val tandem: Tandem, val bus: EventBus)
-  extends FilesystemPartition(tandem.workTree.getWorkTree, bus, false) with Logging {
+class GitPartition (val tandem: Tandem, val bus: EventBus, repoStore: DefaultRepositoryStore)
+  extends FilesystemPartition(tandem.workTree.getWorkTree, bus, false) with Authorizable with GitPermissionBuilder with Logging {
 
   def updateWorkspace():Boolean = {
     tandem.updateWorkTree()
     true
   }
 
-  private def git = tandem.workTree.git
+  def isAuthorized(action: Action) = {
+    action match {
+      case ResourceAction.all => hasRead && hasWrite
+      case ResourceAction.read => hasRead
+      case ResourceAction.write => hasWrite
+    }
+  }
+
+  private def hasRead = {
+    val name = tandem.bare.name
+    val model = repoStore.getRepository(name)
+    if (model.tag == RepositoryTag.open)
+      true
+    else {
+      Security.hasPerm(git action(pull) on(name))
+    }
+  }
+
+  private def hasWrite = {
+    val name = tandem.bare.name
+    Security.hasPerm(git action(push) on(name))
+  }
+
+
+  private def workTree = tandem.workTree.git
 
   private def commit(c: GitFile, changeInfo: Option[ChangeInfo], action:String) {
     val login = Option(SecurityUtils.getSubject.getPrincipal).map(_.toString).getOrElse("anonymous")
@@ -44,7 +76,7 @@ class GitPartition (val tandem: Tandem, val bus: EventBus)
       case _ => action
     }) + "\n\nresource: "+ c.name.fullName+"\nsubject: "+ login
 
-    git.commit()
+    workTree.commit()
       .setMessage(message)
       .setAuthor(name, email)
       .setAll(true)
@@ -54,12 +86,12 @@ class GitPartition (val tandem: Tandem, val bus: EventBus)
   protected[gitr] def commitWrite(c: GitFile, changeInfo: Option[ChangeInfo] = None) {
     synchronized {
       val path = Path(c.file).strip(c.rootPath)
-      git.add()
+      workTree.add()
         .addFilepattern(path.toRelative.asString)
         .setUpdate(false)
         .call()
 
-      if (!git.status().call().isClean) {
+      if (!workTree.status().call().isClean) {
         info("commit: "+ path.toRelative.asString)
 
         commit(c, changeInfo, "Update")
@@ -71,7 +103,7 @@ class GitPartition (val tandem: Tandem, val bus: EventBus)
   protected[gitr] def commitDelete(c: GitFile) {
     synchronized {
       val path = Path(c.file).strip(c.rootPath)
-      git.rm()
+      workTree.rm()
         .addFilepattern(path.toRelative.asString)
         .call()
       commit(c, None, "Delete")

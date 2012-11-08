@@ -34,7 +34,7 @@ import com.google.inject.{Singleton, Inject}
  * @since 22.04.12 08:14
  */
 @Singleton
-class UsersRealm @Inject() (val db: DefaultAuthStore, resolver:PermissionResolver, bus: EventBus) extends AuthorizingRealm {
+class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissionResolver, bus: EventBus) extends AuthorizingRealm {
 
   setCredentialsMatcher(new CompositeCredentialsMatcher(List(
     new DynamicHashCredentialsMatcher,

@@ -24,6 +24,9 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
  * @since 15.10.12 19:17
  */
 class PubletDocModule extends AbstractModule with PubletModule with PubletBinding {
+
+  override def binder() = super.binder()
+
   def configure() {
     bind[PubletDocExtension].asEagerSingleton()
   }

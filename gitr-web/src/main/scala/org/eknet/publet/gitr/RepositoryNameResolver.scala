@@ -29,7 +29,7 @@ trait RepositoryNameResolver {
 
   private val gitRepositoryNameKey = Key("gitRepositoryName", {
     case Request => {
-      PubletWeb.instance[RepositoryService].getRepositoryName(applicationPath, isGitRequest)
+      PubletWeb.instance[RepositoryService].get.getRepositoryName(applicationPath, isGitRequest)
     }
   })
 
@@ -41,7 +41,7 @@ trait RepositoryNameResolver {
 
   private val repositoryModelKey = Key("requestRepositoryModel", {
     case Request => getRepositoryName.map { name =>
-      PubletWeb.instance[DefaultRepositoryStore].getRepository(name)
+      PubletWeb.instance[DefaultRepositoryStore].get.getRepository(name)
     }
   })
 
@@ -57,7 +57,7 @@ trait RepositoryNameResolver {
   private val gitActionKey = Key("gitrequestAction", {
     case Request => {
       if (isGitRequest) {
-        Some(PubletWeb.instance[RepositoryService].getGitRequestAction(fullUrl))
+        Some(PubletWeb.instance[RepositoryService].get.getGitRequestAction(fullUrl))
       } else {
         None
       }

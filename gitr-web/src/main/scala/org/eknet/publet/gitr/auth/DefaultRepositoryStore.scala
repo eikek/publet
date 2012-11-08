@@ -25,20 +25,27 @@ import org.eknet.gitr.RepositoryName
  * @since 04.11.12 16:14
  */
 @Singleton
-class DefaultRepositoryStore @Inject() (repoStore: util.Set[RepositoryStore])  extends RepositoryStore {
+class DefaultRepositoryStore extends RepositoryStore {
   import collection.JavaConversions._
 
+  private var _repoStores: util.Set[RepositoryStore] = util.Collections.emptySet()
+
+  @Inject(optional = true)
+  def setRepoStores(stores: util.Set[RepositoryStore]) {
+    this._repoStores = stores
+  }
+
   def findRepository(name: RepositoryName) = {
-    repoStore.foldLeft(None:Option[RepositoryModel])((el, store) => if (el.isDefined) el else store.findRepository(name))
+    _repoStores.foldLeft(None:Option[RepositoryModel])((el, store) => if (el.isDefined) el else store.findRepository(name))
   }
 
   def getRepository(name: RepositoryName) = findRepository(name).getOrElse(RepositoryModel(name, RepositoryTag.open))
 
-  def allRepositories = repoStore.flatMap(rs => rs.allRepositories)
-  def repositoriesByOwner(owner: String) = repoStore.flatMap(rs => rs.repositoriesByOwner(owner))
+  def allRepositories = _repoStores.flatMap(rs => rs.allRepositories)
+  def repositoriesByOwner(owner: String) = _repoStores.flatMap(rs => rs.repositoriesByOwner(owner))
 
   def findRepositoryStore(name: RepositoryName) =
-    repoStore.foldLeft(None:Option[RepositoryStore])((el, store) => if (el.isDefined) el else {
+    _repoStores.foldLeft(None:Option[RepositoryStore])((el, store) => if (el.isDefined) el else {
       if (store.findRepository(name).isDefined) Some(store)
       else None
     })

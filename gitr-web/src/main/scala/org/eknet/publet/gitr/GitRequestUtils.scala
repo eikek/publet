@@ -18,7 +18,8 @@ package org.eknet.publet.gitr
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.{Config, RequestAttr, RequestUrl}
-import org.eknet.publet.gitr.auth.{RepositoryModel, GitAction}
+import org.eknet.publet.gitr.auth.{GitPermissionBuilder, RepositoryModel, GitAction}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,16 +29,15 @@ class GitRequestUtils(val req: HttpServletRequest) extends RepositoryNameResolve
 
 }
 
-object GitRequestUtils {
+object GitRequestUtils extends GitPermissionBuilder {
   implicit def toGitRequestUtils(req: HttpServletRequest) = new GitRequestUtils(req)
 
   def gitMount(config: Config) = config("publet.gitMount").getOrElse("git")
 
-
   def checkGitAction(action: GitAction.Action, model: RepositoryModel) {
-
+    Security.checkPerm(git action(action) on model.name)
   }
   def hasGitAction(action: GitAction.Action, model: RepositoryModel): Boolean = {
-    false
+    Security.hasPerm(git action(action) on model.name)
   }
 }
