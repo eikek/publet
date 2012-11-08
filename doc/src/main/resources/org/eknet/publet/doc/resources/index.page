@@ -85,6 +85,6 @@ title: Publet Documentation
       .tab-pane#scripts
         =include("_scala-scripts.md")
       .tab-pane#security
-        =include("_security.md")
+        =include("_security.jade")
       .tab-pane#assets
         =include("_assets.jade")

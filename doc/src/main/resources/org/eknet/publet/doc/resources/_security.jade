@@ -1,0 +1,502 @@
+:markdown
+  # Security
+
+  Publet implements a security strategy using [Apache Shiro](http://shiro.apache.org).
+
+  Publet is a web application that serves resources from a configured content tree. The content
+  tree is a collection of _partitions_. A partition is a special container that is said to "own"
+  (in a security sense) its child resources and can itself have a security scheme. That is
+  necessary, since it might be accessed by other means not in the scope of publet web app.
+
+  The publet web application does not need to honor partition access conditions. It could very
+  well decide to still serve this one resource, but not the other. In particular, if a partition denies
+  access to the current subject, it is assumed that the subject is not able to access *any* resource
+  in that partition. That means, if the publet server decides to still deliver the resource, it can be
+  sure that this is the only way for the current subject. On the other hand, if a partition grants
+  access, then the current subject can access *all* resources in this partition in some other way. In
+  this case, it makes no sense to obey any other restrictions. This idea is the basis of publet's
+  `resource` permissions.
+
+
+  ## Permission Strings
+
+  Permission strings are used as described in shiro's [manual](http://shiro.apache.org/permissions.html).
+  There are two pre-defined domains for permissions:
+
+  * git -- for permissions regarding git repositories
+  * resource -- for permissions regarding single resources
+
+
+  ## Resource Permissions
+
+  Resource permissions apply to the publet web app and they can be used to overrule the partition
+  security schemes as described above.
+
+  A resource permission is marked by the `resource` domain and can be granted for a specific set
+  of resources identified by its paths in the content tree. Resource sets are defined conveniently
+  by using globs: `/main/priv/**` for example means "any resource below `/main/priv/`". The possible
+  actions are `read` and `write`, while `write` includes the deletion of existing and creation of
+  new resources.
+
+  Resource permissions are of the form
+
+      resource:read,write:/path/pattern/**,/path/*/pattern/**
+
+  The above defines the permissions to read and write resources
+  that match the patterns `/path/pattern/**` or `/path/*/pattern/**`. A shorter version
+  would be
+
+      resource:*:/path/pattern/**,/path/*/pattern/**
+
+  A permission that would grant all access actions to all resources looks like this
+
+      resource:*:/**
+
+  or
+
+      resource:*:**
+
+  Note the double '*' characters. While the actions read and write are used by publet, you can also
+  define other actions and check them.
+
+
+  ## Git Partition
+
+  Publet comes with a partition type, that is backed by a git repository. The
+  git repository can also be accessed by the git command line client (or any other git client, of course).
+  The git servlet provided by [JGit](http://www.jgit.org/) is taking care of those requests.
+
+  Requests to the git servlet are authenticated and authorized based on two permissions: `pull` and `push`.
+  The permissions are checked against a repository model, which is defined in some database. A repository
+  model provides the following information
+
+  * name -- the repository name, used for identifying
+  * tag -- can be _open_ or _closed_
+  * owner -- the username of the owner of this repository
+
+  The repository tag describes whether this is an _open_ or _closed_ repository. Open repositories can be
+  read by everyone, no matter if authenticated or not. Closed repositories always require either pull
+  or push permissions.
+
+  Thus, if a git client wants to clone a closed repository, the client has to authenticate and `pull`
+  permissions are checked. Cloning open repositories is allowed without authentication. Any write
+  access (git push) is always authenticated and the `push` permission is checked.
+
+  Git permissions are prefixed by the domain `git`, followed by the permission(s) and the last part is
+  a list of repository names to which those permissions apply. For example, to grant `pull` permissions:
+
+      git:pull:contentroot,myproject
+
+  The publet webapp provides a simple administration web interface. This uses three more permissions defined
+  in the git domain.
+
+  * admin -- for editing repository attributes, like setting open/closed state and deleting the repository
+  * create, createRoot -- for creating new repositories, either below the own username only or at a place of choice
+
+  The repository owner is always granted all repository permissions implicitely (which are pull, push and admin).
+
+  ## Authorizing access to pages
+
+  When accessing resources over the web, more granular access checks are possible. Restricting read access
+  makes obviously only sense for resources coming from closed git repositories or non git repositories. Resources
+  from open git repositories are always served without access checks. Usually, you might want to have a closed
+  repository, but open up certain paths to the public. This is possible by applying a mix of resource permissions
+  and two sets of resource patterns: one for restricted and one for anonymous access. On each request (to a
+  non-open repository), the url is first matched against the defined set of restricted resource patterns. If no
+  match is found, the url is matched against the defined anonymous set of patterns. If a match is found, the request
+  is served, otherwise the read or write action is checked against the current subject.
+
+
+  #### Examples
+
+  ##### 1. allow sub paths
+
+      <repository name="contentroot" tag="closed"/>    - close the repository
+      <resources>
+        <open>/main/public/**</open>                   - open up everything below /main/public/. access to other
+      </resources>                                       resources is checked by default.
+
+  ##### 2. explicit deny
+
+      <repository name="contentroot" tag="closed"/>    - close the repository
+      <resources>
+        <open>/main/**</open>                          - open up everything below /main/, but
+        <restrict>/main/members/**</restrict>          - restrict access to everything below /main/members/
+      </resources>
+      <grant>                                          - all "developers" are able to access /main/mebers/**
+        <perm>resource:read:/main/members/**</perm>
+        <to>developers</to>
+      </grant>
+
+  ##### 3. selective
+
+      <repository name="contentroot" tag="closed"/>    - close the repository
+      <resources>
+        <open>/main/**</open>
+        <restrict>/main/projectx/**</restrict>
+        <restrict by="chefaction">                     - access to everything below /main/projectx/chefsonly
+          /main/projectx/chefsonly/**                    is restricted by checking a resource permission using the
+        </restrict>                                      given part "checkaction".
+      </resources>
+      <grant>                                          - all "developers" are able to access /main/projectx/**
+        <perm>resource:read:/main/projectx/**</perm>
+        <to>developers</to>
+      </grant>
+      <grant>                                          - all "managers" are also able to access /main/projectx/chefsonly/**
+        <perm>resource:read:/main/projectx/**</perm>
+        <perm>resource:chefaction:/main/projectx/chefsonly/**</perm>
+        <to>managers</to>
+      </grant>
+
+  ##### 4. more selective
+
+      <repository name="contentroot" tag="closed"/>    - close the repository
+      <resources>
+        <open>/main/**</open>
+        <restrict>/main/projectx/**</restrict>
+        <restrict by="chefaction" on="write">          - protect write access by checking "chefaction" againts the url
+          /main/projectx/chefsonly/**                    read access is not affected by this rule
+        </restrict>
+      </resources>
+      <grant>                                          - all "developers" are able to read and write /main/projectx/**
+        <perm>resource:read,write:/main/projectx/**</perm>
+        <to>developers</to>
+      </grant>
+      <grant>                                          - all "managers" are able to access /main/projectx/chefsonly/**
+        <perm>resource:chefaction:/main/projectx/chefsonly/**</perm>
+        <perm>resource:read,write:/main/projectx/**</perm>
+        <to>managers</to>
+      </grant>
+
+
+  The order of <restrict> and <open> definitions does not matter. If a resource matches one of the resticted
+  patterns, the corresponding permission is checked. It is also checked if there is no match in the set of
+  open patterns. Basically on each access, the git permission is checked first (if applicable) and if that
+  returns a positive response, access is granted. Only if the "global" access to the git repository is denied,
+  the resource permissions are used to "overwrite" the restrictions.
+
+  #### What happens ...
+
+  ... when a requests hits the server.
+
+  `GET: /main/projectx/index.html`
+
+  1. if partition grants read: SERVE. Else
+  2. rset = restriction patterns for read
+     for r <- rset check("resource:" +r.action+ ":" +url)
+  3. if (!rset.isEmpty) SERVE, else:
+       aset = open patterns
+       if (url in aset) SERVE else
+  4. check("resource:read:"+url)
+
+
+  `PUT: /main/projectx/image.png`
+
+  1. if partition grants write SERVE, else
+  2. rset = restriction patterns for write
+     for r <- rset check("resource" +r.action+ ":" +url)
+     if (!rset.isEmpty) SERVE, else
+  3. check("resource:write:"+url)
+
+
+
+  ## Default Database
+
+  Publet provides the ability to specify all authentication and authorization information in xml
+  files in the content tree. The files are
+
+      /.allIncludes/config/permissions.xml
+      /.allIncludes/config/repositories.xml
+
+  where the first contains the user repository, the permission definitions and the resource pattern
+  sets. The second one contains a list of git repository models.
+
+  ### Superadmin
+
+  After a fresh install, there is no authentication data available. That's why a superadmin-account
+  is added. This can be removed by specifying
+
+      superadminEnabled=false
+
+  in the configuration file. The login is `superadmin` and the password can also be specified in
+  the configuration file
+
+      superadminPassword=superadmin
+
+  and is `superadmin` by default.
+
+  The _superadmin_ always has all privileges.
+
+
+  ### Repositories file explained
+
+  Here is an example `repositories.xml` file:
+
+      <!-- Defines repository states, default is `open` -->
+      <repositories>
+        <repository name="jdoe/dotfiles" tag="closed" owner="jdoe"/>
+        <repository name="wikis/mywiki" tag="open" owner="jdoe"/>
+        <repository name="contentroot" tag="closed"/>
+      </repositories>
+
+  The main content repository is called `contentroot` and is created by default. But
+  there may exists more repositories. The tag `<repositories/>` defines the state for each. Any
+  repository not listed is always an _open_ repository. In the example the
+  `contentroot` is defined to be a closed repository. Access to a closed repository
+  will always be checked.
+
+  Additionally (and optional), an owner can be specified. This should be a
+  login of an registered user.
+
+
+  ### Permission file explained
+
+  Here is an example `permissions.xml` file explained:
+
+      <publetAuth>
+        <!-- user database
+         -
+         - users are filtered on login property. This must be unique
+         - any duplicates are ignored, the first entry wins.
+        -->
+        <users>
+          <user login="jdoe">
+            <fullName>John Doe</fullName>
+            <email>jdoe@mail.com</email>
+            <password>098f6bcd4621d373cade4e832627b4f6</password>
+            <algorithm>md5</algorithm>
+            <digest>abcdef</digest>
+            <group>wikiuser</group>
+            <group>editor</group>
+          </user>
+        </users>
+
+        <!-- Defines permissions and associates them to groups -->
+        <permissions>
+          <!-- allows many perm and to tags; information is collected from all grant tags -->
+          <grant>
+            <to>manager</to>
+            <to>editor</to>
+            <perm>git:pull:*</perm>
+            <perm>resource:*:*</perm>
+          </grant>
+          <grant>
+            <to>coders</to>
+            <perm>resource:read:/**</perm>
+          </grant>
+          <grant>
+            <to>anonymous</to>
+            <perm>resource:read:/**</perm>
+          </grant>
+        </permissions>
+
+        <resources>
+          <open>/main/**</open>
+          <restrict>/main/projectx/**</restrict>
+          <restrict by="chefaction">
+            /main/projectx/chefsonly/**
+          </restrict>
+        </resources>
+      </publetAuth>
+
+  Note, the file is inside the repository, so you can edit it like any
+  other resource.
+
+  #### User Database
+
+  The `<users/>` tag represents the user database. Each user is specified with
+  login and password. The password can be plain text or encrypted using one of
+  JDK's supported algorithms. In the example file, I created a md5 encrypted
+  password using the command
+
+      echo -n "test" | md5sum
+
+  The `<group/>` tag specifies the roles or groups the user belongs to. Permissions
+  can only be associated with groups.
+
+  The `digest` property specifies the so called `HA1` value for authenticating
+  using the [Digest](http://en.wikipedia.org/wiki/Digest_access_authentication)
+  method. Currently, this is only used for authenticating WebDAV requests and is therefore
+  optional (if it is not present authentication does not work for WebDAV
+  requests). Please refer to the WebDAV documentation for more information.
+
+
+  #### Permissions
+
+  Permissions are simple strings and associated to a group. You sould read the
+  [shiro documentation about wildcard permissions](http://shiro.apache.org/permissions.html).
+
+  There exist some predefined permissions that are checked by publet, for the `git` and
+  `resource` domain.
+
+  You can define any permission you like using the `<grant/>` tag and check them
+  anywhere in a template or script using the `Security` scala singleton:
+
+      Security.checkPerm(perm:String)
+      Security.hasPerm(perm: String): Boolean
+
+  That way it's easy to check specific permissions in a template. See the source code of
+  the `Security` object for more information.
+
+
+  #### Resource Sets
+
+  The information provided in the `<resources/>` tag is used to control if and
+  how to do access checks for a single resource. Those are applied in publet's
+  http filter when serving web pages. Those patterns allow you
+  to define what permissions to check for sets of resources. It is a shortcut for
+  adding
+
+      Security.checkPerm("<perm>")
+
+  to any page template.
+
+  As already said, resources from open git repositories are not access checked. This
+  section therefore only applies to resources served from closed git repositories
+  or other containers.
+
+  By default, each access to a resource is protected by checking either `read` or
+  `write` permissions. For a GET request to `/main/test/index.html` the permission
+  `resource:read:/main/test/index.html` is checked before proceeding. For simple
+  setups, this and the `<open/>` tag should suffice.
+
+  In order to explicitely skip access checks for a set of resources, specify a
+  `<open/>` pattern:
+
+      <open>/main/public/**</open>
+
+  This opens up all pages in "/main/public/" and all subfolders.
+
+  More refined checks can be specified by defining other permissions to check. Let's
+  say the content in `/main/projectx/` should be readable to all developers, but only
+  managers should be able to read and write to `/main/projectx/planning/`. At
+  first, it sufficient to grant read permissions to all developers and managers, while managers are granted
+  write access:
+
+      <grant>
+        <to>developer</to>
+        <to>manager</to>
+        <perm>resource:read:/main/projectx/**</perm>
+      </grant>
+      <grant>
+        <to>manager</to>
+        <perm>resource:write:/main/projectx/planning/**</perm>
+      </grant>
+
+  Now developers and managers can read everything below `/main/projectx/`, including `/main/projectx/planning/`. So
+  we deny developers access to the special sub-path by introducing a new permission `managerread` and protecting
+  any read access to `/main/projectx/planning/` with it.
+
+      <grant>
+        <to>manager</to>
+        <perm>resource:managerread:/main/porjectx/**</perm>
+      </grant>
+      <resources>
+        <restrict by="managerread" on="read">
+          /main/projectx/planning/**
+        </restrict>
+      </resources>
+
+  The `<resource/>` section tells publet to check the resource permission `managerread` instead of the default
+  `read` permission for any read access to resources matching the pattern `/main/projectx/planning/**`. The `<grant/>` section
+  associates the `managerread` resource permission for all resources below `/main/projectx/` -- i.e.
+  `/main/projectx/planning/**` -- to the group `manager`. Now, if a developer tries to access a resource in
+  `/main/projectx/planning/`, an "unauthorized" error is shown.
+
+  The pattern may contain three wildcards:
+
+  * a star `*` to express many characters up to the next path delimiter `/`
+  * a question mark `?` to express exactly one character
+  * a double star `**` to express many characters crossing path boundaries
+
+
+  ## Authentication
+
+  There is standard login functionality provided with publet. It uses a simple
+  login template and a script that executes the login. If a unauthorized error
+  occurs somewhere in the application, the client is redirected to this login
+  template.
+
+  The path to the default login template is: `/publet/templates/login.jade`. So
+  you can login at this url: `/publet/templates/login.html`.
+
+  The template looks for a url parameter of name `redirect` and will replace
+  the URL of the browser with that value after successful login. So you could
+  write the request `/publet/template/login.html?redirect=/main/index.html` to
+  be redirected to the main screen after successful login.
+
+  A more useful variation is to use the current URL for redirect. This can be
+  achieved easily with some scala code in your template (jade):
+
+      - def urlOf(str: String) = PubletWebContext.urlOf(str)
+      - val loginUrl = urlOf("/publet/templates/login.html") + "?redirect="+ urlOf(PubletWebContext.applicationUri)
+      - val logoutUrl = urlOf("/publet/scripts/logout.json?redirect=" + urlOf("/"))
+      ul
+        - if (Security.isAuthenticated)
+          li
+            a(href={ logoutUrl })
+              i.icon-hand-right
+              | Logout
+        - if (!Security.isAuthenticated)
+          li
+            a.btn.btn-inverse(href={ loginUrl })
+              i.icon-user.icon-white
+              | Login
+
+  The example above renders a login link, if the current user is anonmyous. It
+  will render a logout link, if the current user is logged in. As you can see,
+  the logout is performed using the `logout.json` script.
+
+  The scala script that the login form is sending its content to, is at the path
+  `/publet/scripts/login.json`. It will use the information provided by the
+  login form and issue an login using [Apache Shiro's](http://shiro.apache.org)
+  API.
+
+  The code is very simple (thanks to shiro):
+
+      object Login extends ScalaScript {
+
+        def serve() = {
+          val username = PubletWebContext.param("username")
+          val password = PubletWebContext.param("password")
+          val rememberMe = PubletWebContext.param("rememberMe")
+          if (username.isDefined && password.isDefined) {
+            val subject = Security.subject
+            val token = new UsernamePasswordToken(username.get, password.get.toCharArray)
+            token.setRememberMe(checkboxToBoolean(rememberMe))
+            try {
+              subject.login(token)
+              makeJson(Map("success"->true, "message"->"Login successful."))
+            } catch {
+              case e:ShiroException => {
+                makeJson(Map("success"->false, "message"->"Login failed."))
+              }
+            }
+          } else {
+            makeJson(Map("success"->false, "message"->"No login information given."))
+          }
+        }
+
+        def checkboxToBoolean(str: Option[String]): Boolean = {
+          str.exists(_ == "on")
+        }
+      }
+
+  At first the parameters are extracted from the request using
+  `PubletWebContext.param("name")`. Then a authentication token is created and
+  passed to the `login()` method of shiro's `Subject`. That's all about it.
+
+
+  ### Customize Login
+
+  You can create a custom login template that either reuses the provided
+  `login.json` script or using a custom one. Please have a look at the [source
+  of the provided template](../templates/login.jade) for a starting point.
+
+  To have publet redirect to your custom template on unauthentication errors,
+  add its location to the `settings.properties` file:
+
+      publet.loginUrl=/path/to/your/login-template.jade
+
+  If you like to execute your own code for login, just add a new template that
+  uses your custom script.
