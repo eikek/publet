@@ -56,5 +56,5 @@ class SuperadminStore @Inject() (config: Config) extends UserStoreAdapter with P
 
   def getPermissions(group: String*) = Set[String]()
 
-  def getUserPermissions(user: User) = Set("*")
+  def getUserPermissions(user: User) = if (user == superadmin) Set("*") else Set[String]()
 }

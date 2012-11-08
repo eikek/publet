@@ -62,7 +62,9 @@ class XmlRepositoryStore @Inject() (@Named("contentroot") container: Provider[Co
 
 class XmlData(source: ContentResource, userStore: UserStore) extends XmlResource(source) {
 
-  private var model = new Model
+  private val model = new Model
+
+  reload()
 
   class Model {
     var repositories = Map[String, RepositoryModel]()
@@ -70,7 +72,7 @@ class XmlData(source: ContentResource, userStore: UserStore) extends XmlResource
 
   def onLoad(rootElem: Elem) {
     withWriteLock {
-      this.model.repositories = (rootElem \ "repositories" \ "repository")
+      this.model.repositories = (rootElem \ "repository")
         .map(repositoryFromXml(_))
         .map(rm => rm.name.name -> rm)
         .toMap
