@@ -104,8 +104,8 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
         val l1: Long = v2.get(pageCountKey).getOrElse(0)
         l0.compareTo(l1) > 0
       }).map(v => (
-        v(pagePathKey).asInstanceOf[String],
-        v(pageCountKey).asInstanceOf[Long])
+        v(pagePathKey).get.asInstanceOf[String],
+        v(pageCountKey).getOrElse(0L).asInstanceOf[Long])
       )
     }
   }

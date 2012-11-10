@@ -111,7 +111,6 @@ object Security extends Logging with PermissionBuilder {
     hasPerm(resource grant(action) on path.asString)
   }
 
-
   def hasWritePermission(resourcePath: Path): Boolean = {
     PubletWeb.instance[ResourcePermissionService].get.isWritePermitted(resourcePath)
   }
@@ -131,4 +130,9 @@ object Security extends Logging with PermissionBuilder {
     PubletWeb.instance[ResourcePermissionService].get.isReadPermitted(resourcePath)
   }
 
+  def hasGroup(names: String*) = {
+    import collection.JavaConversions._
+    if (!isAuthenticated) false
+    else subject.hasAllRoles(names.toList)
+  }
 }

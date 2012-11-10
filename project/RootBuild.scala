@@ -25,7 +25,7 @@ object Version {
   val milton = "1.8.1.3"
   val ccodec = "1.5"
   val jdom = "1.1"
-  val jetty = "8.1.7.v20120910"
+  val jetty = "8.1.8.v20121106"
   val bouncyCastle = "1.46"
   val scala = "2.9.2"
   val yuicompressor = "2.4.7"
@@ -384,6 +384,7 @@ object Doc extends Build {
 
 object Server extends Build {
   import sbtassembly.Plugin._
+  import AssemblyKeys._
   import com.github.siasia._
 
   val serverDist = TaskKey[File]("server-dist", "Creates a distributable zip file containing the publet standalone server.")
@@ -396,6 +397,12 @@ object Server extends Build {
 
   val buildProperties = Project.defaultSettings ++ assemblySettings ++ Seq[Project.Setting[_]](
     name := "publet-server",
+    mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+      {
+        case "about.html" => MergeStrategy.concat
+        case x => old(x)
+      }
+    },
     serverDist <<= (AssemblyKeys.assembly, PluginKeys.packageWar.in(War.module).in(Compile), Keys.target, Keys.name, Keys.version, Keys.sourceDirectory) map { (server:File, war:File, target:File, name:String, version:String, sourceDir: File) =>
       val distdir = target / (name +"-"+ version)
       val zipFile = target / (name +"-"+ version +".zip")
@@ -430,7 +437,7 @@ object Server extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(grizzledSlf4j, servletApi, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
+  val deps = Seq(grizzledSlf4j, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
 }
 
 object App extends Build {

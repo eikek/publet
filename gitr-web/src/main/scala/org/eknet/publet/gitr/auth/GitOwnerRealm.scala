@@ -27,6 +27,9 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo
 import com.google.common.eventbus.Subscribe
 
 /**
+ * This realm adds git pull, push and admin permissions to all repositories
+ * the principal is owner of.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 05.11.12 22:47
  */

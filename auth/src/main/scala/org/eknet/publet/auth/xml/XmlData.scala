@@ -68,7 +68,7 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
       data.permissions = pmap.toMap
 
       data.anonPatterns ++= (rootElem \ "resources" \ "open").map(_.text).toList
-      data.restricted ++= (rootElem \ "resources" \ "restricted").map(restrictedFromXml).toList
+      data.restricted ++= (rootElem \ "resources" \ "restrict").map(restrictedFromXml).toList
 
       this._data = data
     }
@@ -132,19 +132,19 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
   private def restrictedToXml(rdef: ResourcePatternDef) = {
     rdef match {
       case ResourcePatternDef(Glob(pattern), "", ResourceAction.all) => {
-        <restricted>
+        <restrict>
           { pattern }
-        </restricted>
+        </restrict>
       }
       case ResourcePatternDef(Glob(pattern), "", action) => {
-        <restricted on={action.name}>
+        <restrict on={action.name}>
           { pattern }
-        </restricted>
+        </restrict>
       }
       case ResourcePatternDef(Glob(pattern), by, on) => {
-        <restricted on={on.name} by={by}>
+        <restrict on={on.name} by={by}>
           { pattern }
-        </restricted>
+        </restrict>
       }
     }
   }

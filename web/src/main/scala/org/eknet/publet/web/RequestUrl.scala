@@ -117,6 +117,12 @@ trait RequestUrl extends Logging {
    */
   def resourcePath = attr(resourceUri).get
 
+  /**
+   * Returns the path to the source file that this request
+   * is pointing to.
+   *
+   * @return
+   */
   def getResourceUri = resourcePath.map(_.asString).getOrElse("")
 
   /**
