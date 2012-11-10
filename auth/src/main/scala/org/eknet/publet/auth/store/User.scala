@@ -26,6 +26,8 @@ import org.eknet.publet.auth.{DigestGenerator, Algorithm}
 final class User(val login: String, val properties: Map[UserProperty.Value, String]) extends Serializable {
   require(login != null && !login.isEmpty)
 
+  def this(login: String) = this(login, Map())
+
   def get(name: UserProperty.Value) = properties.get(name)
   def isEnabled = !get(enabled).exists(_ == "false")
 

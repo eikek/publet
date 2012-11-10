@@ -16,33 +16,38 @@
 
 package org.eknet.publet.auth
 
-import collection.JavaConversions._
 import org.apache.shiro.realm.AuthorizingRealm
-import org.apache.shiro.authz.{SimpleAuthorizationInfo, AuthorizationInfo}
+import org.apache.shiro.authz.AuthorizationInfo
 import org.apache.shiro.subject.PrincipalCollection
-import org.apache.shiro.authc.{UsernamePasswordToken, DisabledAccountException, AuthenticationToken}
-import org.apache.shiro.{authz, SecurityUtils}
+import org.apache.shiro.authc.{UsernamePasswordToken, AuthenticationToken}
 import org.apache.shiro.authc.credential.SimpleCredentialsMatcher
-import com.google.common.eventbus.EventBus
-import scala.Some
-import org.eknet.publet.auth.store.{DefaultAuthStore, User}
-import org.apache.shiro.authz.permission.{PermissionResolver, WildcardPermission}
+import org.eknet.publet.auth.store.DefaultAuthStore
 import com.google.inject.{Singleton, Inject}
+import com.google.common.eventbus.Subscribe
+import org.apache.shiro.cache.MemoryConstrainedCacheManager
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 22.04.12 08:14
  */
 @Singleton
-class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissionResolver, bus: EventBus) extends AuthorizingRealm {
+class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissionResolver) extends AuthorizingRealm with Logging {
+
+  @Subscribe
+  def clearCacheOnChange(event: AuthDataChanged) {
+    Option(getAuthenticationCache).map(_.clear())
+    Option(getAuthorizationCache).map(_.clear())
+  }
 
   setCredentialsMatcher(new CompositeCredentialsMatcher(List(
     new DynamicHashCredentialsMatcher,
-    new DigestCredentialsMatcher(db),
+    new DigestCredentialsMatcher,
     new SimpleCredentialsMatcher
   )))
 
   setPermissionResolver(resolver)
+  setCacheManager(new MemoryConstrainedCacheManager)
 
   override def supports(token: AuthenticationToken) = {
     token.isInstanceOf[DigestAuthenticationToken] || token.isInstanceOf[UsernamePasswordToken]
@@ -50,47 +55,16 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissio
 
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val user = token.getPrincipal.toString
-    db.findUser(user) match {
-      case Some(u) => {
-        if (u.isEnabled) new UserAuthInfo(u)
-        else throw new DisabledAccountException("Account disabled.")
-      }
-      case None => null
-    }
+    db.findUser(user).map(u => new UserAuthcInfo(u)).orNull
   }
 
   def doGetAuthorizationInfo(principals: PrincipalCollection): AuthorizationInfo = {
     val login = getAvailablePrincipal(principals).toString
-    db.findUser(login) map { user =>
-      new PolicyAuthInfo(user)
-    } getOrElse {
-      new SimpleAuthorizationInfo()
-    }
+    db.findUser(login).map(u => {
+      val groups = db.getGroups(login)
+      val dbperms = db.getAllUserPermissions(login)
+      new PolicyAuthzInfo(u, groups, dbperms)
+    }).orNull
   }
 
-  class PolicyAuthInfo(user: User) extends AuthorizationInfo {
-
-    private def buildPolicy() = {
-      val permset = collection.mutable.Set[String]()
-      val dbperms = db.getUserPermissions(user)
-      dbperms.foreach(p =>  permset += p)
-
-      Policy(Set(), permset.toSet, db.getGroups(user.login))
-    }
-
-    private def policy = {
-      Option(SecurityUtils.getSubject.getSession.getAttribute("policy")).map(_.asInstanceOf[Policy])
-        .getOrElse {
-          val policy = buildPolicy()
-          SecurityUtils.getSubject.getSession.setAttribute("policy", policy)
-          policy
-        }
-    }
-
-    def getRoles = policy.groups
-    def getStringPermissions = policy.stringPerms
-    def getObjectPermissions = policy.objPerms
-  }
-
-  case class Policy(objPerms: Set[authz.Permission], stringPerms: Set[String], groups: Set[String])
 }

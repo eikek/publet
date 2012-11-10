@@ -36,22 +36,18 @@ abstract class XmlResource(val source: ContentResource) extends Logging {
   private val prettyPrinter = new PrettyPrinter(90, 2)
   private var lastModification: Option[Long] = None
 
-  def load() {
-    info("LOADING XML permissions file...")
-    reloadIfChanged()
-  }
-
   def reload() {
     lastModification = None
     reloadIfChanged()
   }
 
-
-  def reloadIfChanged() {
+  def reloadIfChanged() = {
     if (lastModification.getOrElse(0L) != source.lastModification.getOrElse(0L)) {
-      info("Reloading permissions due to file change")
       val rootElem = XML.load(source.inputStream)
       onLoad(rootElem)
+      true
+    } else {
+      false
     }
   }
 

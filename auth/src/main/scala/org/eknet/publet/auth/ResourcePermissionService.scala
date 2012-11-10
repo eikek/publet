@@ -41,7 +41,7 @@ class ResourcePermissionService @Inject() (publet: Publet, authm: DefaultAuthSto
       case Some((p, c: Authorizable)) if (c.isAuthorized(read)) => true
       case _ => {
         val restricted = authm.restrictedResources.filter(rd => rd.pattern.matches(path.asString) && rd.on.contains(read))
-        val ok = restricted.foldLeft(false)((b, rd) => if (b) true else f(permString(read, rd, path)))
+        val ok = restricted.foldLeft(true)((b, rd) => b && f(permString(read, rd, path)))
         if (ok && !restricted.isEmpty) true
         else {
           val anon = authm.anonPatterns.foldLeft(false)((b, op) => if (b) true else op.matches(path.asString))
@@ -52,8 +52,22 @@ class ResourcePermissionService @Inject() (publet: Publet, authm: DefaultAuthSto
     }
   }
 
+  /**
+   * Returns whether the current subject is allowed to read the resource at the
+   * given path.
+   *
+   * @param path
+   * @return
+   */
   def isReadPermitted(path: Path) = hasReadPermission(path, perm => SecurityUtils.getSubject.isPermitted(perm))
 
+  /**
+   * Checks whether the current subject is allowed to read the resource at the
+   * given path. If access is not granted an exception is thrown.
+   *
+   * @param path
+   * @return
+   */
   def checkRead(path: Path) = hasReadPermission(path, perm => {
     SecurityUtils.getSubject.checkPermission(perm)
     true
@@ -66,7 +80,7 @@ class ResourcePermissionService @Inject() (publet: Publet, authm: DefaultAuthSto
       case Some((p, c: Authorizable)) if (c.isAuthorized(write)) => true
       case _ => {
         val restricted = authm.restrictedResources.filter(rd => rd.pattern.matches(path.asString) && rd.on.contains(write))
-        val ok = restricted.foldLeft(false)((b, rd) => if (b) true else f(permString(write, rd, path)))
+        val ok = restricted.foldLeft(true)((b, rd) => b && f(permString(write, rd, path)))
         if (ok && !restricted.isEmpty) true
         else {
           f(resource action(write) on path.asString)
@@ -75,8 +89,22 @@ class ResourcePermissionService @Inject() (publet: Publet, authm: DefaultAuthSto
     }
   }
 
+  /**
+   * Returns whether the current subject is allowed to write to the resource
+   * at the given path.
+   *
+   * @param path
+   * @return
+   */
   def isWritePermitted(path: Path) = hasWritePermission(path, perm => SecurityUtils.getSubject.isPermitted(perm))
 
+  /**
+   * Checks whether the current subject is allowed to write to the resource
+   * at the given path. If access is not granted, an exception is thrown.
+   *
+   * @param path
+   * @return
+   */
   def checkWrite(path: Path) = hasWritePermission(path, perm => {
     SecurityUtils.getSubject.checkPermission(perm)
     true

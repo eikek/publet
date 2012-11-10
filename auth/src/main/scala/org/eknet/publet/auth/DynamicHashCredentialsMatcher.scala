@@ -28,7 +28,7 @@ class DynamicHashCredentialsMatcher extends CredentialsMatcher {
 
   def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
     (info, token) match {
-      case (ui: UserAuthInfo, pwt: UsernamePasswordToken) => {
+      case (ui: UserAuthcInfo, pwt: UsernamePasswordToken) => {
         ui.algorithm.map(PasswordServiceProvider.newPasswordService(_)) match {
           case Some(ps) => {
             val given = token.getCredentials

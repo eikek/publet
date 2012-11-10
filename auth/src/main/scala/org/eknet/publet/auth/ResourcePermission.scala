@@ -35,8 +35,8 @@ final case class ResourcePermission(str: String) extends WildcardPermission(str)
   if (!ResourcePermission.isValid(str))
     sys.error("Not a resource permission: "+ str)
 
-  def actions = getParts.drop(1).headOption.map(_.toSet)
-  def patterns = getParts.drop(2).headOption.map(_.toSet)
+  lazy val actions = getParts.drop(1).headOption.map(_.toSet)
+  lazy val patterns = getParts.drop(2).headOption.map(_.toSet)
 
   override def implies(p: ShiroPermission) = {
     //only for resource permissions

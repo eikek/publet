@@ -23,12 +23,10 @@ import grizzled.slf4j.Logging
 import org.eknet.publet.{Publet, Glob}
 import org.eknet.publet.auth.store._
 import com.google.inject.{Inject, Singleton}
-import com.google.common.eventbus.Subscribe
-import org.eknet.publet.vfs.events.ContentWrittenEvent
-import org.eknet.publet.vfs.events.ContentWrittenEvent
+import com.google.common.eventbus.{EventBus, Subscribe}
+import org.eknet.publet.vfs.events.{ContainerModifiedEvent, ContentWrittenEvent}
 import scala.Some
 import com.google.inject.name.Named
-import org.eknet.publet.vfs.events.ContentWrittenEvent
 import scala.Some
 
 /**
@@ -36,7 +34,7 @@ import scala.Some
  * @since 17.05.12 21:57
  */
 @Singleton
-class XmlDatabase @Inject() (@Named("contentroot") container: Container) extends UserStore with PermissionStore with ResourceSetStore with Logging {
+class XmlDatabase @Inject() (@Named("contentroot") container: Container, bus: EventBus) extends UserStore with PermissionStore with ResourceSetStore with Logging {
 
   val data = new XmlData(
     source = container
@@ -47,7 +45,16 @@ class XmlDatabase @Inject() (@Named("contentroot") container: Container) extends
 
   @Subscribe
   def reloadOnChange(event: ContentWrittenEvent) {
-    data.reloadIfChanged()
+    if (data.reloadIfChanged()) {
+      bus.post(new AuthDataChanged)
+    }
+  }
+
+  @Subscribe
+  def reloadAfterPush(event: ContainerModifiedEvent) {
+    if (data.reloadIfChanged()) {
+      bus.post(new AuthDataChanged)
+    }
   }
 
   //user
@@ -89,7 +96,7 @@ class XmlDatabase @Inject() (@Named("contentroot") container: Container) extends
     }
   }
 
-  def getUserPermissions(user: User) = Set[String]()
+  def getUserPermissions(login: String) = Set[String]()
 
   def getPermissions(groups: String*) =
     groups.flatMap(g => data.permissions.get(g).getOrElse(Set[String]())).toSet
@@ -111,6 +118,8 @@ class XmlDatabase @Inject() (@Named("contentroot") container: Container) extends
   }
 
   def getGroups(login: String) = data.groups.get(login).getOrElse(Set())
+
+  def allGroups = data.groups.values.flatten.toSet
 
   def anonPatterns = data.anonPatterns.map(Glob(_))
 

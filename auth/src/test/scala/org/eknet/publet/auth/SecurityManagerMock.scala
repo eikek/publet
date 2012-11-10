@@ -22,6 +22,7 @@ import org.apache.shiro.subject.{PrincipalCollection, Subject}
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.{AuthenticationToken, SimpleAccount, UsernamePasswordToken}
 import org.apache.shiro.realm.AuthorizingRealm
+import org.apache.shiro.realm.text.TextConfigurationRealm
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,20 +42,13 @@ trait SecurityManagerMock {
   }
 
 
-  class TestRealm extends AuthorizingRealm {
-    import collection.JavaConversions._
+  class TestRealm extends TextConfigurationRealm {
 
     setPermissionResolver(new ResourcePermissionResolver)
-    def account = {
-      val acc = new SimpleAccount("test", "test", "test")
-      acc.setRoles(Set("manager", "developer"))
-      acc.setStringPermissions(Set("resource:read:/aa/bb/cc/**",
-        "resource:*:/aa/uu/**",
-        "resource:read,delete:/cc/*/d/**,/cc/*/e/**"))
-      acc
-    }
+    setUserDefinitions("test = test, manager, developer")
+    setRoleDefinitions("manager = \"resource:read:/aa/bb/cc/**\", " +
+      "\"resource:*:/aa/uu/**\", \"resource:read,delete:/cc/*/d/**,/cc/*/e/**\"")
 
-    def doGetAuthenticationInfo(token: AuthenticationToken) = account
-    def doGetAuthorizationInfo(principals: PrincipalCollection) = account
+    init()
   }
 }

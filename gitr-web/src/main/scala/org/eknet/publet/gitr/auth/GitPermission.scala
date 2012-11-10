@@ -29,10 +29,10 @@ class GitPermission(str: String) extends WildcardPermission(str) with GitPermiss
   import PermissionBuilder._
   import collection.JavaConversions._
 
-  str.ensuring(_.startsWith(GitPermissionBuilder.domain+ partDivider), "Not a valid git permission: " +str)
+  str.ensuring(GitPermission.isValid(_), "Not a valid git permission: " +str)
 
-
-  def actions = getParts.drop(1).headOption.map(_.toSet)
+  lazy val actions = getParts.drop(1).headOption.map(_.toSet).getOrElse(Set[String]())
+  lazy val repositories = getParts.drop(2).headOption.map(_.toSet).getOrElse(Set[String]())
 
   override def implies(p: Permission) = {
     if (!p.isInstanceOf[GitPermission])
@@ -40,13 +40,11 @@ class GitPermission(str: String) extends WildcardPermission(str) with GitPermiss
     else {
       import GitAction._
       // push implies pull.
-      actions.map(set => {
-        val newset = if (set.contains(push.name)) (set + pull.name) else set
-        if (newset.size == set.size)
-          super.implies(p)
-        else
-          newPerm(newset).implies(p)
-      }) getOrElse(false)
+      val newset = if (actions.contains(push.name)) (actions + pull.name) else actions
+      if (newset.size == actions.size)
+        super.implies(p)
+      else
+        newPerm(newset).implies(p)
     }
   }
 
@@ -54,4 +52,9 @@ class GitPermission(str: String) extends WildcardPermission(str) with GitPermiss
     val rest = getParts.drop(2).map(s => s.mkString(subpartDivider)).mkString(partDivider)
     new WildcardPermission(git.grant(actions.toSeq: _*).on(rest))
   }
+}
+
+object GitPermission {
+
+  def isValid(str: String) = str.startsWith(GitPermissionBuilder.domain + PermissionBuilder.partDivider)
 }

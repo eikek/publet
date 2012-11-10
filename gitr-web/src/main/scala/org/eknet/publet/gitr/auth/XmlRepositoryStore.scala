@@ -26,13 +26,31 @@ import org.eknet.publet.auth.store.{DefaultAuthStore, UserStore}
 import org.eknet.publet.Publet
 import com.google.inject.{Provider, Inject, Singleton}
 import com.google.inject.name.Named
+import com.google.common.eventbus.{EventBus, Subscribe}
+import org.eknet.publet.vfs.events.{ContainerModifiedEvent, ContentWrittenEvent}
+import org.eknet.publet.gitr.PostReceiveEvent
+import org.eknet.publet.auth.AuthDataChanged
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.11.12 16:10
  */
 @Singleton
-class XmlRepositoryStore @Inject() (@Named("contentroot") container: Provider[Container], authm: DefaultAuthStore) extends RepositoryStore {
+class XmlRepositoryStore @Inject() (@Named("contentroot") container: Provider[Container], authm: DefaultAuthStore, bus: EventBus) extends RepositoryStore {
+
+  @Subscribe
+  def reloadOnChange(event: ContentWrittenEvent) {
+    if (data.reloadIfChanged()) {
+      bus.post(new AuthDataChanged)
+    }
+  }
+
+  @Subscribe
+  def reloadAfterPush(event: ContainerModifiedEvent) {
+    if (data.reloadIfChanged()) {
+      bus.post(new AuthDataChanged)
+    }
+  }
 
   lazy val data = new XmlData(container.get()
     .lookup(Publet.allIncludesPath / "config" / "repositories.xml")
@@ -40,21 +58,21 @@ class XmlRepositoryStore @Inject() (@Named("contentroot") container: Provider[Co
     .getOrElse(Resource.emptyContent(ResourceName("repositories.xml"), ContentType.xml)), authm)
 
   def findRepository(name: RepositoryName): Option[RepositoryModel] =
-    data.repositories.get(name.name)
+    data.repositories.get(name.fullName)
 
   def allRepositories = data.repositories.values
 
   def repositoriesByOwner(owner: String) = data.repositories.values.filter(rm => rm.owner == owner)
 
   def updateRepository(rm: RepositoryModel) = data.modify { model =>
-    val old = model.repositories.get(rm.name.name)
-    model.repositories = model.repositories + (rm.name.name -> rm)
+    val old = model.repositories.get(rm.name.fullName)
+    model.repositories = model.repositories + (rm.name.fullName -> rm)
     old
   }
 
   def removeRepository(name: RepositoryName) = data.modify { model =>
-    val old = model.repositories.get(name.name)
-    model.repositories = model.repositories - name.name
+    val old = model.repositories.get(name.fullName)
+    model.repositories = model.repositories - name.fullName
     old
   }
 
@@ -74,7 +92,7 @@ class XmlData(source: ContentResource, userStore: UserStore) extends XmlResource
     withWriteLock {
       this.model.repositories = (rootElem \ "repository")
         .map(repositoryFromXml(_))
-        .map(rm => rm.name.name -> rm)
+        .map(rm => rm.name.fullName -> rm)
         .toMap
     }
   }
@@ -88,7 +106,7 @@ class XmlData(source: ContentResource, userStore: UserStore) extends XmlResource
   def repositories = withReadLock( model.repositories )
 
   private def repositoryToXml(rm: RepositoryModel) = {
-      <repository name={rm.name.name} tag={rm.tag.toString} owner={rm.owner}/>
+      <repository name={rm.name.fullName} tag={rm.tag.toString} owner={rm.owner}/>
   }
 
   private def repositoryFromXml(repoNode: Node): RepositoryModel = {

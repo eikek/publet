@@ -49,8 +49,9 @@ trait PermissionStore {
   /**
    * Returns any permissions specific to a certain user.
    *
-   * @param user
+   * @param login
    * @return
    */
-  def getUserPermissions(user: User): Set[String]
+  def getUserPermissions(login: String): Set[String]
+
 }

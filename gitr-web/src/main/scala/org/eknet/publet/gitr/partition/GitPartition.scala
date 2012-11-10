@@ -22,7 +22,7 @@ import fs.FilesystemPartition
 import scala.Option
 import org.apache.shiro.SecurityUtils
 import grizzled.slf4j.Logging
-import com.google.common.eventbus.EventBus
+import com.google.common.eventbus.{Subscribe, EventBus}
 import org.eknet.gitr.Tandem
 import org.eknet.publet.auth.{ResourceAction, Authorizable}
 import org.eknet.publet.auth.ResourceAction.Action
@@ -32,9 +32,18 @@ import org.eknet.publet.gitr.auth.GitAction._
 import org.eknet.publet.vfs.ChangeInfo
 import org.eknet.publet.auth.ResourceAction.Action
 import scala.Some
+import org.eknet.publet.gitr.PostReceiveEvent
+import org.eknet.publet.vfs.events.ContainerModifiedEvent
 
 class GitPartition (val tandem: Tandem, val bus: EventBus, repoStore: DefaultRepositoryStore)
   extends FilesystemPartition(tandem.workTree.getWorkTree, bus, false) with Authorizable with GitPermissionBuilder with Logging {
+
+  bus.register(this)
+
+  @Subscribe
+  def emitContainerModified(event: PostReceiveEvent) {
+    bus.post(new ContainerModifiedEvent(this))
+  }
 
   def updateWorkspace():Boolean = {
     tandem.updateWorkTree()

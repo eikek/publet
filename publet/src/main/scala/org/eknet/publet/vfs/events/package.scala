@@ -57,4 +57,11 @@ package object events {
    * @param changeInfo
    */
   case class ContentWrittenEvent(resource: ContentResource, changeInfo: Option[ChangeInfo]) extends Event
+
+  /**
+   * Event that indicates an outside change to a container.
+   *
+   * @param container
+   */
+  case class ContainerModifiedEvent(container: Container) extends Event
 }

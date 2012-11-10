@@ -30,7 +30,9 @@ class TransferOwner extends ScalaScript {
             // need to move possibly
             val newsegs = repo.name.segments.map(n => if (n == model.owner) newOwner else n)
             val newName = RepositoryName(newsegs)
-            PubletWeb.instance[GitrMan].get.rename(repo.name, newName)
+            if (newName != repo.name) {
+              PubletWeb.instance[GitrMan].get.rename(repo.name, newName)
+            }
 
             // need to change owner permission
             repoStore.removeRepository(model.name)

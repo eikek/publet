@@ -28,6 +28,7 @@ import org.eknet.publet.auth.store.{ResourceSetStore, ResourceSetStoreAdapter, P
 import org.eknet.publet.gitr.auth._
 import org.apache.shiro.authz.permission.PermissionResolver
 import org.eknet.publet.gitr.webui.scripts.GitrControl
+import org.apache.shiro.realm.Realm
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,10 +42,11 @@ class GitrModule extends SquireModule with PubletModule with PubletBinding {
     bind[GitPartMan].to[GitPartManImpl].as[Singleton]()
     bindRequestHandler.add[GitHandlerFactory]
     bind[RepositoryService].in(Scopes.SINGLETON)
+    bind[GitPartitionMounter].in(Scopes.SINGLETON)
 
     bind[DefaultRepositoryStore].in(Scopes.SINGLETON)
     setOf[RepositoryStore].add[XmlRepositoryStore].in(Scopes.SINGLETON)
-    setOf[PermissionStore].add[GitPermissionStore].in(Scopes.SINGLETON)
+    setOf[Realm].add[GitOwnerRealm].in(Scopes.SINGLETON)
     setOf[PermissionResolver].add[GitPermissionResolver].in(Scopes.SINGLETON)
     setOf[ResourceSetStore].add[GitrResourcePatterns].in(Scopes.SINGLETON)
   }

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.guice
+package org.eknet.publet.auth
 
-import com.google.inject.name
+import org.apache.shiro.authc.{DisabledAccountException, AuthenticationInfo}
+import org.apache.shiro.subject.SimplePrincipalCollection
+import org.eknet.publet.auth.store.{UserProperty, User}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 07.10.12 02:05
+ * @since 21.10.12 23:40
  */
-object Names {
+final case class UserAuthcInfo(user: User) extends AuthenticationInfo {
 
-  val scriptEngine = annot("ScriptEngine")
-  val contentroot = annot("contentroot")
-  val servletContext = annot("publetServletContext")
+  if (!user.isEnabled) throw new DisabledAccountException("Account disabled for '"+ user.login+ "'.")
 
-  implicit def annot(str: String) = name.Names.named(str)
+  def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
+  def getCredentials = user.get(UserProperty.password).orNull
+  def algorithm: Option[String] = user.get(UserProperty.algorithm)
 }

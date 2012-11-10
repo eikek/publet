@@ -19,13 +19,15 @@ package org.eknet.publet.gitr.auth
 import java.util
 import com.google.inject.{Inject, Singleton}
 import org.eknet.gitr.RepositoryName
+import com.google.common.eventbus.EventBus
+import org.eknet.publet.auth.AuthDataChanged
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.11.12 16:14
  */
 @Singleton
-class DefaultRepositoryStore extends RepositoryStore {
+class DefaultRepositoryStore @Inject() (bus: EventBus) extends RepositoryStore {
   import collection.JavaConversions._
 
   private var _repoStores: util.Set[RepositoryStore] = util.Collections.emptySet()
@@ -44,17 +46,23 @@ class DefaultRepositoryStore extends RepositoryStore {
   def allRepositories = _repoStores.flatMap(rs => rs.allRepositories)
   def repositoriesByOwner(owner: String) = _repoStores.flatMap(rs => rs.repositoriesByOwner(owner))
 
-  def findRepositoryStore(name: RepositoryName) =
-    _repoStores.foldLeft(None:Option[RepositoryStore])((el, store) => if (el.isDefined) el else {
-      if (store.findRepository(name).isDefined) Some(store)
-      else None
-    })
+  def findRepositoryStores(name: RepositoryName) =
+    _repoStores.filter(store => store.findRepository(name).isDefined)
 
+  def updateRepository(rm: RepositoryModel) = {
+    val results = _repoStores.flatMap(store => store.updateRepository(rm))
+    bus.post(new AuthDataChanged)
+    if (results.isEmpty) {
+      None
+    } else {
+      results.headOption
+    }
+  }
 
-  def updateRepository(rm: RepositoryModel) =
-    findRepositoryStore(rm.name).flatMap(store => store.updateRepository(rm))
-
-  def removeRepository(name: RepositoryName) =
-    findRepositoryStore(name).flatMap(store => store.removeRepository(name))
+  def removeRepository(name: RepositoryName) = {
+    val result = findRepositoryStores(name).flatMap(store => store.removeRepository(name)).headOption
+    bus.post(new AuthDataChanged)
+    result
+  }
 
 }

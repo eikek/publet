@@ -16,16 +16,17 @@
 
 package org.eknet.publet.auth
 
-import org.apache.shiro.authc.AuthenticationInfo
-import org.apache.shiro.subject.SimplePrincipalCollection
-import org.eknet.publet.auth.store.{UserProperty, User}
+import org.eknet.publet.event.Event
 
 /**
+ * Event that is emitted if a store has been modified that contains
+ * information used for authentication or authorization.
+ *
+ * Realms can listen on that event to clear its caches.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 21.10.12 23:40
+ * @since 10.11.12 18:45
  */
-final case class UserAuthInfo(user: User) extends AuthenticationInfo {
-  def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
-  def getCredentials = user.get(UserProperty.password).orNull
-  def algorithm: Option[String] = user.get(UserProperty.algorithm)
+final class AuthDataChanged extends Event {
+
 }

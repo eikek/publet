@@ -24,24 +24,24 @@ import org.eknet.publet.auth.store.{DefaultAuthStore, UserProperty}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 26.07.12 17:00
  */
-class DigestCredentialsMatcher(authm: DefaultAuthStore) extends CredentialsMatcher {
+class DigestCredentialsMatcher extends CredentialsMatcher {
 
   def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
-    if (token.isInstanceOf[DigestAuthenticationToken]) {
-      matchDigest(token.asInstanceOf[DigestAuthenticationToken])
-    } else {
-      false
+    (token, info) match {
+      case (digestToken: DigestAuthenticationToken, policy: PolicyAuthzInfo) =>
+        matchDigest(digestToken, policy)
+      case _ => false
     }
   }
 
-  private def matchDigest(token: DigestAuthenticationToken) = {
+  private def matchDigest(token: DigestAuthenticationToken, policy: PolicyAuthzInfo) = {
     val digestResp = token.getCredentials
-    val user = authm.findUser(token.getPrincipal)
-    if (user.isDefined) {
-      val dig = DigestGenerator.generateDigestWithEncryptedPassword(digestResp, user.get.get(UserProperty.digest).getOrElse(""))
-      digestResp.responseDigest == dig
-    } else {
-      false
+    policy.user.get(UserProperty.digest) match {
+      case Some(digest) => {
+        val dig = DigestGenerator.generateDigestWithEncryptedPassword(digestResp, digest)
+        digestResp.responseDigest == dig
+      }
+      case _ => false
     }
   }
 }

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.guice
+package org.eknet.publet.auth
 
-import com.google.inject.name
+import org.eknet.publet.auth.store.User
+import org.apache.shiro.authz.{Permission, AuthorizationInfo}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 07.10.12 02:05
+ * @since 10.11.12 17:05
  */
-object Names {
+case class PolicyAuthzInfo(user: User, groups: Set[String], permissions: Set[String]) extends AuthorizationInfo {
+  import collection.JavaConversions._
 
-  val scriptEngine = annot("ScriptEngine")
-  val contentroot = annot("contentroot")
-  val servletContext = annot("publetServletContext")
+  def getRoles = groups
+  def getStringPermissions = permissions
+  def getObjectPermissions = Set[Permission]()
 
-  implicit def annot(str: String) = name.Names.named(str)
 }
+

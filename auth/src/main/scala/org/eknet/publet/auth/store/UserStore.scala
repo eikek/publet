@@ -52,7 +52,7 @@ trait UserStore {
   def addGroup(login: String, group: String)
   def dropGroup(login: String, group: String)
   def getGroups(login: String): Set[String]
-
+  def allGroups: Set[String]
 }
 
 class UserStoreAdapter extends UserStore {
@@ -64,4 +64,5 @@ class UserStoreAdapter extends UserStore {
   def addGroup(login: String, group: String) {}
   def dropGroup(login: String, group: String) {}
   def getGroups(login: String) = Set[String]()
+  def allGroups: Set[String] = Set()
 }

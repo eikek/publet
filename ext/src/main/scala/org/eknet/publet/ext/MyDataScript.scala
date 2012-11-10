@@ -77,12 +77,15 @@ class MyDataScript extends ScalaScript {
   }
 
   private def getUserData = {
-    val user = PubletWeb.authManager.findUser(Security.username).get
-    makeJson(Map(
-      "success" -> true,
-      "fullName" -> (user.get(UserProperty.fullName).getOrElse("")),
-      "email" -> (user.get(UserProperty.email).getOrElse(""))
-    ))
+    PubletWeb.authManager.findUser(Security.username).flatMap(user => {
+      makeJson(Map(
+        "success" -> true,
+        "fullName" -> (user.get(UserProperty.fullName).getOrElse("")),
+        "email" -> (user.get(UserProperty.email).getOrElse(""))
+      ))
+    }) orElse {
+      error("User '"+Security.username+"' not found.")
+    }
   }
 
 }

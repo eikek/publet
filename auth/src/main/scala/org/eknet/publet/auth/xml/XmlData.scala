@@ -101,7 +101,8 @@ class XmlData(source: ContentResource) extends XmlResource(source) {
 
   private def userFromXml(userN: Node): User = {
     val login = (userN \ "@login").text.trim
-    val attr = (for (c <- userN.child if (UserProperty.exists(c.label.trim))) yield (UserProperty.withName(c.label.trim) -> c.text)).toMap
+    val attr = (for (c <- userN.child if (UserProperty.exists(c.label.trim)))
+      yield (UserProperty.withName(c.label.trim) -> c.text.trim)).toMap
     User(login, attr)
   }
 

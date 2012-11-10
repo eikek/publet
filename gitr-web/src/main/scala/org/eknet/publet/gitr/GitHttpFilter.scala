@@ -30,6 +30,8 @@ import collection.JavaConversions._
 import org.eknet.publet.web.util.ClientInfo
 import org.eknet.gitr.{Tandem, GitrRepository, RepositoryName, GitrMan}
 import org.eknet.publet.gitr.auth.{RepositoryModel, GitAction}
+import org.eknet.publet.event.Event
+import org.eknet.publet.vfs.events.ContainerModifiedEvent
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -119,4 +121,4 @@ case class GitEvent(action: GitAction.Value, repository: GitrRepository, repoMod
  * @param commands
  * @param tandem
  */
-case class PostReceiveEvent(rp: ReceivePack, commands: Seq[ReceiveCommand], tandem: Tandem, clientInfo: ClientInfo)
+case class PostReceiveEvent(rp: ReceivePack, commands: Seq[ReceiveCommand], tandem: Tandem, clientInfo: ClientInfo) extends Event

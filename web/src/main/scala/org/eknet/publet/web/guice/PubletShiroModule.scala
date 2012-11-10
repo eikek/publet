@@ -35,7 +35,7 @@ import org.apache.shiro.authc.{AuthenticationListener, AbstractAuthenticator}
 import org.apache.shiro.cache.CacheManager
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.auth.store.{UserStore, PermissionStore, ResourceSetStore}
-import org.eknet.publet.web.shiro.SuperadminStore
+import org.eknet.publet.web.shiro.SuperadminRealm
 
 /**
  * Needs services defined in [[org.eknet.publet.web.guice.AppModule]]
@@ -51,9 +51,7 @@ object PubletShiroModule extends SquireModule with PubletBinding {
 
     setOf[ResourceSetStore].add[DefaultResourcePatterns].in(Scopes.SINGLETON)
 
-    bind[SuperadminStore].in(Scopes.SINGLETON)
-    setOf[PermissionStore].add[SuperadminStore]
-    setOf[UserStore].add[SuperadminStore]
+    setOf[Realm].add[SuperadminRealm].in(Scopes.SINGLETON)
   }
 
   @Provides@Singleton

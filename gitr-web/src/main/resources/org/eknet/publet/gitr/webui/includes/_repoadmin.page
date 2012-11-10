@@ -149,7 +149,7 @@ hr/
           be cloned by everyone. But write access is always only possible to authorized users.
         form.ajaxForm.form-horizontal#repoStateForm(action="updateRepository.json" method="post")
           fieldset
-            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+            input(type="hidden" name="r" value={repositoryModel.get.name.fullName})
             .control-group
               .controls
                 label.radio
@@ -178,7 +178,7 @@ hr/
         br/
         form.ajaxForm.form-horizontal(action="transferOwnership.json" method="post")
           fieldset
-            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+            input(type="hidden" name="r" value={repositoryModel.get.name.fullName})
             .control-group
               label.control-label New owner
               .controls
@@ -197,7 +197,7 @@ hr/
             of any _pull_ rights!
         .span3
           form.ajaxForm(action="updateCollaborator.json" method="post")
-            input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+            input(type="hidden" name="r" value={repositoryModel.get.name.fullName})
             fieldset
               .control-group
                 label.control-label Group
@@ -222,7 +222,7 @@ hr/
           | This action is not recoverable!
         br/
         form.ajaxForm.form-horizontal(action="destroyRepo.json" method="post")
-          input(type="hidden" name="r" value={repositoryModel.get.name+".git"})
+          input(type="hidden" name="r" value={repositoryModel.get.name.fullName})
           fieldset
             .control-group
               .controls

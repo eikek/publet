@@ -47,14 +47,7 @@ class PartitionMounter @Inject() (publet: Publet, config: Config, settings: Sett
         for (m <- mounts) publet.mountManager.mount(m, fsp)
         1
       }
-//      case PartitionConfig("git", dir, mounts) => {
-//        info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
-//        val gitp = gitpartman.getOrCreate(Path(dir), git.Config())
-//        for (m <- mounts) publet.mountManager.mount(m, gitp)
-//        1
-//      }
       case PartitionConfig(kind, _, _) => {
-        error("Uknown partition type '"+ kind +"' !")
         0
       }
     }
@@ -63,8 +56,6 @@ class PartitionMounter @Inject() (publet: Publet, config: Config, settings: Sett
     info("Mounted "+ count +" partition(s)")
 
   }
-
-
 
 }
 
