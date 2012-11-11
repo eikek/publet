@@ -81,7 +81,6 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
     private def wrapScript(path: Path, cn: String, script: ContentResource): String = {
       "package " + path.parent.segments.mkString(".") +"\n\n"
       "import org.eknet.publet.engine.scala.ScalaScript\n" +
-        "import org.eknet.publet.engine.scala.ScalaScript._\n\n" +
         (if (!imports.isEmpty)
           imports.mkString("import ", "\nimport ", "\n\n")
         else "") +
