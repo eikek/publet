@@ -48,6 +48,8 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissio
 
   setPermissionResolver(resolver)
   setCacheManager(new MemoryConstrainedCacheManager)
+  setAuthenticationCachingEnabled(true)
+  setAuthorizationCachingEnabled(true)
 
   override def supports(token: AuthenticationToken) = {
     token.isInstanceOf[DigestAuthenticationToken] || token.isInstanceOf[UsernamePasswordToken]
@@ -55,7 +57,7 @@ class UsersRealm @Inject() (val db: DefaultAuthStore, resolver: DefaultPermissio
 
   def doGetAuthenticationInfo(token: AuthenticationToken) = {
     val user = token.getPrincipal.toString
-    db.findUser(user).map(u => new UserAuthcInfo(u)).orNull
+    db.findUser(user).map(u => new UserAuthcInfo(u, getName)).orNull
   }
 
   def doGetAuthorizationInfo(principals: PrincipalCollection): AuthorizationInfo = {

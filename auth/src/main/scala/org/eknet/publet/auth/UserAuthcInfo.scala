@@ -24,11 +24,11 @@ import org.eknet.publet.auth.store.{UserProperty, User}
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 21.10.12 23:40
  */
-final case class UserAuthcInfo(user: User) extends AuthenticationInfo {
+final case class UserAuthcInfo(user: User, realmName: String) extends AuthenticationInfo {
 
   if (!user.isEnabled) throw new DisabledAccountException("Account disabled for '"+ user.login+ "'.")
 
-  def getPrincipals = new SimplePrincipalCollection(user.login, "Publet Protected")
+  def getPrincipals = new SimplePrincipalCollection(user.login, realmName)
   def getCredentials = user.get(UserProperty.password).orNull
   def algorithm: Option[String] = user.get(UserProperty.algorithm)
 }
