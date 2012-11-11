@@ -26,7 +26,7 @@ import org.fusesource.scalate.Binding
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Container, ResourceName, Path}
-import org.eknet.publet.web.{PartitionMounter, Settings, Config}
+import org.eknet.publet.web._
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
 import javax.servlet.ServletContext
@@ -109,6 +109,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
 
 
     bind[DefaultLayout].asEagerSingleton()
+
+    setOf[PartitionMount].add[FilesystemMounter].in(Scopes.SINGLETON)
     bind[PartitionMounter].asEagerSingleton()
 
     bindRequestHandler.add[PubletHandlerFactory]

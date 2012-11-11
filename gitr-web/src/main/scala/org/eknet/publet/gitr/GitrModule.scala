@@ -18,7 +18,7 @@ package org.eknet.publet.gitr
 
 import com.google.inject._
 import org.eknet.guice.squire.{SquireModule, SquireBinder}
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{PartitionMount, Config}
 import org.eknet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.gitr.partition.{GitPartManImpl, GitPartMan}
 import com.google.inject.name.Named
@@ -42,7 +42,7 @@ class GitrModule extends SquireModule with PubletModule with PubletBinding {
     bind[GitPartMan].to[GitPartManImpl].as[Singleton]()
     bindRequestHandler.add[GitHandlerFactory]
     bind[RepositoryService].in(Scopes.SINGLETON)
-    bind[GitPartitionMounter].in(Scopes.SINGLETON)
+    setOf[PartitionMount].add[GitPartitionMounter].in(Scopes.SINGLETON)
 
     bind[DefaultRepositoryStore].in(Scopes.SINGLETON)
     setOf[RepositoryStore].add[XmlRepositoryStore].in(Scopes.SINGLETON)

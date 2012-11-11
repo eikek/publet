@@ -19,37 +19,26 @@ package org.eknet.publet.gitr
 import org.eknet.publet.web.guice.PubletStartedEvent
 import com.google.inject.{Singleton, Inject}
 import org.eknet.publet.Publet
-import org.eknet.publet.web.{PartitionConfig, PartitionMounter, Settings, Config}
+import org.eknet.publet.web._
 import com.google.common.eventbus.Subscribe
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.gitr.partition.GitPartMan
+import org.eknet.publet.web.guice.PubletStartedEvent
+import org.eknet.publet.web.PartitionConfig
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.11.12 18:13
  */
 @Singleton
-class GitPartitionMounter @Inject() (publet: Publet, partman: GitPartMan, config: Config, settings: Settings) extends Logging {
+class GitPartitionMounter @Inject() (publet: Publet, partman: GitPartMan) extends PartitionTypeMount("git") with Logging {
 
-  @Subscribe
-  def mountGitPartitions(event: PubletStartedEvent) {
-
-    val configs = PartitionMounter.configs(config, settings)
-
-    def mount(cfg: PartitionConfig): Int = cfg match {
-      case PartitionConfig("git", dir, mounts) => {
-        info("Mounting git repository '"+dir+"' to '"+ mounts.map(_.asString)+"'")
-        val gitp = partman.getOrCreate(Path(dir), partition.Config())
-        for (m <- mounts) publet.mountManager.mount(m, gitp)
-        1
-      }
-      case PartitionConfig(kind, _, _) => {
-        0
-      }
-    }
-
-    val count = if (configs.isEmpty) 0 else configs.map(mount).reduceLeft(_ + _)
-    info("Mounted "+ count +" partition(s)")
+  def apply(cfg: PartitionConfig) = {
+    info("Mounting git repository '"+cfg.directory+"' to '"+ cfg.mounts.map(_.asString)+"'")
+    val gitp = partman.getOrCreate(Path(cfg.directory), partition.Config())
+    for (m <- cfg.mounts) publet.mountManager.mount(m, gitp)
+    1
   }
+
 }
