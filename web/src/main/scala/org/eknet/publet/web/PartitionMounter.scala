@@ -16,15 +16,15 @@
 
 package org.eknet.publet.web
 
+import _root_.com.google.common.eventbus.{EventBus, Subscribe}
+import _root_.com.google.inject.{Inject, Singleton}
 import grizzled.slf4j.Logging
 import guice.PubletStartedEvent
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.vfs.fs.FilesystemPartition
 import java.io.File
-import util.{StringMap, PropertiesMap}
-import com.google.common.eventbus.{EventBus, Subscribe}
+import util.StringMap
 import org.eknet.publet.Publet
-import com.google.inject.{Inject, Singleton}
 
 /**
  * Checks the `Config` and/or `Settings` file for listed partitions to mount.
@@ -47,7 +47,7 @@ class PartitionMounter @Inject() (config: Config, settings: Settings) extends Lo
   def mountPartitions(ev: PubletStartedEvent) {
 
     def mount(cfg: PartitionConfig): Int = {
-      _mounter.foldLeft(0)((i, pm) => i + pm(cfg))
+      _mounter.foldLeft(0)((i, pm) => i + (if (pm.isDefinedAt(cfg)) pm(cfg) else 0))
     }
 
     val configs = getPartitionConfigs(config, settings)
