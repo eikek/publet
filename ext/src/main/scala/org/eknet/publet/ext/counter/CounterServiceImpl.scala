@@ -92,7 +92,7 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
         l0.compareTo(l1) > 0
       }).map(v => (
         v.get[String](pagePathKey).get,
-        v.get[Long](pageLastAccessKey).get
+        v.get[Long](pageLastAccessKey).getOrElse(0L)
       ))
     }
   }
@@ -171,7 +171,7 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
       db.withTx {
         val pv = pageVertex(uriPath)
         pv(pageMd5Checksum).map(cs => {
-          val mod = Option(pv(lastmod)).map(_.asInstanceOf[Long]).getOrElse(0L)
+          val mod = pv(lastmod).map(_.asInstanceOf[Long]).getOrElse(0L)
           val cur = publet.findSources(Path(uriPath)).headOption.flatMap(_.lastModification).getOrElse(0L)
           if (cur > mod) updateChecksum(pv, res)
           else cs.asInstanceOf[String]
