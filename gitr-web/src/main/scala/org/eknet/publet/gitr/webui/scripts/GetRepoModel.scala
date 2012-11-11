@@ -10,7 +10,7 @@ import org.eknet.publet.web.shiro.Security
 class GetRepoModel extends ScalaScript {
   def serve() = {
     import GitrControl._
-    import ScalaScript._
+    import org.eknet.publet.web.util.RenderUtils.makeJson
 
     Security.checkAuthenticated()
     getRepositoryModelFromParam flatMap { r =>

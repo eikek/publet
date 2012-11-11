@@ -17,7 +17,6 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.engine.scala.ScalaScript
-import ScalaScript._
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.Config
 
@@ -26,6 +25,7 @@ import org.eknet.publet.web.Config
  * @since 15.04.12 23:16
  */
 class MailContact extends ScalaScript with MailSupport {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def serve() = {
     val ctx = PubletWebContext

@@ -19,7 +19,6 @@ package org.eknet.publet.web.scripts
 import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.eknet.publet.engine.scala.ScalaScript
-import ScalaScript._
 import org.apache.shiro.ShiroException
 import org.eknet.publet.web.util.PubletWebContext
 
@@ -30,6 +29,8 @@ import org.eknet.publet.web.util.PubletWebContext
 object Login extends ScalaScript {
 
   def serve() = {
+    import org.eknet.publet.web.util.RenderUtils.makeJson
+
     val username = PubletWebContext.param("username")
     val password = PubletWebContext.param("password")
     val rememberMe = PubletWebContext.param("rememberMe")

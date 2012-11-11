@@ -17,7 +17,6 @@
 package org.eknet.publet.engine.scala
 
 import org.eknet.publet.vfs.{ContentType, Content}
-import org.eknet.publet.com.twitter.json.Json
 import java.io.InputStream
 import grizzled.slf4j.Logging
 
@@ -31,17 +30,4 @@ trait ScalaScript extends Logging {
 
   def serve(): Option[Content]
 
-}
-
-object ScalaScript {
-
-  def makeJson(any: Any): Option[Content] = Some(Content(Json.build(any).toString, ContentType.json))
-
-  def makeJs(str: String): Option[Content] = Some(Content(str, ContentType.javascript))
-
-  def makePng(data: Array[Byte]): Option[Content] = Some(Content(data, ContentType.png))
-  def makePng(data: InputStream): Option[Content] = Some(Content(data, ContentType.png))
-
-  def makeJpg(data: Array[Byte]): Option[Content] = Some(Content(data, ContentType.jpg))
-  def makeJpg(data: InputStream): Option[Content] = Some(Content(data, ContentType.jpg))
 }

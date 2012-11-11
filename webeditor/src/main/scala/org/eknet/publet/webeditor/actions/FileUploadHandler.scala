@@ -16,8 +16,6 @@
 
 package org.eknet.publet.webeditor.actions
 
-import org.eknet.publet.engine.scala.ScalaScript
-import ScalaScript._
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.{ContentResource, Path}
 import collection.mutable
@@ -25,12 +23,14 @@ import org.eknet.publet.webeditor.EditorPaths
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web._
 import util.{RenderUtils, PubletWeb, PubletWebContext}
+import org.eknet.publet.engine.scala.ScalaScript
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 23.05.12 19:17
  */
 object FileUploadHandler extends ScalaScript with Logging with ThumbnailUrlUtil {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   lazy val pushJson = EditorPaths.pushScript.asString
   lazy val uploadJson = EditorPaths.uploadScript.asString

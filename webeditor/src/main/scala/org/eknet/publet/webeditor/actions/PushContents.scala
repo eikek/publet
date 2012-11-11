@@ -29,9 +29,10 @@ import org.eknet.publet.webeditor.EditorPaths
  * @since 26.04.12 19:46
  */
 object PushContents extends ScalaScript with Logging {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def notify(success: Boolean, msg: String, head: Option[String] = None) = {
-    ScalaScript.makeJson(Map("success"->success, "message"->msg, "lastMod"->head.getOrElse("")))
+    makeJson(Map("success"->success, "message"->msg, "lastMod"->head.getOrElse("")))
   }
 
   def serve() = {

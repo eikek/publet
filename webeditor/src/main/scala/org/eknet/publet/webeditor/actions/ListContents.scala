@@ -21,9 +21,8 @@ import org.eknet.publet.vfs.Resource._
 import org.eknet.publet.Publet
 import collection.mutable
 import org.eknet.publet.vfs._
-import ScalaScript._
 import org.eknet.publet.webeditor.EditorPaths
-import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
+import org.eknet.publet.web.util.{RenderUtils, PubletWeb, PubletWebContext}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -38,7 +37,7 @@ object ListContents extends ScalaScript with ThumbnailUrlUtil {
     val p = if (path.directory) path else path.parent
     val json = createJsonMap(p, PubletWeb.publet)
 
-    makeJson(json)
+    RenderUtils.makeJson(json)
   }
 
   private def createJsonMap(path: Path, publet: Publet) = {

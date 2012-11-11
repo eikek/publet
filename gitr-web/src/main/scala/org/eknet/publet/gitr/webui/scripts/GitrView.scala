@@ -20,7 +20,6 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.treewalk.filter.PathFilter
 import collection.mutable.ListBuffer
 import org.eknet.publet.engine.scala.ScalaScript
-import ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.{ContentType, Content, Path}
 import org.eclipse.jgit.revwalk.RevCommit
@@ -39,6 +38,7 @@ import org.eknet.gitr.GitrRepository
 //   p = path inside the tree, defaults to '/'
 
 class GitrView extends ScalaScript {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def serve() = {
     getRepositoryModelFromParam.map(GitRequestUtils.checkGitAction(GitAction.pull, _))
@@ -94,7 +94,7 @@ class GitrView extends ScalaScript {
           }
         }
       }
-      var readmeHtml = getReadmeHtml(commit, repo, cpPath, wikiExtensions.toList ::: markdownExtensions.toList)
+      val readmeHtml = getReadmeHtml(commit, repo, cpPath, wikiExtensions.toList ::: markdownExtensions.toList)
 
       makeJson {
         Map(

@@ -28,8 +28,7 @@ import org.eknet.publet.auth.Algorithm
  * @since 19.07.12 16:21
  */
 class MyDataScript extends ScalaScript {
-
-  import ScalaScript._
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def serve(): Option[Content] = {
     if (!Security.isAuthenticated) {

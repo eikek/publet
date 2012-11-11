@@ -28,7 +28,7 @@ class GetGroupInfo extends ScalaScript {
         .toArray
     }
 
-    import ScalaScript._
+    import org.eknet.publet.web.util.RenderUtils.makeJson
     repoGroups.flatMap(v => makeJson(Map("collaborators" -> v))) orElse {
       makeJson(authm.allGroups.toArray)
     }

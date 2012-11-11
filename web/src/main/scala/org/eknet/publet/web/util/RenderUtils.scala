@@ -16,9 +16,10 @@
 
 package org.eknet.publet.web.util
 
-import org.eknet.publet.vfs.Content
+import org.eknet.publet.vfs.{Content, ContentType}
 import org.fusesource.scalate.TemplateSource
-import java.io.{PrintWriter, StringWriter}
+import java.io.{InputStream, PrintWriter, StringWriter}
+import org.eknet.publet.com.twitter.json.Json
 
 /**
  * Utility methods for [[org.eknet.publet.engine.scala.ScalaScript]]s
@@ -28,6 +29,16 @@ import java.io.{PrintWriter, StringWriter}
  *
  */
 object RenderUtils {
+
+  def makeJs(str: String): Option[Content] = Some(Content(str, ContentType.javascript))
+
+  def makePng(data: Array[Byte]): Option[Content] = Some(Content(data, ContentType.png))
+  def makePng(data: InputStream): Option[Content] = Some(Content(data, ContentType.png))
+
+  def makeJpg(data: Array[Byte]): Option[Content] = Some(Content(data, ContentType.jpg))
+  def makeJpg(data: InputStream): Option[Content] = Some(Content(data, ContentType.jpg))
+
+  def makeJson(any: Any): Option[Content] = Some(Content(Json.build(any).toString, ContentType.json))
 
   def renderTemplate(uri: String, attributes: Map[String, Any]): Option[Content] = {
     val attr = PubletWeb.scalateEngine.attributes ++ attributes

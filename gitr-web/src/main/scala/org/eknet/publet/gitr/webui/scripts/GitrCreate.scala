@@ -18,13 +18,13 @@ package org.eknet.publet.gitr.webui.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import ScalaScript._
 import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, RepositoryModel, GitAction, RepositoryTag}
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.gitr.GitRequestUtils
 import org.eknet.gitr.{GitrMan, RepositoryName}
 
 class GitrCreate extends ScalaScript {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def checkName(repoName: String): Boolean = repoName.matches("[\\w_\\-]+")
 

@@ -4,7 +4,6 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, RepositoryModel, GitAction}
 import org.eknet.gitr.{GitrMan, RepositoryName}
-import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -15,7 +14,7 @@ class TransferOwner extends ScalaScript {
   def repoStore = PubletWeb.instance[DefaultRepositoryStore].get
 
   def serve() = {
-    import ScalaScript._
+    import org.eknet.publet.web.util.RenderUtils.makeJson
     import GitrControl._
 
     getRepositoryFromParam flatMap (repo => {

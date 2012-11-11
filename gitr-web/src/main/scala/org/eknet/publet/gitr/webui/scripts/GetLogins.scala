@@ -9,9 +9,10 @@ import org.eknet.publet.web.util.PubletWeb
  * @since 17.06.12 01:19
  */
 class GetLogins extends ScalaScript {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
+
   def serve() = {
     Security.checkAuthenticated()
-    import ScalaScript._
     makeJson(PubletWeb.authManager.allUser.map(_.login).toList)
   }
 }

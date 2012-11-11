@@ -1,17 +1,16 @@
 package org.eknet.publet.gitr.webui.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
-import ScalaScript._
 import GitrControl._
 import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.gitr.auth.{GitPermissionBuilder, GitAction}
-import org.eknet.publet.gitr.GitRequestUtils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 17.06.12 17:29
  */
 class UpdateCollaborator extends ScalaScript with GitPermissionBuilder {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def param(name: String) = PubletWebContext.param(name)
 

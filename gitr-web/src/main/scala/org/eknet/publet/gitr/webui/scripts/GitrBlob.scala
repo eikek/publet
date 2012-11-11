@@ -16,19 +16,20 @@
 
 package org.eknet.publet.gitr.webui.scripts
 
-import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.engine.scala.ScalaScript._
 import GitrControl._
 import org.eknet.publet.vfs.ContentType
 import org.eknet.publet.web.{ErrorResponse, StreamResponse}
 import org.eknet.publet.gitr.GitRequestUtils
 import org.eknet.publet.gitr.auth.GitAction
+import org.eknet.publet.engine.scala.ScalaScript
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 03.06.12 10:09
  */
 class GitrBlob extends ScalaScript {
+  import org.eknet.publet.web.util.RenderUtils.makeJson
+
   def serve() = {
     getRepositoryFromParam match {
       case None => makeJson(Map("success"->false, "message"->"No repository found."))

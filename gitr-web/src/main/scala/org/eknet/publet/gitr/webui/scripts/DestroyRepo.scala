@@ -2,7 +2,7 @@ package org.eknet.publet.gitr.webui.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.util.{RenderUtils, PubletWebContext, PubletWeb}
 import org.eknet.publet.gitr.GitRequestUtils
 import org.eknet.publet.gitr.auth.{DefaultRepositoryStore, GitAction}
 import org.eknet.gitr.GitrMan
@@ -15,25 +15,27 @@ class DestroyRepo extends ScalaScript with Logging {
 
   def serve() = {
     import GitrControl._
-    import ScalaScript._
+    import RenderUtils.makeJson
 
-    getRepositoryFromParam flatMap ( repo => {
-      val model = getRepositoryModelFromParam.get
-      GitrControl.checkGitAction(GitAction.admin, model)
+    getRepositoryModelFromParam flatMap ( model => {
+      checkGitAction(GitAction.admin, model)
       try {
-        PubletWeb.instance[GitrMan].get.delete(repo.name)
-        PubletWeb.instance[DefaultRepositoryStore].get.removeRepository(repo.name)
-        info("Successfully destroyed repository: "+ repo.name)
+        gitrMan.delete(model.name)
+        repoStore.removeRepository(model.name)
+        info("Successfully destroyed repository: "+ model.name.fullName)
         makeJson(Map("success"->true,
           "message"->"Successfully destroyed the repository.",
-          "redirect"->PubletWebContext.urlOf(GitrControl.mountPoint+"/")))
+          "redirect"->PubletWebContext.urlOf(mountPoint+"/")))
       }
       catch {
         case e:Exception => {
-          error("Error destroying repository '"+ repo.name +"'!", e)
+          error("Error destroying repository '"+ model.name.fullName +"'!", e)
           makeJson(Map("success"->false, "message"-> ("Unable to destroy the repository. "+ e.getLocalizedMessage)))
         }
       }
     }) orElse(makeJson(Map("success"->false, "message"->"Repository not found.")))
   }
+
+  private def repoStore = PubletWeb.instance[DefaultRepositoryStore].get
+  private def gitrMan = PubletWeb.instance[GitrMan].get
 }

@@ -27,7 +27,7 @@ import org.eknet.publet.vfs.{ContentType, Path, Content}
 import scala.Some
 import org.eknet.gitr.{GitrMan, GitrRepository, RepositoryName}
 import org.eknet.publet.gitr.auth.{RepositoryModel, DefaultRepositoryStore, GitAction}
-import org.eknet.publet.gitr.{RepositoryService, GitRequestUtils}
+import org.eknet.publet.gitr.GitRequestUtils
 import org.eknet.publet.web.shiro.Security
 
 /**
@@ -168,7 +168,6 @@ class GitrControl extends ScalaScript {
         RenderUtils.renderTemplate(gitrcommitTemplate, attrs)
       })
     }) getOrElse {
-      import ScalaScript._
       makeJson(Map("success"->false, "message"->"Repository not found."))
     }
   }

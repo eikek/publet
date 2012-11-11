@@ -18,9 +18,8 @@ package org.eknet.publet.gitr.webui.scripts
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import ScalaScript._
 import org.eknet.publet.gitr.auth.{GitAction, DefaultRepositoryStore, RepositoryTag}
-import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.util.{RenderUtils, PubletWebContext, PubletWeb}
 import org.eknet.gitr.{GitrMan, RepositoryName}
 import org.eknet.publet.gitr.GitRequestUtils
 
@@ -96,7 +95,7 @@ class GitrRepoList extends ScalaScript {
     }
 
     val list = PubletWeb.instance[GitrMan].get.allRepositories(repoFilter)
-    makeJson(list
+    RenderUtils.makeJson(list
       .map(r => (r, getRepositoryModel(r.name.name)))
       .map(t => new RepositoryInfo(t._1, t._2))
       .toList.sorted

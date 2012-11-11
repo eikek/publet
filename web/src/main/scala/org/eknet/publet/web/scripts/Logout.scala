@@ -16,10 +16,9 @@
 
 package org.eknet.publet.web.scripts
 
-import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import ScalaScript._
 import org.eknet.publet.web.util.PubletWebContext
+import org.eknet.publet.engine.scala.ScalaScript
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,6 +27,8 @@ import org.eknet.publet.web.util.PubletWebContext
 object Logout extends ScalaScript {
 
   def serve() = {
+    import org.eknet.publet.web.util.RenderUtils.makeJson
+
     if (Security.isAuthenticated) {
       Security.subject.logout()
     }

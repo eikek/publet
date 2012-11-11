@@ -22,7 +22,6 @@ import java.awt.{Color, GradientPaint, RenderingHints, Font}
 import util.Random
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import ScalaScript._
 import org.eknet.publet.web.util.{PubletWebContext, Key}
 
 /**Script generates a png image containing a random string. The
@@ -111,6 +110,7 @@ class CaptchaScript extends ScalaScript {
     ctx.sessionMap.put(captchaKey, captchaData._1)
     ctx.attr(captchaKey)
 
+    import org.eknet.publet.web.util.RenderUtils.makePng
     makePng(captchaData._2)
   }
 }
