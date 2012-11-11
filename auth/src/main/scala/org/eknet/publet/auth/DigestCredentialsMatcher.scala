@@ -28,13 +28,13 @@ class DigestCredentialsMatcher extends CredentialsMatcher {
 
   def doCredentialsMatch(token: AuthenticationToken, info: AuthenticationInfo) = {
     (token, info) match {
-      case (digestToken: DigestAuthenticationToken, policy: PolicyAuthzInfo) =>
+      case (digestToken: DigestAuthenticationToken, policy: UserAuthcInfo) =>
         matchDigest(digestToken, policy)
       case _ => false
     }
   }
 
-  private def matchDigest(token: DigestAuthenticationToken, policy: PolicyAuthzInfo) = {
+  private def matchDigest(token: DigestAuthenticationToken, policy: UserAuthcInfo) = {
     val digestResp = token.getCredentials
     policy.user.get(UserProperty.digest) match {
       case Some(digest) => {
