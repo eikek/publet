@@ -18,8 +18,8 @@ package org.eknet.guice.squire
 
 import com.google.inject._
 import com.google.inject.multibindings.Multibinder
-import com.google.inject.matcher.Matcher
-import com.google.inject.spi.{TypeListener, TypeEncounter}
+import com.google.inject.matcher.{AbstractMatcher, Matcher}
+import com.google.inject.spi.{InjectionListener, TypeListener, TypeEncounter}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -37,11 +37,14 @@ trait SquireBinder {
   def setOf[A: Manifest] =
     new SquireSetBindingBuilder[A](Multibinder.newSetBinder(binder(), typeLiteral[A]))
 
-  def bindListener(matcher: Matcher[_ >: TypeLiteral[_]])(f: (TypeLiteral[_], TypeEncounter[_]) => Unit) {
-    binder().bindListener(matcher, new TypeListener {
-      def hear[I](literal: TypeLiteral[I], encounter: TypeEncounter[I]) {
-        f(literal, encounter)
-      }
+  def bindTypeListener(matcher: Matcher[_ >: TypeLiteral[_]], listener: (TypeLiteral[_], TypeEncounter[_]) => Unit) {
+    binder().bindListener(matcher, new TypeListenerFunction(listener))
+  }
+
+  def addInjectionListener(matcher: Matcher[_ >: TypeLiteral[_]], listener:(Any)=>Unit) {
+    bindTypeListener(matcher, (literal, encounter) => {
+      val il: InjectionListener[AnyRef] = new InjectionListenerFun[AnyRef](listener)
+      encounter.register(il.asInstanceOf[InjectionListener[_ >: Any]])
     })
   }
 }

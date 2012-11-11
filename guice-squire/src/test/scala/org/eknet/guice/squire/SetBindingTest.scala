@@ -18,10 +18,11 @@ package org.eknet.guice.squire
 
 import org.scalatest.FunSuite
 import org.scalatest.matchers.ShouldMatchers
-import com.google.inject.{Key, Scopes, Singleton, Guice}
+import com.google.inject._
 import java.awt.event.{ActionEvent, ActionListener}
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.util.Types
+import com.google.inject.matcher.{Matcher, Matchers}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -50,6 +51,33 @@ class SetBindingTest extends FunSuite with ShouldMatchers {
     val a = inj.getInstance(classOf[ServiceA])
     val b = inj.getInstance(classOf[ServiceB])
     a should be (b)
+  }
+
+  test ("InjectionListener registration for any") {
+    val module = new InjectionListenerModule(Matchers.any())
+    val inj = Guice.createInjector(module)
+    inj.getInstance(classOf[ServiceA])
+    inj.getInstance(classOf[ServiceB])
+    module.set should have size (3)
+  }
+
+  test ("InjectionListener for specific class") {
+    val module = new InjectionListenerModule(MoreMatchers.ofClass[ServicAImpl])
+    val inj = Guice.createInjector(module)
+    inj.getInstance(classOf[ServiceA])
+    inj.getInstance(classOf[ServiceB])
+    module.set should have size (1)
+  }
+
+  class InjectionListenerModule(matcher: Matcher[_ >: TypeLiteral[_]]) extends SquireModule {
+    val set = collection.mutable.Set[String]()
+    def configure() {
+      addInjectionListener(matcher, (injectee => {
+        set.add("InjectionListener:" +injectee)
+      }))
+      bind[ServiceA].to[ServicAImpl].in(Scopes.SINGLETON)
+      bind[ServiceB].to[ServicBImpl].in(Scopes.SINGLETON)
+    }
   }
 
   class ServiceABModule extends SquireModule {
