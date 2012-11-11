@@ -4,9 +4,10 @@ import org.eknet.publet.web.shiro.Security
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.UsernamePasswordToken
 import grizzled.slf4j.Logging
-import com.bradmcevoy.http.{Auth, Request, DigestResource, Resource}
-import com.bradmcevoy.http.Request.Method
-import com.bradmcevoy.http.http11.auth.{DigestResponse => MiltonDigestResponse}
+import io.milton.resource.{Resource, DigestResource}
+import io.milton.http.{Auth, Request}
+import io.milton.http.Request.Method
+import io.milton.http.http11.auth.{DigestResponse => MiltonDigestResponse}
 import org.eknet.publet.web.util.PubletWebContext
 import org.eknet.publet.auth.{DigestResponse, DigestAuthenticationToken}
 

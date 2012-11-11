@@ -2,9 +2,9 @@ package org.eknet.publet.webdav
 
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.Path
-import com.bradmcevoy.http.ResourceFactory
-import com.bradmcevoy.http.exceptions.BadRequestException
 import org.eknet.publet.Publet
+import io.milton.http.ResourceFactory
+import io.milton.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

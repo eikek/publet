@@ -3,8 +3,8 @@ package org.eknet.publet.webdav.pvfs
 import org.eknet.publet.vfs.ContentResource
 import java.io.OutputStream
 import java.util
-import com.bradmcevoy.http.{Auth, GetableResource}
-import com.bradmcevoy.http
+import io.milton.resource.GetableResource
+import io.milton.http
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -17,7 +17,7 @@ trait ContentGet extends GetableResource {
     resource.copyTo(out, close = true)
   }
 
-  def getMaxAgeSeconds(auth: Auth) = null
+  def getMaxAgeSeconds(auth: http.Auth) = null
 
   def getContentType(accepts: String) = resource.contentType.mimeString
 

@@ -2,7 +2,8 @@ package org.eknet.publet.webdav.pvfs
 
 import java.util
 import org.eknet.publet.webdav.WebdavResource
-import com.bradmcevoy.http.{Request, PropFindableResource, Resource}
+import io.milton.resource.{PropFindableResource, Resource}
+import io.milton.http.Request
 
 /**
  * Implements the milton `Resource` interface based on nothing.

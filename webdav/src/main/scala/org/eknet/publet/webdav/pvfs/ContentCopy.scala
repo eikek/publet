@@ -2,8 +2,8 @@ package org.eknet.publet.webdav.pvfs
 
 import org.eknet.publet.vfs.{Writeable, Modifyable, ContentResource}
 import org.eknet.publet.webdav.{DavContainerResource, WebdavResource}
-import com.bradmcevoy.http.{CollectionResource, CopyableResource}
-import com.bradmcevoy.http.exceptions.{BadRequestException, ConflictException}
+import io.milton.resource.{CollectionResource, CopyableResource}
+import io.milton.http.exceptions.{BadRequestException, ConflictException}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

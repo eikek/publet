@@ -3,8 +3,9 @@ package org.eknet.publet.webdav.pvfs
 import org.eknet.publet.vfs.Container
 import java.io.OutputStream
 import java.util
-import com.bradmcevoy.http.{XmlWriter, Auth, GetableResource}
-import com.bradmcevoy.http
+import io.milton.resource.GetableResource
+import io.milton.http
+import io.milton.http.{XmlWriter, Auth}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
