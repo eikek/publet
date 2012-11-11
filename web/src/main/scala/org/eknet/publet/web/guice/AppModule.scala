@@ -16,6 +16,11 @@
 
 package org.eknet.publet.web.guice
 
+import _root_.com.google.common.eventbus.EventBus
+import _root_.com.google.inject.matcher.Matchers
+import _root_.com.google.inject.name.Named
+import _root_.com.google.inject.servlet.ServletModule
+import _root_.com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import com.google.inject._
 import org.eknet.publet.web.template.{DefaultLayout, IncludeLoader, ConfiguredScalateEngine}
 import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
@@ -30,21 +35,23 @@ import org.eknet.publet.web._
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
 import javax.servlet.ServletContext
-import com.google.inject.servlet.ServletModule
-import com.google.inject.name.Named
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.asset.impl.DefaultAssetManager
 import org.eknet.publet.web.asset.AssetManager
-import com.google.common.eventbus.EventBus
-import com.google.inject.matcher.Matchers
-import com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
-import org.eknet.publet.web.util.{PubletWeb, StringMap}
+import org.eknet.publet.web.util.PubletWeb
 import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
 import org.eknet.guice.squire.SquireBinder
 import org.eknet.publet.auth.guice.AuthModule
 
 /**
+ * The main application module. It defines all bindings for a working application.
+ *
+ * Additional bindings can be supplied via the [[java.util.ServiceLoader]] pattern. Create
+ * modules that extend the marker trait [[org.eknet.publet.web.guice.PubletModule]] and make
+ * them available in `META-INF/services/org.eknet.publet.web.guice.PubletModule`. They are
+ * then picked up by this module and installed.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.10.12 23:19
  */
@@ -84,20 +91,13 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     bind[Config].toInstance(config)
     bind[EventBus].toInstance(eventBus)
 
-    bindListener(Matchers.any(), new TypeListener {
-      def hear[I](`type`: TypeLiteral[I], encounter: TypeEncounter[I]) {
-        encounter.register(new InjectionListener[I] {
-          def afterInjection(injectee: I) {
-            eventBus.register(injectee)
-          }
-        })
-      }
-    })
+    addInjectionListener(Matchers.any(), injectee => eventBus.register(injectee))
+
     eventBus.register(PubletWeb)
     bind[Settings].in(Scopes.SINGLETON)
 
     install(new AuthModule)
-    install(PubletShiroModule)
+    install(new PubletShiroModule)
 
     val moduleManager = new ModuleManager(config)
     bind[ModuleManager].toInstance(moduleManager)

@@ -97,13 +97,13 @@ object RootBuild extends Build {
     settings = buildSettings
   ) aggregate (
       Publet.module,
+      Gitr.module,
       GuiceSquire.module,
       ScalaScriptEngine.module,
+      ScalateEngine.module,
       Web.module,
-      Gitr.module,
       GitrWeb.module,
       Auth.module,
-      ScalateEngine.module,
       War.module,
       WebEditor.module,
       Ext.module,
@@ -185,7 +185,81 @@ object Gitr extends Build {
 
 }
 
+object GuiceSquire extends Build {
 
+  lazy val module = Project(
+    id = "guice-squire",
+    base = file("guice-squire"),
+    settings = buildProperties
+  )
+
+  val buildProperties = Project.defaultSettings ++ Seq(
+    name := "guice-squire",
+    description := "Helpers for working with guice using Scala",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(
+    slf4jApi, guice, guiceMultibindings, scalaTest
+  )
+}
+
+// engine implementations
+object ScalaScriptEngine extends Build {
+
+  lazy val module = Project(
+    id = "scala-script",
+    base = file("scala-script"),
+    settings = buildProperties
+  ) dependsOn (Publet.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-scala-scriptengine",
+    description := "Provides a engine that compiles and executes scala " +
+      "scripts, converting from *.scala source files to some dynamic content.",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(slf4jApi, scalaCompiler, scalaTest, grizzledSlf4j)
+
+}
+
+
+object ScalateEngine extends Build {
+
+  lazy val module = Project(
+    id = "scalate",
+    base = file("scalate"),
+    settings = buildProperties
+  ) dependsOn Publet.module
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-scalate",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateUtil, scalateWikitext, scalatePage)
+}
+
+// authentication and authorization module
+object Auth extends Build {
+
+  lazy val module = Project(
+    id = "auth",
+    base = file("auth"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, GuiceSquire.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-auth",
+    description := "Authentication module for publet, exposing a AuthManager and default impls.",
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(slf4jApi, grizzledSlf4j, shiro, guice, scalaTest)
+}
+
+// the web module
 object Web extends Build {
 
   lazy val module = Project(
@@ -213,6 +287,7 @@ object Web extends Build {
 
 }
 
+// extensions
 object GitrWeb extends Build {
 
   lazy val module = Project(
@@ -230,27 +305,6 @@ object GitrWeb extends Build {
 
 }
 
-
-object ScalaScriptEngine extends Build {
-
-  lazy val module = Project(
-    id = "scala-script",
-    base = file("scala-script"),
-    settings = buildProperties
-  ) dependsOn (Publet.module)
-
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-scala-scriptengine",
-    description := "Provides a engine that compiles and executes scala " +
-      "scripts, converting from *.scala source files to some dynamic content.",
-    libraryDependencies ++= deps
-  ) 
-
-  val deps = Seq(slf4jApi, scalaCompiler, scalaTest, grizzledSlf4j)
-
-}
-
-
 object Webdav extends Build {
 
   lazy val module = Project(
@@ -265,44 +319,6 @@ object Webdav extends Build {
   )
 
   val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
-}
-
-object War extends Build {
-
-  import com.github.siasia._
-  import WebappPlugin.webappSettings
-
-  lazy val module = Project(
-    id = "war",
-    base = file("war"),
-    settings = buildProperties
-  ) dependsOn (Publet.module, ScalateEngine.module, Web.module,
-    WebEditor.module, Ext.module, GitrWeb.module, Doc.module, Webdav.module)
-
-  val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
-    name := "publet-war",
-    publishArtifact in (Compile, packageBin) := true,
-    libraryDependencies ++= deps
-  )
-
-  val deps = Seq(servletApiProvided, logbackClassic)
-}
-
-object Auth extends Build {
-
-  lazy val module = Project(
-    id = "auth",
-    base = file("auth"),
-    settings = buildProperties
-  ) dependsOn (Publet.module, GuiceSquire.module)
-
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-auth",
-    description := "Authentication module for publet, exposing a AuthManager and default impls.",
-    libraryDependencies ++= deps
-  )
-
-  val deps = Seq(slf4jApi, grizzledSlf4j, shiro, guice, scalaTest)
 }
 
 object WebEditor extends Build {
@@ -320,10 +336,10 @@ object WebEditor extends Build {
 
   val deps = Seq(servletApiProvided, grizzledSlf4j, scalaTest)
 
-} 
+}
 
 object Ext extends Build {
-  
+
   lazy val module = Project(
     id = "ext",
     base = file("ext"),
@@ -333,26 +349,10 @@ object Ext extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
     libraryDependencies ++= deps
-  ) 
+  )
 
   val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons, scue)
 
-}
-
-object ScalateEngine extends Build {
-
-  lazy val module = Project(
-    id = "scalate",
-    base = file("scalate"),
-    settings = buildProperties
-  ) dependsOn Publet.module
-
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-scalate",
-    libraryDependencies ++= deps
-  ) 
-
-  val deps = Seq(slf4jApi, grizzledSlf4j, scalateCore, scalateUtil, scalateWikitext, scalatePage)
 }
 
 object Doc extends Build {
@@ -381,6 +381,29 @@ object Doc extends Build {
 
   val deps = Seq(grizzledSlf4j, servletApiProvided)
 }
+
+// modules to create deployable units
+object War extends Build {
+
+  import com.github.siasia._
+  import WebappPlugin.webappSettings
+
+  lazy val module = Project(
+    id = "war",
+    base = file("war"),
+    settings = buildProperties
+  ) dependsOn (Publet.module, ScalateEngine.module, Web.module,
+    WebEditor.module, Ext.module, GitrWeb.module, Doc.module, Webdav.module)
+
+  val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
+    name := "publet-war",
+    publishArtifact in (Compile, packageBin) := true,
+    libraryDependencies ++= deps
+  )
+
+  val deps = Seq(servletApiProvided, logbackClassic)
+}
+
 
 object Server extends Build {
   import sbtassembly.Plugin._
@@ -450,24 +473,5 @@ object App extends Build {
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-app"
-  )
-}
-
-object GuiceSquire extends Build {
-
-  lazy val module = Project(
-    id = "guice-squire",
-    base = file("guice-squire"),
-    settings = buildProperties
-  )
-
-  val buildProperties = Project.defaultSettings ++ Seq(
-    name := "guice-squire",
-    description := "Helpers for working with guice using Scala",
-    libraryDependencies ++= deps
-  )
-
-  val deps = Seq(
-    slf4jApi, guice, guiceMultibindings, scalaTest
   )
 }

@@ -29,6 +29,8 @@ import com.google.common.eventbus.Subscribe
 import org.eknet.publet.engine.scalate.ScalateEngine
 
 /**
+ * Registers provided default assets and sets the default layout template.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 18:25
  */

@@ -23,7 +23,7 @@ import collection.mutable
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 02.04.12 23:01
  */
-trait MountManager {
+class MountManager {
 
   protected val tree = SegTree("/")
 

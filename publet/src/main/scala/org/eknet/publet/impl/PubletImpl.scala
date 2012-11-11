@@ -28,7 +28,10 @@ import grizzled.slf4j.Logging
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 28.03.12 22:43
  */
-class PubletImpl extends MountManager with Publet with EngineMangager with RootContainer with Logging {
+class PubletImpl extends Publet with Logging {
+
+  private val engineMgr = new EngineMangager
+  private val mountMgr = new MountManager with RootContainer
 
   def process(path: Path): Option[Content] = {
     Predef.ensuring(path != null, "null is illegal")
@@ -43,7 +46,7 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
       case data => {
         if (data.size > 1) warn("More than one source file found for: "+ path.asString)
         val sourcePath = path.sibling(data.head.name.fullName)
-        val eng = engine.orElse(resolveEngine(sourcePath))
+        val eng = engine.orElse(engineMgr.resolveEngine(sourcePath))
           .getOrElse(sys.error("No engine found for uri: "+ path.asString))
 
         eng.process(path, data.head, targetType)
@@ -90,7 +93,7 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
       // its children (like ClasspathContainer). Only lowercase
       // extensions are used for lookups!
 
-      lookup(path.parent).collect({case c: ContainerResource=>c})
+      mountMgr.lookup(path.parent).collect({case c: ContainerResource=>c})
         .map(_.children.filter(_.name.name == path.name.name))
         .filter(!_.isEmpty)
         .map(_.collect({case c: ContentResource=> c}))
@@ -103,10 +106,10 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
           val reqexts = path.name.targetType.extensions
 
           //lookup first sources with requested extensions
-          val rsources = reqexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc}).toSeq
+          val rsources = reqexts.map(ext => mountMgr.lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc}).toSeq
           val others = mutable.ListBuffer[ContentResource]()
           if (rsources.isEmpty) {
-            others ++= allexts.map(ext => lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc})
+            others ++= allexts.map(ext => mountMgr.lookup(path.withExt(ext))).collect({case Some(cc:ContentResource) => cc})
           }
           rsources ++ others.toSeq
       }
@@ -115,14 +118,12 @@ class PubletImpl extends MountManager with Publet with EngineMangager with RootC
 
   def createResource(path: Path, ext: Option[String]): Resource = {
     val p = if (ext.isDefined) path.withExt(ext.get) else path
-    createResource(p)
+    mountMgr.createResource(p)
   }
 
-  def mountManager = this
-
-  def engineManager = this
-
-  def rootContainer = this
+  def mountManager = mountMgr
+  def engineManager = engineMgr
+  def rootContainer = mountMgr
 
 }
 

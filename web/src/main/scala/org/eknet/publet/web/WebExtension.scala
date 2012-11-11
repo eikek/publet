@@ -36,14 +36,15 @@ trait WebExtension {
    * not routed here.
    *
    * If you just want to be informed, you could also subscribe to
-   * the [[org.eknet.publet.web.req.RequestStartedEvent]] or
-   * [[org.eknet.publet.web.req.RequestEndEvent]]
+   * the [[org.eknet.publet.web.req.RequestStartedEvent]].
    */
   def onBeginRequest(req:HttpServletRequest): HttpServletRequest
 
   /**
    * This method is invoked on the end of each request.
    *
+   * If you just want to be informed, you could also subscribe to
+   * the [[org.eknet.publet.web.req.RequestEndEvent]].
    */
   def onEndRequest(req: HttpServletRequest)
 

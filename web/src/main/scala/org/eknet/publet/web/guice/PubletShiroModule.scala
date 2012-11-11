@@ -43,7 +43,7 @@ import org.eknet.publet.web.shiro.SuperadminRealm
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 14:02
  */
-object PubletShiroModule extends SquireModule with PubletBinding {
+class PubletShiroModule extends SquireModule with PubletBinding {
 
   def configure() {
     bind[SessionManager].to[ServletContainerSessionManager].asEagerSingleton()

@@ -63,6 +63,13 @@ trait Publet {
    */
   def push(path: Path, content: InputStream, changeInfo: Option[ChangeInfo] = None): ContentResource
 
+  /**
+   * Deletes the resource at the given path. If the resource is not found, this
+   * method returns without error. If the resource is not modifiyable, an exception
+   * is thrown.
+   *
+   * @param path
+   */
   def delete(path: Path)
 
   /**

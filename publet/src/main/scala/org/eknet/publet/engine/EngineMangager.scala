@@ -25,7 +25,7 @@ import collection.mutable
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 29.03.12 13:21
  */
-trait EngineMangager {
+class EngineMangager {
 
   private val mountMap = mutable.Map[Glob, PubletEngine]()
   private val engineMap = mutable.Map[Symbol, PubletEngine]()

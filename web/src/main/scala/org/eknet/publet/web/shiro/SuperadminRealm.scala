@@ -17,10 +17,11 @@
 package org.eknet.publet.web.shiro
 
 import org.eknet.publet.auth.store.{PermissionStore, UserProperty, User, UserStoreAdapter}
-import org.eknet.publet.web.Config
+import org.eknet.publet.web.{ConfigReloadedEvent, Config}
 import com.google.inject.{Singleton, Inject}
 import org.eknet.publet.auth.DigestGenerator
 import org.apache.shiro.realm.text.TextConfigurationRealm
+import com.google.common.eventbus.Subscribe
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,12 +30,24 @@ import org.apache.shiro.realm.text.TextConfigurationRealm
 @Singleton
 class SuperadminRealm @Inject() (config: Config) extends TextConfigurationRealm {
 
-  if (config("superadminEnabled").getOrElse("true").toBoolean) {
-    setUserDefinitions("superadmin = "+ getPassword+ ", superuser")
-    setRoleDefinitions("superuser = *")
-    processDefinitions()
+  setup()
+
+  private def setup() {
+    users.clear()
+    roles.clear()
+    setUserDefinitions(null)
+    setRoleDefinitions(null)
+    if (config("superadminEnabled").getOrElse("true").toBoolean) {
+      setUserDefinitions("superadmin = "+ getPassword+ ", superuser")
+      setRoleDefinitions("superuser = *")
+      processDefinitions()
+    }
   }
 
   private def getPassword = config("superadminPassword").getOrElse("superadmin")
 
+  @Subscribe
+  def reloadRealm(event: ConfigReloadedEvent) {
+    setup()
+  }
 }
