@@ -4,7 +4,7 @@ import Dependencies._
 
 object Resolvers {
   val eknet = "eknet.org" at "https://eknet.org/maven2"
-  val ettrema = "ettrema.com" at "http://www.ettrema.com/maven2"
+  val ettrema = "milton.io" at "http://milton.io/maven"
 }
 object Version {
   val slf4j = "1.6.5"
