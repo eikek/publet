@@ -244,9 +244,9 @@ openclipart, licensed under Public Domain.
 <http://openclipart.org>
 
 
-### Milton 1.x
+### Milton 2 Community Edition
 
-milton 1.x, licensed under
+milton 2 community edition, licensed under
 Apache Software License, Version 2.0.
 
 <http://milton.io/>
