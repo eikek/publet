@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.ext.orient
+package org.eknet.publet.ext.graphdb
 
 import com.google.inject._
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
@@ -24,11 +24,11 @@ import org.eknet.guice.squire.SquireModule
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.10.12 22:43
  */
-class OrientModule extends SquireModule with PubletBinding with PubletModule {
+class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GraphDbProvider].to[DefaultGraphDbProvider] in Scopes.SINGLETON
-    bind[OrientDbShutdownHook].asEagerSingleton()
+    bind[GraphDbShutdownHook].asEagerSingleton()
   }
 
 }

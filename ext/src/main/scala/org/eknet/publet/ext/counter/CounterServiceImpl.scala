@@ -31,7 +31,7 @@ import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.{Settings, SettingsReloadedEvent}
-import org.eknet.publet.ext.orient.GraphDbProvider
+import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.scue._
 
 /**
@@ -53,10 +53,12 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
    * are connected to.
    *
    */
-  val pagesNode = vertex("pages" := "pages", {v =>
-    db.referenceNode --> "pages" --> v
-    db.graph.createKeyIndex(Properties.pagePathKey, classOf[Vertex])
-  })
+  def pagesNode = withTx {
+    vertex("pages" := "pages", {v =>
+      db.referenceNode --> "pages" --> v
+      db.graph.createKeyIndex(Properties.pagePathKey, classOf[Vertex])
+    })
+  }
 
 
   @Subscribe

@@ -1,6 +1,5 @@
-package org.eknet.publet.ext.orient
+package org.eknet.publet.ext.graphdb
 
-import com.orientechnologies.orient.core.exception.OConcurrentModificationException
 import org.fusesource.scalate.util.Logging
 import org.eknet.scue.GraphDsl
 
@@ -29,7 +28,7 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
   /**
    * Wraps the function in a transaction.
    *
-   * The function receives the [[org.eknet.publet.ext.orient.BlueprintGraph]]
+   * The function receives the [[org.eknet.publet.ext.graphdb.BlueprintGraph]]
    * as argument. That can be used with the following
    * syntax
    *
@@ -49,16 +48,16 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
   }
 
   private def executeOpt[A](count: Int, max: Int, f:BlueprintGraph => A): A = {
-    if (count >= max) sys.error("Too many ("+max+") concurrent modifications.")
-    try {
+//    if (count >= max) sys.error("Too many ("+max+") concurrent modifications.")
+//    try {
       GraphDsl.withTx(f(graph))(graph)
-    }
-    catch {
-      case e: OConcurrentModificationException => {
-        error("Concurrent modification error ("+count+"). Trying again...")
-        executeOpt(count +1, max, f)
-      }
-    }
+//    }
+//    catch {
+//      case e: OConcurrentModificationException => {
+//        error("Concurrent modification error ("+count+"). Trying again...")
+//        executeOpt(count +1, max, f)
+//      }
+//    }
   }
 
   /**

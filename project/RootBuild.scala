@@ -7,8 +7,8 @@ object Resolvers {
   val ettrema = "milton.io" at "http://milton.io/maven"
 }
 object Version {
-  val slf4j = "1.6.5"
-  val logback = "1.0.6"
+  val slf4j = "1.7.2"
+  val logback = "1.0.7"
   val servlet = "3.0.1"
   val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
@@ -20,8 +20,6 @@ object Version {
   val grizzled = "0.6.9"
   val scalate = "1.5.3"
   val mimeUtil = "2.1.3"
-  val orientdb = "1.2.0"
-  val blueprints = "2.1.0"
   val milton = "2.2.1"
   val ccodec = "1.5"
   val jdom = "1.1"
@@ -34,14 +32,13 @@ object Version {
   val guice = "3.0"
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
   val scue = "1.0.0-SNAPSHOT"
+  val titan = "0.1.0"
 }
 
 object Dependencies {
 
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload exclude("rhino", "js")
   val commonsIo = "commons-io" % "commons-io" % Version.cio withSources() exclude("rhino", "js")
-  val blueprints = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive() //uses orientdb 1.0.1
-  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
   val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle exclude("rhino", "js")
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle exclude("rhino", "js")
   val findbugs = "com.google.code.findbugs" % "jsr305" % Version.findbugs
@@ -66,8 +63,6 @@ object Dependencies {
   )
   val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
-  val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources() exclude("rhino", "js")
-  val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources() exclude("rhino", "js")
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources() exclude("rhino", "js")
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
   val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
@@ -81,6 +76,13 @@ object Dependencies {
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("rhino", "js")
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j exclude("rhino", "js")
   val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail exclude("com.google.guava", "guava")
+  val titan = "com.thinkaurelius.titan" % "titan" % Version.titan withSources() intransitive()
+  val titanDeps = Seq(
+    "com.tinkerpop.blueprints" % "blueprints-core" % "2.1.0",
+    "commons-configuration" % "commons-configuration" % "1.6",
+    "com.sleepycat" % "je" % "5.0.58",
+    "com.googlecode" % "kryo" % "1.04"
+  )
   val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor
 }
 
@@ -351,7 +353,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   )
 
-  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprints, blueprintsCore, orientdbCore, orientCommons, scue)
+  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, titan, scue) ++ titanDeps
 
 }
 
@@ -398,6 +400,14 @@ object War extends Build {
   val buildProperties = Project.defaultSettings ++ webappSettings ++ Seq[Project.Setting[_]](
     name := "publet-war",
     publishArtifact in (Compile, packageBin) := true,
+  //todo find out how to better remove any test artifact
+    PluginKeys.warPostProcess in Compile <<= (target) map {
+      (target) => {
+        () =>
+          val webapp = target / "webapp"
+          IO.delete(webapp / "WEB-INF" / "lib" / "scue_2.9.2-test.jar")
+      }
+    },
     libraryDependencies ++= deps
   )
 
