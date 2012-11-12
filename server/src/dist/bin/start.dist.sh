@@ -6,6 +6,12 @@
 # will override all system properties.
 #
 
+# find utf8 locale and set it
+LOC=`locale -a | grep -i utf8 | head -n1`
+if [ -n "$LOC" ]; then
+  export LC_ALL=$LOC
+fi
+
 # find working dir and cd into it
 cd `dirname $0`/..
 
