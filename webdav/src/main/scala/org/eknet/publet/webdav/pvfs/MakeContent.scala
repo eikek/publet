@@ -5,8 +5,8 @@ import java.io.InputStream
 import java.lang.Long
 import org.eknet.publet.webdav.WebdavResource
 import org.eknet.publet.web.shiro.Security
-import com.bradmcevoy.http.PutableResource
-import com.bradmcevoy.http.exceptions.BadRequestException
+import io.milton.resource.PutableResource
+import io.milton.http.exceptions.BadRequestException
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

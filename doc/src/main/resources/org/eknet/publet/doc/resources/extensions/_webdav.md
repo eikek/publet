@@ -93,9 +93,17 @@ Some WebDAV clients expect a certain behaviour of the server to function
 correctly. That means that some clients may work only partially or not at all.
 This is most probably due to how publet exposes the WebDAV feature. To be
 honest, I lowered my efforts, once <code>mvn deploy</code> and <code>sbt
-publish</code> started working for me. The WebDAV feature is based on
-[Milton](http://milton.io) - there you can find a nice [page on this
-topic](http://milton.io/guide/m18/compat/index.html). 
+publish</code> started working for me.
+
+The WebDAV feature is based on [Milton](http://milton.io) - there you can find
+a nice [page on this topic](http://milton.io/guide/m18/compat/index.html). Milton
+is distributed in two flavours: as community edition that offers DAV 1 support and
+as enterprise edition with more features. Publet is distributed with the community
+edition of milton. In order to use the enterprise edition, you need to download it
+and drop it in the `plugins` directory. Note, that the enterprise edition of milton
+is licensed under either the [AGPL](http://www.gnu.org/licenses/agpl-3.0.en.html)
+or commercial licenses, so you probably want to check that first. Visit the [milton](http://milton.io)
+page for more information.
 
 The following clients seem to work:
 

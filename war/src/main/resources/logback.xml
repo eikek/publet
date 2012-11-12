@@ -11,8 +11,7 @@
 
   <logger name="org" level="INFO"/>
   <logger name="com" level="WARN"/>
-  <logger name="com.bradmcevoy" level="INFO"/>
-  <logger name="com.ettrema" level="INFO"/>
+  <logger name="io.milton" level="INFO"/>
 
   <root>
     <appender-ref ref="STDOUT" />

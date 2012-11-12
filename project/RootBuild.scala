@@ -22,7 +22,7 @@ object Version {
   val mimeUtil = "2.1.3"
   val orientdb = "1.2.0"
   val blueprints = "2.1.0"
-  val milton = "1.8.1.3"
+  val milton = "2.2.1"
   val ccodec = "1.5"
   val jdom = "1.1"
   val jetty = "8.1.8.v20121106"
@@ -58,13 +58,13 @@ object Dependencies {
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources() exclude("rhino", "js")
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources() exclude("rhino", "js")
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("rhino", "js")
-  val miltonApi = "com.ettrema" % "milton-api" % Version.milton withSources() intransitive()
+  val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
     "commons-codec" % "commons-codec" % Version.ccodec withSources() exclude("rhino", "js"),
     "commons-collections" % "commons-collections" % Version.ccollections withSources() exclude("rhino", "js"),
     "org.jdom" % "jdom" % Version.jdom exclude("rhino", "js")
   )
-  val miltonServlet = "com.ettrema" % "milton-servlet" % Version.milton withSources() intransitive()
+  val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdbCore = "com.orientechnologies" % "orientdb-core" % Version.orientdb withSources() exclude("rhino", "js")
   val orientCommons = "com.orientechnologies" % "orient-commons" % Version.orientdb withSources() exclude("rhino", "js")
