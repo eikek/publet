@@ -2,8 +2,9 @@
 #
 # Starts publet server
 #
-# You can change properties in `etc/server.properties` as they
-# will override all system properties.
+# You can change properties in `etc/server.properties` and using
+# system properties. System properties override those settings in
+# the configuration file.
 #
 
 # find utf8 locale and set it

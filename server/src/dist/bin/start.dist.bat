@@ -1,6 +1,10 @@
 @echo off
 java -version
 
+rem You can change properties in `etc/server.properties` and using
+rem system properties. System properties override those settings in
+rem the configuration file.
+
 rem change in correct working directory
 cd %~dp0\..
 
