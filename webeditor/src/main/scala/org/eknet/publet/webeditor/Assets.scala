@@ -20,7 +20,7 @@ import org.eknet.publet.vfs.util.SimpleContentResource
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.web.asset.{AssetCollection, Group}
 import scala.Some
-import io.Source
+import scala.io.Source
 import org.eknet.publet.vfs.{ContentType, Content}
 import org.eknet.publet.web.template.DefaultLayout
 import org.eknet.publet.web.Config
