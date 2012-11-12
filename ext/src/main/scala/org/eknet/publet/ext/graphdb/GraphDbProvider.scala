@@ -109,9 +109,11 @@ class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider 
 
   def toOrientUri(dbname: String) = "local://"+ databaseDir(config, dbname).getAbsolutePath
 
-  def newGraph(name: String): BlueprintGraph = new TitanWrapper(TitanFactory.open(databaseDir(config, name).getAbsolutePath))
+  def newGraph(name: String): BlueprintGraph = wrapTitanGraph(TitanFactory.open(databaseDir(config, name).getAbsolutePath))
 
   def newDatabase(name: String): GraphDb = new GraphDb(newGraph(name))
+
+  private def wrapTitanGraph(tg: TitanGraph): BlueprintGraph = new TitanWrapper(tg)
 
   private class TitanWrapper(titan: TitanGraph) extends BlueprintGraph {
     def getFeatures = titan.getFeatures

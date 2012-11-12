@@ -14,15 +14,12 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
   /**
    * Wraps the function in a transaction.
    *
-   * It retries a few times on concurrent modification
-   * errors.
-   *
    * @param f
    * @tparam A
    * @return
    */
   def withTx[A](f: => A):A = {
-    executeOpt(0, 5, db => f)
+    GraphDsl.withTx(f)(graph)
   }
 
   /**
@@ -44,21 +41,9 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
    * @return
    */
   def withTx[A](f: BlueprintGraph => A): A = {
-    executeOpt(0, 5, f)
+    GraphDsl.withTx(f(graph))(graph)
   }
 
-  private def executeOpt[A](count: Int, max: Int, f:BlueprintGraph => A): A = {
-//    if (count >= max) sys.error("Too many ("+max+") concurrent modifications.")
-//    try {
-      GraphDsl.withTx(f(graph))(graph)
-//    }
-//    catch {
-//      case e: OConcurrentModificationException => {
-//        error("Concurrent modification error ("+count+"). Trying again...")
-//        executeOpt(count +1, max, f)
-//      }
-//    }
-  }
 
   /**
    * Delegates to `graph.shutdonw()`
@@ -71,10 +56,10 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
    * The reference node that is created on first access.
    *
    */
-  lazy val referenceNode = {
+  def referenceNode = {
     val referenceProperty = "6b67f6429706419098b4f02923a5a9d5"
-    withTx { implicit graph:BlueprintGraph =>
-      vertex(referenceProperty := 0)
+    withTx {
+      vertex(referenceProperty := 0)(graph)
     }
   }
 }
