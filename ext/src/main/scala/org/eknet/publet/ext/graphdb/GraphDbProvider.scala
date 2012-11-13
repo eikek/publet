@@ -34,7 +34,8 @@ trait GraphDbProvider {
 
   /**
    * Creates a new database or opens an existing one. Subsequent calls with
-   * the same argument may yield in returning the same object.
+   * the same argument yield in returning the same object where the `newXyz`
+   * methods return new objects potentially accessing the same database.
    *
    * @param name
    * @return
@@ -65,6 +66,12 @@ trait GraphDbProvider {
    */
   def shutdownAll()
 
+  /**
+   * Returns a list of the names of all currently registered databases.
+   *
+   * @return
+   */
+  def registeredDatabases: Iterable[String]
 }
 
 @Singleton
@@ -100,22 +107,25 @@ class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider 
     }
   }
 
-  private def dbroot(config: Config) = {
+  def registeredDatabases: Iterable[String] = {
+    import collection.JavaConversions._
+    dbs.keySet().toSet
+  }
+
+  private[this] def dbroot(config: Config) = {
     val d = new File(config.configDirectory, "databases")
     new File(d, "titans")
   }
 
-  private def databaseDir(config: Config, dbname: String) = new File(dbroot(config), dbname)
-
-  def toOrientUri(dbname: String) = "local://"+ databaseDir(config, dbname).getAbsolutePath
+  private[this] def databaseDir(config: Config, dbname: String) = new File(dbroot(config), dbname)
 
   def newGraph(name: String): BlueprintGraph = wrapTitanGraph(TitanFactory.open(databaseDir(config, name).getAbsolutePath))
 
   def newDatabase(name: String): GraphDb = new GraphDb(newGraph(name))
 
-  private def wrapTitanGraph(tg: TitanGraph): BlueprintGraph = new TitanWrapper(tg)
+  private[this] def wrapTitanGraph(tg: TitanGraph): BlueprintGraph = new TitanWrapper(tg)
 
-  private class TitanWrapper(titan: TitanGraph) extends BlueprintGraph {
+  private[this] class TitanWrapper(titan: TitanGraph) extends BlueprintGraph {
     def getFeatures = titan.getFeatures
     def addVertex(id: Any) = titan.addVertex(id)
     def getVertex(id: Any) = titan.getVertex(id)

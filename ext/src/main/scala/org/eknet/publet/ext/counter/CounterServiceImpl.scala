@@ -127,7 +127,7 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
     def isBlacklisted: Boolean = {
       //dont count spiders...
       val bot = info.agent.map(_.toLowerCase)
-        .exists(agent => agent.contains("spider") || agent.contains("bot"))
+        .exists(agent => agent.matches(".*crawler.*|.*spider.*|.*bot.*"))
 
       //honor blacklist in settings
       lazy val bl = ipBlacklist.isListed(info.ip)
