@@ -2,6 +2,8 @@ package org.eknet.publet.ext.graphdb
 
 import org.fusesource.scalate.util.Logging
 import org.eknet.scue.GraphDsl
+import java.io.{InputStream, OutputStream}
+import com.tinkerpop.blueprints.util.io.graphml.{GraphMLReader, GraphMLWriter}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -61,5 +63,27 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
     withTx {
       vertex(referenceProperty := 0)(graph)
     }
+  }
+
+  /**
+   * Uses blueprints [[com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter]] to
+   * export this graph database into graphML.
+   *
+   * @param out
+   */
+  def exportToGraphML(out: OutputStream) {
+    val writer = new GraphMLWriter(graph)
+    writer.outputGraph(out)
+  }
+
+  /**
+   * Uses blueprints [[com.tinkerpop.blueprints.util.io.graphml.GraphMLReader]] to
+   * read the graphML input stream into this database.
+   *
+   * @param in input stream containing GraphML data
+   */
+  def importGraphML(in: InputStream) {
+    val reader = new GraphMLReader(graph)
+    reader.inputGraph(in)
   }
 }
