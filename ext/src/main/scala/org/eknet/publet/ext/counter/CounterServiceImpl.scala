@@ -54,8 +54,8 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
    *
    */
   def pagesNode = withTx {
-    vertex("pages" := "pages", {v =>
-      db.referenceNode --> "pages" --> v
+    vertex("name" := "pages", {v =>
+      db.referenceNode --> "pagesNodes" --> v
       db.graph.createKeyIndex(Properties.pagePathKey, classOf[Vertex])
     })
   }
