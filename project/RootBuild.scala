@@ -5,6 +5,7 @@ import Dependencies._
 object Resolvers {
   val eknet = "eknet.org" at "https://eknet.org/maven2"
   val ettrema = "milton.io" at "http://milton.io/maven"
+  val oracle = "oracle.com" at "http://download.oracle.com/maven"
 }
 object Version {
   val slf4j = "1.7.2"
@@ -14,9 +15,9 @@ object Version {
   val cfileupload = "1.2.2"
   val cio = "2.2"
   val squaremail = "1.0.2"
-  val jgit = "2.0.0.201206130900-r"
+  val jgit = "2.1.0.201209190230-r"
   val shiro = "1.2.1"
-  val scalaTest = "2.0.M2"
+  val scalaTest = "2.0.M4"
   val grizzled = "0.6.9"
   val scalate = "1.5.3"
   val mimeUtil = "2.1.3"
@@ -36,46 +37,46 @@ object Version {
 }
 
 object Dependencies {
-
-  val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload exclude("rhino", "js")
-  val commonsIo = "commons-io" % "commons-io" % Version.cio withSources() exclude("rhino", "js")
-  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle exclude("rhino", "js")
-  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle exclude("rhino", "js")
+// exclude("rhino", "js")
+  val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
+  val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
+  val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
+  val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
   val findbugs = "com.google.code.findbugs" % "jsr305" % Version.findbugs
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("rhino", "js") //scala 2.9.2 only
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("org.slf4j", "slf4j-api") //scala 2.9.2 only
   val guava = "com.google.guava" % "guava" % Version.guava withSources()
-  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib") withSources()
+  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib") exclude("org.slf4j", "slf4j-api") withSources()
   val cglib = "cglib" % "cglib" % "2.2.2" withSources()
   val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice withSources()
   val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice withSources()
-  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty exclude("rhino", "js")
-  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources() exclude("rhino", "js")
-  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty exclude("rhino", "js")
-  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources() exclude("rhino", "js")
-  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources() exclude("rhino", "js")
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("rhino", "js")
+  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
+  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
+  val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
+  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("org.slf4j", "slf4j-api")
   val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
     "commons-codec" % "commons-codec" % Version.ccodec withSources() exclude("rhino", "js"),
-    "commons-collections" % "commons-collections" % Version.ccollections withSources() exclude("rhino", "js"),
-    "org.jdom" % "jdom" % Version.jdom exclude("rhino", "js")
+    "commons-collections" % "commons-collections" % Version.ccollections withSources(),
+    "org.jdom" % "jdom" % Version.jdom
   )
   val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources() exclude("rhino", "js")
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources()
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
   val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate exclude("rhino", "js")
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate exclude("rhino", "js")
-  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources() exclude("rhino", "js")
+  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
   val scue = "org.eknet.scue" %% "scue" % Version.scue
-  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources() exclude("rhino", "js")
-  val servletApiProvided = servletApi % "provided" exclude("rhino", "js")
-  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("rhino", "js")
-  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("rhino", "js")
-  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j exclude("rhino", "js")
-  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail exclude("com.google.guava", "guava")
+  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
+  val servletApiProvided = servletApi % "provided"
+  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
+  val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
+  val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
   val titan = "com.thinkaurelius.titan" % "titan" % Version.titan withSources() intransitive()
   val titanDeps = Seq(
     "com.tinkerpop.blueprints" % "blueprints-core" % "2.1.0",
@@ -83,7 +84,7 @@ object Dependencies {
     "com.sleepycat" % "je" % "5.0.58",
     "com.googlecode" % "kryo" % "1.04"
   )
-  val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor
+  val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor exclude("rhino", "js")
 }
 
 // Root Module 
@@ -118,7 +119,7 @@ object RootBuild extends Build {
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-parent",
     libraryDependencies ++= deps
-  ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)
+  ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)  ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.0.0-SNAPSHOT",
@@ -128,7 +129,7 @@ object RootBuild extends Build {
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
-    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema),
+    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema, Resolvers.oracle),
     pomExtra := <licenses>
       <license>
         <name>Apache 2</name>
@@ -163,7 +164,7 @@ object Publet extends Build {
     libraryDependencies ++= deps,
     ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
     sourceGenerators in Compile <+= ReflectPlugin.reflect
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, findbugs, guava, scalaTest)
 
@@ -273,7 +274,7 @@ object Web extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   val deps = Seq(servletApiProvided,
     slf4jApi, grizzledSlf4j,
@@ -301,7 +302,7 @@ object GitrWeb extends Build {
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr-web",
     libraryDependencies ++= deps
-  ) 
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   lazy val deps = Seq(grizzledSlf4j, servletApiProvided, guice, jgitHttpServer, scalaTest)
 
@@ -318,7 +319,7 @@ object Webdav extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webdav",
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
 }
@@ -334,7 +335,7 @@ object WebEditor extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webeditor",
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   val deps = Seq(servletApiProvided, grizzledSlf4j, scalaTest)
 
@@ -351,7 +352,7 @@ object Ext extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, titan, scue) ++ titanDeps
 
@@ -409,9 +410,9 @@ object War extends Build {
       }
     },
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(servletApiProvided, logbackClassic)
+  val deps = Seq(slf4jApi, servletApiProvided, logbackClassic)
 }
 
 
@@ -468,9 +469,9 @@ object Server extends Build {
       zipFile
     },
     libraryDependencies ++= deps
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(grizzledSlf4j, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
+  val deps = Seq(slf4jApi, grizzledSlf4j, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
 }
 
 object App extends Build {
@@ -483,5 +484,6 @@ object App extends Build {
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-app"
-  )
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+
 }

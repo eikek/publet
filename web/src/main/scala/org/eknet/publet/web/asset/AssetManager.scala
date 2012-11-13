@@ -80,6 +80,6 @@ object AssetManager {
    *
    * @return
    */
-  def service = PubletWeb.instance[AssetManager]
+  def service = PubletWeb.instance[AssetManager].get
 
 }
