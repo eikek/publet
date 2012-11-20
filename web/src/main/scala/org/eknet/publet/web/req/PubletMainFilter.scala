@@ -25,6 +25,7 @@ import scala.Some
 import collection.JavaConversions._
 import com.google.common.eventbus.EventBus
 import org.eknet.publet.event.Event
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * Publet's main filter. Gets the contributed [[org.eknet.publet.web.req.RequestHandlerFactory]]
@@ -48,6 +49,11 @@ class PubletMainFilter @Inject() (handlerFactories: java.util.Set[RequestHandler
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     val start = if (isDebugEnabled) Some(System.currentTimeMillis()) else None
     val req = request.asInstanceOf[HttpServletRequest]
+    val res = response.asInstanceOf[HttpServletResponse]
+    req.setCharacterEncoding("UTF-8")
+    res.setHeader("Accept-Charset", "UTF-8")
+    res.setHeader("Server", AppSignature.toString)
+
     val handler = handlerFactories.foldLeft(nullHandler)((f1, f2) => {
       f1.getApplicableScore(req) match {
         case score1 if (score1 == NO_MATCH) => f2
