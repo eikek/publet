@@ -192,10 +192,10 @@ can contain a `*` to match any sequence of characters but not a `/`, a `?` to ma
 single character and `**` to match any sequence of characters including `/`.
 
 
-## Blueprints / OrientDB
+## Blueprints / Titan
 
 The `ext` module is introducing a database to publet. It uses the
-graph/document database [OrientDB](http://code.google.com/p/orient/) while
+graph/document database [Titan](http://thinkaurelius.github.com/titan/) while
 code should be written against the
 [Blueprints](http://blueprints.tinkerpop.com/) API that is part of the
 [Tinkerpop stack](http://tinkerpop.com/).
@@ -205,11 +205,11 @@ your code independent from the underlying graph database.
 
 ### API
 
-The service `OrientDbProvider` is provided to access databases using its
+The service `GraphDbProvider` is provided to access databases using its
 `getDatabase(name: String)` method. Each database is uniquely named and
 the same database object is returned on subsequent invocations.
 
-A listener is registered that will shutdown all Orient databases on application
+A listener is registered that will shutdown all databases on application
 exit.
 
 

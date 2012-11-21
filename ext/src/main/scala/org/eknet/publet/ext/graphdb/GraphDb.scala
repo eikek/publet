@@ -84,6 +84,9 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
    */
   def importGraphML(in: InputStream) {
     val reader = new GraphMLReader(graph)
+    reader.setVertexIdKey("id")
+    reader.setEdgeIdKey("id")
+    reader.setEdgeLabelKey("label")
     reader.inputGraph(in)
   }
 }
