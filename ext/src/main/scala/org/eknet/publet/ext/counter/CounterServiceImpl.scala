@@ -34,6 +34,9 @@ import org.eknet.publet.web.{Settings, SettingsReloadedEvent}
 import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.scue._
 import com.google.common.base.Splitter
+import java.security.{DigestInputStream, MessageDigest}
+import java.io.BufferedInputStream
+import org.apache.shiro.codec.Hex
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -157,10 +160,12 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
 
     /** Create a checksum of the inputstream of the resource */
     def createChecksum(res: ContentResource): (String, Long) = {
-      val source = ByteSource.Util.bytes(res.inputStream)
-      val md5 = new Md5Hash(source, null)
-      val format = new HexFormat
-      (format.format(md5), res.lastModification.getOrElse(0L))
+      val md = MessageDigest.getInstance("MD5")
+      val mdin = new BufferedInputStream(new DigestInputStream(res.inputStream, md))
+      while (mdin.read() != -1) {}
+      mdin.close()
+      val md5string = Hex.encodeToString(md.digest())
+      (md5string, res.lastModification.getOrElse(0L))
     }
 
     /** Updates the checksum property with a new checksum of the given resource */

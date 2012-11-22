@@ -8,6 +8,9 @@ import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
 import org.eknet.publet.auth.store.UserProperty
 import org.eknet.publet.gitr.partition.GitFile
+import java.io.{BufferedInputStream, InputStream}
+import java.security.{DigestInputStream, MessageDigest}
+import org.apache.shiro.codec.Hex
 
 /**
  * A helper class that defines method for retrieving information to
@@ -220,5 +223,13 @@ object ResourceInfo {
 
   def getSizeString(uri: String): Option[String] = {
     getSize(uri) map { sz => ByteSize.bytes.normalizeString(sz.toDouble) }
+  }
+
+  private[ext] def createMd5(in: InputStream) = {
+    val md = MessageDigest.getInstance("MD5")
+    val mdin = new BufferedInputStream(new DigestInputStream(in, md))
+    while (mdin.read() != -1) {}
+    mdin.close()
+    Hex.encodeToString(md.digest())
   }
 }
