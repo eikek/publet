@@ -19,6 +19,7 @@ package org.eknet.publet.engine.scala
 import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Path, ContentResource}
 import tools.nsc.io.VirtualDirectory
+import java.util.concurrent.{TimeUnit, ConcurrentHashMap}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -30,12 +31,34 @@ class DefaultPubletCompiler(val publet: Publet,
                             imports: List[String]) extends PubletCompiler {
 
 
-  val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), classPath, imports)
+  private[this] val lock = new ResourceLock
+  private[this] val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), classPath, imports)
 
   def evaluate(path: Path, resource: ContentResource) = {
-    val miniProject = MiniProject.find(path, publet, pathPrefix)
-    val script = compiler.scriptLoader(miniProject, path, resource)
-    Some(script)
+    val r = (path / resource).asString
+    lock.lock(r, 2, TimeUnit.MINUTES)
+    try {
+      val miniProject = MiniProject.find(path, publet, pathPrefix)
+      val script = compiler.scriptLoader(miniProject, path, resource)
+      Some(script)
+    } finally {
+      lock.release(r)
+    }
   }
 
+  private class ResourceLock {
+    private[this] val map = new ConcurrentHashMap[String, String]()
+
+    def lock(resource: String, timeout: Long, unit: TimeUnit) {
+      while (map.putIfAbsent(resource, resource) != null) {
+        synchronized { wait(unit.toMillis(timeout)) }
+      }
+    }
+
+    def release(resource: String) {
+      if (map.remove(resource) != null) {
+        synchronized(notifyAll())
+      }
+    }
+  }
 }
