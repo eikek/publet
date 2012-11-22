@@ -33,6 +33,7 @@ import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.{Settings, SettingsReloadedEvent}
 import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.scue._
+import com.google.common.base.Splitter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -42,6 +43,7 @@ import org.eknet.scue._
 class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvider, publet: Publet) extends CounterService {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
+  private val urlBlacklist = new UrlBlacklist(settings)
   private val db = dbprovider.getDatabase("extdb")
   private implicit val graph = db.graph
   import GraphDsl._
@@ -64,6 +66,7 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
   @Subscribe
   def reloadIps(event: SettingsReloadedEvent) {
     ipBlacklist.reloadIps()
+    urlBlacklist.reloadUrlList()
   }
 
   def getPageCount(uri: String) = {
@@ -130,13 +133,12 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
         .exists(agent => agent.matches(".*crawler.*|.*spider.*|.*bot.*"))
 
       //honor blacklist in settings
-      lazy val bl = ipBlacklist.isListed(info.ip)
+      lazy val ipListed = ipBlacklist.isListed(info.ip)
+      lazy val urlListed = urlBlacklist.isListed(uri)
 
-      bot || bl
+      bot || ipListed || urlListed
     }
-    val urlmatch = settings("ext.counter.pattern")
-      .map(Glob(_).matches(uri)).getOrElse(true)
-    if (!isBlacklisted && urlmatch) {
+    if (!isBlacklisted) {
       val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
       db.withTx {
         val pvertex = pageVertex(uriPath)

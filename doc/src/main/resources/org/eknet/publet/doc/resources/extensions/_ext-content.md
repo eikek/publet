@@ -181,15 +181,23 @@ in certain intervals to its ip address.
 By default, accesses from all ips are taken into account but not user agents
 with words _bot_ or _spider_ in their name.
 
-Additionally a glob pattern can be specified that is matched against the uri. Only
-if it matches, the uri is counted. If no such pattern is found, this evaluates to
-`true`. Specify the pattern in `settings.xml` with key `ext.counter.pattern`:
+Additionally a list glob pattern can be specified that is matched against the uri.
+The list can be defined to be a blacklist or whitelist. If it is a blacklist, only
+uris that does not match a pattern in the list are counted. In case of a whitelist,
+only those uris that match a pattern in the list are counted. Specify the pattern
+in `settings.properties` with key `ext.counter.url.list`:
 
-    ext.counter.pattern=/main/**
+    ext.counter.url.list=/main/**, /publet/doc/**
 
-This would count only URLs starting with `/main/`, all others are discarded. The glob
-can contain a `*` to match any sequence of characters but not a `/`, a `?` to match any
-single character and `**` to match any sequence of characters including `/`.
+This would count only URLs starting with `/main/`, all others are discarded, because
+by default the list is a white list. You can add another property to make this a
+blacklist:
+
+    ext.counter.url.list.blacklist=true
+
+The patterns are separated by comma. The glob can contain a `*` to match any sequence
+of characters but not a `/`, a `?` to match any single character and `**` to match any
+sequence of characters including `/`.
 
 
 ## Blueprints / Titan
