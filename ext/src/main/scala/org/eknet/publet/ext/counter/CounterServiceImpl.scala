@@ -17,26 +17,19 @@
 package org.eknet.publet.ext.counter
 
 import java.util.concurrent.TimeUnit
-import org.eknet.publet.web.util.{StringMap, ClientInfo}
-import org.eknet.publet.{Publet, Glob}
+import org.eknet.publet.web.util.ClientInfo
+import org.eknet.publet.Publet
 import org.eknet.publet.vfs.{Path, ContentResource}
-import org.apache.shiro.util.ByteSource
-import org.apache.shiro.crypto.hash.Md5Hash
-import org.apache.shiro.crypto.hash.format.HexFormat
 import com.tinkerpop.blueprints.Vertex
 import java.util.Locale
 import java.text.DateFormat
 import java.util
-import com.google.inject.name.Named
 import com.google.inject.{Singleton, Inject}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.web.{Settings, SettingsReloadedEvent}
 import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.scue._
-import com.google.common.base.Splitter
-import java.security.{DigestInputStream, MessageDigest}
-import java.io.BufferedInputStream
-import org.apache.shiro.codec.Hex
+import org.eknet.publet.ext.ResourceInfo
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -160,11 +153,7 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
 
     /** Create a checksum of the inputstream of the resource */
     def createChecksum(res: ContentResource): (String, Long) = {
-      val md = MessageDigest.getInstance("MD5")
-      val mdin = new BufferedInputStream(new DigestInputStream(res.inputStream, md))
-      while (mdin.read() != -1) {}
-      mdin.close()
-      val md5string = Hex.encodeToString(md.digest())
+      val md5string = ResourceInfo.createMd5(res.inputStream)
       (md5string, res.lastModification.getOrElse(0L))
     }
 
