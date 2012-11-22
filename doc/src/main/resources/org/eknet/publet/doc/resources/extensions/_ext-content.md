@@ -203,7 +203,7 @@ sequence of characters including `/`.
 ## Blueprints / Titan
 
 The `ext` module is introducing a database to publet. It uses the
-graph/document database [Titan](http://thinkaurelius.github.com/titan/) while
+graph database [Titan](http://thinkaurelius.github.com/titan/) while
 code should be written against the
 [Blueprints](http://blueprints.tinkerpop.com/) API that is part of the
 [Tinkerpop stack](http://tinkerpop.com/).
