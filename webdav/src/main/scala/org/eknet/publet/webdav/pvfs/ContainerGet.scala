@@ -1,11 +1,13 @@
 package org.eknet.publet.webdav.pvfs
 
-import org.eknet.publet.vfs.Container
-import java.io.OutputStream
+import org.eknet.publet.vfs.{Resource, ContainerResource, Path, Container}
+import java.io.{BufferedOutputStream, OutputStream}
 import java.util
 import io.milton.resource.GetableResource
 import io.milton.http
 import io.milton.http.{XmlWriter, Auth}
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb}
+import org.eknet.publet.web.shiro.Security
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -20,13 +22,25 @@ trait ContainerGet extends GetableResource {
 
   def getMaxAgeSeconds(auth: Auth) = null
 
+  private[this] def getChildren(path: Path) = {
+      resource.children.filter(r => Security.hasReadPermission((path / r).toAbsolute))
+  }
+
   def sendContent(out: OutputStream, range: http.Range, params: util.Map[String, String], contentType: String) {
-    val w = new XmlWriter(out)
-    w.open("hmtl")
-    w.open("body")
-    w.begin("h1").open().writeText("Sorry, not implemented!").close()
-    w.close("body")
-    w.close("html")
-    w.flush()
+    val path = PubletWebContext.applicationPath
+    val content =
+      <html>
+        <head><title>Listing</title></head>
+        <body>
+          <h2>Listing</h2>
+          <ul>
+            { for (r <- getChildren(path)) yield <li><a href={ r.name.fullName }>{ r.name.fullName }</a></li> }
+          </ul>
+        </body>
+      </html>
+
+    val bout = new BufferedOutputStream(out)
+    bout.write(content.toString().getBytes("UTF-8"))
+    bout.flush()
   }
 }
