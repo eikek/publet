@@ -23,7 +23,7 @@ import _root_.com.google.inject.servlet.ServletModule
 import _root_.com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
 import com.google.inject._
 import org.eknet.publet.web.template.{DefaultLayout, IncludeLoader, ConfiguredScalateEngine}
-import org.eknet.publet.engine.scala.{ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
+import org.eknet.publet.engine.scala.{PubletCompiler, ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
 import java.io.File
 import java.net.URL
 import tools.nsc.util.ScalaClassLoader.URLClassLoader
@@ -33,7 +33,7 @@ import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Container, ResourceName, Path}
 import org.eknet.publet.web._
 import org.eknet.publet.vfs.util.MapContainer
-import org.eknet.publet.web.scripts.{Logout, Login, WebScriptResource}
+import org.eknet.publet.web.scripts.{StartupScriptLoader, Logout, Login, WebScriptResource}
 import javax.servlet.ServletContext
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.asset.impl.DefaultAssetManager
@@ -116,6 +116,8 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     bindRequestHandler.add[PubletHandlerFactory]
     bindRequestHandler.add[AssetsHandlerFactory]
 
+    bind[StartupScriptLoader].asEagerSingleton()
+
     filter("/*") through classOf[PubletMainFilter]
   }
 
@@ -152,14 +154,19 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     e
   }
 
-  @Provides@Singleton@Named("ScriptEngine")
-  def createScriptEngine(publet: Publet, scalateEngine: ScalateEngine, @Named("publetServletContext") servletContext: ServletContext, config: Config): PubletEngine = {
+  @Provides@Singleton
+  def createPubletCompiler(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config): PubletCompiler = {
     val additionalImports = List(
       "org.eknet.publet.web.util.RenderUtils",
       "RenderUtils._"
     )
-    val compiler = new DefaultPubletCompiler(publet, config.mainMount,
+    new DefaultPubletCompiler(publet, config.mainMount,
       getCustomClasspath(servletContext), webImports ::: additionalImports)
+  }
+
+  @Provides@Singleton@Named("ScriptEngine")
+  def createScriptEngine(publet: Publet, scalateEngine: ScalateEngine, compiler: PubletCompiler): PubletEngine = {
+
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
 
     publet.engineManager.register("*.scala", scalaEngine)

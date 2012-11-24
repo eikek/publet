@@ -16,7 +16,7 @@
 
 package org.eknet.publet.vfs
 
-import io.Source
+import scala.io.Source
 import java.io._
 import xml.NodeSeq
 

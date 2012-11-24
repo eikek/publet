@@ -41,12 +41,39 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
   private val lastCompileCache = mutable.Map[Path, Long]()
 
 
-  def scriptLoader(mp: Option[MiniProject], path: Path, resource: ContentResource): ScalaScript = {
+  /**
+   * Compiles the scala source file resource into a [[org.eknet.publet.engine.scala.ScalaScript]]
+   * instance. The resource content is wrapped with the [[org.eknet.publet.engine.scala.ScalaScript]]
+   * source.
+   *
+   * @param mp
+   * @param path
+   * @param resource
+   * @return
+   */
+  def scriptLoad(mp: Option[MiniProject], path: Path, resource: ContentResource): ScalaScript = {
     val settings = ScriptCompiler.compilerSettings(target, classPath, mp)
     val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
     val compiler = new Compiler(settings,
       classPath.map(cp => new URLClassLoader(cp.split("\\s*[,;]\\s*").map(new URL(_)), cl)).getOrElse(cl))
-    compiler.loadScalaScriptClass(path, resource)
+    compiler.newScalaScriptClass(path, resource)
+  }
+
+  /**
+   * Compiles the scala source file resource as is (without wrapping the contents
+   * with [[org.eknet.publet.engine.scala.ScalaScript]] source).
+   *
+   * @param mp
+   * @param path
+   * @param resource
+   * @return
+   */
+  def load(mp: Option[MiniProject], path: Path, resource: ContentResource): Class[_] = {
+    val settings = ScriptCompiler.compilerSettings(target, classPath, mp)
+    val cl = mp.map(_.classLoader()).getOrElse(classOf[MiniProject].getClassLoader)
+    val compiler = new Compiler(settings,
+      classPath.map(cp => new URLClassLoader(cp.split("\\s*[,;]\\s*").map(new URL(_)), cl)).getOrElse(cl))
+    compiler.loadScalaClass(path, resource, wrap = false)
   }
 
   private def hasChanged(path: Path, script: ContentResource):Boolean = {
@@ -62,9 +89,24 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
 
     val targetClassLoader: ClassLoader = new AbstractFileClassLoader(target, parentCl)
 
-    def loadScalaScriptClass(path: Path, resource: ContentResource): ScalaScript = {
+    def newScalaScriptClass(path: Path, resource: ContentResource): ScalaScript = {
       val cls = compile(path, resource)
       cls.getConstructor().newInstance().asInstanceOf[ScalaScript]
+    }
+
+    /**
+     * Compiles and loads the scala class that is given in the resoure source file. If
+     * `wrap` is true, the resource content is wrapped in the `server()` method of
+     * a [[org.eknet.publet.engine.scala.ScalaScript]] trait. The classname is the
+     * name of the resource.
+     *
+     * @param path
+     * @param resource
+     * @param wrap
+     * @return
+     */
+    def loadScalaClass(path: Path, resource: ContentResource, wrap:Boolean): Class[_] = {
+      compile(path, resource, wrap)
     }
 
     def findClass(className: String): Option[Class[_]] = {
@@ -91,8 +133,7 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
         "}"
     }
 
-
-    def compile(path: Path, script: ContentResource): Class[_] = {
+    private def compile(path: Path, script: ContentResource, wrap: Boolean = true): Class[_] = {
       val start = System.currentTimeMillis()
       def throwOnError() {
         if (global.reporter.hasErrors) {
@@ -108,7 +149,8 @@ class ScriptCompiler(target: AbstractFile, classPath: Option[String],
       synchronized {
         if (hasChanged(path, script)) {
           info("Script '"+path.asString+"' has changed sinced last compile.")
-          compileSource(cn, wrapScript(path, cn, script), filename)
+          val source = if (wrap) wrapScript(path, cn, script) else script.contentAsString()
+          compileSource(cn, source, filename)
           throwOnError()
           lastCompileCache.put(path, System.currentTimeMillis())
         }

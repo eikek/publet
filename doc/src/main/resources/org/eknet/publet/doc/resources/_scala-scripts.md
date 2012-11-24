@@ -47,14 +47,7 @@ At first, we create a template for the new page at `/.allIncludes/config/admin.p
        td Reload Configuration:
        td
          button.btn.btn-primary(href="#" id="config") Reload Configuration
-     tr
-       td Reload Settings
-       td
-         button.btn.btn-primary(href="#" id="settings") Reload Settings
     hr/
-    ul
-     li
-       a(href="/main/internal/page-lists.html") Page List
 
     :javascript
      $(function() {
@@ -88,10 +81,6 @@ The reload functionality is implemented in a Scala script
         Config.reload();
         makeJson(Map("success"->true, "message"->"Configuration reloaded!"))
       }
-      case Some("settings") => {
-        PubletWeb.publetSettings.reload();
-        makeJson(Map("success"->true, "message"->"Settings reloaded!"))
-      }
       case _ => {
         makeJson(Map("success"->false, "message"->"Don't know what to reload!"))
       }
@@ -122,3 +111,20 @@ contain jar files that are added to the classpath when compiling and the
 sourcce directory is also added to the compiler classpath. Note, since the
 mini project applies only to scripts in `/apps/myapp` and below, because it is
 defined in the `.includes` folder at that level.
+
+
+## Startup Scripts
+
+On startup, the special directory `.allIncludes/startup/` is scanned for scala
+source files. The source files are then compiled and expected to comply to the
+following conditions:
+
+* each file contains one class
+* the class name is the same as the file name
+
+After compiling the classes are instantiated via guice' injector (and are therefore
+registered at publet's event bus).
+
+This can be useful to do some initial setup tasks. For example, the `AssetManager`
+can be injected to register other resources, or scripts can listen for any events
+and do some further work (send mails etc).

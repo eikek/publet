@@ -35,13 +35,26 @@ class DefaultPubletCompiler(val publet: Publet,
   private[this] val compiler = new ScriptCompiler(new VirtualDirectory("(memory)", None), classPath, imports)
 
   def evaluate(path: Path, resource: ContentResource) = {
+    withLock(path, resource) {
+      val miniProject = MiniProject.find(path, publet, pathPrefix)
+      val script = compiler.scriptLoad(miniProject, path, resource)
+      Some(script)
+    }
+  }
+
+  def loadClass(path: Path, resource: ContentResource): Class[_] = {
+    withLock[Class[_]](path, resource) {
+      val miniProject = MiniProject.find(path, publet, pathPrefix)
+      compiler.load(miniProject, path, resource)
+    }
+  }
+
+  private[this] def withLock[A](path: Path, resource: ContentResource)(body: => A): A = {
     val r = (path / resource).asString
     lock.lock(r, 2, TimeUnit.MINUTES)
     try {
-      val miniProject = MiniProject.find(path, publet, pathPrefix)
-      val script = compiler.scriptLoader(miniProject, path, resource)
-      Some(script)
-    } finally {
+      body
+    } finally{
       lock.release(r)
     }
   }

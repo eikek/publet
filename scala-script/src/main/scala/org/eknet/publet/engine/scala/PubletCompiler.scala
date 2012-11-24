@@ -40,4 +40,14 @@ trait PubletCompiler {
    */
   def evaluate(path: Path, resource: ContentResource): Option[ScalaScript]
 
+  /**
+   * Assumes that `resource` is a scala source file that contains a class/trait. The
+   * source files is compiled and the class is loaded. The class name is derived
+   * from the resource name.
+   *
+   * @param path
+   * @param resource
+   * @return
+   */
+  def loadClass(path: Path, resource: ContentResource): Class[_]
 }
