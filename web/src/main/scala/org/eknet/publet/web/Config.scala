@@ -73,7 +73,8 @@ class Config(contextPath: String, eventBus: EventBus) extends PropertiesMap(even
    */
   def configFile(name: String) = {
     if (System.getProperty("publet.standalone") != null) {
-      new File(new File("etc"), name)
+      val parent = new File(Config.rootDirectory.getParentFile, "etc")
+      new File(parent, name)
     } else {
       getFile(name)
     }
