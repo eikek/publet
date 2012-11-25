@@ -36,7 +36,7 @@ import org.eknet.publet.ext.ResourceInfo
  * @since 07.10.12 02:49
  */
 @Singleton
-class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvider, publet: Publet) extends CounterService {
+class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvider, publet: Publet) extends CounterService with CounterManagerMBean {
 
   private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
   private val urlBlacklist = new UrlBlacklist(settings)
@@ -72,6 +72,15 @@ class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvi
         .headOption
         .flatMap(_.get(pageCountKey))
         .getOrElse(0L)
+    }
+  }
+
+  def setPageCount(uri: String, value: Long) {
+    val uriPath = if (uri.startsWith("/")) uri.substring(1) else uri
+    db.withTx {
+      vertices(pagePathKey, uriPath)
+        .headOption
+        .map(v => v(pageCountKey) = value)
     }
   }
 

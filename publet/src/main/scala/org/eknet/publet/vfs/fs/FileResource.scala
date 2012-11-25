@@ -20,6 +20,9 @@ import java.io._
 import org.eknet.publet.vfs._
 import com.google.common.eventbus.EventBus
 import org.eknet.publet.vfs.events.{ContentWrittenEvent, ContentCreatedEvent}
+import java.nio.file.{FileVisitResult, Path => NioPath, SimpleFileVisitor, Files}
+import org.eknet.publet.vfs.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 /**
  *
@@ -74,5 +77,46 @@ private[fs] class CloseEventOutStream(out: OutputStream, bus: EventBus, resource
   override def close() {
     out.close()
     bus.post(ContentWrittenEvent(resource, changeInfo))
+  }
+}
+
+object FileResource {
+
+  private[this] def deleteDirectory(root: File, keepRoot: Boolean) {
+    Files.walkFileTree(root.toPath, new SimpleFileVisitor[NioPath] {
+      override def visitFile(file: NioPath, attrs: BasicFileAttributes) = {
+        Files.delete(file)
+        FileVisitResult.CONTINUE
+      }
+      override def postVisitDirectory(dir: NioPath, exc: IOException) = {
+        if (exc == null) {
+          if (!keepRoot || !root.equals(dir.toFile)) {
+            Files.delete(dir)
+          }
+          FileVisitResult.CONTINUE
+        } else {
+          FileVisitResult.TERMINATE
+        }
+      }
+    })
+  }
+
+  /**
+   * Recursively deletes the given directory.
+   *
+   * @param root
+   */
+  def deleteDirectory(root: File) {
+    deleteDirectory(root, keepRoot = false)
+  }
+
+  /**
+   * Recursively cleans the given directory. The contents
+   * in the directory are delted, but not the directory itself.
+   *
+   * @param root
+   */
+  def cleanDirectory(root: File) {
+    deleteDirectory(root, keepRoot = true)
   }
 }

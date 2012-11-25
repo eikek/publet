@@ -55,26 +55,4 @@ object FileHelper {
     def accept(pathname: File) = f(pathname)
   }
 
-  /**
-   * Deletes the given file and, if it is a directory, it deletes all
-   * entries.
-   *
-   * @param file
-   */
-  def deleteRecursice(file: File) {
-    Files.walkFileTree(file.toPath, new SimpleFileVisitor[Path] {
-      override def visitFile(file: Path, attrs: BasicFileAttributes) = {
-        Files.delete(file)
-        FileVisitResult.CONTINUE
-      }
-      override def postVisitDirectory(dir: Path, exc: IOException) = {
-        if (exc == null) {
-          Files.delete(dir)
-          FileVisitResult.CONTINUE
-        } else {
-          FileVisitResult.TERMINATE
-        }
-      }
-    })
-  }
 }

@@ -44,6 +44,10 @@
     </appender>
     -->
 
+    <logger name="org" level="INFO"/>
+    <logger name="com" level="WARN"/>
+    <logger name="io.milton" level="WARN"/>
+
     <!-- change level to DEBUG for debugging output
     <logger name="org.eknet.publet" level="DEBUG">  -->
 

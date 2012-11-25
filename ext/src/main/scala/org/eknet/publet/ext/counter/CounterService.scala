@@ -20,6 +20,14 @@ trait CounterService {
   def getPageCount(uriPath: String): Long
 
   /**
+   * Sets the counter for the given uri to the given value.
+   *
+   * @param uriPath
+   * @param value
+   */
+  def setPageCount(uriPath: String, value: Long)
+
+  /**
    * Returns the last time the given uri has been accessed.
    *
    * @param uriPath

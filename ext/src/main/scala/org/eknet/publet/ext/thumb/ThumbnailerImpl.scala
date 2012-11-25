@@ -20,7 +20,7 @@ import org.eknet.publet.vfs._
 import javax.imageio.ImageIO
 import java.io.{BufferedOutputStream, File}
 import Path._
-import org.eknet.publet.vfs.fs.FilesystemPartition
+import org.eknet.publet.vfs.fs.{FileResource, FilesystemPartition}
 import java.util.concurrent
 import concurrent.Callable
 import com.google.common.cache._
@@ -33,7 +33,7 @@ import com.google.common.eventbus.EventBus
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.05.12 12:20
  */
-class ThumbnailerImpl(mm: MountManager, bus: EventBus, tempDir: File, options: CacheOptions) extends Thumbnailer {
+class ThumbnailerImpl(mm: MountManager, bus: EventBus, tempDir: File, options: CacheOptions) extends Thumbnailer with ThumbnailerMBean {
 
   val thumbnailPath = "/publet/ext/thumbs/".p
 
@@ -60,20 +60,40 @@ class ThumbnailerImpl(mm: MountManager, bus: EventBus, tempDir: File, options: C
       options.maxEntries.map(b.maximumSize(_))
     }
     b.weigher(sizer)
+      .recordStats()
       .removalListener(remover)
       .build()
   }
 
+  def getCacheCount = thumbCache.size()
+
+  def getDiskSize = {
+    val size = partition.children
+      .collect({ case r:ContentResource => r})
+      .foldLeft(0L)((sum, r) => sum + r.length.getOrElse(0L))
+
+    ByteSize.bytes.normalizeString(size)
+  }
+
+  def clearCache() {
+    thumbCache.invalidateAll()
+    FileResource.cleanDirectory(tempDir)
+  }
+
+  def getCacheStats = thumbCache.stats().toString
+
   def thumbnail(c: ContentResource, maxh: Int, maxw: Int): Path = {
     val key = Key(c.name.fullName, c.lastModification.getOrElse(0), maxw, maxh)
     val file = thumbCache.get(key, callable {
-      val img = ImageIO.read(c.inputStream)
-      val scaled = ImageScaler.scaleIfNecessary(img, maxw, maxh)
-      val target = partition.createResource(key.targetName.p)
-      val out = new BufferedOutputStream(target.asInstanceOf[Writeable].outputStream)
-      ImageIO.write(scaled, "PNG", out)
-      out.flush()
-      out.close()
+      partition.lookup(key.targetName.p) getOrElse {
+        val img = ImageIO.read(c.inputStream)
+        val scaled = ImageScaler.scaleIfNecessary(img, maxw, maxh)
+        val target = partition.createResource(key.targetName.p)
+        val out = new BufferedOutputStream(target.asInstanceOf[Writeable].outputStream)
+        ImageIO.write(scaled, "PNG", out)
+        out.flush()
+        out.close()
+      }
       key.targetName.p
     })
     thumbnailPath / file

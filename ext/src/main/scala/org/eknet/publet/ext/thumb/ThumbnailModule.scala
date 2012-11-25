@@ -23,6 +23,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import com.google.common.eventbus.EventBus
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.ext.jmx.JmxService
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -49,6 +50,7 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
     } getOrElse(CacheOptions.getDefault)
 
     val tn = new ThumbnailerImpl(publet.mountManager, bus, tempDir, options)
+    JmxService.registerMBean(tn)
     tn
   }
 }
