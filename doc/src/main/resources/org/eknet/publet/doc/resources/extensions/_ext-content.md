@@ -270,3 +270,30 @@ of the following units can be used: `Bytes`, `KiB`, `MiB`, and `GiB`.
 
 Only one of the two constraints can be specified! If both are given (as in the example), the `maxDiskSize`
 value is prefered. If nothing is specified, a default value of `50MiB` is used.
+
+
+## JMX Connector
+
+For accessing mbeans, there is a connector started that exposes the platforms mbean server via the
+jmxmp protocol. It is only started, if a `publet.jmx.port` configuration value is defined. The connector
+is not protected by default. It can be protected by specifying `publet.jmx.protected=true` in the config file.
+Then only users with permission `jmx:connector` are allowed to connect. Furthermore, the client must send
+the credentials as an Array where the first element is the username and the second the password.
+
+Usually, protected jmx connectors are not necessary, since ssh tunneling can be used instead. For example on
+linux, use ssh command to create  a tunnel from localhost:9999 to someserver:9910:
+
+    ssh user@someserver -L 9999:someserver:9910
+
+Then connect vial `localhost:9999`.
+
+### Registering MBeans
+
+Registering MBeans is done by simply creating a binding in the guice module. There is a binding listener
+that will register an object that complies to the mbean convention to the platforms MBeanServer.
+
+If a provider or factory method is used, registering the mbean must be done manually:
+
+    val service = ... //complies to MBean spec
+    JmxService.registerMBean(service)
+

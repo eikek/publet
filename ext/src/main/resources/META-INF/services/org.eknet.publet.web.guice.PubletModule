@@ -2,3 +2,4 @@ org.eknet.publet.ext.ExtraModule
 org.eknet.publet.ext.graphdb.GraphDbModule
 org.eknet.publet.ext.thumb.ThumbnailModule
 org.eknet.publet.ext.counter.CounterModule
+org.eknet.publet.ext.jmx.JmxConnectorModule

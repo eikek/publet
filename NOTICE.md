@@ -504,3 +504,11 @@ Codemirror, licensed under a MIT-style license.
 Google Guice, licensed under the Apache Software License, Version 2.0.
 
 <http://code.google.com/p/google-guice/>
+
+
+### JMX(TM) Remote API RI, Optional Packages
+
+JMX(TM) Remote API RI, Optional Packages, licensed under
+Common Development And Distribution License (CDDL) Version 1.0.
+
+<http://java.sun.com/products/JavaManagement>
