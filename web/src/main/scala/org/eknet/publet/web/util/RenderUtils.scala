@@ -30,6 +30,8 @@ import org.eknet.publet.com.twitter.json.Json
  */
 object RenderUtils {
 
+  def makeHtml(str: String): Option[Content] = Some(Content(str, ContentType.html))
+
   def makeJs(str: String): Option[Content] = Some(Content(str, ContentType.javascript))
 
   def makePng(data: Array[Byte]): Option[Content] = Some(Content(data, ContentType.png))

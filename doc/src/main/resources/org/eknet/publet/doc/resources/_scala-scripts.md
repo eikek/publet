@@ -10,10 +10,11 @@ scripts. They are executed on each request. The code is embedded in the trait
 
     }
 
-There exists some handy methods to create content objects. The
-`renderTemplate()` method from the singleton `org.eknet.publet.web.util.RenderUtils`
-can be used to create html by rendering a template. The method expects an uri that
-names the template and an optional map of attributes.
+Thus the body of a script must return a value of type `Option[Content]`. There exists
+some handy methods to create content objects in `org.eknet.publet.web.util.RenderUtils`,
+which is imported by default. For example, the `renderTemplate()` method can be used to
+create html by rendering a template. The method expects an uri that names the template
+and an optional map of attributes.
 
 Another quite common scenario is to return JSON, usually when interacting with
 javascript. The method `makeJson()` can be used for that. It will convert a
@@ -22,11 +23,46 @@ serializer](https://github.com/twitter/scala-json/blob/master/src/main/scala/com
 
 You need to give the file the extension `scala`.
 
+## Mini projects
+
+Scala scripts can access all classes in the classpath of the web application.
+Often, one wants to define addtional objects and classes to share code between
+scripts. You can extend the sourcepath and classpath of Scala scripts to
+achieve it.
+
+Suppose there exists several scripts in `/apps/myapp/` that want to share
+code. You would create a _mini project_ by creating the following directory
+outline:
+
+    /apps/myapp/.includes/project/src/main/scala/
+    /apps/myapp/.includes/project/lib/
+
+The `project` folder contains the mini project files. The `lib` directory can
+contain jar files that are added to the classpath when compiling and the
+sourcce directory is also added to the compiler classpath. Note, since the
+mini project applies only to scripts in `/apps/myapp` and below, because it is
+defined in the `.includes` folder at that level.
+
+
+## Startup Scripts
+
+On startup, the special directory `.allIncludes/startup/` is scanned for scala
+source files. The source files are then compiled and expected to comply to the
+following conditions:
+
+* each file contains one class
+* the class name is the same as the file name
+
+After compiling the classes are instantiated via guice' injector (and are therefore
+registered at publet's event bus).
+
+This can be useful to do some initial setup tasks. For example, the `AssetManager`
+can be injected to register other resources, or scripts can listen for any events
+and do some further work (send mails etc).
 
 ## Example: Admin page
 
-This example creates a simple page that allows to reload the configuration,
-settings and permissions file.
+This example creates a simple page that allows to reload the configuration.
 
 At first, we create a template for the new page at `/.allIncludes/config/admin.page`:
 
@@ -90,41 +126,3 @@ At first a special permission `configure` is checked. The `Security` object is
 imported by default and defines some helper methods for checking permissions.
 Then the parameter is evaluated and the corresponding action is executed. The
 output will be a short JSON response that the client will handle.
-
-
-## Mini projects
-
-Scala scripts can access all classes in the classpath of the web application.
-Often, one wants to define addtional objects and classes to share code between
-scripts. You can extend the sourcepath and classpath of Scala scripts to
-achieve it.
-
-Suppose there exists several scripts in `/apps/myapp/` that want to share
-code. You would create a _mini project_ by creating the following directory
-outline:
-
-    /apps/myapp/.includes/project/src/main/scala/
-    /apps/myapp/.includes/project/lib/
-
-The `project` folder contains the mini project files. The `lib` directory can
-contain jar files that are added to the classpath when compiling and the
-sourcce directory is also added to the compiler classpath. Note, since the
-mini project applies only to scripts in `/apps/myapp` and below, because it is
-defined in the `.includes` folder at that level.
-
-
-## Startup Scripts
-
-On startup, the special directory `.allIncludes/startup/` is scanned for scala
-source files. The source files are then compiled and expected to comply to the
-following conditions:
-
-* each file contains one class
-* the class name is the same as the file name
-
-After compiling the classes are instantiated via guice' injector (and are therefore
-registered at publet's event bus).
-
-This can be useful to do some initial setup tasks. For example, the `AssetManager`
-can be injected to register other resources, or scripts can listen for any events
-and do some further work (send mails etc).
