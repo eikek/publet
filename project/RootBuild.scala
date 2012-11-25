@@ -34,7 +34,6 @@ object Version {
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
   val scue = "1.0.0-SNAPSHOT"
   val titan = "0.1.0"
-  val jmxRemote = "1.0_01-ea" // "4.0-b33"
 }
 
 object Dependencies {
@@ -56,7 +55,6 @@ object Dependencies {
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
   val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
-  val jmxRemote = "org.jvnet.opendmk" % "jmxremote_optional" % Version.jmxRemote % "runtime"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("org.slf4j", "slf4j-api")
   val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
   val miltonApiDeps = Seq(
@@ -356,7 +354,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, titan, scue, jmxRemote) ++ titanDeps
+  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, titan, scue) ++ titanDeps
 
 }
 

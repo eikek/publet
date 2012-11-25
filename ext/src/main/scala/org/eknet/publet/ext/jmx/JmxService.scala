@@ -29,6 +29,9 @@ import java.util.Hashtable
 import javax.management.ObjectName
 
 /**
+ * Creates and starts a jmx connector exposing the platforms MBeanServer. If no
+ * url is specified in the config file, the connector is not started.
+ *
  * @author Eike Kettner eike.kettner@gmail.comy
  * @since 24.11.12 15:27
  */
@@ -48,12 +51,11 @@ class JmxService @Inject() (config: Config) extends AbstractService with Logging
   }
 
   def doStart() {
-    val jmxPort = config("publet.jmx.port").map(_.toInt)
-    val jmxHost = config("publet.jmx.host")
-    (jmxHost, jmxPort) match {
-      case (host, Some(port)) => {
+    val jmxUrl = config("publet.jmx.serviceUrl")
+    jmxUrl match {
+      case (Some(inUrl)) => {
         try {
-          val url = new JMXServiceURL("jmxmp", host.orNull, port)
+          val url = new JMXServiceURL(inUrl)
           val env = new util.HashMap[String, Object]()
           if (config("publet.jmx.protected").map(_.toBoolean).getOrElse(false)) {
             val authc = new JmxAuthenticator
@@ -71,7 +73,7 @@ class JmxService @Inject() (config: Config) extends AbstractService with Logging
         }
       }
       case _ => {
-        info("Not starting JMX Connector. No port given in config file.")
+        info("Not starting JMX Connector. No url given in config file.")
         notifyStarted()
       }
     }
