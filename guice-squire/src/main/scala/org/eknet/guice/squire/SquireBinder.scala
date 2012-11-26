@@ -17,9 +17,11 @@
 package org.eknet.guice.squire
 
 import com.google.inject._
-import com.google.inject.multibindings.Multibinder
-import com.google.inject.matcher.{AbstractMatcher, Matcher}
-import com.google.inject.spi.{InjectionListener, TypeListener, TypeEncounter}
+import com.google.inject.multibindings.{MapBinder, Multibinder}
+import com.google.inject.matcher.Matcher
+import com.google.inject.spi.{InjectionListener, TypeEncounter}
+import java.lang.reflect.{Type, ParameterizedType}
+import com.google.inject.internal.MoreTypes
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -37,6 +39,13 @@ trait SquireBinder {
   def setOf[A: Manifest] =
     new SquireSetBindingBuilder[A](Multibinder.newSetBinder(binder(), typeLiteral[A]))
 
+  def annotateSetOf[A: Manifest] = new SquireSetBinderFactory[A](binder())
+
+  def mapOf[A: Manifest, B: Manifest] =
+    new SquireMapBindingBuilder[A, B](MapBinder.newMapBinder(binder(), typeLiteral[A], typeLiteral[B]))
+
+  def annoateMapOf[A: Manifest, B: Manifest] = new SquireMapBinderFactory[A, B](binder())
+
   def bindTypeListener(matcher: Matcher[_ >: TypeLiteral[_]], listener: (TypeLiteral[_], TypeEncounter[_]) => Unit) {
     binder().bindListener(matcher, new TypeListenerFunction(listener))
   }
@@ -52,7 +61,19 @@ trait SquireBinder {
 object SquireBinder {
   import java.lang.annotation.{Annotation => JAnnotation}
 
-  def typeLiteral[A: Manifest]: TypeLiteral[A] = TypeLiteral.get(classFor[A])
+  def typeLiteral[A: Manifest]: TypeLiteral[A] = {
+    val pt = resolveManifest(manifest[A])
+    TypeLiteral.get(pt).asInstanceOf[TypeLiteral[A]]
+  }
+
+
+  private[this] def resolveManifest[A: Manifest]: Type = {
+    val mf = manifest[A]
+    mf.typeArguments match {
+      case Nil => mf.erasure.asInstanceOf[Type]
+      case list => new MoreTypes.ParameterizedTypeImpl(null, mf.erasure, list.map(resolveManifest(_)): _*)
+    }
+  }
 
   def classFor[A: Manifest] = manifest[A].erasure.asInstanceOf[Class[A]]
 
@@ -62,12 +83,4 @@ object SquireBinder {
 
   def key[A: Manifest](annotType: Class[_ <: JAnnotation]) = Key.get(classFor[A], annotType)
 
-  class SquireSetBindingBuilder[A: Manifest](val self: Multibinder[A]) {
-    def withDuplicates = { self.permitDuplicates(); this }
-
-    def add[B <: A: Manifest] = self.addBinding().to(classFor[B])
-  }
-
-  implicit def enrichMultibinder[A: Manifest](mb: Multibinder[A]) = new SquireSetBindingBuilder[A](mb)
-  implicit def toMultibinder[A](eb: SquireSetBindingBuilder[A]) = eb.self
 }
