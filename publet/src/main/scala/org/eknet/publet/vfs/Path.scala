@@ -169,7 +169,7 @@ case class Path(segments: List[String], query: Option[String], absolute: Boolean
 
 object Path {
 
-  val root = Path(List(), None, true, true)
+  val root = Path(List(), None, absolute = true, directory = true)
 
   private val sep = '/'
 
@@ -177,7 +177,7 @@ object Path {
     Predef.ensuring(str.length() > 0, "empty paths are not allowed. use Path.root.")
     if (str == "/") root
     else {
-      val pathRegex = "((.*?)(\\?.*)?)".r
+      val pathRegex = "((.*?)(\\?(?s).*)?)".r
       str match {
         case pathRegex(f, p, q) => {
           val segs = p.split(sep)
