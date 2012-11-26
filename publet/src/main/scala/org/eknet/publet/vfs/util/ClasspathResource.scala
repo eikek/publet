@@ -16,25 +16,21 @@
 
 package org.eknet.publet.vfs.util
 
-import org.eknet.publet.vfs.Resource
+import org.eknet.publet.vfs.{ResourceName, Resource}
 
 /**
+ * @param classpathResource the resource name within the classpath
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 28.04.12 19:24
+ * @since 26.11.12 21:48
  */
-trait ForwadingResource extends Resource {
+class ClasspathResource(val classpathResource: String, classLoader: Option[ClassLoader], name: Option[ResourceName]) extends ForwardingContentResource {
 
-  protected def delegate: Resource
+  protected lazy val delegate = {
+    val cl = classLoader.getOrElse(Thread.currentThread().getContextClassLoader)
+    if (name.isDefined)
+      new UrlResource(cl.getResource(classpathResource), name.get)
+    else
+      new UrlResource(cl.getResource(classpathResource))
+  }
 
-  def name = delegate.name
-
-  def lastModification = delegate.lastModification
-
-  def exists = delegate.exists
-
-  override def toString = delegate.toString
-
-  override def hashCode = delegate.hashCode()
-
-  override def equals(other: Any) = delegate.equals(other)
 }

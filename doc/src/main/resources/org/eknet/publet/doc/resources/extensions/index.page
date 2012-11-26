@@ -6,6 +6,8 @@ title: Publet Documentation
 
 --- name:content pipeline:jade
 =include("../_includes/header.jade")
+- import org.eknet.publet.doc.ExtensionDoc
+- val docservice = PubletWeb.instance[ExtensionDoc].get
 .row
   .span2
     ul.nav.nav-pills.nav-stacked
@@ -15,26 +17,16 @@ title: Publet Documentation
           | Introduction
       li
         h4 Included Extensions
-      li
-        a(href="#ext" data-toggle="pill")
-          i.icon-chevron-right
-          | Extras
-      li
-        a(href="#gitrweb" data-toggle="pill")
-          i.icon-chevron-right
-          | GitR Web
-      li
-        a(href="#webdav" data-toggle="pill")
-          i.icon-chevron-right
-          | Webdav
+      - for (key <- docservice.moduleKeys)
+        li
+          a(href={ "#"+key.toKey} data-toggle="pill")
+            i.icon-chevron-right
+            =key.toString
 
   .span10
     .tab-content
       .tab-pane.active#intro
         =include("_intro.jade")
-      .tab-pane#ext
-        =include("_ext.jade")
-      .tab-pane#gitrweb
-        =include("_gitrweb.md")
-      .tab-pane#webdav
-        =include("_webdav.md")
+      - for (key <- docservice.moduleKeys)
+        .tab-pane(id={key.toKey})
+          =include(docservice.pathOf(key))

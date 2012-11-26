@@ -16,7 +16,10 @@
 
 package org.eknet.publet.vfs
 
-import java.io.ByteArrayInputStream
+import java.io.{File, ByteArrayInputStream}
+import org.eknet.publet.vfs.util.{ClasspathResource, UrlResource}
+import org.eknet.publet.vfs.fs.FileResource
+import java.net.URL
 
 
 /**
@@ -79,6 +82,12 @@ object Resource {
     else if (isContainer(r2) && !isContainer(r1)) false
     else r1.name.compareTo(r2.name) < 0
   }
+
+  def classpath(uri: String, loader: Option[ClassLoader] = None, name: Option[ResourceName] = None): ContentResource = {
+    new ClasspathResource(uri, loader, name)
+  }
+
+  def file(path: String): ContentResource = new UrlResource(new File(path).toURI.toURL)
 
   def isContainer(r:Resource):Boolean = r match {
     case r:Container => true
