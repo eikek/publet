@@ -16,6 +16,7 @@
 
 package org.eknet.publet.gitr
 
+import auth.GitPermissionResolver
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSuite, BeforeAndAfter}
 import org.apache.shiro.mgt.{DefaultSecurityManager, SecurityManager}
@@ -52,7 +53,7 @@ class PermissionTest extends FunSuite with ShouldMatchers with BeforeAndAfter {
   }
 
   class TestRealm extends AuthorizingRealm {
-    setPermissionResolver(new ResourcePermissionResolver)
+    setPermissionResolver(new GitPermissionResolver)
     def account = {
       val acc = new SimpleAccount("test", "test", "test")
       acc.setRoles(Set("manager", "developer"))

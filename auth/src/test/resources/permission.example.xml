@@ -16,14 +16,7 @@
     </user>
   </users>
 
-  <!-- Defines repository states, default is `closed` -->
-  <repositories>
-    <repository name="jdoe/dotfiles" tag="closed" owner="jdoe"/>
-    <repository name="wikis/mywiki" tag="open" owner="jdoe"/>
-    <repository name="contentroot" tag="closed"/>
-  </repositories>
-
-  <!-- Defines permissions and associates them to roles -->
+  <!-- Defines permissions and associates them to groups -->
   <permissions>
     <!-- allows many to and perm tags -->
     <grant>
@@ -37,11 +30,11 @@
 
   <resources>
     <open>/public/**</open>
-    <restricted>
+    <restrict>
         /dev/aa/project/**
-    </restricted>
-    <restricted on="write" by="secperm">
+    </restrict>
+    <restrict on="write" by="secperm">
         /dev/bb/**
-    </restricted>
+    </restrict>
   </resources>
 </publetAuth>
