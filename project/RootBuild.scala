@@ -32,7 +32,7 @@ object Version {
   val guava = "13.0.1"
   val guice = "3.0"
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
-  val scue = "1.0.0-SNAPSHOT"
+  val scue = "0.1.0-SNAPSHOT"
   val titan = "0.1.0"
 }
 
