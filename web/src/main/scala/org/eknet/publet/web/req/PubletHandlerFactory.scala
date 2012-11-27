@@ -59,7 +59,7 @@ class PubletHandlerFactory @Inject() (webext: java.util.Set[WebExtension], confi
     }
 
     def onUnauthenticated(ex: UnauthenticatedException, req: HttpServletRequest, res: HttpServletResponse) {
-      info("Unauthenticated user for '"+ req.applicationUri+"'. Redirect to login")
+      debug("Unauthenticated user for '"+ req.applicationUri+"'. Redirect to login")
       if (redirectToLoginPage) req.redirectToLoginPage(res) else writeError(ex, req, res)
     }
 
