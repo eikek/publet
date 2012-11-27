@@ -24,6 +24,8 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import com.google.common.eventbus.EventBus
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.ext.jmx.JmxService
+import org.eknet.publet.vfs.{Resource, ContentResource}
+import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,6 +35,11 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
 
   def configure() {
     bindExtension.add[ThumbnailExtension]
+
+    annoateMapOf[Class[_], List[ContentResource]]
+      .by(Names.named("ExtDoc"))
+      .add(classOf[ThumbnailModule])
+      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/thumbnailerdoc.md")))
   }
 
   @Provides@Singleton

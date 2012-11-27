@@ -24,6 +24,8 @@ import javax.management.{DynamicMBean, JMX, ObjectName}
 import java.util.Hashtable
 import com.google.inject.matcher.AbstractMatcher
 import com.google.inject.TypeLiteral
+import org.eknet.publet.vfs.{Resource, ContentResource}
+import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -41,6 +43,10 @@ class JmxConnectorModule extends SquireModule with PubletModule {
         })
       }
     })
+    annoateMapOf[Class[_], List[ContentResource]]
+      .by(Names.named("ExtDoc"))
+      .add(classOf[JmxConnectorModule])
+      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/jmxdoc.md")))
   }
 }
 

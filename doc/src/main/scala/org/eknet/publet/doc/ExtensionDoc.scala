@@ -31,7 +31,7 @@ import com.google.common.eventbus.Subscribe
  * @since 26.11.12 20:07
  */
 @Singleton
-class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[String, List[ContentResource]], publet: Publet) {
+class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[Class[Object], List[ContentResource]], publet: Publet) {
 
   private val basePath = "/publet/doc/modules/".p
 
@@ -41,7 +41,7 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[String, List[
       val key = ModuleKey(e._1)
       val mapc = new MapContainer
       for (r <- e._2) mapc.addResource(r)
-      publet.mountManager.mount(basePath / key.toKey.toLowerCase, mapc)
+      publet.mountManager.mount(basePath / key.toKey, mapc)
     }
   }
 
@@ -54,7 +54,7 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[String, List[
   }
 }
 
-case class ModuleKey(module: String) {
-  def toKey = module.toLowerCase
-  override def toString = toKey
+case class ModuleKey(module: Class[_]) {
+  def toKey = module.getSimpleName.toLowerCase
+  override def toString = module.getSimpleName
 }

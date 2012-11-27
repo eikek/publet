@@ -17,7 +17,7 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.{Resource, ContentResource, Path}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 import com.google.inject.{Inject, Singleton, Provides, AbstractModule}
@@ -27,6 +27,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
 import org.eknet.guice.squire.SquireModule
+import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,10 +35,9 @@ import org.eknet.guice.squire.SquireModule
  */
 @Singleton
 class ExtWebExtension @Inject() (publet: Publet) extends Logging {
-
+  val extScriptPath = Path("/publet/ext/scripts/")
   @Subscribe
   def onStartup(ev: PubletStartedEvent) {
-    import ExtWebExtension.extScriptPath
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
@@ -51,16 +51,15 @@ class ExtWebExtension @Inject() (publet: Publet) extends Logging {
 
 }
 
-object ExtWebExtension {
-
-  val extScriptPath = Path("/publet/ext/scripts/")
-
-}
-
 class ExtraModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()
+
+    annoateMapOf[Class[_], List[ContentResource]]
+      .by(Names.named("ExtDoc"))
+      .add(classOf[ExtWebExtension])
+      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/extrasdoc.md")))
   }
 
   @Provides@Singleton
