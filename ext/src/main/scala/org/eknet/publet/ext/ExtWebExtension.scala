@@ -58,9 +58,11 @@ class ExtraModule extends SquireModule with PubletBinding with PubletModule {
 
     annoateMapOf[Class[_], List[ContentResource]]
       .by(Names.named("ExtDoc"))
-      .add(classOf[ExtWebExtension])
-      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/extrasdoc.md")))
+      .add(this.getClass)
+      .toInstance(docResource("extrasdoc.md", "captcha-example.png", "captcha-example1.png", "downloadTemplate.png"))
   }
+
+  private[this] def docResource(names: String*) = names.map("org/eknet/publet/ext/doc/"+ _).map(Resource.classpath(_)).toList
 
   @Provides@Singleton
   def createDefaultMailer(config: Config): MailSender = {
