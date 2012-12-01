@@ -51,15 +51,12 @@ class ExtWebExtension @Inject() (publet: Publet) extends Logging {
 
 }
 
-class ExtraModule extends SquireModule with PubletBinding with PubletModule {
+class ExtraModule extends SquireModule with PubletBinding {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()
 
-    annoateMapOf[Class[_], List[ContentResource]]
-      .by(Names.named("ExtDoc"))
-      .add(this.getClass)
-      .toInstance(docResource("extrasdoc.md", "captcha-example.png", "captcha-example1.png", "downloadTemplate.png"))
+    bindDocumentation(docResource("extrasdoc.md", "captcha-example.png", "captcha-example1.png", "downloadTemplate.png"))
   }
 
   private[this] def docResource(names: String*) = names.map("org/eknet/publet/ext/doc/"+ _).map(Resource.classpath(_)).toList
@@ -74,4 +71,6 @@ class ExtraModule extends SquireModule with PubletBinding with PubletModule {
 
     new DefaultMailSender(sessionFactory)
   }
+
+  override def toString = "Extras"
 }

@@ -17,7 +17,7 @@
 package org.eknet.publet.ext.jmx
 
 import org.eknet.guice.squire.SquireModule
-import org.eknet.publet.web.guice.PubletModule
+import org.eknet.publet.web.guice.{PubletBinding, PubletModule}
 import com.google.inject.spi.{TypeEncounter, TypeListener, InjectionListener}
 import java.lang.management.ManagementFactory
 import javax.management.{DynamicMBean, JMX, ObjectName}
@@ -31,7 +31,7 @@ import com.google.inject.name.Names
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.11.12 16:12
  */
-class JmxConnectorModule extends SquireModule with PubletModule {
+class JmxConnectorModule extends SquireModule with PubletBinding {
   def configure() {
     bind[JmxService].asEagerSingleton()
     bindListener(new MBeanMatcher, new TypeListener {
@@ -43,11 +43,10 @@ class JmxConnectorModule extends SquireModule with PubletModule {
         })
       }
     })
-    annoateMapOf[Class[_], List[ContentResource]]
-      .by(Names.named("ExtDoc"))
-      .add(classOf[JmxConnectorModule])
-      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/jmxdoc.md")))
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/jmxdoc.md")))
   }
+
+  override def toString = "JMX Connector"
 }
 
 class MBeanMatcher extends AbstractMatcher[TypeLiteral[_]] {

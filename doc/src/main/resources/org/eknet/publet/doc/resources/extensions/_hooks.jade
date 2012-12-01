@@ -1,0 +1,69 @@
+- import org.eknet.publet.doc.SourceHelper
+:markdown
+  ### Hooks
+  #### Events
+
+  Publet uses an event bus to publish events. You can listen for any event just by registering
+  an object to the `EventBus` that has `@Subscribe` annotated methods expecting the desired event
+  as its only argument. Registering is quite easy, since all services created by guice are registerd
+  on the `EventBus`. Thus, you only need to create a class with the appropriate event handler methods
+  and bind them in your module.
+
+  For example, to mount additional resources into the content tree, the `PubletStartedEvent` can
+  be used. This is published once on application start.
+
+
+  #### The trait _WebExtension_
+
+  This trait can be used to intercept standard request processing. It looks as
+  follows:
+
+pre
+  code.scala<>
+    !~~SourceHelper.printSource("WebExtension.scala")
+
+:markdown
+  This way you can wrap the request before it goes to the final processing phase.
+
+  You need to bind your `WebExtension` using a `Multibinder` such that it is added to the
+  existing set of extensions. When using the helper trait `PubletBindings` this can be
+  done like that:
+
+      binder.bindExtension.toType[MyWebExtension]
+
+  or just use guice's `Multibinder.newSetBinder` with the type `WebExtension`.
+
+
+  #### RequestHandler
+
+  All requests are dispatched to a specific request handler that has been registered with guice. Each
+  request is handed to a `RequestHandlerFactory` in order to find a match. If a match is found, the
+  request is handed off to the handler.
+
+  You can add custom handlers by binding a `RequestHandlerFactory` in your module.
+
+      binder.bindRequestHandler.toType[GitHandlerFactory]
+
+  The trait looks like this:
+
+pre
+  code.scala<>
+    !~~SourceHelper.printSource("RequestHandlerFactory.scala")
+
+:markdown
+
+  A `RequestHandlerFactory` is asked to create a `javax.servlet.Filter` that handles a request. This
+  filter is only applied, if the request matches this handler. That is, it returns the highest score
+  for the current request. To ease writing new filters, the `SuperFilter` class can be used to create
+  a filter that itself is a filter chain. The object `Filters` collects some pre-defined filters that
+  can be reused, if applicable.
+
+  Please have a look at the provided implementations for more information.
+
+  #### Realms
+
+  The same way `WebExtension` and `RequestHandlerFactory` are contributed, you can contribute
+  shiro `Realm` objects. If you have an user database, just implement a `Realm` and bind it in
+  your module to the set of Realms.
+
+      binder.bindRealm.toType[UsersRealm]

@@ -2,6 +2,9 @@
 -@ val title : String = "Welcome"
 -@ val head: String = null
 -@ val highlightTheme: String = PubletWeb.publetSettings("publet.layout.highlightTheme").getOrElse("idea")
+-@ val sidebar: String = null
+-@ val sidebarOrientation: String = "left"
+-@ val sidebarSize: Int = 4
 -@ val searchForSidebar: Boolean = PubletWeb.publetSettings("publet.layout.searchForSidebar").getOrElse("true").toBoolean
 -@ val searchForHeadIncludes: Boolean = PubletWeb.publetSettings("publet.layout.searchForHeadIncludes").getOrElse("true").toBoolean
 -@ val footer: String = null
@@ -38,15 +41,34 @@ html
       - if (ext.isDefined)
         =include("__incl_nav."+ext.get)
     #content.container
-      - val ext = if (searchForSidebar) findIncludeExtension("sidebar", false) else None
-      - if (ext.isDefined)
+      - if (sidebar != null)
         .row
-          .span8
-            !~~ body
-          .span4
-            !~~ include("__incl_sidebar."+ext.get)
-      - if (ext.isEmpty)
-        !~~ body
+          - if (sidebarOrientation == "right")
+            div(class={ "span" + (12 - sidebarSize) })
+              !~~ body
+            div(class={ "span" + sidebarSize })
+              !~~ sidebar
+          - else
+            div(class={ "span" + sidebarSize })
+              !~~ sidebar
+            div(class={ "span" + (12 - sidebarSize) })
+              !~~ body
+      - else
+        - val ext = if (searchForSidebar) findIncludeExtension("sidebar", false) else None
+        - if (ext.isDefined)
+          .row
+            - if (sidebarOrientation == "right")
+              div(class={ "span" + (12 - sidebarSize) })
+                !~~ body
+              div(class={ "span" + sidebarSize })
+                !~~ include("__incl_sidebar."+ext.get)
+            - else
+              div(class={ "span" + sidebarSize })
+                !~~ include("__incl_sidebar."+ext.get)
+              div(class={ "span" + (12 - sidebarSize) })
+                !~~ body
+        - if (ext.isEmpty)
+          !~~ body
 
     - if (footer != null)
       !~~ footer

@@ -37,6 +37,11 @@ case class ResourceName(name: String, ext: String) extends Ordered[ResourceName]
   lazy val fullName = name + (if (hasExtension) "."+ext else "")
 
   /**
+   * Returns this name prefixed with a '_' character.
+   */
+  lazy val invisibleName = ResourceName(if (name.startsWith("_")) fullName else "_"+ fullName)
+
+  /**
    * Returns a new name with the specified extension
    *
    * @param ext

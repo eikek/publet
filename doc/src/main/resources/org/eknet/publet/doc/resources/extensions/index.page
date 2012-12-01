@@ -1,32 +1,41 @@
 ---
 title: Publet Documentation
+sidebarOrientation: left
+sidebarSize: 3
 
 --- name:navigationBar pipeline:jade
 =include("../_includes/nav.jade")
 
+--- name:sidebar pipeline:jade
+ul.nav.nav-pills
+  li
+    a.pill(href="../")
+      i.icon-chevron-left
+      | Documentation Overview
+
+h4 Navigation
+ul.nav.nav-pills.nav-stacked
+  li.active
+    a(href="#intro" data-toggle="pill")
+      i.icon-chevron-right
+      | Introduction
+  li
+    a(href="#guice" data-toggle="pill")
+      i.icon-chevron-right
+      | Guice
+  li
+    a(href="#hooks" data-toggle="pill")
+      i.icon-chevron-right
+      | Hooks
+
 --- name:content pipeline:jade
 =include("../_includes/header.jade")
-- import org.eknet.publet.doc.ExtensionDoc
-- val docservice = PubletWeb.instance[ExtensionDoc].get
-.row
-  .span2
-    ul.nav.nav-pills.nav-stacked
-      li.active
-        a(href="#intro" data-toggle="pill")
-          i.icon-chevron-right
-          | Introduction
-      li
-        h4 Included Extensions
-      - for (key <- docservice.moduleKeys)
-        li
-          a(href={ "#"+key.toKey} data-toggle="pill")
-            i.icon-chevron-right
-            =key.toString
+h2 Extensions
 
-  .span10
-    .tab-content
-      .tab-pane.active#intro
-        =include("_intro.jade")
-      - for (key <- docservice.moduleKeys)
-        .tab-pane(id={key.toKey})
-          =include(docservice.pathOf(key))
+.tab-content
+  .tab-pane.active#intro
+    =include("_intro.jade")
+  .tab-pane#guice
+    =include("_guice.md")
+  .tab-pane#hooks
+    =include("_hooks.jade")

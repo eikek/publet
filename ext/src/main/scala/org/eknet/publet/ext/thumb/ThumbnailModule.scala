@@ -35,11 +35,7 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
 
   def configure() {
     bindExtension.add[ThumbnailExtension]
-
-    annoateMapOf[Class[_], List[ContentResource]]
-      .by(Names.named("ExtDoc"))
-      .add(classOf[ThumbnailModule])
-      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/thumbnailerdoc.md")))
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/thumbnailerdoc.md")))
   }
 
   @Provides@Singleton
@@ -60,4 +56,6 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
     JmxService.registerMBean(tn)
     tn
   }
+
+  override def toString = "Thumbnailer"
 }

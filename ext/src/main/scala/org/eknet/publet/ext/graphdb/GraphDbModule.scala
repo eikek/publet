@@ -32,10 +32,8 @@ class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
     bind[GraphDbProvider].to[DefaultGraphDbProvider] in Scopes.SINGLETON
     bind[GraphDbShutdownHook].asEagerSingleton()
 
-    annoateMapOf[Class[_], List[ContentResource]]
-      .by(Names.named("ExtDoc"))
-      .add(classOf[GraphDbModule])
-      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/graphdbdoc.md")))
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/graphdbdoc.md")))
   }
 
+  override def toString = "Graph Database"
 }

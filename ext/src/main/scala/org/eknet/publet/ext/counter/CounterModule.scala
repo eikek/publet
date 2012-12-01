@@ -35,9 +35,8 @@ class CounterModule extends SquireModule with PubletModule with PubletBinding {
     bind[CounterService].to[CounterServiceImpl].in(Scopes.SINGLETON)
     bindExtension.add[CounterExtension]
 
-    annoateMapOf[Class[_], List[ContentResource]]
-      .by(Names.named("ExtDoc"))
-      .add(classOf[CounterModule])
-      .toInstance(List(Resource.classpath("org/eknet/publet/ext/doc/counterdoc.md")))
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/counterdoc.md")))
   }
+
+  override def toString = "Page Counter"
 }
