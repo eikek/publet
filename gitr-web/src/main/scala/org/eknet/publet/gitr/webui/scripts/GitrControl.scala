@@ -65,10 +65,12 @@ class GitrControl extends ScalaScript {
   }
 
   def repoHeadMap: Map[String, Any] = {
-    val repo = getRepositoryModelFromParam
+    val repoModel = getRepositoryModelFromParam
+    val repo = getRepositoryFromParam
+    val info = repo.flatMap(r => repoModel.map(rm => new RepositoryInfo(r, rm)))
     val currentHead = getRev
     Map(
-      "repositoryModel" -> repo,
+      "repositoryInfo" -> info,
       "currentHead" -> currentHead
     )
   }

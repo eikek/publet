@@ -1,6 +1,8 @@
 - import org.eknet.publet.gitr.auth.RepositoryModel
 - import org.eknet.publet.gitr.auth.RepositoryTag
--@ val repositoryModel: Option[RepositoryModel] = None
+- import org.eknet.publet.gitr.webui.scripts.RepositoryInfo
+-@ val repositoryInfo: Option[RepositoryInfo] = None
+- val repositoryModel: Option[RepositoryModel] = repositoryInfo.map(_.model)
 -@ val revisions: String = ""
 -@ val currentHead: String = ""
 
