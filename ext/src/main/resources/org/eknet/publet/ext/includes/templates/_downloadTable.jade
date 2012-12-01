@@ -11,8 +11,8 @@
 
 - val folders = ti.folders(dir)
 - if (!folders.isEmpty)
-  .subnav
-    ul.nav.nav-pills
+  .pagination.pagination-small
+    ul
       - for (d <- folders) {
         - val name = d.name.name.takeWhile(_ != '/')
         li
