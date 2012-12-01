@@ -91,7 +91,7 @@ pre .symbol,
 pre .ruby .symbol .string,
 pre .lisp .keyword,
 pre .tex .special,
-pre .input_number {
+pre .prompt {
   color: #990073
 }
 
@@ -124,8 +124,4 @@ pre .diff .change {
 
 pre .chunk {
   color: #aaa
-}
-
-pre .tex .formula {
-  opacity: 0.5;
 }
