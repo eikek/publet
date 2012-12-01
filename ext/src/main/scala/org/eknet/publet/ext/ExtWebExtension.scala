@@ -17,7 +17,7 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.{Resource, ContentResource, Path}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
 import com.google.inject.{Inject, Singleton, Provides, AbstractModule}
@@ -27,6 +27,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
 import org.eknet.guice.squire.SquireModule
+import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,10 +35,9 @@ import org.eknet.guice.squire.SquireModule
  */
 @Singleton
 class ExtWebExtension @Inject() (publet: Publet) extends Logging {
-
+  val extScriptPath = Path("/publet/ext/scripts/")
   @Subscribe
   def onStartup(ev: PubletStartedEvent) {
-    import ExtWebExtension.extScriptPath
     import org.eknet.publet.vfs.ResourceName._
     val muc = new MapContainer()
     muc.addResource(new WebScriptResource("captcha.png".rn, new CaptchaScript))
@@ -51,17 +51,15 @@ class ExtWebExtension @Inject() (publet: Publet) extends Logging {
 
 }
 
-object ExtWebExtension {
-
-  val extScriptPath = Path("/publet/ext/scripts/")
-
-}
-
-class ExtraModule extends SquireModule with PubletBinding with PubletModule {
+class ExtraModule extends SquireModule with PubletBinding {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()
+
+    bindDocumentation(docResource("extrasdoc.md", "captcha-example.png", "captcha-example1.png", "downloadTemplate.png"))
   }
+
+  private[this] def docResource(names: String*) = names.map("org/eknet/publet/ext/doc/"+ _).map(Resource.classpath(_)).toList
 
   @Provides@Singleton
   def createDefaultMailer(config: Config): MailSender = {
@@ -73,4 +71,6 @@ class ExtraModule extends SquireModule with PubletBinding with PubletModule {
 
     new DefaultMailSender(sessionFactory)
   }
+
+  override def toString = "Extras"
 }

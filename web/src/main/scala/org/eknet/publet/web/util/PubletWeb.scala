@@ -25,7 +25,7 @@ import org.eknet.publet.engine.scalate.ScalateEngine
 import com.google.inject
 import inject.Injector
 import com.google.common.eventbus.Subscribe
-import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent, Names}
+import org.eknet.publet.web.guice.{AppModule, PubletShutdownEvent, PubletStartedEvent}
 import org.eknet.publet.auth.store.DefaultAuthStore
 import org.eknet.publet.web.Settings
 import org.eknet.guice.squire.LookupSquire
@@ -55,7 +55,7 @@ object PubletWeb extends LookupSquire with Logging {
 
   def publet = instance[Publet].get
   def scalateEngine = instance[ScalateEngine].get
-  def contentRoot = instance[Container].annotatedWith(Names.contentroot)
+  def contentRoot = instance[Container].annotatedWith(AppModule.contentrootAnnot)
   def authManager = instance[DefaultAuthStore].get
   def publetSettings = instance[Settings].get
 

@@ -21,6 +21,9 @@ import org.eknet.publet.web.WebExtension
 import org.eknet.publet.web.req.RequestHandlerFactory
 import org.eknet.publet.auth.store.UserStore
 import org.eknet.guice.squire.SquireBinder
+import org.eknet.publet.vfs.ContentResource
+import com.google.inject.name.Names
+import com.google.inject.AbstractModule
 
 /**
  *
@@ -28,14 +31,19 @@ import org.eknet.guice.squire.SquireBinder
  * @since 15.10.12 13:03
  * 
  */
-trait PubletBinding {
-  this: SquireBinder =>
+trait PubletBinding extends PubletModule {
+  this: AbstractModule with SquireBinder =>
 
   def bindRequestHandler = setOf[RequestHandlerFactory]
   def bindExtension = setOf[WebExtension]
   def bindRealm = setOf[Realm]
   def bindUserStore = setOf[UserStore]
-
+  def bindDocumentation(resources:  List[ContentResource]) {
+    annoateMapOf[PubletModule, List[ContentResource]]
+      .by(Names.named("ExtDoc"))
+      .add(this)
+      .toInstance(resources)
+  }
 }
 
 

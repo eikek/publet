@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.web.guice
+package org.eknet.publet.vfs.util
 
-import com.google.inject.name
+import org.eknet.publet.vfs.{ResourceName, Resource}
 
 /**
+ * @param classpathResource the resource name within the classpath
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 07.10.12 02:05
+ * @since 26.11.12 21:48
  */
-object Names {
+class ClasspathResource(val classpathResource: String, classLoader: Option[ClassLoader], name: Option[ResourceName]) extends ForwardingContentResource {
 
-  val scriptEngine = annot("ScriptEngine")
-  val contentroot = annot("contentroot")
-  val servletContext = annot("publetServletContext")
+  protected lazy val delegate = {
+    val cl = classLoader.getOrElse(Thread.currentThread().getContextClassLoader)
+    if (name.isDefined)
+      new UrlResource(cl.getResource(classpathResource), name.get)
+    else
+      new UrlResource(cl.getResource(classpathResource))
+  }
 
-  implicit def annot(str: String) = name.Names.named(str)
 }

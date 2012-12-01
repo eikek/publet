@@ -28,8 +28,7 @@ class MailContact extends ScalaScript with MailSupport {
   import org.eknet.publet.web.util.RenderUtils.makeJson
 
   def serve() = {
-    val ctx = PubletWebContext
-    import ctx._
+    import PubletWebContext._
 
     if (Config("smtp.host").isEmpty || Config("defaultReceiver").isEmpty) {
       jsonError("Mailer not configured! Sorry, the contact form is not working.")

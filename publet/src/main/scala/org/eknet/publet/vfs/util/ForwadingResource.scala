@@ -32,4 +32,9 @@ trait ForwadingResource extends Resource {
 
   def exists = delegate.exists
 
+  override def toString = delegate.toString
+
+  override def hashCode = delegate.hashCode()
+
+  override def equals(other: Any) = delegate.equals(other)
 }

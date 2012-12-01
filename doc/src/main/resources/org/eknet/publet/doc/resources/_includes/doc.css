@@ -17,3 +17,9 @@
 code {
     color: black;
 }
+
+.alert code {
+    background: transparent;
+    color: #002D53;
+    border: none;
+}

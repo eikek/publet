@@ -20,6 +20,11 @@ import com.google.inject.{Scopes, AbstractModule}
 import org.eknet.publet.web.guice.{PubletBinding, PubletModule}
 import org.eknet.publet.web.WebExtension
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.vfs.{ContentResource, Resource}
+import org.eknet.publet.vfs.util.UrlResource
+import com.google.inject.name.Names
+import collection.JavaConversions._
+import com.google.inject.multibindings.MapBinder
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,5 +34,9 @@ class CounterModule extends SquireModule with PubletModule with PubletBinding {
   def configure() {
     bind[CounterService].to[CounterServiceImpl].in(Scopes.SINGLETON)
     bindExtension.add[CounterExtension]
+
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/counterdoc.md")))
   }
+
+  override def toString = "Page Counter"
 }

@@ -18,10 +18,9 @@ package org.eknet.publet.web.guice
 
 import _root_.com.google.common.eventbus.EventBus
 import _root_.com.google.inject.matcher.Matchers
-import _root_.com.google.inject.name.Named
+import _root_.com.google.inject.name.{Names, Named}
+import _root_.com.google.inject.{Provides, Scopes}
 import _root_.com.google.inject.servlet.ServletModule
-import _root_.com.google.inject.spi.{InjectionListener, TypeEncounter, TypeListener}
-import com.google.inject._
 import org.eknet.publet.web.template.{DefaultLayout, IncludeLoader, ConfiguredScalateEngine}
 import org.eknet.publet.engine.scala.{PubletCompiler, ScalaScriptEngine, DefaultPubletCompiler, ScriptCompiler}
 import java.io.File
@@ -31,7 +30,6 @@ import org.fusesource.scalate.Binding
 import org.eknet.publet.Publet
 import org.eknet.publet.engine.PubletEngine
 import org.eknet.publet.vfs.{Container, ResourceName, Path}
-import org.eknet.publet.web._
 import org.eknet.publet.vfs.util.MapContainer
 import org.eknet.publet.web.scripts.{StartupScriptLoader, Logout, Login, WebScriptResource}
 import javax.servlet.ServletContext
@@ -39,10 +37,11 @@ import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.asset.impl.DefaultAssetManager
 import org.eknet.publet.web.asset.AssetManager
 import org.eknet.publet.web.util.PubletWeb
-import org.eknet.publet.web.req._
 import grizzled.slf4j.Logging
 import org.eknet.guice.squire.SquireBinder
 import org.eknet.publet.auth.guice.AuthModule
+import org.eknet.publet.web.req.{PubletHandlerFactory, AssetsHandlerFactory, PubletMainFilter}
+import org.eknet.publet.web.{Settings, PartitionMount, FilesystemMounter, PartitionMounter, Config}
 
 /**
  * The main application module. It defines all bindings for a working application.
@@ -79,13 +78,14 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
    */
   val customClasspathInitParam = "custom-classpath"
 
+  val servletContextName = Names.named("publetServletContext")
 
   override def configureServlets() {
     val eventBus = new EventBus("Publet Global EventBus")
     val config = new Config(servletContext.getContextPath, eventBus)
 
     bind[ServletContext]
-      .annotatedWith(Names.servletContext)
+      .annotatedWith(servletContextName)
       .toInstance(servletContext)
 
     bind[Config].toInstance(config)
@@ -121,7 +121,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     filter("/*") through classOf[PubletMainFilter]
   }
 
-  @Provides@Singleton
+  @Provides@com.google.inject.Singleton
   def createPublet(@Named("contentroot") mainPartition: Container, config: Config) = {
     val publ = Publet()
     publ.mountManager.mount(Path(config.mainMount).toAbsolute, mainPartition)
@@ -135,7 +135,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     publ
   }
 
-  @Provides@Singleton
+  @Provides@com.google.inject.Singleton
   def createScalateEngine(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config, assetMgr: AssetManager): ScalateEngine = {
     val e = new ConfiguredScalateEngine('wikiMain, publet, config, assetMgr)
     e.engine.combinedClassPath = true
@@ -154,7 +154,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     e
   }
 
-  @Provides@Singleton
+  @Provides@com.google.inject.Singleton
   def createPubletCompiler(publet: Publet, @Named("publetServletContext") servletContext: ServletContext, config: Config): PubletCompiler = {
     val additionalImports = List(
       "org.eknet.publet.web.util.RenderUtils",
@@ -164,7 +164,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
       getCustomClasspath(servletContext), webImports ::: additionalImports)
   }
 
-  @Provides@Singleton@Named("ScriptEngine")
+  @Provides@com.google.inject.Singleton@Named("ScriptEngine")
   def createScriptEngine(publet: Publet, scalateEngine: ScalateEngine, compiler: PubletCompiler): PubletEngine = {
 
     val scalaEngine = new ScalaScriptEngine('eval, compiler, scalateEngine)
@@ -173,7 +173,7 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
     scalaEngine
   }
 
-  @Provides@Singleton
+  @Provides@com.google.inject.Singleton
   def createAssetManager(publet: Publet, config: Config, bus: EventBus) = {
     val tempDir = config.newStaticTempDir("assets")
     val mgr: AssetManager = new DefaultAssetManager(publet, bus, tempDir)
@@ -189,4 +189,13 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
   private def getCustomClasspath(servletContext: ServletContext) =
     Option(servletContext.getInitParameter(customClasspathInitParam)).filterNot(_.isEmpty)
 
+}
+
+object AppModule {
+
+  val servletContextName = "publetServletContext"
+  val servletContextAnnot = Names.named(servletContextName)
+
+  val contentrootName = "contentroot"
+  val contentrootAnnot = Names.named(contentrootName)
 }

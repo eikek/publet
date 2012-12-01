@@ -19,6 +19,7 @@ package org.eknet.publet.gitr.webui
 import com.google.inject.AbstractModule
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.vfs.Resource
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -28,5 +29,10 @@ class GitrWebModule extends SquireModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GitrWebExtension].asEagerSingleton()
+    bindDocumentation(docResource("_gitrweb.md", "gitr-shot1.png", "gitr-shot2.png"))
   }
+
+  private[this] def docResource(names: String*) = names.map("org/eknet/publet/gitr/doc/"+ _).map(Resource.classpath(_)).toList
+
+  override def toString = "Git Web Frontend"
 }

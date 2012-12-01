@@ -16,7 +16,7 @@
 
 package org.eknet.publet.doc
 
-import com.google.inject.AbstractModule
+import com.google.inject.{Scopes, AbstractModule}
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 
@@ -28,5 +28,6 @@ class PubletDocModule extends SquireModule with PubletModule with PubletBinding 
 
   def configure() {
     bind[PubletDocExtension].asEagerSingleton()
+    bind[ExtensionDoc] in Scopes.SINGLETON
   }
 }

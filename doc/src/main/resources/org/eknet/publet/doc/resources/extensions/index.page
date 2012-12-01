@@ -1,40 +1,41 @@
 ---
 title: Publet Documentation
+sidebarOrientation: left
+sidebarSize: 3
 
 --- name:navigationBar pipeline:jade
 =include("../_includes/nav.jade")
 
+--- name:sidebar pipeline:jade
+ul.nav.nav-pills
+  li
+    a.pill(href="../")
+      i.icon-chevron-left
+      | Documentation Overview
+
+h4 Navigation
+ul.nav.nav-pills.nav-stacked
+  li.active
+    a(href="#intro" data-toggle="pill")
+      i.icon-chevron-right
+      | Introduction
+  li
+    a(href="#guice" data-toggle="pill")
+      i.icon-chevron-right
+      | Guice
+  li
+    a(href="#hooks" data-toggle="pill")
+      i.icon-chevron-right
+      | Hooks
+
 --- name:content pipeline:jade
 =include("../_includes/header.jade")
-.row
-  .span2
-    ul.nav.nav-pills.nav-stacked
-      li.active
-        a(href="#intro" data-toggle="pill")
-          i.icon-chevron-right
-          | Introduction
-      li
-        h4 Included Extensions
-      li
-        a(href="#ext" data-toggle="pill")
-          i.icon-chevron-right
-          | Extras
-      li
-        a(href="#gitrweb" data-toggle="pill")
-          i.icon-chevron-right
-          | GitR Web
-      li
-        a(href="#webdav" data-toggle="pill")
-          i.icon-chevron-right
-          | Webdav
+h2 Extensions
 
-  .span10
-    .tab-content
-      .tab-pane.active#intro
-        =include("_intro.jade")
-      .tab-pane#ext
-        =include("_ext.jade")
-      .tab-pane#gitrweb
-        =include("_gitrweb.md")
-      .tab-pane#webdav
-        =include("_webdav.md")
+.tab-content
+  .tab-pane.active#intro
+    =include("_intro.jade")
+  .tab-pane#guice
+    =include("_guice.md")
+  .tab-pane#hooks
+    =include("_hooks.jade")

@@ -61,6 +61,10 @@ title: Publet Documentation
         a(href="#redirects" data-toggle="pill")
           i.icon-chevron-right
           | Redirects
+      li
+        a(href={ PubletWebContext.urlOf("/publet/doc/extensions/index.html") })
+          i.icon-share-alt
+          | Extensions
 
   .span10
     .tab-content

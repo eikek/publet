@@ -1,7 +1,9 @@
-- import org.eknet.publet.doc.SourceHelper
-:markdown
-  # Extensions
+- import org.eknet.publet.web.guice.ModuleManager
+- import org.eknet.publet.doc.ExtensionDoc
+- val mm = PubletWeb.instance[ModuleManager].get
+- val extdoc = PubletWeb.instance[ExtensionDoc].get
 
+:markdown
   Extensions are packaged jar files that contain code, templates and other
   resources that add extra functionality to publet. Publet is distributed with
   some extensions already.
@@ -11,109 +13,36 @@
   In order to create new extensions, you need to know a little about how components
   interact.
 
-  ## Guice Modules
-
-  The different application components are wired using the [Guice](http://code.google.com/p/google-guice/)
-  dependency injection framework. Guice already offers an extension concept which is used here in conjunction
-  with [Java's ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) pattern.
-  The guice "container" is an `Injector` that is created at  application start. This injector contains the default
-  bindings of the application and extensions can contribute other bindings easily by creating a module
-  that extends the `PubletModule` trait. This guice module implementation must then be published in a file inside
-  the `META-INF/services` directory of the extension jar.
-
-  Thus, to add a new module create a file
-
-      META-INF/services/org.eknet.publet.web.guice.PubletModule
-
-  and add lines denoting the full classname of your modules. The module must have a no-arg constructor
-  in order to get instantiated. There is another trait `PubletBindings` that defines some helper
-  methods for creating bindings. The injector can be used to inject or create new instances, but most
-  usually you would just bind your objects in the module implementation.
-
-  That means, that all such provided modules are automatically added to the injector. If you want to
-  prevent certain modules from being loaded, specify them in the configuration file `publet.properties`.
-  Please use the full class name of the published module class with an associated value of `false`. For
-  example, you could exclude the webeditor by specifying
-
-      org.eknet.publet.webeditor.WebeditorModule=false
-
-  in the configuration file.
-
-  This is the only way to contribute to the application, but using guice bindings it is possible
-  to contribute to existing services. There are a few hooks available:
-
-  ### Events
-
-  Publet uses an event bus to publish events. You can listen for any event just by registering
-  an object to the `EventBus` that has `@Subscribe` annotated methods expecting the desired event
-  as its only argument. Registering is quite easy, since all services created by guice are registerd
-  on the `EventBus`. Thus, you only need to create a class with the appropriate event handler methods
-  and bind them in your module.
-
-  For example, to mount additional resources into the content tree, the `PubletStartedEvent` can
-  be used. This is published once on application start.
-
-
-  ### The trait _WebExtension_
-
-  This trait can be used to intercept standard request processing. It looks as
-  follows:
-
-pre
-  code.scala<>
-    !~~SourceHelper.printSource("WebExtension.scala")
-
-:markdown
-  This way you can wrap the request before it goes to the final processing phase.
-
-  You need to bind your `WebExtension` using a `Multibinder` such that it is added to the
-  existing set of extensions. When using the helper trait `PubletBindings` this can be
-  done like that:
-
-      binder.bindExtension.toType[MyWebExtension]
-
-  or just use guice's `Multibinder.newSetBinder` with the type `WebExtension`.
-
-
-  ### RequestHandler
-
-  All requests are dispatched to a specific request handler that has been registered with guice. Each
-  request is handed to a `RequestHandlerFactory` in order to find a match. If a match is found, the
-  request is handed off to the handler.
-
-  You can add custom handlers by binding a `RequestHandlerFactory` in your module.
-
-      binder.bindRequestHandler.toType[GitHandlerFactory]
-
-  The trait looks like this:
-
-pre
-  code.scala<>
-    !~~SourceHelper.printSource("RequestHandlerFactory.scala")
-
-:markdown
-
-  A `RequestHandlerFactory` is asked to create a `javax.servlet.Filter` that handles a request. This
-  filter is only applied, if the request matches this handler. That is, it returns the highest score
-  for the current request. To ease writing new filters, the `SuperFilter` class can be used to create
-  a filter that itself is a filter chain. The object `Filters` collects some pre-defined filters that
-  can be reused, if applicable.
-
-  Please have a look at the provided implementations for more information.
-
-  ### Realms
-
-  The same way `WebExtension` and `RequestHandlerFactory` are contributed, you can contribute
-  shiro `Realm` objects. If you have an user database, just implement a `Realm` and bind it in
-  your module to the set of Realms.
-
-      binder.bindRealm.toType[UsersRealm]
-
-
-  ## Installing Extensions
+  ### Installing Extensions
 
   Extensions are installed by including them in the classpath. For a war file, that means using
   the "exploded war" mode and dropping the jar file into `WEB-INF/lib`.
 
   When using the standalone server, drop it in the directory `plugins`. You
   might need to create it first (next to the `etc` directory).
+
+  If the extenions classes are on the classpath, they're loaded on startup by default. If you
+  want to exclude certain modules, add an entry to publet's configuration file like
+
+      org.eknet.publet.ext.jmx.JmxConnectorModule=false
+
+  The key is the full classname of the module (this is shown at the top of each module
+  documentation page) with an associated value of `false`.
+
+  The publet documentation itself is an extension using the module class `org.eknet.publet.doc.PubletDocModule`.
+  If you exclude this module, no documentation is not loaded.
+
+  ### Extension Documentation
+
+  Installed extensions can plugin their documentation so they are available from
+  this place.
+
+.span4
+  ul.nav.nav-pills.nav-stacked
+    - for (dockey <- extdoc.moduleKeys)
+      li
+        a(href={ extdoc.getIndexHtml(dockey) })
+          i.icon-share-alt
+          = dockey.displayName
+
+br/

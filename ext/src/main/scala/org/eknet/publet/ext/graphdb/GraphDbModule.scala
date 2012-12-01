@@ -19,6 +19,8 @@ package org.eknet.publet.ext.graphdb
 import com.google.inject._
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.vfs.{Resource, ContentResource}
+import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,6 +31,9 @@ class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
   def configure() {
     bind[GraphDbProvider].to[DefaultGraphDbProvider] in Scopes.SINGLETON
     bind[GraphDbShutdownHook].asEagerSingleton()
+
+    bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/graphdbdoc.md")))
   }
 
+  override def toString = "Graph Database"
 }
