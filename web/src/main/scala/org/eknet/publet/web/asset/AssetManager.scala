@@ -34,6 +34,16 @@ trait AssetManager {
   def setup(groups: Group*)
 
   /**
+   * Replaces all resources of an existing group with the resources
+   * of the given group. If `before`, `after` and `uses` are non empty
+   * they are used in favor for the existing ones.
+   *
+   * @param groups
+   * @return the groups that have been replaced
+   */
+  def replace(groups: Group*): Seq[Group]
+
+  /**
    * Returns the path to the compressed `kind` resource that
    * is made of all resources belonging to the given group and
    * that match the given path.

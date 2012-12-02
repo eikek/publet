@@ -17,17 +17,16 @@
 package org.eknet.publet.ext
 
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.vfs.{Resource, ContentResource, Path}
+import org.eknet.publet.vfs.{Resource, Path}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
-import com.google.inject.{Inject, Singleton, Provides, AbstractModule}
+import com.google.inject.{Inject, Singleton, Provides}
 import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.Publet
-import org.eknet.publet.web.guice.{PubletStartedEvent, PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{PubletStartedEvent, PubletBinding}
 import org.eknet.publet.web.Config
 import org.eknet.guice.squire.SquireModule
-import com.google.inject.name.Names
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

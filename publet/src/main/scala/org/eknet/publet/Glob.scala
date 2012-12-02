@@ -81,6 +81,7 @@ final case class Glob(pattern: String) extends Ordered[Glob] {
 }
 
 object Glob {
+  val all = Glob("**")
 
   implicit def stringToGlob(str: String) = Glob(str)
 

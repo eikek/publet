@@ -49,6 +49,12 @@ class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends 
     groups.foreach(assetContainer.mount)
   }
 
+  override def replace(groups: Group*): Seq[Group] = {
+    val x = super.replace(groups: _*)
+    x.foreach(assetContainer.mount)
+    x
+  }
+
   def getCompressed(group: Iterable[String], path: Option[Path], kind: Kind.KindVal): Path =  {
     val newTask = future {
       val sources = getSources(group, path, kind)

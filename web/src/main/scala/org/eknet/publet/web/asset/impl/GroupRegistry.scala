@@ -39,6 +39,16 @@ class GroupRegistry extends Logging {
     }
   }
 
+  def replace(groups: Group*): Seq[Group] = {
+    val replaced = for (
+      g <- groups;
+      n = graph.get(g.name) if (n.isDefined)
+    ) yield n.get.replace(g)
+
+    replaced.foreach(n => graph.put(n.group.name, n))
+    replaced map (_.group)
+  }
+
   def getGroups = graph.values.map(_.group).toList.sortBy(g => g.name)
 
   def getSourcesUnordered = graph.values.flatMap(_.group.resources)
@@ -158,6 +168,17 @@ class GroupRegistry extends Logging {
         other.befores ++ group.befores,
         other.afters ++ group.afters,
         other.uses ++ group.uses))
+    }
+
+    def replace(other: Group): Node = {
+      val replaced = group.resources.map(r => other.resources.find(_.name == r.name).getOrElse(r))
+      Node(Group(group.name,
+        if (other.pathPattern != Glob.all) other.pathPattern else group.pathPattern,
+        replaced,
+        if (other.befores.isEmpty) group.befores else other.befores,
+        if (other.afters.isEmpty) group.afters else other.afters,
+        if (other.uses.isEmpty) group.uses else other.uses
+      ))
     }
   }
 }

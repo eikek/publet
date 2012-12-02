@@ -24,7 +24,7 @@ import org.eknet.publet.Glob
  * @since 28.09.12 20:38
  */
 final case class Group(name: String,
-                  pathPattern: Glob = Glob("**"),
+                  pathPattern: Glob = Glob.all,
                   resources: List[AssetResource] = Nil,
                   befores: Set[String] = Set(),
                   afters: Set[String] = Set(),
