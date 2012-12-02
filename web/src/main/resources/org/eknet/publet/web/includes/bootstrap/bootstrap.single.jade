@@ -26,6 +26,8 @@ html
 
     - if (defaultAssetGroup == "default")
       link(href={ highlightCss } rel="stylesheet")
+      :css
+        pre code { background-color: transparent; }
 
     - if (searchForHeadIncludes)
       =loadHeadIncludes()
