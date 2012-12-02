@@ -196,66 +196,7 @@ Apache Software License, Version 2.0.
 
 <http://www.medsea.eu>
 
-### Titan
-
-Titan, licensed under
-Apache Software License, Version 2.0.
-
-<http://thinkaurelius.github.com/titan/>
-
-#### Kryo
-
-kryo, licensed under [BSD 3 clause license](http://opensource.org/licenses/BSD-3-Clause)
-
-<http://code.google.com/p/kryo/>
-
-####  Oracle's BerkeleyDB
-
-> =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-> The following is the license that applies to this copy of the Berkeley
-> DB Java Edition software.  For a license to use the Berkeley DB Java
-> Edition software under conditions other than those described here, or
-> to purchase support for this software, please contact Oracle at
-> berkeleydb-info_us@oracle.com.
->
-> =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
->
->  Copyright (c) 2002, 2012 Oracle and/or its affiliates.  All rights reserved.
->
->  Redistribution and use in source and binary forms, with or without
->  modification, are permitted provided that the following conditions
->  are met:
->  1. Redistributions of source code must retain the above copyright
->     notice, this list of conditions and the following disclaimer.
->  2. Redistributions in binary form must reproduce the above copyright
->     notice, this list of conditions and the following disclaimer in the
->     documentation and/or other materials provided with the distribution.
->  3. Redistributions in any form must be accompanied by information on
->     how to obtain complete source code for the DB software and any
->     accompanying software that uses the DB software.  The source code
->     must either be included in the distribution or be available for no
->     more than the cost of distribution plus a nominal fee, and must be
->     freely redistributable under reasonable conditions.  For an
->     executable file, complete source code means the source code for all
->     modules it contains.  It does not include source code for modules or
->     files that typically accompany the major components of the operating
->     system on which the executable file runs.
->
->  THIS SOFTWARE IS PROVIDED BY ORACLE ``AS IS'' AND ANY EXPRESS OR
->  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
->  WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
->  NON-INFRINGEMENT, ARE DISCLAIMED.  IN NO EVENT SHALL ORACLE BE LIABLE
->  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
->  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
->  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
->  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
->  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
->  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
->  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-<http://www.oracle.com/technetwork/products/berkeleydb/>
-
-#### Celt Colt
+#### Cern Colt
 
 > Copyright (c) 1999 CERN - European Organization for Nuclear Research.
 > Permission to use, copy, modify, distribute and sell this software and its documentation
@@ -266,7 +207,14 @@ kryo, licensed under [BSD 3 clause license](http://opensource.org/licenses/BSD-3
 
 <http://acs.lbl.gov/software/colt/>
 
-#### asm
+### cglib
+
+cglib, licensed under Apache Software License, Version 2.0.
+
+<http://cglib.sourceforge.net/>
+
+
+### asm
 
 asm, licensed under BSD style license.
 
@@ -300,7 +248,7 @@ asm, licensed under BSD style license.
 
 <http://asm.ow2.org/>
 
-### Blueprints
+### Blueprints Core and Blueprints Orient Graph
 
 blueprints, from tinkerpop stack, licensed under a BSD license
 
@@ -331,6 +279,14 @@ blueprints, from tinkerpop stack, licensed under a BSD license
 > SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <https://github.com/tinkerpop/blueprints/wiki/>
+
+
+### OrientDB
+
+orientdb, licensed under
+Apache Software License, Version 2.0.
+
+<http://www.orientdb.org/>
 
 
 ### OpenClipart

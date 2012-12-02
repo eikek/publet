@@ -8,40 +8,44 @@ object Resolvers {
   val oracle = "oracle.com" at "http://download.oracle.com/maven"
 }
 object Version {
-  val slf4j = "1.7.2"
-  val logback = "1.0.7"
-  val servlet = "3.0.1"
+  val blueprints = "2.1.0"
+  val bouncyCastle = "1.46"
+  val ccodec = "1.5"
   val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
-  val squaremail = "1.0.2"
-  val jgit = "2.1.0.201209190230-r"
-  val shiro = "1.2.1"
-  val scalaTest = "2.0.M4"
-  val grizzled = "0.6.9"
-  val scalate = "1.5.3"
-  val mimeUtil = "2.1.3"
-  val milton = "2.2.1"
-  val ccodec = "1.5"
+  val colt = "1.2.0"
+  val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
   val jdom = "1.1"
+  val jgit = "2.1.0.201209190230-r"
   val jetty = "8.1.8.v20121106"
-  val bouncyCastle = "1.46"
-  val scala = "2.9.2"
-  val yuicompressor = "2.4.7"
   val googleClosureCompiler = "rr2079.1"
+  val grizzled = "0.6.9"
   val guava = "13.0.1"
   val guice = "3.0"
-  val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
+  val logback = "1.0.7"
+  val milton = "2.2.1"
+  val mimeUtil = "2.1.3"
+  val orientdb = "1.2.0"
+  val scalate = "1.5.3"
+  val scalaTest = "2.0.M4"
   val scue = "0.1.0-SNAPSHOT"
-  val titan = "0.1.0"
+  val servlet = "3.0.1"
+  val shiro = "1.2.1"
+  val slf4j = "1.7.2"
+  val squaremail = "1.0.2"
+  val scala = "2.9.2"
+  val yuicompressor = "2.4.7"
 }
 
 object Dependencies {
-// exclude("rhino", "js")
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
   val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
+  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
+  val blueprintsOrient = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive()
   val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
+  val colt = "colt" % "colt" % Version.colt // is used by blueprints-core
   val findbugs = "com.google.code.findbugs" % "jsr305" % Version.findbugs
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
   val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("org.slf4j", "slf4j-api") //scala 2.9.2 only
@@ -64,6 +68,7 @@ object Dependencies {
   )
   val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton withSources() intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
+  val orientdb = "com.orientechnologies" % "orientdb-core" % Version.orientdb
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources()
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
   val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
@@ -77,13 +82,6 @@ object Dependencies {
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
   val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
-  val titan = "com.thinkaurelius.titan" % "titan" % Version.titan withSources() intransitive()
-  val titanDeps = Seq(
-    "com.tinkerpop.blueprints" % "blueprints-core" % "2.1.0",
-    "commons-configuration" % "commons-configuration" % "1.6",
-    "com.sleepycat" % "je" % "5.0.58",
-    "com.googlecode" % "kryo" % "1.04"
-  )
   val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor exclude("rhino", "js")
 }
 
@@ -354,7 +352,7 @@ object Ext extends Build {
     libraryDependencies ++= deps
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, titan, scue) ++ titanDeps
+  val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprintsCore, colt, orientdb, blueprintsOrient, scue)
 
 }
 

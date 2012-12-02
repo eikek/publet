@@ -19,12 +19,16 @@ package org.eknet.publet.ext.graphdb
 import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.Config
 import java.io.File
-import scala.actors.{Futures, Future}
+import scala.actors.Future
 import actors.Futures._
 import java.util.concurrent.ConcurrentHashMap
-import com.thinkaurelius.titan.core.{TitanGraph, TitanFactory}
 import com.tinkerpop.blueprints.{Vertex, Edge, Element}
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
+import com.tinkerpop.blueprints.impls.orient.OrientGraph
+import com.orientechnologies.orient.core.db.graph.OGraphDatabase
+import com.orientechnologies.orient.core.db.ODatabase
+import com.orientechnologies.orient.core.config.OGlobalConfiguration
+import org.eknet.scue.util.{ForwardingGraph, ScueIdGraph}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -54,7 +58,6 @@ trait GraphDbProvider {
    * Creates a new [[org.eknet.publet.ext.graphdb.GraphDb]] using
    * a new [[org.eknet.publet.ext.graphdb.BlueprintGraph]] instance.
    *
-   *
    * @param name
    * @return
    */
@@ -78,6 +81,9 @@ trait GraphDbProvider {
 class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider {
 
   private val dbs = new ConcurrentHashMap[String, Future[GraphDb]]()
+
+  //disable l1 cache. See http://tinkerpop.com/docs/wikidocs/blueprints/2.1.0/OrientDB-Implementation.html
+  OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false)
 
   /**
    * Returns a database for the given name. If it already exists, the same instance
@@ -114,33 +120,17 @@ class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider 
 
   private[this] def dbroot(config: Config) = {
     val d = new File(config.configDirectory, "databases")
-    new File(d, "titans")
+    new File(d, "orientdbs")
   }
 
   private[this] def databaseDir(config: Config, dbname: String) = new File(dbroot(config), dbname)
 
-  def newGraph(name: String): BlueprintGraph = wrapTitanGraph(TitanFactory.open(databaseDir(config, name).getAbsolutePath))
+  def newGraph(name: String): BlueprintGraph = {
+    val og = new OrientGraph("local:"+ databaseDir(config, name).getAbsolutePath) with BlueprintGraph
+    og.getRawGraph.setLockMode(OGraphDatabase.LOCK_MODE.DATABASE_LEVEL_LOCKING)
+    og
+  }
 
   def newDatabase(name: String): GraphDb = new GraphDb(newGraph(name))
 
-  private[this] def wrapTitanGraph(tg: TitanGraph): BlueprintGraph = new TitanWrapper(tg)
-
-  private[this] class TitanWrapper(titan: TitanGraph) extends BlueprintGraph {
-    def getFeatures = titan.getFeatures
-    def addVertex(id: Any) = titan.addVertex(id)
-    def getVertex(id: Any) = titan.getVertex(id)
-    def removeVertex(vertex: Vertex) { titan.removeVertex(vertex) }
-    def getVertices = titan.getVertices
-    def getVertices(key: String, value: Any) = titan.getVertices(key, value)
-    def addEdge(id: Any, outVertex: Vertex, inVertex: Vertex, label: String) = titan.addEdge(id, outVertex, inVertex, label)
-    def getEdge(id: Any) = titan.getEdge(id)
-    def removeEdge(edge: Edge) { titan.removeEdge(edge) }
-    def getEdges = titan.getEdges
-    def getEdges(key: String, value: Any) = titan.getEdges(key, value)
-    def dropKeyIndex[T <: Element](key: String, elementClass: Class[T]) { titan.dropKeyIndex(key, elementClass) }
-    def createKeyIndex[T <: Element](key: String, elementClass: Class[T]) { titan.createKeyIndex(key, elementClass) }
-    def getIndexedKeys[T <: Element](elementClass: Class[T]) = titan.getIndexedKeys(elementClass)
-    def stopTransaction(conclusion: Conclusion) { titan.stopTransaction(conclusion) }
-    def shutdown() { titan.shutdown() }
-  }
 }
