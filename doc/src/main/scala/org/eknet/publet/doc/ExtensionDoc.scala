@@ -119,15 +119,15 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
    */
   private[this] def wrapContent(key: ModuleKey, sourcePath: Path): Content = {
     val menu = moduleKeys.map(currentKey => {
-      """  li(${active})
-        |    a.pill(href="${moduleLink}")
-        |      i.icon-chevron-right
-        |      | ${moduleName}
+      """      li(${active})
+        |        a.pill(href="${moduleLink}")
+        |          i.icon-chevron-right
+        |          | ${moduleName}
       """.stripMargin
         .replace("${moduleLink}", getIndexHtml(currentKey))
         .replace("${moduleName}", currentKey.displayName)
         .replace("${active}", if (key == currentKey) "class=\"active\"" else "")
-    }).mkString("ul.nav.nav-pills.nav-stacked\n", "\n", "")
+    }).mkString("    ul.nav.nav-pills.nav-stacked \n", "\n", "")
     val content =
       """---
         |title: Publet Doc - ${moduleName}
@@ -137,20 +137,22 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
         |--- name:navigationBar pipeline:jade
         |=include("../../_includes/nav.jade")
         |
-        |--- name:sidebar pipeline:jade
-        |ul.nav.nav-pills
-        |  li
-        |    a.pill(href="../../extensions/")
-        |      i.icon-chevron-left
-        |      | Extension Overview
-        |h4 Installed Extensions
-        |${menu}
         |--- name:content pipeline:jade
         |=include("../../_includes/header.jade")
-        |p.alert.alert-info
-        |  | Module Class: ${moduleClass}
         |
-        |=include("${modulePath}")
+        |.row
+        |  .span3
+        |    ul.nav.nav-pills
+        |      li
+        |        a.pill(href="../../extensions/")
+        |          i.icon-chevron-left
+        |          | Extension Overview
+        |    h4 Installed Extensions
+        |${menu}
+        |  .span9
+        |    p.alert.alert-info
+        |      | Module Class: ${moduleClass}
+        |    =include("${modulePath}")
         |
         |""".stripMargin.replace("${moduleName}", key.displayName)
                         .replace("${modulePath}", sourcePath.asString)
