@@ -17,28 +17,26 @@
 package org.eknet.publet.ext.jmx
 
 import org.eknet.guice.squire.SquireModule
-import org.eknet.publet.web.guice.{PubletBinding, PubletModule}
+import org.eknet.publet.web.guice.PubletBinding
 import com.google.inject.spi.{TypeEncounter, TypeListener, InjectionListener}
-import java.lang.management.ManagementFactory
-import javax.management.{DynamicMBean, JMX, ObjectName}
-import java.util.Hashtable
+import javax.management.{JMException, DynamicMBean, JMX}
 import com.google.inject.matcher.AbstractMatcher
 import com.google.inject.TypeLiteral
-import org.eknet.publet.vfs.{Resource, ContentResource}
-import com.google.inject.name.Names
+import org.eknet.publet.vfs.Resource
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.11.12 16:12
  */
-class JmxConnectorModule extends SquireModule with PubletBinding {
+class JmxConnectorModule extends SquireModule with PubletBinding with Logging {
   def configure() {
     bind[JmxService].asEagerSingleton()
     bindListener(new MBeanMatcher, new TypeListener {
       def hear[I](`type`: TypeLiteral[I], encounter: TypeEncounter[I]) {
         encounter.register(new InjectionListener[I] {
           def afterInjection(injectee: I) {
-            JmxService.registerMBean(injectee.asInstanceOf[AnyRef])
+            registerMBean(injectee.asInstanceOf[AnyRef])
           }
         })
       }
@@ -47,6 +45,17 @@ class JmxConnectorModule extends SquireModule with PubletBinding {
   }
 
   override def toString = "JMX Connector"
+
+  private[this] def registerMBean(injectee: AnyRef) {
+    try {
+      JmxService.registerMBean(injectee)
+    }
+    catch {
+      case e: JMException => {
+        error("Error registering MBean '"+injectee+"'!", e)
+      }
+    }
+  }
 }
 
 class MBeanMatcher extends AbstractMatcher[TypeLiteral[_]] {
