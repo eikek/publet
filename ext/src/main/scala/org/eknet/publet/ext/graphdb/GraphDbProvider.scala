@@ -18,7 +18,7 @@ package org.eknet.publet.ext.graphdb
 
 import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.Config
-import java.io.File
+import java.io.{BufferedOutputStream, FileOutputStream, File}
 import scala.actors.Future
 import actors.Futures._
 import java.util.concurrent.ConcurrentHashMap
@@ -78,7 +78,7 @@ trait GraphDbProvider {
 }
 
 @Singleton
-class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider {
+class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider with GraphDbProviderMBean {
 
   private val dbs = new ConcurrentHashMap[String, Future[GraphDb]]()
 
@@ -133,4 +133,17 @@ class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider 
 
   def newDatabase(name: String): GraphDb = new GraphDb(newGraph(name))
 
+  def getDatabases = registeredDatabases.toArray
+
+  def exportDatabase(name: String) {
+    if (!dbs.keySet().contains(name)) {
+      throw new IllegalArgumentException("Database '"+name+"' does not exist.")
+    }
+    val db = getDatabase(name)
+    val file = config.getFile(name+"_"+System.currentTimeMillis()+".ml")
+    val fout = new BufferedOutputStream(new FileOutputStream(file))
+    db.exportToGraphML(fout)
+    fout.flush()
+    fout.close()
+  }
 }
