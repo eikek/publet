@@ -11,8 +11,6 @@ import com.tinkerpop.blueprints.util.io.graphml.{GraphMLReader, GraphMLWriter}
  */
 class GraphDb(val graph: BlueprintGraph) extends Logging {
 
-  import org.eknet.scue.GraphDsl._
-
   /**
    * Wraps the function in a transaction.
    *
@@ -32,9 +30,9 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
    * syntax
    *
    * <pre>
-   *   withTx {
-   *     implicit db =>
-   *       referenceNode --> "domains" -->| vertex("name", "domainNames")
+   *   import GraphDsl._
+   *   withTx { implicit db =>
+   *     referenceNode --> "domains" -->| vertex("name", "domainNames")
    *   }
    * </pre>
    *
@@ -52,17 +50,6 @@ class GraphDb(val graph: BlueprintGraph) extends Logging {
    */
   def shutdown() {
     graph.shutdown()
-  }
-
-  /**
-   * The reference node that is created on first access.
-   *
-   */
-  def referenceNode = {
-    val referenceProperty = "6b67f6429706419098b4f02923a5a9d5"
-    withTx {
-      vertex(referenceProperty := 0)(graph)
-    }
   }
 
   /**
