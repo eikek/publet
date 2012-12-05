@@ -26,6 +26,7 @@ import collection.JavaConversions._
 import com.google.common.eventbus.EventBus
 import org.eknet.publet.event.Event
 import org.eknet.publet.web.util.AppSignature
+import org.eknet.publet.web.filter.Filters
 
 /**
  * Publet's main filter. Gets the contributed [[org.eknet.publet.web.req.RequestHandlerFactory]]
@@ -68,10 +69,19 @@ class PubletMainFilter @Inject() (handlerFactories: java.util.Set[RequestHandler
       handlerMap.get(handler.getClass).get.doFilter(request, response, chain)
     } catch {
       case e: Throwable => {
-        //this is last resort. all exceptions should be properly handled in filters above
-        val res = response.asInstanceOf[HttpServletResponse]
-        error("Error during request: "+ req.getRequestURI, e)
-        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+        Filters.findSocketClosed(e)
+          .map(e => error("Socket closed: "+e.getClass+": "+e.getMessage))
+          .getOrElse {
+
+          //this is last resort. all exceptions should be properly handled in filters above
+          val res = response.asInstanceOf[HttpServletResponse]
+          error("Error during request: "+ req.getRequestURI, e)
+          try {
+            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+          } catch {
+            case e: Exception => error("Error sending 500: " + e.getMessage)
+          }
+        }
       }
     }
     finally {

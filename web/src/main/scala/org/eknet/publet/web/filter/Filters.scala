@@ -6,6 +6,7 @@ import org.eknet.publet.web.asset.{AssetManager, AssetFilter}
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.{WebExtension, Settings, Config}
 import org.eknet.publet.Publet
+import com.google.common.base.Throwables
 
 /**
  *
@@ -39,4 +40,20 @@ object Filters {
 
   def forwardRequest(req: HttpServletRequest, path: Path, clearAttributes: Boolean = true) =
     new ForwardRequest(req.getContextPath+path.asString, req, clearAttributes)
+
+  /**
+   * Tries to find out whether this exception is a "broken pipe" exception
+   * where the client closed the connection (pressing reload multiple times
+   * for example).
+   *
+   * @param e
+   * @return
+   */
+  def findSocketClosed(e: Throwable): Option[Throwable] = {
+    val root = Throwables.getRootCause(e)
+    root.getMessage match {
+      case x if (x.contains("broken pipe")) => Some(root)
+      case _ => None
+    }
+  }
 }

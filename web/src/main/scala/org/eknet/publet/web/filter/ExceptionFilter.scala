@@ -19,6 +19,7 @@ package org.eknet.publet.web.filter
 import javax.servlet._
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.{PageWriter, PubletRequestWrapper}
+import com.google.common.base.Throwables
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,8 +34,12 @@ class ExceptionFilter extends Filter with PageWriter with PubletRequestWrapper w
     }
     catch {
       case e:Throwable => {
-        error("Application error", e)
-        writeError(e, request, response)
+        Filters.findSocketClosed(e)
+          .map(e => error("Socket closed: "+e.getClass+": "+e.getMessage))
+          .getOrElse {
+          error("Application error", e)
+          writeError(e, request, response)
+        }
       }
     }
   }
