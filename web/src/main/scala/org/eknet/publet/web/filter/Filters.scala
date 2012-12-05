@@ -51,8 +51,8 @@ object Filters {
    */
   def findSocketClosed(e: Throwable): Option[Throwable] = {
     val root = Throwables.getRootCause(e)
-    root.getMessage match {
-      case x if (x.contains("broken pipe")) => Some(root)
+    Option(root.getMessage) match {
+      case Some(x) if (x.contains("broken pipe")) => Some(root)
       case _ => None
     }
   }
