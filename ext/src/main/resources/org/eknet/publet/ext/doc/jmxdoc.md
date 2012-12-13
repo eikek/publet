@@ -18,7 +18,7 @@ client must send the credentials as an Array where the first element is the user
 Usually, protected jmx connectors are not necessary, since ssh tunneling can be used instead. For example on
 linux, use ssh command to create  a tunnel from `localhost:9999` to `someserver:9910`:
 
-    ssh user@someserver -L 9999:someserver:9910
+    ssh user@someserver -L 9999:localhost:9910
 
 Then connect via `localhost:9999`.
 
