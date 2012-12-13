@@ -23,12 +23,12 @@ object Version {
   val grizzled = "0.6.9"
   val guava = "13.0.1"
   val guice = "3.0"
-  val logback = "1.0.7"
+  val logback = "1.0.9"
   val milton = "2.2.1"
   val mimeUtil = "2.1.3"
   val orientdb = "1.2.0"
   val scalate = "1.5.3"
-  val scalaTest = "2.0.M4"
+  val scalaTest = "2.0.M6-SNAP3"
   val scue = "0.1.0-SNAPSHOT"
   val servlet = "3.0.1"
   val shiro = "1.2.1"
@@ -128,12 +128,7 @@ object RootBuild extends Build {
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     resolvers := Seq(Resolvers.eknet, Resolvers.ettrema, Resolvers.oracle),
-    pomExtra := <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      </license>
-    </licenses>,
+    licenses := Seq(("ASL2", new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))),
 
     // see https://jira.codehaus.org/browse/JETTY-1493
     ivyXML := <dependency org="org.eclipse.jetty.orbit" name="javax.servlet" rev="3.0.0.v201112011016">
