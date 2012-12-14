@@ -22,13 +22,9 @@ import java.io.{BufferedOutputStream, FileOutputStream, File}
 import scala.actors.Future
 import actors.Futures._
 import java.util.concurrent.ConcurrentHashMap
-import com.tinkerpop.blueprints.{Vertex, Edge, Element}
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
-import com.orientechnologies.orient.core.db.ODatabase
 import com.orientechnologies.orient.core.config.OGlobalConfiguration
-import org.eknet.scue.util.{ForwardingGraph, ScueIdGraph}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

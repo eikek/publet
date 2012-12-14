@@ -31,7 +31,7 @@
           li
             .input-prepend
               button.btn http
-              input.input-xlarge(type="text" style="background-color: inherit;" value={repositoryInfo.get.gitUrl} disabled="disabled")
+              input.input-xlarge(type="text" style="background-color: inherit;" value={repositoryInfo.get.gitUrl})
         - if (Security.hasPerm("git:" + GitAction.admin.name+":"+ repositoryModel.get.name.name))
           li
             a(href={"?r=" +repositoryModel.get.name.fullNameDotGit+ "&do=admin"}) Admin
