@@ -81,6 +81,7 @@ object Dependencies {
   val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
   val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
+  val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % Version.slf4j
   val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
   val yuicompressor = "com.yahoo.platform.yui" % "yuicompressor" % Version.yuicompressor exclude("rhino", "js")
 }
@@ -405,7 +406,7 @@ object War extends Build {
     libraryDependencies ++= deps
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(slf4jApi, servletApiProvided, logbackClassic)
+  val deps = Seq(slf4jApi, slf4jJcl, servletApiProvided, logbackClassic)
 }
 
 
@@ -444,13 +445,16 @@ object Server extends Build {
       IO.unzip(war, webapp)
       //remove logging dependencies, it's included in publet-server.jar
       IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("logback*")).map(IO.delete)
-      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("slf4j*")).map(IO.delete)
+      IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("slf4j-api*")).map(IO.delete)
       IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("grizzled-slf4*")).map(IO.delete)
       //remove scala library
       IO.listFiles(webapp/ "WEB-INF" / "lib", FileFilter.globFilter("scala-library*")).map(IO.delete)
 
       //copy some resources
       val distResources = sourceDir / "dist"
+      IO.copyFile(target.getParentFile.getParentFile / "LICENSE.txt", distdir / "LICENSE.txt")
+      IO.copyFile(target.getParentFile.getParentFile / "NOTICE.md", distdir / "NOTICE.md")
+      IO.copyFile(target.getParentFile.getParentFile / "README.md", distdir / "README.md")
       IO.listFiles(distResources / "bin").map(f => IO.copyFile(f, bin / f.getName))
       IO.listFiles(distResources / "etc").map(f => IO.copyFile(f, etc / f.getName))
 
