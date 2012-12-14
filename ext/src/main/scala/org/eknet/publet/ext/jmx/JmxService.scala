@@ -26,7 +26,7 @@ import java.util
 import org.eknet.publet.web.guice.{PubletShutdownEvent, PubletStartedEvent}
 import com.google.common.eventbus.Subscribe
 import java.util.Hashtable
-import javax.management.ObjectName
+import javax.management.{NotCompliantMBeanException, ObjectName}
 
 /**
  * Creates and starts a jmx connector exposing the platforms MBeanServer. If no
@@ -106,7 +106,18 @@ object JmxService {
   def defaultMBeanServer = ManagementFactory.getPlatformMBeanServer
 
   def registerMBean(mbean: AnyRef, createName: AnyRef => ObjectName = createObjectName) {
-    defaultMBeanServer.registerMBean(mbean, createObjectName(mbean))
+    val server = defaultMBeanServer
+    val name = createObjectName(mbean)
+    if (server.isRegistered(name)) {
+      server.unregisterMBean(name)
+    }
+    try {
+      server.registerMBean(mbean, name)
+    }
+    catch {
+      case e: NotCompliantMBeanException =>
+        server.registerMBean(new MBeanWrapper(mbean), name)
+    }
   }
 
   def createObjectName(inst: AnyRef) = {

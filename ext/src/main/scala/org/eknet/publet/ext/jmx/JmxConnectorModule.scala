@@ -68,9 +68,13 @@ class MBeanMatcher extends AbstractMatcher[TypeLiteral[_]] {
     cls.getInterfaces.exists(i => JMX.isMXBeanInterface(i))
   }
 
-  private[this] def isStandardMBean(cls: Class[_]) =
-    cls.getInterfaces.exists(i => i.getSimpleName.endsWith("MBean"))
+  private[this] def isStandardMBean(cls: Class[_]) = {
+    val name = cls.getName
+    val iname = cls.getInterfaces.find(_.getSimpleName.endsWith("MBean")).map(_.getName.replaceAll("MBean$", ""))
+    iname.exists(in => in == name)
+  }
 
   private[this] def isDynamicMBean(cls: Class[_]) =
     classOf[DynamicMBean].isAssignableFrom(cls)
+
 }
