@@ -39,4 +39,9 @@ class ModuleManager(config: Config) extends Logging {
 
 }
 
-trait PubletModule extends Module
+trait PubletModule extends Module {
+
+  def name: String
+  def version: String
+
+}

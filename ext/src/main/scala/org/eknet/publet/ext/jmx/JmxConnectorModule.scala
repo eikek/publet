@@ -24,6 +24,7 @@ import com.google.inject.matcher.AbstractMatcher
 import com.google.inject.TypeLiteral
 import org.eknet.publet.vfs.Resource
 import grizzled.slf4j.Logging
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -44,8 +45,6 @@ class JmxConnectorModule extends SquireModule with PubletBinding with Logging {
     bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/jmxdoc.md")))
   }
 
-  override def toString = "JMX Connector"
-
   private[this] def registerMBean(injectee: AnyRef) {
     try {
       JmxService.registerMBean(injectee)
@@ -56,6 +55,9 @@ class JmxConnectorModule extends SquireModule with PubletBinding with Logging {
       }
     }
   }
+
+  val name = "JMX Connector"
+  val version = AppSignature.version
 }
 
 class MBeanMatcher extends AbstractMatcher[TypeLiteral[_]] {

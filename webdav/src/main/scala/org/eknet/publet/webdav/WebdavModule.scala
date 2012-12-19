@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.vfs.Resource
+import org.eknet.publet.web.util.AppSignature
 
 /**
  *
@@ -20,5 +21,6 @@ class WebdavModule extends SquireModule with PubletBinding with PubletModule {
 
   private[this] def docResource(names: String*) = names.map("org/eknet/publet/webdav/doc/"+ _).map(Resource.classpath(_)).toList
 
-  override def toString = "WebDAV"
+  val name = "WebDAV"
+  val version = AppSignature.version
 }

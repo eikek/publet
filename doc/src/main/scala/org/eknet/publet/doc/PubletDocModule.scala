@@ -19,6 +19,7 @@ package org.eknet.publet.doc
 import com.google.inject.{Scopes, AbstractModule}
 import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -30,4 +31,7 @@ class PubletDocModule extends SquireModule with PubletModule with PubletBinding 
     bind[PubletDocExtension].asEagerSingleton()
     bind[ExtensionDoc] in Scopes.SINGLETON
   }
+
+  val name = "Publet Documentation"
+  val version = AppSignature.version
 }

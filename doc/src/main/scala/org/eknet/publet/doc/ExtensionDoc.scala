@@ -150,9 +150,12 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
         |  .span9
         |    p.alert.alert-info
         |      | Module Class: ${moduleClass}
+        |      br/
+        |      | Version: ${version}
         |    =include("${modulePath}")
         |
         |""".stripMargin.replace("${moduleName}", key.displayName)
+                        .replace("${version}", key.version)
                         .replace("${modulePath}", sourcePath.asString)
                         .replace("${moduleClass}", key.module.getClass.getName)
                         .replace("${menu}", menu)
@@ -164,11 +167,9 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
 
 case class ModuleKey(module: PubletModule) extends Ordered[ModuleKey] {
   def toKey = module.getClass.getSimpleName.toLowerCase
-  def displayName = module.toString match {
-    case n if (!n.contains("@")) => n
-    case _ => module.getClass.getSimpleName
-  }
-  override def toString = module.toString
+  def displayName = module.name
+  def version = module.version
+  override def toString = displayName +" (v"+ version +")"
 
   def compare(that: ModuleKey) = displayName.compare(that.displayName)
 }

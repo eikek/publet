@@ -29,6 +29,7 @@ import org.eknet.publet.gitr.auth._
 import org.apache.shiro.authz.permission.PermissionResolver
 import org.eknet.publet.gitr.webui.scripts.GitrControl
 import org.apache.shiro.realm.Realm
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -58,6 +59,8 @@ class GitrModule extends SquireModule with PubletModule with PubletBinding {
   def createMainPartition(gitr: GitPartMan): Container =
     gitr.getOrCreate(contentRootRepo, org.eknet.publet.gitr.partition.Config(None))
 
+  val name = "Git Module"
+  val version = AppSignature.version
 }
 
 @Singleton

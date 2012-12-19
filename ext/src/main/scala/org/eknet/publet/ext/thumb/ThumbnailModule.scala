@@ -26,6 +26,7 @@ import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.ext.jmx.JmxService
 import org.eknet.publet.vfs.{Resource, ContentResource}
 import com.google.inject.name.Names
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -57,5 +58,6 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
     tn
   }
 
-  override def toString = "Thumbnailer"
+  val name = "Thumbnailer"
+  val version = AppSignature.version
 }

@@ -36,7 +36,7 @@ import javax.servlet.ServletContext
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.publet.web.asset.impl.DefaultAssetManager
 import org.eknet.publet.web.asset.AssetManager
-import org.eknet.publet.web.util.PubletWeb
+import org.eknet.publet.web.util.{AppSignature, PubletWeb}
 import grizzled.slf4j.Logging
 import org.eknet.guice.squire.SquireBinder
 import org.eknet.publet.auth.guice.AuthModule
@@ -55,6 +55,11 @@ import org.eknet.publet.web.{Settings, PartitionMount, FilesystemMounter, Partit
  * @since 06.10.12 23:19
  */
 class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging with SquireBinder {
+
+
+  def name = "Core App Module"
+
+  def version = AppSignature.version
 
   private val webImports = List(
     "org.eknet.publet.web.Config",

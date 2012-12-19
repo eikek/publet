@@ -30,6 +30,7 @@ import org.eknet.publet.Publet
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.engine.scalate.ScalateEngine
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -77,4 +78,7 @@ class WebeditorModule extends SquireModule with PubletModule with PubletBinding 
     bind[NotFoundHandler].to[CreateNewHandler] in Scopes.SINGLETON
     bind[EditorWebExtension].asEagerSingleton()
   }
+
+  val name = "Webeditor"
+  val version = AppSignature.version
 }

@@ -9,7 +9,6 @@ Note, to use the `jmxmp` protocol, you must download the `jmxremote_optional.jar
 (search for _Java Management Extensions (JMX) Remote API Reference Implementation_) and add it somehow to the
 classpath. You can drop it in the `plugins` directory or add it as an extension to your java installation -- put
 the jar in `$JRE/lib/ext` directory. This way it is globally available. Of course, all clients need this jar, too.
-This jar cannot be bundled with publet, because its license is not compatible with publets license.
 
 The connector is not protected by default. It can be protected by specifying `publet.jmx.protected=true` in
 the config file. Then only users with permission `jmx:connector` are allowed to connect. Additionally, the
@@ -25,7 +24,10 @@ Then connect via `localhost:9999`.
 ### Registering MBeans
 
 Registering MBeans is done by simply creating a binding in the guice module. There is a binding listener
-that will register an object that complies to the mbean convention to the platforms MBeanServer.
+that will register an object that complies to the mbean convention to the platforms MBeanServer. If the
+class implements an interface ending in `MBean` than this object is considered to be an MBean, whether
+it complies to the naming convention or not. If it does not, it is wrapped in a `DynamicMBean` to be able
+to register it.
 
 If a provider or factory method is used, registering the mbean must be done manually:
 

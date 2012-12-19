@@ -21,6 +21,7 @@ import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.vfs.{Resource, ContentResource}
 import com.google.inject.name.Names
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -35,5 +36,6 @@ class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
     bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/graphdbdoc.md")))
   }
 
-  override def toString = "Graph Database"
+  val name = "Graph Database"
+  val version = AppSignature.version
 }

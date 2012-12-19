@@ -27,7 +27,7 @@ import org.apache.shiro.web.filter.authc.{AnonymousFilter, BasicHttpAuthenticati
 import org.eknet.publet.web.{Settings, Config}
 import javax.servlet.ServletContext
 import org.apache.shiro.web.env.WebEnvironment
-import org.eknet.publet.web.util.StringMap
+import org.eknet.publet.web.util.{AppSignature, StringMap}
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import com.google.common.eventbus.EventBus
@@ -44,6 +44,10 @@ import org.eknet.publet.web.shiro.SuperadminRealm
  * @since 07.10.12 14:02
  */
 class PubletShiroModule extends SquireModule with PubletBinding {
+
+  val version = AppSignature.version
+
+  def name = "Shiro Module"
 
   def configure() {
     bind[SessionManager].to[ServletContainerSessionManager].asEagerSingleton()

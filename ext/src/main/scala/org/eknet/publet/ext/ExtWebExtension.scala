@@ -27,6 +27,7 @@ import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{PubletStartedEvent, PubletBinding}
 import org.eknet.publet.web.Config
 import org.eknet.guice.squire.SquireModule
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -71,5 +72,6 @@ class ExtraModule extends SquireModule with PubletBinding {
     new DefaultMailSender(sessionFactory)
   }
 
-  override def toString = "Extras"
+  val name = "Extras"
+  val version = AppSignature.version
 }

@@ -25,12 +25,14 @@ import org.eknet.publet.vfs.util.UrlResource
 import com.google.inject.name.Names
 import collection.JavaConversions._
 import com.google.inject.multibindings.MapBinder
+import org.eknet.publet.web.util.AppSignature
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:48
  */
 class CounterModule extends SquireModule with PubletModule with PubletBinding {
+
   def configure() {
     bind[CounterService].to[CounterServiceImpl].in(Scopes.SINGLETON)
     bindExtension.add[CounterExtension]
@@ -38,5 +40,7 @@ class CounterModule extends SquireModule with PubletModule with PubletBinding {
     bindDocumentation(List(Resource.classpath("org/eknet/publet/ext/doc/counterdoc.md")))
   }
 
-  override def toString = "Page Counter"
+  val name = "Page Counter"
+
+  val version = AppSignature.version
 }
