@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 Publet is a web application where you can edit pages like in a wiki. Besides three
 wiki languages, you can also write Scala scripts and choose from a broad set of
@@ -15,14 +15,6 @@ This is achieved by utilising [Scalate](http://scalate.fusesource.org/), a
 template engine that supports those three major wiki markup languages. Publet
 is handing wiki pages to [Scalate](http://scalate.fusesource.org/) which
 produces the HTML output that is finally displayed.
-
-Many wiki applications allow to extend the markup by using macros. That is
-quite handy for adding simple dynamic content. Still, when a more complex page
-is desired, the wiki syntax with many macros feels cumbersome. The macros are
-often hard to read and are most often specific to the current application. In
-those situations it's better to turn this inside out: don't use wiki markup with
-macros, but use a template language and insert wiki markup in the appropriate places.
-Now, that's exactly what [Scalate](http://scalate.fusesource.org/) offers.
 
 As said, [Scalate](http://scalate.fusesource.org/) is a template engine, thus
 you can write templates: SSP (similiar to JSP), Jade, Mustache and more. All

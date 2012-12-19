@@ -1,4 +1,4 @@
-# Layouts
+## Layouts
 
 [Layout templates](http://scalate.fusesource.org/documentation/user-guide.html#layouts)
 are used to define html page skeletons. They may provide a `<head/>` section
@@ -9,7 +9,7 @@ Each template/wiki page can specify which layout to be wrapped in. If nothing
 is specified the default layout is used.
 
 
-## The default layout
+### The default layout
 
 Publet is shipped with [Bootstrap](http://twitter.github.com/bootstrap/) and
 provides a default layout template that is wrapped around each page (if not
@@ -47,7 +47,7 @@ Pages can control the layout's behaviour by defining parameters:
 
 See the full source of the default layout [here](../../../publet/bootstrap/bootstrap.single.jade).
 
-### Html head includes
+#### Html head includes
 
 The default layout includes any `js`, `css` and `xml` files from the _special directories_.
 The `js` and `css` files are obvoius. the `xml` files are XML files that define other
@@ -63,7 +63,7 @@ header, define a xml file with this content:
 If you like to override some css, just place your css file into `/.allIncludes/mytheme.css`,
 for example, and it is included in every page.
 
-### Navigation bar
+#### Navigation bar
 
 The parameter `nav` is containing HTML code to render contents of the
 navigation bar at the top of the page. If no value is specified for this
@@ -73,14 +73,14 @@ _special directories_.
 The initial content provides a basic outline of the navigation bar that is
 stored at `.allIncludes/nav.jade`.
 
-### Sidebar
+#### Sidebar
 
 The default layout will search the special directories for a file with name `sidebar`. If
 one exists, the page is divided into two columns, where the right column renders the
 `sidebar` and the main (left) column renders the page body.
 
 
-## Custom layouts
+### Custom layouts
 
 You can easily create a custom layout and place it anywhere in the content tree. Then use
 the parameter `layout` in your templates and define the uri to your new layout.

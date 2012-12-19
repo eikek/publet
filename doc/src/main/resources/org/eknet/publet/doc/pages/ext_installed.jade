@@ -1,0 +1,18 @@
+- import org.eknet.publet.web.guice.ModuleManager
+- import org.eknet.publet.doc.ExtensionDoc
+- val mm = PubletWeb.instance[ModuleManager].get
+- val extdoc = PubletWeb.instance[ExtensionDoc].get
+
+:markdown
+  ## Installed Extensions
+
+  Installed extensions can plugin their documentation. The following list is the documentation
+  of extensions that are currently installed.
+
+.span4
+  ul.nav.nav-pills.nav-stacked
+    - for (dockey <- extdoc.moduleKeys)
+      li
+        a(href={ extdoc.getIndexHtml(dockey) })
+          i.icon-share-alt
+          = dockey.displayName

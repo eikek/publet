@@ -1,4 +1,4 @@
-### Guice Modules
+## Guice Modules
 
 The different application components are wired using the [Guice](http://code.google.com/p/google-guice/)
 dependency injection framework. Guice already offers an extension concept which is used here in conjunction
@@ -14,7 +14,7 @@ Thus, to add a new module create a file
 
 and add lines denoting the full classname of your modules. The module must have a no-arg constructor
 in order to get instantiated. There is another trait `PubletBindings` that defines some helper
-methods for creating bindings. The injector can be used to inject or create new instances, but most
+methods for creating bindings specific to publet. The injector can be used to inject or create new instances, but most
 usually you would just bind your objects in the module implementation.
 
 That means, that all such provided modules are automatically added to the injector. If you want to
@@ -26,5 +26,6 @@ example, you could exclude the webeditor by specifying
 
 in the configuration file.
 
-This is the only way to contribute to the application, but using guice bindings it is possible
-to contribute to existing services. There are a few hooks available:
+This is the only way to contribute to the application, but contributing new guice bindings allows to
+hook into the application at various places. The [Hooks](ext_hooks.html) section describes some of the
+possibilities.

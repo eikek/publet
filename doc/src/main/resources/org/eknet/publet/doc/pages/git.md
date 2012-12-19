@@ -1,4 +1,4 @@
-# Git
+## Git
 
 The location of the git repositories is mapped to the path `git/`. The content
 repository is located at `/git/contentroot.git`. If publet is installed at

@@ -1,4 +1,4 @@
-# Configuration
+## Configuration
 
 There are two configuration files:
 
@@ -9,7 +9,7 @@ There are two configuration files:
   specific to the running application
 
 
-## Settings
+### Settings
 
 An optional `settings.properties` can be created in the contentroot repository
 at
@@ -27,17 +27,11 @@ applying a string key, for example:
     val stringValue: Option[String] = PubletWeb.publetSettings("applicationName")
     val stringValue: Option[String] = Settings("applicationName")
 
-Note, the settings are reloaded automatically on each change.
+Note, the settings are reloaded automatically on each change. At the bottom
+of the page there is a `settings.properties` file listed with known options.
 
 
-### Reference settings file
-
-A (hopefully) complete `settings.properties` file is shown below.
-
-<div p:ref="settings.html"></div>
-
-
-## Configuration File
+### Configuration File
 
 The location of the configuration file `publet.properties` depends on whether
 you use the war file or the standalone server.
@@ -52,24 +46,20 @@ The configuration can be accessed in code using the class
 The `Config` class can be injected via guice or looked up via `Config.get`. The `Config`
 object must be reloaded manually after modification.
 
-### War
+At the bottom of the page there is a `publet.properties` file listed with known options.
+
+#### War
 
 Using the war file, the configuration file is expected at the root of the
 `$PUBLET_DIR/<context-path>` of the war file. Please see the [install instructions]() for more information.
 
 
-### Standalone Server
+#### Standalone Server
 
 The file is expected in the `etc` directory.
 
 
-### Reference configuration file
-
-A (hopefully) complete `publet.properties` file is shown below.
-
-<div p:ref="publet-cfg.html"></div>
-
-## Logging
+### Logging
 
 [Logback](http://logback.qos.ch/) is used as logging backend. It is configured via a
 `logback.xml` configuration file that is expected next to the `publet.properties` file.
@@ -99,3 +89,18 @@ found, a default configuration similiar to this is used:
       </root>
 
     </configuration>
+
+
+### Reference Files
+
+#### Settings file
+
+A (hopefully) complete `settings.properties` file is shown below.
+
+<div p:ref="incl/settings.html"></div>
+
+#### Configuration file
+
+A (hopefully) complete `publet.properties` file is shown below.
+
+<div p:ref="incl/publet-cfg.html"></div>

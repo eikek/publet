@@ -1,0 +1,13 @@
+---
+title: Publet Documentation
+
+--- name:navigationBar pipeline:jade
+=include("_includes/nav.jade")
+
+--- name:content pipeline:jade
+=include("_includes/header.jade")
+.row
+  .span2
+    =include("_includes/sidebar.jade")
+  .span10
+    =include("intro.md")

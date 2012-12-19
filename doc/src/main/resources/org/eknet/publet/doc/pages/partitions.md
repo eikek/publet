@@ -1,4 +1,4 @@
-# Partitions
+## Partitions
 
 Partitions are a concept in publet to make resources from multiple sources
 available to the server. The idea is taken from unix/linux systems where you
@@ -20,7 +20,7 @@ mapped to the path `main/`. This is necessary to allow other applications to
 be added next to the main resources. In other words, publet instantiates a
 `GitPartition` and mounts it to the path `main/`.
 
-## Known partition types
+### Known partition types
 
 There are few partition types implemented so far:
 
@@ -41,7 +41,7 @@ Other container implementations include the `ClasspathContainer` and
 classpath, or fetched otherwise.
 
 
-## Specifying partitions
+### Specifying partitions
 
 On startup, publet scans the `settings.properties` file for partition
 settings. The settings define what partitions are mounted into the content

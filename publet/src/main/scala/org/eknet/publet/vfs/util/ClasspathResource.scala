@@ -27,10 +27,11 @@ class ClasspathResource(val classpathResource: String, classLoader: Option[Class
 
   protected lazy val delegate = {
     val cl = classLoader.getOrElse(Thread.currentThread().getContextClassLoader)
+    val clr = Option(cl.getResource(classpathResource)).getOrElse(sys.error("Resource '"+classpathResource+"' does not exist"))
     if (name.isDefined)
-      new UrlResource(cl.getResource(classpathResource), name.get)
+      new UrlResource(clr, name.get)
     else
-      new UrlResource(cl.getResource(classpathResource))
+      new UrlResource(clr)
   }
 
 }

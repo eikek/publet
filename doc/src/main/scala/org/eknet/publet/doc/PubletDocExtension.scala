@@ -16,8 +16,8 @@
 
 package org.eknet.publet.doc
 
-import org.eknet.publet.vfs.util.ClasspathContainer
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.util.{SimpleContentResource, MapContainer, ClasspathContainer}
+import org.eknet.publet.vfs.{ResourceName, Path}
 import grizzled.slf4j.Logging
 import org.eknet.publet.web.asset.{AssetManager, Group, AssetCollection}
 import org.eknet.publet.web.template.DefaultLayout
@@ -40,6 +40,28 @@ class PubletDocExtension @Inject() (publet: Publet, assetMgr: AssetManager) exte
     .add(resource("doc.css"))
     .require(DefaultLayout.Assets.bootstrap.name)
 
+  val docResources = List(
+    DocPage("intro.md", "Introduction"),
+    DocPage("install.md", "Installation"),
+    DocPage("usage.md", "Basic Usage"),
+    MenuName("Good to know"),
+    DocPage("conventions.md", "Conventions"),
+    DocPage("configuration.md", "Configuration"),
+    DocPage("security.jade", "Security"),
+    DocPage("git.md", "Git"),
+    MenuName("Other Topics"),
+    DocPage("page-layouts.md", "Layouts"),
+    DocPage("assets.jade", "Assets"),
+    DocPage("partitions.md", "Partitions"),
+    DocPage("scala-scripts.md", "Scala Scripts"),
+    DocPage("redirects.md", "Redirects"),
+    MenuName("Extensions"),
+    DocPage("ext_intro.md", "Introduction"),
+    DocPage("ext_guice.md", "Guice"),
+    DocPage("ext_hooks.jade", "Hooks"),
+    DocPage("ext_installed.jade", "Installed Extensions")
+  )
+
   @Subscribe
   def mountResources(ev: PubletStartedEvent) {
     assetMgr setup css
@@ -47,7 +69,22 @@ class PubletDocExtension @Inject() (publet: Publet, assetMgr: AssetManager) exte
       .use(css.name)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/doc/resources")
-    publet.mountManager.mount(Path("/publet/doc"), cont)
+    publet.mountManager.mount(Path("/publet/doc/incl"), cont)
+
+    val pageContainer = new MapContainer
+    pageContainer.addResource(new SidebarResource(docResources))
+    docResources map (dr => dr match {
+      case p: DocPage => {
+        pageContainer.addResource(new SimpleContentResource(p.resource.name.invisibleName, p.resource))
+        val docr = new DocPageResource(p)
+        pageContainer.addResource(docr)
+        if (p == docResources.head) {
+          pageContainer.addResource(new SimpleContentResource(ResourceName("index.md").withExtension(docr.name.ext), docr))
+        }
+      }
+      case _ =>
+    })
+    publet.mountManager.mount(Path("/publet/doc"), pageContainer)
   }
 
 }

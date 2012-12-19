@@ -1,6 +1,6 @@
-# Redirects and Forwards
+## Redirects and Forwards
 
-## Redirects
+### Redirects
 
 You may have noticed that a request to the root `index.html` is immediately
 redirected to `main/index.html`. This is a built-in redirect but you can add
@@ -10,7 +10,7 @@ Redirect settings are declaring certain urls to be redirected immediately to
 another URL. The keys must start with `redirect.` and name the URL to be
 redirected. The value is the target URL.
 
-#### Examples:
+##### Examples:
 
     redirect./welcome.html=/main/stuff/welcome.html
     redirect./main/welcome.html=/main/stuff/welcome.html
@@ -27,14 +27,14 @@ There are the following redirects configured by default:
 * `/favicon.ico` -> `/main/favicon.ico`
 * `/favicon.png` -> `/main/favicon.png`
 
-## Forwards
+### Forwards
 
 Forwarding the request to some other resource can be achieved the same way
 like redirects. Specify the resources to forward from in the `settings.properties`
 file and use the prefix `forward.` (instead of `redirect.`). The value of such
 a property specifies the resource to forward to.
 
-#### Example:
+##### Example:
 
     forward./robots.txt=/main/robots.txt
 

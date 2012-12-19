@@ -1,4 +1,4 @@
-# Scala Scripts
+## Scala Scripts
 
 Besides writing templates and wiki pages, it is also possible to write Scala
 scripts. They are executed on each request. The code is embedded in the trait
@@ -23,7 +23,7 @@ serializer](https://github.com/twitter/scala-json/blob/master/src/main/scala/com
 
 You need to give the file the extension `scala`.
 
-## Mini projects
+### Mini projects
 
 Scala scripts can access all classes in the classpath of the web application.
 Often, one wants to define addtional objects and classes to share code between
@@ -44,7 +44,7 @@ mini project applies only to scripts in `/apps/myapp` and below, because it is
 defined in the `.includes` folder at that level.
 
 
-## Startup Scripts
+### Startup Scripts
 
 On startup, the special directory `.allIncludes/startup/` is scanned for scala
 source files. The source files are then compiled and expected to comply to the
@@ -60,7 +60,7 @@ This can be useful to do some initial setup tasks. For example, the `AssetManage
 can be injected to register other resources, or scripts can listen for any events
 and do some further work (send mails etc).
 
-## Example: Admin page
+### Example: Admin page
 
 This example creates a simple page that allows to reload the configuration.
 

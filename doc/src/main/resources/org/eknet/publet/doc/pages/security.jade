@@ -1,5 +1,5 @@
 :markdown
-  # Security
+  ## Security
 
   Publet implements a security strategy using [Apache Shiro](http://shiro.apache.org).
 
@@ -18,7 +18,7 @@
   `resource` permissions.
 
 
-  ## Permission Strings
+  ### Permission Strings
 
   Permission strings are used as described in shiro's [manual](http://shiro.apache.org/permissions.html).
   There are two pre-defined domains for permissions:
@@ -27,7 +27,7 @@
   * resource -- for permissions regarding single resources
 
 
-  ## Resource Permissions
+  ### Resource Permissions
 
   Resource permissions apply to the publet web app and they can be used to overrule the partition
   security schemes as described above.
@@ -60,7 +60,7 @@
   define other actions and check them.
 
 
-  ## Git Partition
+  ### Git Partition
 
   Publet comes with a partition type, that is backed by a git repository. The
   git repository can also be accessed by the git command line client (or any other git client, of course).
@@ -95,7 +95,7 @@
 
   The repository owner is always granted all repository permissions implicitely (which are pull, push and admin).
 
-  ## Authorizing access to pages
+  ### Authorizing access to pages
 
   When accessing resources over the web, more granular access checks are possible. Restricting read access
   makes obviously only sense for resources coming from closed git repositories or non git repositories. Resources
@@ -182,9 +182,9 @@
   `GET: /main/projectx/index.html`
 
   1. if partition grants read: SERVE. Else
-  2. rset = restriction patterns for read
+  2. rset = restriction patterns for read; <br/>
      for r <- rset check("resource:" +r.action+ ":" +url)
-  3. if (!rset.isEmpty) SERVE, else:
+  3. if (!rset.isEmpty) SERVE, else:<br/>
        aset = open patterns
        if (url in aset) SERVE else
   4. check("resource:read:"+url)
@@ -193,14 +193,14 @@
   `PUT: /main/projectx/image.png`
 
   1. if partition grants write SERVE, else
-  2. rset = restriction patterns for write
+  2. rset = restriction patterns for write;<br/>
      for r <- rset check("resource" +r.action+ ":" +url)
      if (!rset.isEmpty) SERVE, else
   3. check("resource:write:"+url)
 
 
 
-  ## Default Database
+  ### Default Database
 
   Publet provides the ability to specify all authentication and authorization information in xml
   files in the content tree. The files are
@@ -211,7 +211,7 @@
   where the first contains the user repository, the permission definitions and the resource pattern
   sets. The second one contains a list of git repository models.
 
-  ### Superadmin
+  #### Superadmin
 
   After a fresh install, there is no authentication data available. That's why a superadmin-account
   is added. This can be removed by specifying
@@ -228,7 +228,7 @@
   The _superadmin_ always has all privileges.
 
 
-  ### Repositories file explained
+  #### Repositories file explained
 
   Here is an example `repositories.xml` file:
 
@@ -249,7 +249,7 @@
   login of an registered user.
 
 
-  ### Permission file explained
+  #### Permission file explained
 
   Here is an example `permissions.xml` file explained:
 
@@ -302,7 +302,7 @@
   Note, the file is inside the repository, so you can edit it like any
   other resource.
 
-  #### User Database
+  ##### User Database
 
   The `<users/>` tag represents the user database. Each user is specified with
   login and password. The password can be plain text or encrypted using one of
@@ -321,7 +321,7 @@
   requests). Please refer to the WebDAV documentation for more information.
 
 
-  #### Permissions
+  ##### Permissions
 
   Permissions are simple strings and associated to a group. You sould read the
   [shiro documentation about wildcard permissions](http://shiro.apache.org/permissions.html).
@@ -339,7 +339,7 @@
   the `Security` object for more information.
 
 
-  #### Resource Sets
+  ##### Resource Sets
 
   The information provided in the `<resources/>` tag is used to control if and
   how to do access checks for a single resource. Those are applied in publet's
@@ -410,7 +410,7 @@
   * a double star `**` to express many characters crossing path boundaries
 
 
-  ## Authentication
+  ### Authentication
 
   There is standard login functionality provided with publet. It uses a simple
   login template and a script that executes the login. If a unauthorized error
@@ -487,7 +487,7 @@
   passed to the `login()` method of shiro's `Subject`. That's all about it.
 
 
-  ### Customize Login
+  #### Customize Login
 
   You can create a custom login template that either reuses the provided
   `login.json` script or using a custom one. Please have a look at the [source

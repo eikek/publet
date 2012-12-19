@@ -1,7 +1,7 @@
 .row
   .span10
     :~markdown
-      # Assets
+      ## Assets
 
       Most web pages today use assets like javascript and css resources quite frequently. Those are usually not
       subject to authorization and can therefore circument certain request processing rules. If
@@ -17,9 +17,9 @@
         and specifying dependencies on each other
       * include all resources of a group using one line of code in a template
 
-      ## Registering Resources
+      ### Registering Resources
 
-      ### Creating Groups
+      #### Creating Groups
 
       Resources always belong to a group with some name. For example, the following creates a group of
       bootstrap resources and saves the resulting group definitions in an `object`:
@@ -51,7 +51,7 @@
       a `UrlResource` using the given name and looks it up in the current classpath.
 
 
-      ### Make them available
+      #### Make them available
 
       In your code, for example, inside an *Extension's* `onStartup()` method, use the `AssetManager`
       to register asset groups on application start.
@@ -72,7 +72,7 @@
       the meta group *default*. So if you want a resource to be included in every page, you could add
       it to the default group using an *Extension*.
 
-      ## Get them
+      ### Get them
 
       The `AssetManager` mounts the resources to a special path
 
@@ -124,7 +124,7 @@
 
           .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
 
-      ## Using with Templates
+      ### Using with Templates
 
       A template can include all resources of one or more groups with a single line:
 
@@ -145,7 +145,7 @@
           def loadAssetsSingle(groups: String*)
 
 
-      ### Predefined Groups
+      #### Predefined Groups
 
       Publet already has a number of resources registered, like JQuery, Bootstrap, a few
       plugins etc. All those are collected in the meta group *default* and *defaultNoHighlightJs* which
@@ -156,7 +156,7 @@
       a(href={ PubletWebContext.urlOf("/publet/templates/assets.html")}) /publet/templates/assets.html
 
     :~markdown
-      ### Default Template
+      #### Default Template
 
       The group *default* is loaded by the default layout template. You can override this
       or include additional groups by defining parameters. See the following page template
@@ -177,7 +177,7 @@
       include the syntax highlighter *HighlightJs*. Additionally it specified to load resources
       of the groups "mygroup1" and "mygroup2".
 
-      #### Example
+      ##### Example
 
       Just to quickly see the difference, consider the two *page* templates:
 

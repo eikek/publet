@@ -1,21 +1,35 @@
 - import org.eknet.publet.doc.SourceHelper
 :markdown
-  ### Hooks
-  #### Events
+  ## Hooks
+  ### Events
 
   Publet uses an event bus to publish events. You can listen for any event just by registering
-  an object to the `EventBus` that has `@Subscribe` annotated methods expecting the desired event
+  an object to the `EventBus` that has `@Subscribe` annotated methods defining the desired event
   as its only argument. Registering is quite easy, since all services created by guice are registerd
-  on the `EventBus`. Thus, you only need to create a class with the appropriate event handler methods
-  and bind them in your module.
+  on the `EventBus` automatically. Thus, you only need to create a class with the appropriate event
+  handler methods and bind them in your module.
+
+      bind[MyService].to[MyServiceImpl]
 
   For example, to mount additional resources into the content tree, the `PubletStartedEvent` can
   be used. This is published once on application start.
 
+      class Setup @Inject() (publet: Publet) {
+        @Subscribe
+        def mountResources(ev: PubletStartedEvent) {
+          publet.mountManager.mount(...)
+        }
+      }
 
-  #### The trait _WebExtension_
+  You need to make sure, that your class is instantiated. If it is not injected anywhere, you
+  need to eagerly load it:
 
-  This trait can be used to intercept standard request processing. It looks as
+      bind[Setup].asEagerSingleton()
+
+
+  ### The trait _WebExtension_
+
+  This trait is used to intercept standard request processing. It looks as
   follows:
 
 pre
@@ -29,20 +43,20 @@ pre
   existing set of extensions. When using the helper trait `PubletBindings` this can be
   done like that:
 
-      binder.bindExtension.toType[MyWebExtension]
+      bindExtension[MyWebExtension]
 
   or just use guice's `Multibinder.newSetBinder` with the type `WebExtension`.
 
 
-  #### RequestHandler
+  ### RequestHandler
 
   All requests are dispatched to a specific request handler that has been registered with guice. Each
   request is handed to a `RequestHandlerFactory` in order to find a match. If a match is found, the
-  request is handed off to the handler.
+  request is handed off to the handler created by this factory.
 
   You can add custom handlers by binding a `RequestHandlerFactory` in your module.
 
-      binder.bindRequestHandler.toType[GitHandlerFactory]
+      bindRequestHandler[GitHandlerFactory]
 
   The trait looks like this:
 
@@ -58,12 +72,20 @@ pre
   a filter that itself is a filter chain. The object `Filters` collects some pre-defined filters that
   can be reused, if applicable.
 
-  Please have a look at the provided implementations for more information.
+  This way you can add new servlets and filter to the application. Please have a look at the provided
+  implementations for more information.
 
-  #### Realms
+  ### Realms
 
   The same way `WebExtension` and `RequestHandlerFactory` are contributed, you can contribute
   shiro `Realm` objects. If you have an user database, just implement a `Realm` and bind it in
   your module to the set of Realms.
 
       binder.bindRealm.toType[UsersRealm]
+
+  ### More ...
+
+  The `DefaultAuthStore`, which is responsible for getting user information, accepts contributions
+  as well as other services. Extensions can add objects to existing services or create itself hooks
+  for others to contribute to. Often, extensions define new events and post them on the `EventBus`
+  object. A look into the source code is the best start for looking for other extension points.

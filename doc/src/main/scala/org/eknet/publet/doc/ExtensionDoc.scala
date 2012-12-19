@@ -50,7 +50,7 @@ import org.eknet.publet.engine.scalate.ScalateEngine
 @Singleton
 class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule, List[ContentResource]], publet: Publet, scalateEngine: ScalateEngine) {
 
-  private val basePath = "/publet/doc/modules".p
+  private val basePath = "/publet/doc/extensions".p
 
   @Subscribe
   def automountDoc(event: PubletStartedEvent) {
@@ -130,9 +130,7 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
     }).mkString("    ul.nav.nav-pills.nav-stacked \n", "\n", "")
     val content =
       """---
-        |title: Publet Doc - ${moduleName}
-        |sidebarOrientation: left
-        |sidebarSize: 3
+        |title: ${moduleName} - Publet Documentation
         |
         |--- name:navigationBar pipeline:jade
         |=include("../../_includes/nav.jade")
@@ -141,12 +139,12 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
         |=include("../../_includes/header.jade")
         |
         |.row
-        |  .span3
+        |  .span2
         |    ul.nav.nav-pills
         |      li
-        |        a.pill(href="../../extensions/")
+        |        a.pill(href="../../")
         |          i.icon-chevron-left
-        |          | Extension Overview
+        |          | Overview
         |    h4 Installed Extensions
         |${menu}
         |  .span9
@@ -158,6 +156,7 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
                         .replace("${modulePath}", sourcePath.asString)
                         .replace("${moduleClass}", key.module.getClass.getName)
                         .replace("${menu}", menu)
+
 
     Content(content, ContentType.page)
   }

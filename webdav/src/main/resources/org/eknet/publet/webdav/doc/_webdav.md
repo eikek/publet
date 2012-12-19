@@ -83,7 +83,7 @@ create a page like the following `mydata.page` with this content:
 Then go to the new page `mydata.html` and change your password. Note that this
 only works for authenticated users. This will update the user entry in the
 `permissions.xml` file with the password and a correct digest value. Please
-see the "Ext" section in the [Extension documentation](extensions/) for more
+see the [Extension documentation](../extramodule/index.html#_em_Change_Password__em__and__em_My_Data__em__template) for more
 information on the _myData_ template.
 
 

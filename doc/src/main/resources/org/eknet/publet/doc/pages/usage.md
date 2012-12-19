@@ -1,9 +1,11 @@
-# Usage
+## Usage
 
 When starting publet the first time, it presents a welcome screen similiar to
 this:
 
-![publet welcome screen](welcome-screen.png)
+<ul class="thumbnails">
+<li class="span4"><a href="incl/welcome1.png" alt="publet welcome screen"><img src="incl/welcome1.png"></a></li>
+</ul>
 
 Publet initializes the content root repository with this example content.
 
@@ -15,15 +17,16 @@ to to login as a super user.
 Then the edit screen is presented with the initial contents of the `index.md`
 file:
 
-![publet edit screen](welcome-edit.png)
+<ul class="thumbnails">
+<li class="span4"><a href="incl/welcome2.png" alt="publet edit screen"><img src="incl/welcome2.png"></a></li>
+</ul>
 
-Let me explain what you see there. At the right hand side, there is a file
-browser component that shows the files on the server. If you click on one, the
-edit screen updates with the corresponding file. You can go up and down
-directories as usual.
+At the right hand side, there is a file browser component that shows the files on the
+server. If you click on one, the edit screen updates with the corresponding file. You
+can go up and down directories as usual.
 
 On the top there is a button bar with some actions: saving changes, deleting
-the file in questions, or to cancel the action and view the page. The button
+the file in question, or to cancel the action and view the page. The button
 _Upload Files_ takes you to another screen for uploading files (like images).
 
 Below the button bar, there is a combo box _Extensions_. This lets you choose
@@ -40,7 +43,7 @@ non existing resource. Another alternative is to create a link to a
 non-existing page and click on that link. Also you could just change the url
 parameter `resource` to another (non-existing or existing) file,
 
-## Markup
+### Markup
 
 As said in the introduction, publet utilises
 [Scalate](http://scalate.fusesource.org/) for template and wiki file
@@ -49,13 +52,13 @@ documentation](http://scalate.fusesource.org/documentation/index.html) on the
 different supported template languages and their syntax. Here I will give
 a short summary of their documentation to get some feel about it.
 
-### Wiki: Markdown
+#### Wiki: Markdown
 
-One of the popular wiki syntaxes is _Markdown_. It is very easy to write and
+One very popular wiki syntaxes is _Markdown_. It is very easy to write and
 is designed to be readable as is, as plain text. The complete markdown syntax
 is [explained here](http://daringfireball.net/projects/markdown/).
 
-#### Example
+##### Example
 
 Here is a silly example:
 
@@ -97,15 +100,17 @@ Here is a silly example:
 
 You need to use the file extension `md` or `markdown`. The resulting HTML is shown in the image below.
 
-![test-markdown.png](test-markdown.png)
+<ul class="thumbnails">
+<li class="span4"><a href="incl/welcome3.png"><img src="incl/welcome3.png"></a></li>
+</ul>
 
 
-### Wiki: Textile
+#### Wiki: Textile
 
 _Textile_ is another very popular wiki syntax. It allows more HTML tweakings than markdown. The complete
 syntax is available on the [textile page](http://textile.thresholdstate.com/).
 
-#### Example
+##### Example
 
     h1. My first headline
 
@@ -134,11 +139,11 @@ syntax is available on the [textile page](http://textile.thresholdstate.com/).
 This produces the same output as the markdown example.
 
 
-### Jade
+#### Jade
 
-Jade is a template language for producing HTML code. It simplifies HTML
-writing tremendously. Visit the [Scalate
-Documentation](http://scalate.fusesource.org/documentation/jade.html)
+[Jade](https://github.com/visionmedia/jade) is a template language for producing HTML
+code. It simplifies HTML writing tremendously. [Scalate](http://scalate.fusesource.org/)
+provides a scala implementation of jade. Please see there [documentation](http://scalate.fusesource.org/documentation/jade.html) for more information.
 for more information.
 
 Here is an example that demostrates the combination of markdown and jade. This
@@ -169,7 +174,7 @@ example is taken from Scalate's documentation page:
 >     </div>
 
 
-### SSP
+#### SSP
 
 SSP templates are similiar to JSP or Velocity templates, but Scala is used
 as language for expressions and code. The
@@ -181,7 +186,7 @@ Sometimes this is helpful if some dynamic content must be added to a normal
 HTML page. In this case, simply rename the file from _html_ to _ssp_ and add
 code.
 
-### Page
+#### Page
 
 Files with extension `page` allow to define multiple sections with content
 made up of any of the supported template languages. The contents of each
@@ -242,7 +247,7 @@ The pipeline can name any supported template or wiki language. The default is
 _markdown_ if it is omitted.
 
 
-## Includes
+### Includes
 
 Using the `include()` function in templates, you can include other templates
 on the server side. With Jade, it looks like this:

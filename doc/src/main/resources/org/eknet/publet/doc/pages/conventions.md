@@ -1,21 +1,21 @@
-# Conventions
+## Conventions
 
-A set of conventions are used by a few features provided by publet. The
-conventions are regarding the location of special files that publet scans for
-in some cases.
+A set of conventions are used by certain features of publet. The conventions
+are regarding the location of special files that publet scans for in some
+cases.
 
 
-## Special Directories
+### Special Directories
 
 The structuring of the web contents is completely up to the user, of course.
 However, there are the following directories that publet searches for
 resources if needed by certain features.
 
-* `.allIncludes/` only at the root of the repository
+* `.allIncludes/` only at the root of the main repository
 * `.includes/` at any level in the content tree
 
-The `.allIncludes` directory exists only once at the root of the repository.
-It contains things that are global to the whole application.
+The `.allIncludes` directory exists only once at the root of the content
+repository. It contains things that are global to the whole application.
 
 The `.includes/` directory, on the other hand, may appear in any directory in
 the content tree. The contents of this directory "apply" only to the sibling
@@ -36,7 +36,7 @@ files from the nearest `.includes` directory and files found `.allIncludes`
 are combined.
 
 
-## Hidden files
+### Hidden files
 
 With the hidden files convention you can create files that will not be served.
 Any request to them will always result in a http 404 error. The idea is to
@@ -53,7 +53,7 @@ Some examples clarify this:
 * `/dir1/_dir2/dir3/test.md` is hidden, because the name of the parent directory `_dir2` starts with an `_`
 
 
-## Error Pages
+### Error Pages
 
 If an HTTP error occurs, the default behaviour is to write the error into the response. This
 leads the browser to show its default error page. If you like to present a custom error page,
