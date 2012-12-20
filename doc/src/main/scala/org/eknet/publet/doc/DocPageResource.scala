@@ -45,9 +45,9 @@ class DocPageResource(p: DocPage) extends ContentResource {
       |--- name:content pipeline:jade
       |=include("incl/_includes/header.jade")
       |.row
-      |  .span2
+      |  .span3
       |    =include("_sidebar.ssp")
-      |  .span10
+      |  .span9
       |    =include("${resourceName}")
     """.stripMargin
       .replace("${resourceName}", p.resource.name.invisibleName.fullName)

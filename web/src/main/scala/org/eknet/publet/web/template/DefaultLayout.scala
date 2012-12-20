@@ -39,6 +39,9 @@ class DefaultLayout @Inject() (publet: Publet, assetMgr: AssetManager, scalateEn
 
   @Subscribe
   def onStartup(ev: PubletStartedEvent) {
+    //mustache
+    assetMgr setup Assets.mustache
+
     //jquery
     assetMgr setup Assets.jquery
 
@@ -73,6 +76,9 @@ object DefaultLayout {
 
     override def classPathBase = "/org/eknet/publet/web/includes"
 
+    val mustache = Group("mustache")
+      .add(resource("mustache/mustache.js"))
+
     val jquery = Group("jquery")
       .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
       .add(resource("jquery/jquery.form.js"))
@@ -100,11 +106,11 @@ object DefaultLayout {
       .add(resource("bootstrap/img/glyphicons-halflings-white.png"))
       .require(jquery.name)
 
-    val default = Group("default").use(jquery.name, spin.name, loadmask.name,
+    val default = Group("default").use(mustache.name, jquery.name, spin.name, loadmask.name,
       publet.name, highlightjs.name, bootstrap.name)
 
     val defaultNoHighlightJs = Group("defaultNoHighlightJs")
-      .use(jquery.name, spin.name, loadmask.name, publet.name, bootstrap.name)
+      .use(mustache.name, jquery.name, spin.name, loadmask.name, publet.name, bootstrap.name)
 
   }
 

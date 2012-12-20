@@ -20,6 +20,7 @@ The default layout defines a html head section with the following includes
 * All [Bootstrap](http://twitter.github.com/bootstrap/) `css` and `js` files
 * code highlighter [highlightJs](http://softwaremaniacs.org/soft/highlight/en/) that
   automatically highlights text enclosed in `<pre><code>` tags
+* [Mustache.js](https://github.com/janl/mustache.js) javascript templates
 * [JQuery](http://jquery.com/) with two plugins
     * [JQuery forms plugin](http://jquery.malsup.com/form/)
     * [JQuery File Upload Plugin](http://blueimp.github.com/jQuery-File-Upload/)
