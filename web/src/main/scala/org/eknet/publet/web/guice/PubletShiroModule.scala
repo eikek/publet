@@ -43,11 +43,9 @@ import org.eknet.publet.web.shiro.SuperadminRealm
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 14:02
  */
-class PubletShiroModule extends SquireModule with PubletBinding {
+class PubletShiroModule extends AbstractPubletModule with PubletBinding {
 
-  val version = AppSignature.version
-
-  def name = "Shiro Module"
+  val name = "Shiro Module"
 
   def configure() {
     bind[SessionManager].to[ServletContainerSessionManager].asEagerSingleton()

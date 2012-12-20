@@ -17,7 +17,7 @@
 package org.eknet.publet.ext.jmx
 
 import org.eknet.guice.squire.SquireModule
-import org.eknet.publet.web.guice.PubletBinding
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletBinding}
 import com.google.inject.spi.{TypeEncounter, TypeListener, InjectionListener}
 import javax.management.{JMException, DynamicMBean, JMX}
 import com.google.inject.matcher.AbstractMatcher
@@ -30,7 +30,7 @@ import org.eknet.publet.web.util.AppSignature
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 24.11.12 16:12
  */
-class JmxConnectorModule extends SquireModule with PubletBinding with Logging {
+class JmxConnectorModule extends AbstractPubletModule with PubletBinding with Logging {
   def configure() {
     bind[JmxService].asEagerSingleton()
     bindListener(new MBeanMatcher, new TypeListener {
@@ -57,7 +57,6 @@ class JmxConnectorModule extends SquireModule with PubletBinding with Logging {
   }
 
   val name = "JMX Connector"
-  val version = AppSignature.version
 }
 
 class MBeanMatcher extends AbstractMatcher[TypeLiteral[_]] {

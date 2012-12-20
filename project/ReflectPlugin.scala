@@ -20,8 +20,8 @@ object ReflectPlugin extends Plugin {
 	lazy val allSettings	= Seq(
 		reflectPackage	:= "",
 		reflectClass	:= "Reflect",
-		reflect			<<= (Keys.sourceManaged, Keys.name, Keys.version, reflectPackage, reflectClass) map {
-			(sourceManaged:File, name:String, version:String, reflectPackage:String, reflectClass:String)	=>
+		reflect			<<= (Keys.sourceManaged, Keys.name, Keys.version, reflectPackage, Keys.licenses, reflectClass) map {
+			(sourceManaged:File, name:String, version:String, reflectPackage:String, licenses: Seq[(String, URL)], reflectClass:String)	=>
 				val	file	= sourceManaged / "reflect" / "Reflect.scala"
 				val code	= 
 						(
@@ -29,9 +29,10 @@ object ReflectPlugin extends Plugin {
 							else							""
 						) +
 						"object " + reflectClass + " {\n" + 
-						"\tval name\t= \"" + name + "\"\n" + 
-						"\tval version\t= \"" + version + "\"\n" + 
-                  "\tval timestamp = " + System.currentTimeMillis +"L\n"+
+						   "\tval name\t= \"" + name + "\"\n" +
+					     "\tval version\t= \"" + version + "\"\n" +
+               "\tval licenses = List("+ licenses.map(l => "(\""+ l._1+ "\", new java.net.URL(\""+ l._2.toString +"\"))").mkString(", ") +")\n" +
+               "\tval timestamp = " + System.currentTimeMillis +"L\n"+
 						"}\n"  
 				IO write (file, code)
 				Seq(file)

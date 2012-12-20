@@ -20,7 +20,7 @@ import com.google.inject.{Singleton, Provides, AbstractModule}
 import org.eknet.publet.web.{WebExtension, Config}
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.Publet
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import com.google.common.eventbus.EventBus
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.ext.jmx.JmxService
@@ -32,7 +32,7 @@ import org.eknet.publet.web.util.AppSignature
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 07.10.12 02:22
  */
-class ThumbnailModule extends SquireModule with PubletBinding with PubletModule {
+class ThumbnailModule extends AbstractPubletModule with PubletBinding with PubletModule {
 
   def configure() {
     bindExtension.add[ThumbnailExtension]
@@ -59,5 +59,4 @@ class ThumbnailModule extends SquireModule with PubletBinding with PubletModule 
   }
 
   val name = "Thumbnailer"
-  val version = AppSignature.version
 }

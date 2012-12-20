@@ -22,6 +22,9 @@ object AppSignature {
   /** The build time of this version */
   val timestamp = new util.Date(Reflect.timestamp)
 
+  /** The license of publet */
+  val license = Reflect.licenses.headOption
+
   /** The build time formatted according to ISO8601 */
   val timeString = {
     val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")

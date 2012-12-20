@@ -23,7 +23,7 @@ import org.eknet.gitr.{GitrMan, GitrManImpl}
 import org.eknet.publet.gitr.partition.{GitPartManImpl, GitPartMan}
 import com.google.inject.name.Named
 import org.eknet.publet.vfs.{Path, Container}
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.publet.auth.store.{ResourceSetStore, ResourceSetStoreAdapter, PermissionStore}
 import org.eknet.publet.gitr.auth._
 import org.apache.shiro.authz.permission.PermissionResolver
@@ -35,7 +35,7 @@ import org.eknet.publet.web.util.AppSignature
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 06.11.12 19:36
  */
-class GitrModule extends SquireModule with PubletModule with PubletBinding {
+class GitrModule extends AbstractPubletModule with PubletModule with PubletBinding {
 
   private val contentRootRepo = Path("contentroot")
 
@@ -60,7 +60,6 @@ class GitrModule extends SquireModule with PubletModule with PubletBinding {
     gitr.getOrCreate(contentRootRepo, org.eknet.publet.gitr.partition.Config(None))
 
   val name = "Git Module"
-  val version = AppSignature.version
 }
 
 @Singleton

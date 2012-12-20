@@ -17,7 +17,7 @@
 package org.eknet.publet.ext.graphdb
 
 import com.google.inject._
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.vfs.{Resource, ContentResource}
 import com.google.inject.name.Names
@@ -27,7 +27,7 @@ import org.eknet.publet.web.util.AppSignature
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.10.12 22:43
  */
-class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
+class GraphDbModule extends AbstractPubletModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GraphDbProvider].to[DefaultGraphDbProvider] in Scopes.SINGLETON
@@ -37,5 +37,4 @@ class GraphDbModule extends SquireModule with PubletBinding with PubletModule {
   }
 
   val name = "Graph Database"
-  val version = AppSignature.version
 }

@@ -56,10 +56,10 @@ import org.eknet.publet.web.{Settings, PartitionMount, FilesystemMounter, Partit
  */
 class AppModule(servletContext: ServletContext) extends ServletModule with PubletBinding with Logging with SquireBinder {
 
-
-  def name = "Core App Module"
-
-  def version = AppSignature.version
+  val name = "Core App Module"
+  val license = AppSignature.license
+  val version = AppSignature.version
+  val homePage = Some(new URL("https://eknet.org/main/projects/publet/"))
 
   private val webImports = List(
     "org.eknet.publet.web.Config",

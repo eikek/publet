@@ -1,7 +1,7 @@
 package org.eknet.publet.webdav
 
 import com.google.inject.AbstractModule
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.vfs.Resource
 import org.eknet.publet.web.util.AppSignature
@@ -12,7 +12,7 @@ import org.eknet.publet.web.util.AppSignature
  * @since 16.10.12 19:18
  * 
  */
-class WebdavModule extends SquireModule with PubletBinding with PubletModule {
+class WebdavModule extends AbstractPubletModule with PubletBinding with PubletModule {
 
   def configure() {
     bindRequestHandler.add[WebdavHandlerFactory]
@@ -22,5 +22,4 @@ class WebdavModule extends SquireModule with PubletBinding with PubletModule {
   private[this] def docResource(names: String*) = names.map("org/eknet/publet/webdav/doc/"+ _).map(Resource.classpath(_)).toList
 
   val name = "WebDAV"
-  val version = AppSignature.version
 }

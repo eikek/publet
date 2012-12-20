@@ -25,7 +25,7 @@ import org.eknet.publet.webeditor.EditorPaths._
 import org.eknet.publet.vfs.ResourceName._
 import org.eknet.publet.web.asset.AssetManager
 import com.google.inject.{Inject, Singleton, Scopes, AbstractModule}
-import org.eknet.publet.web.guice.{PubletModule, PubletStartedEvent, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletStartedEvent, PubletBinding}
 import org.eknet.publet.Publet
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.engine.scalate.ScalateEngine
@@ -72,7 +72,7 @@ class EditorWebExtension @Inject() (publet: Publet, assetMgr: AssetManager, scal
 
 }
 
-class WebeditorModule extends SquireModule with PubletModule with PubletBinding {
+class WebeditorModule extends AbstractPubletModule with PubletModule with PubletBinding {
 
   def configure() {
     bind[NotFoundHandler].to[CreateNewHandler] in Scopes.SINGLETON
@@ -80,5 +80,4 @@ class WebeditorModule extends SquireModule with PubletModule with PubletBinding 
   }
 
   val name = "Webeditor"
-  val version = AppSignature.version
 }

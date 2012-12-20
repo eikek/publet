@@ -24,7 +24,7 @@ import com.google.inject.{Inject, Singleton, Provides}
 import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.Publet
-import org.eknet.publet.web.guice.{PubletStartedEvent, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletStartedEvent, PubletBinding}
 import org.eknet.publet.web.Config
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.web.util.AppSignature
@@ -51,7 +51,7 @@ class ExtWebExtension @Inject() (publet: Publet) extends Logging {
 
 }
 
-class ExtraModule extends SquireModule with PubletBinding {
+class ExtraModule extends AbstractPubletModule with PubletBinding {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()
@@ -73,5 +73,4 @@ class ExtraModule extends SquireModule with PubletBinding {
   }
 
   val name = "Extras"
-  val version = AppSignature.version
 }

@@ -17,7 +17,7 @@
 package org.eknet.publet.gitr.webui
 
 import com.google.inject.AbstractModule
-import org.eknet.publet.web.guice.{PubletModule, PubletBinding}
+import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.guice.squire.SquireModule
 import org.eknet.publet.vfs.Resource
 import org.eknet.publet.web.util.AppSignature
@@ -26,7 +26,7 @@ import org.eknet.publet.web.util.AppSignature
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 15.10.12 19:48
  */
-class GitrWebModule extends SquireModule with PubletBinding with PubletModule {
+class GitrWebModule extends AbstractPubletModule with PubletBinding with PubletModule {
 
   def configure() {
     bind[GitrWebExtension].asEagerSingleton()
@@ -36,5 +36,4 @@ class GitrWebModule extends SquireModule with PubletBinding with PubletModule {
   private[this] def docResource(names: String*) = names.map("org/eknet/publet/gitr/doc/"+ _).map(Resource.classpath(_)).toList
 
   val name = "Git Web Frontend"
-  val version = AppSignature.version
 }

@@ -152,12 +152,20 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
         |      | Module Class: ${moduleClass}
         |      br/
         |      | Version: ${version}
+        |      br/
+        |      | License: ${licenseName}:
+        |      ${licenseLink}
+        |      br/
+        |      ${homePage}
         |    =include("${modulePath}")
         |
         |""".stripMargin.replace("${moduleName}", key.displayName)
                         .replace("${version}", key.version)
+                        .replace("${licenseLink}", key.module.license.map(l => "a(href=\""+l._2.toString+"\") "+l._2.toString).getOrElse(""))
+                        .replace("${licenseName}", key.module.license.map(_._1).getOrElse("None defined."))
                         .replace("${modulePath}", sourcePath.asString)
                         .replace("${moduleClass}", key.module.getClass.getName)
+                        .replace("${homePage}", key.module.homePage.map(hp => "| Homepage:\n      a(href=\""+hp.toString+"\") "+hp.toString).getOrElse(""))
                         .replace("${menu}", menu)
 
 

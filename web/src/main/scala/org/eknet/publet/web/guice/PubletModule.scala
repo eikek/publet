@@ -16,25 +16,29 @@
 
 package org.eknet.publet.web.guice
 
-import java.util.ServiceLoader
-import org.eknet.publet.web.Config
-import collection.JavaConversions._
-import grizzled.slf4j.Logging
-import com.google.inject.Module
-
+import com.google.inject.{AbstractModule, Module}
+import java.net.URL
+import org.eknet.publet.web.util.AppSignature
+import org.eknet.guice.squire.SquireModule
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
- * @since 15.10.12 18:42
+ * @since 20.12.12 17:29
  */
-class ModuleManager(config: Config) extends Logging {
+trait PubletModule extends Module {
 
-  val modules = ServiceLoader.load(classOf[PubletModule])
-    .iterator()
-    .withFilter(ext => config(ext.getClass.getName).getOrElse("true").toBoolean)
-    .toList
+  def name: String
+  def version: String
+  def license: Option[(String, URL)]
+  def homePage: Option[URL]
+}
 
-
-  val moduleNames = modules.map(_.getClass.getName).sorted
-
+/**
+ * Abstract guice module that mixes in [[org.eknet.publet.web.guice.PubletModule]]
+ * and implements `version` and `license` returning the values of the publet app.
+ */
+abstract class AbstractPubletModule extends SquireModule with PubletModule {
+  val version = AppSignature.version
+  val license = AppSignature.license
+  val homePage: Option[URL] = None
 }
