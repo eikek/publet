@@ -139,7 +139,7 @@ class ExtensionDoc @Inject() (@Named("ExtDoc") docs: java.util.Map[PubletModule,
         |=include("../../_includes/header.jade")
         |
         |.row
-        |  .span2
+        |  .span3
         |    ul.nav.nav-pills
         |      li
         |        a.pill(href="../../")

@@ -76,9 +76,9 @@ There are two access permissions referring a repository by name (without the
 
 You need to grant those permissions in `permissions.xml`:
 
-    <grant name="push">
-      <on>contentroot</on>
+    <grant>
       <to>admin</to>
+      <perm>git:push:contentroot</perm>
     </grant>
 
 The snippet above grants the `push` permission for the content root repository
