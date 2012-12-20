@@ -56,8 +56,8 @@ $(function() {
       _unmask();
       $.each(data, function(i, val) {
         var pushIcon = val.push ? ' <i class="icon-pencil"></i>' : '';
-        var name = '<td class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +
-            '<a href="?r='+val.fullName+'">'+ val.name+ pushIcon+ '</a></td>';
+        var name = '<td><div class="hover" data-original-title="'+val.name+'" data-content="'+val.description+'">' +
+            '<a href="?r='+val.fullName+'">'+ val.name+ pushIcon+ '</a></div></td>';
         var icons = '<td>';
         if (val.tag == "closed") 
           icons += '<i class="icon-lock"/>';

@@ -11,7 +11,6 @@ title: Gitr Admin
       success: function(data) {
         var closeIcon = '<a class="close" data-dismiss="alert" href="#">×</a>';
         if (data.success) {
-          $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
           $('#createRepoForm').clearForm();
           $('#myModal').modal('hide');
         } else {
