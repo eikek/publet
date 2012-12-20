@@ -26,7 +26,7 @@ object Version {
   val logback = "1.0.9"
   val milton = "2.2.3"
   val mimeUtil = "2.1.3"
-  val orientdb = "1.2.0"
+  val orientdb = "1.3.0"
   val scalate = "1.5.3"
   val scalaTest = "2.0.M6-SNAP3"
   val scue = "0.1.0"
