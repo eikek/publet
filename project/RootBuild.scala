@@ -40,46 +40,46 @@ object Version {
 
 object Dependencies {
   val commonsFileUpload = "commons-fileupload" % "commons-fileupload" % Version.cfileupload
-  val commonsIo = "commons-io" % "commons-io" % Version.cio withSources()
-  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints withSources() intransitive()
-  val blueprintsOrient = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints withSources() intransitive()
+  val commonsIo = "commons-io" % "commons-io" % Version.cio
+  val blueprintsCore = "com.tinkerpop.blueprints" % "blueprints-core" % Version.blueprints intransitive()
+  val blueprintsOrient = "com.tinkerpop.blueprints" % "blueprints-orient-graph" % Version.blueprints intransitive()
   val bouncyCastleProv = "org.bouncycastle" % "bcprov-jdk16" % Version.bouncyCastle
   val bouncyCastleMail = "org.bouncycastle" % "bcmail-jdk16" % Version.bouncyCastle
   val colt = "colt" % "colt" % Version.colt // is used by blueprints-core
   val findbugs = "com.google.code.findbugs" % "jsr305" % Version.findbugs
   val googleClosureCompiler = "com.google.javascript" % "closure-compiler" % Version.googleClosureCompiler intransitive()
-  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled withSources() exclude("org.slf4j", "slf4j-api") //scala 2.9.2 only
-  val guava = "com.google.guava" % "guava" % Version.guava withSources()
-  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib") exclude("org.slf4j", "slf4j-api") withSources()
-  val cglib = "cglib" % "cglib" % "2.2.2" withSources()
-  val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice withSources()
-  val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice withSources()
+  val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % Version.grizzled exclude("org.slf4j", "slf4j-api") //scala 2.9.2 only
+  val guava = "com.google.guava" % "guava" % Version.guava
+  val guice = "com.google.inject" % "guice" % Version.guice exclude("org.sonatype.sisu.inject", "cglib") exclude("org.slf4j", "slf4j-api")
+  val cglib = "cglib" % "cglib" % "2.2.2"
+  val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice
+  val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice
   val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
-  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container" withSources()
+  val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container"
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
-  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit withSources()
-  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit withSources()
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback withSources() exclude("org.slf4j", "slf4j-api")
-  val miltonApi = "io.milton" % "milton-api" % Version.milton withSources() intransitive()
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit
+  val jgitHttpServer = "org.eclipse.jgit" % "org.eclipse.jgit.http.server" % Version.jgit
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Version.logback  exclude("org.slf4j", "slf4j-api")
+  val miltonApi = "io.milton" % "milton-api" % Version.milton intransitive()
   val miltonApiDeps = Seq(
-    "commons-codec" % "commons-codec" % Version.ccodec withSources() exclude("rhino", "js"),
-    "commons-collections" % "commons-collections" % Version.ccollections withSources(),
+    "commons-codec" % "commons-codec" % Version.ccodec  exclude("rhino", "js"),
+    "commons-collections" % "commons-collections" % Version.ccollections ,
     "org.jdom" % "jdom" % Version.jdom
   )
-  val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton withSources() intransitive()
+  val miltonServlet = "io.milton" % "milton-server-ce" % Version.milton intransitive()
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdb = "com.orientechnologies" % "orientdb-core" % Version.orientdb
-  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala withSources()
+  val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala
   val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
   val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
   val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate exclude("rhino", "js")
   val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate exclude("rhino", "js")
-  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test" withSources()
+  val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
   val scue = "org.eknet.scue" %% "scue" % Version.scue
-  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet withSources()
+  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet
   val servletApiProvided = servletApi % "provided"
-  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
-  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro withSources() exclude("org.slf4j", "slf4j-api")
+  val shiro = "org.apache.shiro" % "shiro-core" % Version.shiro exclude("org.slf4j", "slf4j-api")
+  val shiroWeb = "org.apache.shiro" % "shiro-web" % Version.shiro exclude("org.slf4j", "slf4j-api")
   val slf4jApi = "org.slf4j" % "slf4j-api" % Version.slf4j
   val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % Version.slf4j
   val squareMail = "org.eknet.squaremail" % "squaremail" % Version.squaremail
@@ -401,6 +401,7 @@ object War extends Build {
         () =>
           val webapp = target / "webapp"
           IO.delete(webapp / "WEB-INF" / "lib" / "scue_2.9.2-test.jar")
+          IO.delete(webapp / "WEB-INF" / "lib" / "scalatest_2.9.2-2.0.M6-SNAP3.jar")
       }
     },
     libraryDependencies ++= deps
