@@ -19,12 +19,11 @@ package org.eknet.publet.ext.graphdb
 import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.Config
 import java.io.{BufferedOutputStream, FileOutputStream, File}
-import scala.actors.Future
-import actors.Futures._
 import java.util.concurrent.ConcurrentHashMap
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
 import com.orientechnologies.orient.core.config.OGlobalConfiguration
+import com.google.common.base.{Suppliers, Supplier}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -76,7 +75,7 @@ trait GraphDbProvider {
 @Singleton
 class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider with GraphDbProviderMBean {
 
-  private val dbs = new ConcurrentHashMap[String, Future[GraphDb]]()
+  private val dbs = new ConcurrentHashMap[String, Supplier[GraphDb]]()
 
   //disable l1 cache. See http://tinkerpop.com/docs/wikidocs/blueprints/2.1.0/OrientDB-Implementation.html
   OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false)
@@ -88,24 +87,17 @@ class DefaultGraphDbProvider @Inject() (config: Config) extends GraphDbProvider 
    * @param name
    */
   def getDatabase(name: String) = {
-    val newTask = future {
-      newDatabase(name)
-    }
+    val newTask = Suppliers.memoize(new Supplier[GraphDb] {
+      def get() = newDatabase(name)
+    })
     val task = dbs.putIfAbsent(name, newTask)
-    if (task == null) {
-      newTask()
-    } else {
-      task()
-    }
+    if (task != null) task.get() else newTask.get()
   }
 
   def shutdownAll() {
     import collection.JavaConversions._
-
-    for (future <- dbs.values()) {
-      if (future.isSet) {
-        future().shutdown()
-      } //todo: otherwise cancel
+    for (supp <- dbs.values()) {
+      supp.get().shutdown()
     }
   }
 

@@ -21,8 +21,6 @@ import org.eknet.publet.vfs.{Writeable, Path}
 import org.eknet.publet.Publet
 import java.util.concurrent
 import concurrent.ConcurrentHashMap
-import scala.actors.Futures._
-import actors.Future
 import org.apache.shiro.crypto.hash.Md5Hash
 import grizzled.slf4j.Logging
 import org.apache.shiro.util.ByteSource
@@ -30,6 +28,7 @@ import org.eknet.publet.web.asset.Kind.KindVal
 import Path._
 import java.io.File
 import com.google.common.eventbus.EventBus
+import com.google.common.base.{Suppliers, Supplier}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -37,7 +36,7 @@ import com.google.common.eventbus.EventBus
  */
 class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends GroupRegistry with Logging with AssetManager {
 
-  private val fileCache: concurrent.ConcurrentMap[Key, Future[Path]] = new ConcurrentHashMap()
+  private val fileCache: concurrent.ConcurrentMap[Key, Supplier[Path]] = new ConcurrentHashMap()
   private val assetContainer = new AssetContainer(tempDir, bus)
 
   if (publet.mountManager.resolveMount(AssetManager.assetPath.p) == None) {
@@ -56,24 +55,22 @@ class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends 
   }
 
   def getCompressed(group: Iterable[String], path: Option[Path], kind: Kind.KindVal): Path =  {
-    val newTask = future {
-      val sources = getSources(group, path, kind)
-      val bytes = ConcatInputStream(sources.map(_.inputStream))
-      // create filename
-      val fileName = new Md5Hash(ByteSource.Util.bytes(bytes)).toHex + "."+ kind.toString
-      // if file does not exists, create it
-      assetContainer.lookupTempFile(fileName) getOrElse {
-        val target = assetContainer.createTempFile(fileName)
-        kind.processor.createResource(sources, target.asInstanceOf[Writeable])
+    val newTask = Suppliers.memoize(new Supplier[Path] {
+      def get() = {
+        val sources = getSources(group, path, kind)
+        val bytes = ConcatInputStream(sources.map(_.inputStream))
+        // create filename
+        val fileName = new Md5Hash(ByteSource.Util.bytes(bytes)).toHex + "."+ kind.toString
+        // if file does not exists, create it
+        assetContainer.lookupTempFile(fileName) getOrElse {
+          val target = assetContainer.createTempFile(fileName)
+          kind.processor.createResource(sources, target.asInstanceOf[Writeable])
+        }
+        assetContainer.pathForCompressed(fileName)
       }
-      assetContainer.pathForCompressed(fileName)
-    }
+    })
     val task = fileCache.putIfAbsent(Key(group, path, kind), newTask)
-    if (task == null) {
-      newTask()
-    } else {
-      task()
-    }
+    if (task != null) task.get() else newTask.get()
   }
 
   def getResources(group: Iterable[String], path: Option[Path], kind: KindVal) = {
