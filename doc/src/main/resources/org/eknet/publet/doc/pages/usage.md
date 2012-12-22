@@ -4,7 +4,7 @@ When starting publet the first time, it presents a welcome screen similiar to
 this:
 
 <ul class="thumbnails">
-<li class="span4"><a href="incl/welcome1.png" alt="publet welcome screen"><img src="incl/welcome1.png"></a></li>
+<li class="span4"><a href="incl/welcome1.html" alt="publet welcome screen"><img src="incl/welcome1.png"></a></li>
 </ul>
 
 Publet initializes the content root repository with this example content.
@@ -18,7 +18,7 @@ Then the edit screen is presented with the initial contents of the `index.md`
 file:
 
 <ul class="thumbnails">
-<li class="span4"><a href="incl/welcome2.png" alt="publet edit screen"><img src="incl/welcome2.png"></a></li>
+<li class="span4"><a href="incl/welcome2.html" alt="publet edit screen"><img src="incl/welcome2.png"></a></li>
 </ul>
 
 At the right hand side, there is a file browser component that shows the files on the
@@ -101,7 +101,7 @@ Here is a silly example:
 You need to use the file extension `md` or `markdown`. The resulting HTML is shown in the image below.
 
 <ul class="thumbnails">
-<li class="span4"><a href="incl/welcome3.png"><img src="incl/welcome3.png"></a></li>
+<li class="span4"><a href="incl/welcome3.html"><img src="incl/welcome3.png"></a></li>
 </ul>
 
 

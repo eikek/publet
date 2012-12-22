@@ -26,7 +26,9 @@ It is strongly inspired by [github](https://github.com),
 
 The module can be accessed at path `/gitr/index.html`.
 
-![gitr index page](gitr-shot1.png)
+<ul class="thumbnails">
+<li class="span4"><a href="gitr-shot1.html"><img src="gitr-shot1.png" alt="gitr index page"></a></li>
+</ul>
 
 The screen shot shows the listing of all git repositories. Since this is right
 after a fresh install, only the content root repository is shown. If the
@@ -44,7 +46,9 @@ the Url `http://mydomain.com/gitr/?r=publet.git` would point to the web view
 of the repository `publet.git`. The following screenshot shows the view of
 a repository.
 
-![gitr repository view](gitr-shot2.png)
+<ul class="thumbnails">
+<li class="span4"><a href="gitr-shot2.html"><img src="gitr-shot2.png" alt="gitr repository view"></a></li>
+</ul>
 
 ## Open/Closed repositories and owners
 
