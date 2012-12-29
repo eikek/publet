@@ -5,10 +5,9 @@ import Dependencies._
 object Resolvers {
   val eknet = "eknet.org" at "https://eknet.org/maven2"
   val ettrema = "milton.io" at "http://milton.io/maven"
-  val oracle = "oracle.com" at "http://download.oracle.com/maven"
 }
 object Version {
-  val blueprints = "2.1.0"
+  val blueprints = "2.2.0"
   val bouncyCastle = "1.46"
   val ccodec = "1.5"
   val ccollections = "3.2.1"
@@ -29,7 +28,7 @@ object Version {
   val orientdb = "1.3.0"
   val scalate = "1.5.3"
   val scalaTest = "2.0.M6-SNAP3"
-  val scue = "0.1.0"
+  val scue = "0.2.0"
   val servlet = "3.0.1"
   val shiro = "1.2.1"
   val slf4j = "1.7.2"
@@ -128,7 +127,7 @@ object RootBuild extends Build {
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     exportJars := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
-    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema, Resolvers.oracle),
+    resolvers := Seq(Resolvers.eknet, Resolvers.ettrema),
     licenses := Seq(("ASL2", new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))),
 
     // see https://jira.codehaus.org/browse/JETTY-1493
