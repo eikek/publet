@@ -60,9 +60,10 @@ object ContentType {
   val pdf = ContentType('pdf, Set("pdf"), ("application", "pdf"))
   val zip = ContentType('zip, Set("zip", "gz", "bz2"), ("application", "zip"))
   val jar = ContentType('jar, Set("jar"), ("application", "java-archive"))
+  val sieve = ContentType('sieve, Set("sieve", "siv"), ("application", "sieve"))
   val unknown = ContentType('unknown, Set(), ("application", "octet-stream"))
 
-  val all = Set(text, html, markdown, textile, confluence, page, feed, ssp, scaml,
+  val all = Set(text, html, markdown, textile, confluence, page, feed, ssp, scaml, sieve,
     mustache, jade, xml, css, javascript, json, png, jpg, gif, icon, scal, pdf, jar, zip, unknown)
 
   def apply(f: File): ContentType = apply(extension(f))
