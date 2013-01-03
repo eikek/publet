@@ -58,12 +58,11 @@ assetGroups: publet.webeditor.editpage
                 i.icon-hand-left
               a.btn.btn-small#fullscreenBarButton(rel="tooltip" title="Fullscreen mode, <em>F11</em> to come back" href="#")
                 i.icon-fullscreen
-            .btn-group.pull-right
-              a.btn.btn-small.btn-inverse#editorHelpButton(rel="popover" data-toggle="button" data-original-title="Editor Help") Help
           textarea#editPage.span8(name="page")<
             !~~ contentAsString
           span.help-block.pull-right.small-link
             a#toggleEditorButton(href="#" data-toggle="button") [toggle editor]
+            a.btn.btn-small.btn-inverse#editorHelpButton(data-toggle="button") Help
       .control-group
         label(for="commitMsgInput")
           | Commit Message

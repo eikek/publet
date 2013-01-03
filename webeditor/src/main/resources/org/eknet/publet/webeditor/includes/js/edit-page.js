@@ -21,7 +21,8 @@
 $(function() {
 
   //delete confirmation
-  $('#confirmModal').modal({
+  var confirmModal = $('#confirmModal');
+  confirmModal.modal({
     keyboad: false,
     show: false
   });
@@ -29,10 +30,10 @@ $(function() {
     $('#confirmModal').modal('show');
     return false;
   });
-  $('#confirmModal .cancel').click(function() {
+  confirmModal.find('.cancel').click(function() {
     $('#confirmModal').modal('hide');
   });
-  $('#confirmModal .delete').click(function(event) {
+  confirmModal.find('.delete').click(function(event) {
     $(event.target).attr("disabled", "disabled").mask();
     window.location = $('#deleteFileButton').attr('href');
   });
@@ -41,12 +42,14 @@ $(function() {
   var quickHelp =
       "<strong>F11</strong> toggles fullscreen mode;<br/>" +
       "<strong>CTRL+F</strong> starts search<br/>" +
+      "<strong>SHIFT+CTRL+F</strong> starts search/replace<br/>" +
+      "<strong>SHIFT+CTRL+R</strong> replace all<br/>" +
       "<strong>CTRL+g</strong> next match<br/>" +
+      "<strong>SHIFT+CTRL+g</strong> previous match<br/>" +
       "<strong>CTRL+Z</strong> undo<br/>" +
       "<strong>CTRL+D</strong> delete line.<br/>" +
       "<strong>CTRL+[, CTRL+]</strong> ident more/less";
-  $('#editorHelpButton').attr("data-content", quickHelp);
-  $('[rel="popover"]').popover({ placement: 'bottom' });
+  $('#editorHelpButton').popover({ placement: 'top', content: quickHelp, html: true, title: 'Editor Help' });
   $('[rel="tooltip"]').tooltip({ placement: 'top' });
 
   //convenience function to mask an element
@@ -109,7 +112,8 @@ $(function() {
 
 
   //toggle codemirror or plain textarea
-  $('#toggleEditorButton').click(function() {
+  var toggleEditorButton = $('#toggleEditorButton');
+  toggleEditorButton.click(function() {
     var mode = getEditorMode();
     var extraKeys = {
       "F11": function(cm) {
@@ -123,18 +127,21 @@ $(function() {
       extraKeys["'>'"] = function(cm) { cm.closeTag(cm, '>'); };
       extraKeys["'/'"] = function(cm) { cm.closeTag(cm, '/'); };
     }
-    $('#editPage').codemirror('toggleEditor', {
+    var editPage = $('#editPage');
+    editPage.codemirror('toggleEditor', {
       mode: getEditorMode(),
       extraKeys: extraKeys
     });
-    if ($('#editPage').codemirror('active')) {
+    if (editPage.codemirror('active')) {
       $('#editorButtonBar').css('display', '');
+      $('#editorHelpButton').css('display', '');
     } else {
       $('#editorButtonBar').css('display', 'none');
+      $('#editorHelpButton').css('display', 'none');
     }
   });
   //use codemirror by default, of course ...
-  $('#toggleEditorButton').click();
+  toggleEditorButton.click();
 
   //listen for changes of the file type extension selection and change mode
   $('#extensionInput').change(function() {
