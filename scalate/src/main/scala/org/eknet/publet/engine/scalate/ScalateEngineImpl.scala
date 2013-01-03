@@ -137,10 +137,10 @@ class ScalateEngineImpl(val name: Symbol, val engine: TemplateEngine) extends Sc
 private class DownloadTemplateSource(path: Path, c: ContentResource) extends TemplateSource {
   private val created = System.currentTimeMillis()
 
-  def uri = path.withExt("ssp").asString
+  val uri = path.withExt("ssp").asString
 
   def inputStream = {
-    val p = path.withExt(c.contentType.extensions.head).segments.last
+    val p = c.name.fullName
     NodeContent(<p>Download: <a href={p}>{p}</a></p>, ContentType.ssp).inputStream
   }
 
@@ -151,7 +151,7 @@ private class DownloadTemplateSource(path: Path, c: ContentResource) extends Tem
 private class CodeTemplateSource(path: Path, c: ContentResource) extends TemplateSource {
   private val created = System.currentTimeMillis()
 
-  def uri = path.withExt("ssp").asString
+  val uri = path.withExt("ssp").asString
 
   def inputStream = {
     NodeContent(<pre><code>{c.contentAsString() }</code></pre>, ContentType.ssp).inputStream
@@ -164,7 +164,7 @@ private class CodeTemplateSource(path: Path, c: ContentResource) extends Templat
 private class ImageTemplateSource(path: Path, c: ContentResource) extends TemplateSource {
   private val created = System.currentTimeMillis()
 
-  def uri = path.withExt("ssp").asString
+  val uri = path.withExt("ssp").asString
 
   def inputStream = {
     NodeContent(<img src={ path.sibling(c.name.fullName).asString } alt={c.name.fullName}></img>, ContentType.ssp).inputStream
