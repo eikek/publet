@@ -38,7 +38,7 @@ import org.eknet.publet.ext.ResourceInfo
 @Singleton
 class CounterServiceImpl @Inject() (settings: Settings, dbprovider: GraphDbProvider, publet: Publet) extends CounterService with CounterManagerMBean {
 
-  private val ipBlacklist = new IpBlacklist(settings, (15, TimeUnit.HOURS))
+  private val ipBlacklist = new IpBlacklist(settings)
   private val urlBlacklist = new UrlBlacklist(settings)
   private val db = dbprovider.getDatabase("extdb")
   private implicit val graph = db.graph

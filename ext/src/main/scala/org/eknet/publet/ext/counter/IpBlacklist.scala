@@ -31,13 +31,22 @@ import com.google.common.eventbus.Subscribe
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 04.10.12 10:46
  */
-class IpBlacklist(m: StringMap, resolveIntervall: (Long, TimeUnit)) extends IpPropertyUtil {
+class IpBlacklist(m: StringMap) extends IpPropertyUtil {
 
   private val lock = new ReentrantReadWriteLock()
-  private val updateSpan = resolveIntervall._2.toMillis(resolveIntervall._1)
+  private val updateSpan = resolveInterval._2.toMillis(resolveInterval._1)
   private val nextUpdate = new AtomicLong(updateSpan + System.currentTimeMillis())
 
   private var ipcache = loadIps(m)
+
+  private def resolveInterval = {
+    try {
+      val hours = m("ext.counter.blacklistResolveInterval").getOrElse("15").toInt
+      (hours, TimeUnit.HOURS)
+    } catch {
+      case e: NumberFormatException => (15, TimeUnit.HOURS)
+    }
+  }
 
   private def loadIps(m: StringMap) = {
     nextUpdate.set(System.currentTimeMillis() + updateSpan)

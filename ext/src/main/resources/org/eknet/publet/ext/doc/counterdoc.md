@@ -17,7 +17,14 @@ be discarded from counting (maybe you don't want to count your own accesses).
 The key must start with `ext.counter.blacklist.` and appended with an ip address
 or a valid hostname. A value of `true` will black-list the ip, a value of `false`
 yields in counting accesses from this ip. If a hostname is given, it is re-resolved
-in certain intervals to its ip address.
+in certain intervals to its ip address. The default interval is 15 hours, and it
+can be overriden in `settings.properties` file:
+
+    ext.counter.blacklistResolveInterval=1
+
+The number is interpreted as _hour_. With the setting above, the hostnames are
+re-resolved every hour. If the value is non-negative, the re-resolving is never
+done. Invalid values will fallback to the default.
 
 #### Examples:
 
