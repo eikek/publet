@@ -9,7 +9,7 @@ object Resolvers {
 object Version {
   val blueprints = "2.2.0"
   val bouncyCastle = "1.46"
-  val ccodec = "1.5"
+  val ccodec = "1.7"
   val ccollections = "3.2.1"
   val cfileupload = "1.2.2"
   val cio = "2.2"
@@ -26,7 +26,7 @@ object Version {
   val milton = "2.2.3"
   val mimeUtil = "2.1.3"
   val orientdb = "1.3.0"
-  val scalate = "1.5.3"
+  val scalate = "1.6.1"
   val scalaTest = "2.0.M6-SNAP3"
   val scue = "0.2.0"
   val servlet = "3.0.1"
@@ -69,10 +69,10 @@ object Dependencies {
   val mimeUtil = "eu.medsea.mimeutil" % "mime-util" % Version.mimeUtil intransitive()
   val orientdb = "com.orientechnologies" % "orientdb-core" % Version.orientdb
   val scalaCompiler = "org.scala-lang" % "scala-compiler" % Version.scala
-  val scalateCore = "org.fusesource.scalate" % "scalate-core" % Version.scalate exclude("rhino", "js")
-  val scalateUtil = "org.fusesource.scalate" % "scalate-util" % Version.scalate exclude("rhino", "js")
-  val scalatePage = "org.fusesource.scalate" % "scalate-page" % Version.scalate exclude("rhino", "js")
-  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext" % Version.scalate exclude("rhino", "js")
+  val scalateCore = "org.fusesource.scalate" % "scalate-core_2.9" % Version.scalate exclude("rhino", "js")
+  val scalateUtil = "org.fusesource.scalate" % "scalate-util_2.9" % Version.scalate exclude("rhino", "js")
+  val scalatePage = "org.fusesource.scalate" % "scalate-page_2.9" % Version.scalate exclude("rhino", "js")
+  val scalateWikitext = "org.fusesource.scalate" % "scalate-wikitext_2.9" % Version.scalate exclude("rhino", "js")
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
   val scue = "org.eknet.scue" %% "scue" % Version.scue
   val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet
