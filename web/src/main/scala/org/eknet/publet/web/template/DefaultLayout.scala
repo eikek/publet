@@ -80,7 +80,7 @@ object DefaultLayout {
       .add(resource("mustache/mustache.js"))
 
     val jquery = Group("jquery")
-      .add(resource("jquery/jquery-1.8.2.min.js").noCompress)
+      .add(resource("jquery/jquery-1.9.1.min.js").noCompress)
       .add(resource("jquery/jquery.form.js"))
 
     val spin =  Group("spinjs").add(resource("spin/spin.min.js").noCompress)

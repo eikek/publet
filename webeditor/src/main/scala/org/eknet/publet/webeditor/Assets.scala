@@ -50,6 +50,7 @@ object Assets extends AssetCollection {
     .add(resource("codemirror/lib/util/search.js"))
     .add(resource("codemirror/lib/util/searchcursor.js"))
     .add(resource("codemirror/lib/util/match-highlighter.js"))
+    .add(resource("codemirror/lib/util/matchbrackets.js"))
     .add(resource("codemirror/lib/util/simple-hint.js"))
     .add(resource("codemirror/lib/util/simple-hint.css"))
     .add(resource("codemirror/lib/util/xml-hint.js"))
