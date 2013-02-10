@@ -20,8 +20,8 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.vfs.{Resource, Path}
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.{ClasspathContainer, MapContainer}
-import com.google.inject.{Inject, Singleton, Provides}
-import org.eknet.squaremail.{MailSender, DefaultMailSender, DefaultSessionFactory}
+import com.google.inject.{Scopes, Inject, Singleton, Provides}
+import org.eknet.squaremail.{SessionFactory, MailSender, DefaultMailSender, DefaultSessionFactory}
 import com.google.common.eventbus.Subscribe
 import org.eknet.publet.Publet
 import org.eknet.publet.web.guice.{AbstractPubletModule, PubletStartedEvent, PubletBinding}
@@ -55,20 +55,15 @@ class ExtraModule extends AbstractPubletModule with PubletBinding {
 
   def configure() {
     bind[ExtWebExtension].asEagerSingleton()
-
+    bind[MailSessionFactory]
+    bind[SessionFactory].to[MailSessionFactory]
     bindDocumentation(docResource("extrasdoc.md", "captcha-example.png", "captcha-example1.png", "downloadTemplate.png"))
   }
 
   private[this] def docResource(names: String*) = names.map("org/eknet/publet/ext/doc/"+ _).map(Resource.classpath(_)).toList
 
   @Provides@Singleton
-  def createDefaultMailer(config: Config): MailSender = {
-    val sessionFactory = new DefaultSessionFactory(
-      config("smtp.host").getOrElse("localhost"),
-      config("smtp.port").getOrElse("-1").toInt,
-      config("smtp.username").getOrElse(""),
-      config("smtp.password").getOrElse("").toCharArray)
-
+  def createDefaultMailer(sessionFactory: SessionFactory): MailSender = {
     new DefaultMailSender(sessionFactory)
   }
 
