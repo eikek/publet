@@ -43,8 +43,8 @@ object FileUploadHandler extends ScalaScript with Logging with ThumbnailUrlUtil 
         PubletWebContext.param("resource").map(Path(_))
           .flatMap(path => publet.rootContainer.lookup(path).map((path, _)))
           .collect({ case (p:Path, r: ContentResource) => (p, r)})
-          .map(t => render(toMap(t._1, t._2)))
-          .getOrElse(makeJson(Array()))
+          .map(t => makeJson(toMap(t._1, t._2)))
+          .getOrElse(makeJson(Map()))
       }
       case Method.post => {
         val files = PubletWebContext.uploads
@@ -56,7 +56,7 @@ object FileUploadHandler extends ScalaScript with Logging with ThumbnailUrlUtil 
           info("Uploading to "+ path.asString)
           (path, PubletWeb.publet.push(path, fi.getInputStream, Security.changeInfo(commitMsg)))
         }).map(t => toMap(t._1, t._2))
-        render(out)
+        makeJson(Map("files" -> out))
       }
       case Method.delete => {
         error("DELETE not implemented yet :(")
@@ -80,11 +80,4 @@ object FileUploadHandler extends ScalaScript with Logging with ThumbnailUrlUtil 
     map.toMap
   }
 
-  def render(value: Map[String, Any]) = {
-    makeJson(Array(value))
-  }
-
-  def render(values: Iterable[Map[String, Any]]) = {
-    makeJson(values)
-  }
 }

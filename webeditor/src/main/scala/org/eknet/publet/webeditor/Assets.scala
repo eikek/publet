@@ -92,7 +92,6 @@ object Assets extends AssetCollection {
     .add(resource("js/jquery.fileupload-fp.js"))
     .add(resource("js/jquery.fileupload-ui.js"))
     .add(resource("js/locale.js"))
-    .add(resource("js/main.js"))
     .require(jqueryIframeTransport.name, jqueryUiWidget.name,
               blueimpTmpl.name, blueimpLoadImage.name, DefaultLayout.Assets.jquery.name)
 
