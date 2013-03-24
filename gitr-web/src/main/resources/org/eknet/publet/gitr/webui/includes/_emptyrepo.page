@@ -1,6 +1,5 @@
 ---
 title: Gitr Web
-highlightTheme: magula
 
 --- name:content pipeline:jade
 =include("_gitrpagehead.jade")

@@ -1,6 +1,5 @@
 ---
 title: Gitr Web
-highlightTheme: magula
 
 --- name:head pipeline:jade
 :javascript
