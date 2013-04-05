@@ -36,11 +36,21 @@ class Boot(engine: TemplateEngine) extends Logging {
 
       def pygmentize(m: Matcher): String = Pygmentize.pygmentize(m.group(2), m.group(1))
 
+      def fencedCode(m: Matcher): String = {
+        val lang = Option(m.group(1)).filterNot(_.isEmpty)
+        val body = m.group(2)
+        lang match {
+          case Some(l) => """<pre><code class="%s">%s</code></pre>""".format(lang, body)
+          case None => """<pre>%s</pre>""".format(body)
+        }
+      }
+
       // add some macros to markdown.
       Markdown.macros :::= List(
         MacroDefinition( """\{filter::(.*?)\}(.*?)\{filter\}""", "s", filter, true),
         MacroDefinition( """\{pygmentize::(.*?)\}(.*?)\{pygmentize\}""", "s", pygmentize, true),
-        MacroDefinition( """\{pygmentize\_and\_compare::(.*?)\}(.*?)\{pygmentize\_and\_compare\}""", "s", pygmentize, true)
+        MacroDefinition( """\{pygmentize\_and\_compare::(.*?)\}(.*?)\{pygmentize\_and\_compare\}""", "s", pygmentize, true),
+        MacroDefinition( """```(.*?)\s(.*?)```""", "s", fencedCode, true)
         //        MacroDefinition("""\$\{project_version\}""", "", _ => project_version.toString, true),
         //        MacroDefinition("""\$\{project_name\}""", "", _ => project_name.toString, true),
         //        MacroDefinition("""\$\{project_id\}""", "", _ => project_id.toString, true)
