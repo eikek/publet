@@ -68,9 +68,13 @@ object Security extends Logging with PermissionBuilder {
    * @param message
    * @return
    */
-  def changeInfo(message: String) = user.map( u=> {
-    new ChangeInfo(u.get(UserProperty.fullName), u.get(UserProperty.email), message)
-  })
+  def changeInfo(message: String) = {
+    user.map( u=> {
+      new ChangeInfo(u.get(UserProperty.fullName), u.get(UserProperty.email), message)
+    }) orElse {
+      Some(new ChangeInfo(None, None, message))
+    }
+  }
 
   /**
    * Returns the username of the currently logged in user

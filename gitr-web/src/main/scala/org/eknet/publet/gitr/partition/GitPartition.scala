@@ -81,8 +81,8 @@ class GitPartition (val tandem: Tandem, val bus: EventBus, repoStore: DefaultRep
     val name = changeInfo.flatMap(_.name).getOrElse("Publet Git")
     val email = changeInfo.flatMap(_.email).getOrElse("no@none.com")
     val message = (changeInfo.map(_.message) match {
-      case Some(m) if (!m.isEmpty) => m
-      case _ => action
+      case Some(m) => action +" "+ c.name + " (by "+login+"): "+ m
+      case _ => action +" "+ c.name +" by "+ login
     }) + "\n\nresource: "+ c.name.fullName+"\nsubject: "+ login
 
     workTree.commit()
