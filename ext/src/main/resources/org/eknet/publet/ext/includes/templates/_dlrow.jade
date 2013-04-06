@@ -10,7 +10,8 @@ tr
       ="(" +ri.getSizeString(uri).getOrElse("") + ")"
   td
     =ri.getLastModifiedString(uri)
-  td 
+  td
     =ri.getChecksum(uri).getOrElse("")
-  td 
-    =ri.getAccessCount(uri)   
+  - if (Security.isAuthenticated)
+    td
+      =ri.getAccessCount(uri)

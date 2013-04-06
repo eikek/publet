@@ -23,16 +23,17 @@ br/
 - for (d <- folders) {
   - val dPath = toPath(d)
   - val name = d.name.name.takeWhile(_ != '/')
-  h2(id={ name })
-    img(src={ folderImagePath } height="30px" style="height: 30px;")
+  h4(id={ name })
+    img(src={ folderImagePath } height="20px" style="height: 20px;")
     =name
-    
+
   table.table
     thead
       th
       th uploaded
       th md5
-      th clicks
+      - if (Security.isAuthenticated)
+        th clicks
     tbody
       - for (r <- ti.filesWithoutExtensions(dPath, exclExtensions)) {
         - val uri = (dPath / r).asString
@@ -49,10 +50,11 @@ br/
     h2 /
   table.table.table-striped
     thead
-      th 
+      th
       th uploaded
       th md5
-      th clicks
+      - if (Security.isAuthenticated)
+        th clicks
     tbody
     - for (r <- rootfiles) {
       - val uri = (dir / r).asString
