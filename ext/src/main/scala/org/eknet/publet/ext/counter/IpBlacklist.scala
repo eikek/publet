@@ -32,24 +32,28 @@ import com.google.common.eventbus.Subscribe
  * @since 04.10.12 10:46
  */
 class IpBlacklist(m: StringMap) extends IpPropertyUtil {
-
+  private val defaultUpdateSpan = (15, TimeUnit.HOURS)
   private val lock = new ReentrantReadWriteLock()
-  private val updateSpan = resolveInterval._2.toMillis(resolveInterval._1)
-  private val nextUpdate = new AtomicLong(updateSpan + System.currentTimeMillis())
-
+  private val nextUpdate = new AtomicLong(getUpdateSpan + System.currentTimeMillis())
   private var ipcache = loadIps(m)
+
+  private def getUpdateSpan = resolveInterval._2.toMillis(resolveInterval._1)
 
   private def resolveInterval = {
     try {
       val hours = m("ext.counter.blacklistResolveInterval").getOrElse("15").toInt
-      (hours, TimeUnit.HOURS)
+      if (hours <= 0) {
+        defaultUpdateSpan
+      } else {
+        (hours, TimeUnit.HOURS)
+      }
     } catch {
-      case e: NumberFormatException => (15, TimeUnit.HOURS)
+      case e: NumberFormatException => defaultUpdateSpan
     }
   }
 
   private def loadIps(m: StringMap) = {
-    nextUpdate.set(System.currentTimeMillis() + updateSpan)
+    nextUpdate.set(System.currentTimeMillis() + getUpdateSpan)
     Map() ++ m.blacklistHostnames
       .map(name => name.resolveIp.map(_ -> name))
       .flatten

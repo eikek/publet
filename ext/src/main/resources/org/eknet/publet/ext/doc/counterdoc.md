@@ -23,8 +23,8 @@ can be overriden in `settings.properties` file:
     ext.counter.blacklistResolveInterval=1
 
 The number is interpreted as _hour_. With the setting above, the hostnames are
-re-resolved every hour. If the value is non-negative, the re-resolving is never
-done. Invalid values will fallback to the default.
+re-resolved every hour. If the value is negative, zero or not a number, it will
+fallback to the default.
 
 #### Examples:
 
