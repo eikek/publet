@@ -21,14 +21,14 @@ import org.eknet.publet.vfs.{Writeable, Path}
 import org.eknet.publet.Publet
 import java.util.concurrent
 import concurrent.ConcurrentHashMap
-import org.apache.shiro.crypto.hash.Md5Hash
 import grizzled.slf4j.Logging
-import org.apache.shiro.util.ByteSource
 import org.eknet.publet.web.asset.Kind.KindVal
 import Path._
-import java.io.File
+import java.io.{InputStream, File}
 import com.google.common.eventbus.EventBus
 import com.google.common.base.{Suppliers, Supplier}
+import java.security.{MessageDigest, DigestInputStream}
+import javax.xml.bind.DatatypeConverter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -60,7 +60,7 @@ class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends 
         val sources = getSources(group, path, kind)
         val bytes = ConcatInputStream(sources.map(_.inputStream))
         // create filename
-        val fileName = new Md5Hash(ByteSource.Util.bytes(bytes)).toHex + "."+ kind.toString
+        val fileName = hashStream(bytes) + "."+ kind.toString
         // if file does not exists, create it
         assetContainer.lookupTempFile(fileName) getOrElse {
           val target = assetContainer.createTempFile(fileName)
@@ -71,6 +71,13 @@ class DefaultAssetManager(publet: Publet, bus: EventBus, tempDir: File) extends 
     })
     val task = fileCache.putIfAbsent(Key(group, path, kind), newTask)
     if (task != null) task.get() else newTask.get()
+  }
+
+  private[this] def hashStream(in: InputStream) = {
+    val mdin = new DigestInputStream(in, MessageDigest.getInstance("MD5"))
+    while (mdin.read() != -1) {}
+    mdin.close()
+    DatatypeConverter.printHexBinary(mdin.getMessageDigest.digest()).toLowerCase
   }
 
   def getResources(group: Iterable[String], path: Option[Path], kind: KindVal) = {

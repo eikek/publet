@@ -10,7 +10,7 @@ import org.eknet.publet.auth.store.UserProperty
 import org.eknet.publet.gitr.partition.GitFile
 import java.io.{BufferedInputStream, InputStream}
 import java.security.{DigestInputStream, MessageDigest}
-import org.apache.shiro.codec.Hex
+import javax.xml.bind.DatatypeConverter
 
 /**
  * A helper class that defines method for retrieving information to
@@ -230,6 +230,6 @@ object ResourceInfo {
     val mdin = new BufferedInputStream(new DigestInputStream(in, md))
     while (mdin.read() != -1) {}
     mdin.close()
-    Hex.encodeToString(md.digest())
+    DatatypeConverter.printHexBinary(md.digest())
   }
 }

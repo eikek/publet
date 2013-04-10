@@ -17,7 +17,7 @@
 package org.eknet.publet.gitr.webui.scripts
 
 import java.net.URL
-import org.apache.shiro.crypto.hash.Md5Hash
+import com.google.common.hash.Hashing
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,7 +29,7 @@ object Gravatar {
   private val secureBase = "https://secure.gravatar.com/avatar/"
 
   def imageUrl(secure: Boolean)(email: String, extension: Option[String] = None, size: Option[Int] = None, default: Option[Defaults.Value] = None): URL = {
-    val md5 = new Md5Hash(email.trim.toLowerCase).toHex
+    val md5 = Hashing.md5().hashString(email.trim.toLowerCase).toString
     val s = size map  { s => "s="+s }
     val d = default map { d => "d="+d.toString }
     val opts = List(s, d) collect ({ case o if (o.isDefined) => o.get.toString }) mkString ("&")
