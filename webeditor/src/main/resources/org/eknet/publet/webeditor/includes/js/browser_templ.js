@@ -24,7 +24,7 @@ $(function () {
       fupload.each(function () {
         var that = this;
         $.getJSON(this.action + "?resource=" + res, function (result) {
-          if (result) {
+          if (result && result.name) {
             $(that).fileupload('option', 'done')
                 .call(that, null, {result: { files: [result]} });
           }
