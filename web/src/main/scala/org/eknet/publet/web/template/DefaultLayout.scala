@@ -92,6 +92,7 @@ object DefaultLayout {
 
     val publet = Group("publet")
       .add(resource("publet/js/publet.js"))
+      .add(resource("publet/js/jquery.feedback-message.js"))
       .require(jquery.name)
 
     val highlightjs = Group("highlightjs")
