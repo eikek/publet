@@ -72,7 +72,7 @@ class CodeWebappConfigurer(pluginDir: Option[File]) extends WebAppConfigurer {
     postProcessWebAppContext(webapp)
 
     //the web.xml
-    val sch = new ServletContextHandler(server, "/", ServletContextHandler.NO_SECURITY)
+    val sch = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS)
     sch.setBaseResource(baseResource)
     sch.setSessionHandler(new SessionHandler())
     sch.addFilter(classOf[GuiceFilter], "/*", util.EnumSet.of(DispatcherType.REQUEST))
