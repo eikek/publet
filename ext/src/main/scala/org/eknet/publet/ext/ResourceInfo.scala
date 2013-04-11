@@ -230,6 +230,6 @@ object ResourceInfo {
     val mdin = new BufferedInputStream(new DigestInputStream(in, md))
     while (mdin.read() != -1) {}
     mdin.close()
-    DatatypeConverter.printHexBinary(md.digest())
+    DatatypeConverter.printHexBinary(md.digest()).toLowerCase
   }
 }
