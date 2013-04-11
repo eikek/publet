@@ -43,7 +43,7 @@ class DefaultLayout @Inject() (publet: Publet, assetMgr: AssetManager, scalateEn
     assetMgr setup Assets.mustache
 
     //jquery
-    assetMgr setup Assets.jquery
+    assetMgr setup (Assets.jquery, Assets.jqueryMigrate)
 
     //highlightJs
     publet.mountManager.mount("/publet/highlightjs/".p,
@@ -82,6 +82,10 @@ object DefaultLayout {
     val jquery = Group("jquery")
       .add(resource("jquery/jquery-1.9.1.min.js").noCompress)
       .add(resource("jquery/jquery.form.js"))
+
+    val jqueryMigrate = Group("jquery.migrate")
+      .add(resource("jquery/jquery-migrate-1.1.1.min.js").noCompress)
+      .require(jquery.name)
 
     val spin =  Group("spinjs").add(resource("spin/spin.min.js").noCompress)
 
