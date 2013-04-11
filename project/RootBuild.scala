@@ -32,7 +32,7 @@ object Version {
   val servlet = "3.0.1"
   val shiro = "1.2.1"
   val slf4j = "1.7.2"
-  val squaremail = "1.0.2"
+  val squaremail = "1.0.3"
   val scala = "2.9.2"
   val yuicompressor = "2.4.7"
 }
