@@ -76,11 +76,14 @@ class AssetContainer(tempDir: File, bus: EventBus) extends MountManager with Roo
   def createTempFile(name: String) = createResource(internalTemp(name))
 
   private def defaultFolder(r: AssetResource) = {
-    r.name.targetType match {
-      case ContentType.javascript => "js"
-      case ContentType.css => "css"
-      case m if (m.mime._1 == "image") => "img"
-      case _ => "other"
+    r.target match {
+      case Some(path) => path
+      case None => r.name.targetType match {
+        case ContentType.javascript => "js"
+        case ContentType.css => "css"
+        case m if (m.mime._1 == "image") => "img"
+        case _ => "other"
+      }
     }
   }
 }
