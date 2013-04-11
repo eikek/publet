@@ -40,7 +40,7 @@ class Boot(engine: TemplateEngine) extends Logging {
         val lang = Option(m.group(1)).filterNot(_.isEmpty)
         val body = m.group(2)
         lang match {
-          case Some(l) => """<pre><code class="%s">%s</code></pre>""".format(lang, body)
+          case Some(l) => """<pre><code class="%s">%s</code></pre>""".format(l, body)
           case None => """<pre>%s</pre>""".format(body)
         }
       }
