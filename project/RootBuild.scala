@@ -120,7 +120,7 @@ object RootBuild extends Build {
   ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)  ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   override lazy val settings = super.settings ++ Seq(
-    version := "1.1.0",
+    version := "1.2.0-SNAPSHOT",
     organization := "org.eknet.publet",
     scalaVersion := Version.scala,
     publishTo := Some("eknet-maven2" at "https://eknet.org/maven2"),
