@@ -67,6 +67,7 @@
             lineNumbers: true,
             tabSize: 2,
             matchBrackets: true,
+            viewportMargin: Infinity,
             onCursorActivity: function(editor) {
               editor.matchHighlight("CodeMirror-matchhighlight");
               var data = $(editor.getTextArea()).data('codemirror');

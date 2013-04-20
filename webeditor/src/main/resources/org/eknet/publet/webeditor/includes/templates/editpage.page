@@ -3,6 +3,12 @@ title: Edit Page
 searchForSidebar: false
 assetGroups: publet.webeditor.editpage
 
+--- name:head pipeline:jade
+:css
+  .CodeMirror, .cm-s-default {
+    height: 100%;
+  }
+
 --- name:content pipeline:jade
 - import org.eknet.publet.vfs.Path
 - val ctx = PubletWebContext

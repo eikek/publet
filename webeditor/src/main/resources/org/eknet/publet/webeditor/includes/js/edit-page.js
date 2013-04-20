@@ -74,6 +74,7 @@ $(function() {
     var filetype = $('#extensionInput').val();
     var mode = null;
     if (filetype === "scala") mode = "clike";
+    if (filetype === "properties") mode = "properties";
     if (filetype === "html" || filetype === "ssp" || filetype === "htm") mode = "htmlmixed";
     if (filetype === "css") mode = "css";
     if (filetype === "js") mode = "javascript";
@@ -90,15 +91,10 @@ $(function() {
     },
     success: function(data, status, xhr, form) {
       _unmask(form);
-      var closeIcon = ' <a class="close" data-dismiss="alert" href="#">×</a>';
-      if (data.success) {
-        $('#response').html('<div class="alert alert-success">'+data.message + closeIcon + '</div>');
-        if (data.lastMod) {
-          $('#lastHead').attr('value', data.lastMod);
-        }
-      } else {
-        $('#response').html('<div class="alert alert-error">' +data.message + closeIcon + '</div>');
-      }
+      $('#response').feedbackMessage({
+        message: data.message,
+        cssClass: data.success ? 'alert alert-success' : 'alert alert-error'
+      });
     },
     dataType: 'json'
   };
@@ -123,13 +119,10 @@ $(function() {
         $('#editPage').codemirror('fullscreen', false);
       }
     };
-    if (mode === "xml" || mode === "html") {
-      extraKeys["'>'"] = function(cm) { cm.closeTag(cm, '>'); };
-      extraKeys["'/'"] = function(cm) { cm.closeTag(cm, '/'); };
-    }
     var editPage = $('#editPage');
     editPage.codemirror('toggleEditor', {
       mode: getEditorMode(),
+      autoCloseTags: true,
       extraKeys: extraKeys
     });
     if (editPage.codemirror('active')) {
