@@ -30,7 +30,10 @@ case class CommitInfo(name: String, path: String, container: Boolean, author: Pe
 
   def gravatarUrl = Gravatar.imageUrl(PubletWebContext.urlBase.startsWith("https"))(author.getEmailAddress).toString
 
-  def getAge = (Duration(TimeUnit.SECONDS.toMillis(commitTime)).distanceAgo)
+  def getAge = {
+    import Duration._
+    commitTime.seconds.untilNow.ageString + " ago"
+  }
 
   def getCommitDate = new JDate(TimeUnit.SECONDS.toMillis(commitTime))
 
