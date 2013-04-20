@@ -2746,7 +2746,13 @@ window.CodeMirror = (function() {
   // 'wrap f in an operation, performed on its `this` parameter'
 
   CodeMirror.prototype = {
-    focus: function() {window.focus(); focusInput(this); onFocus(this); fastPoll(this);},
+    focus: function() {
+      if (window.focus) {
+        //chromium does not provide a focus method :( this hack seems to work
+        window.focus();
+      }
+      focusInput(this); onFocus(this); fastPoll(this);
+    },
 
     setOption: function(option, value) {
       var options = this.options, old = options[option];
