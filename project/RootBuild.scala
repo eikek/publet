@@ -27,7 +27,7 @@ object Version {
   val mimeUtil = "2.1.3"
   val orientdb = "1.3.0"
   val scalate = "1.6.1"
-  val scalaTest = "2.0.M6-SNAP3"
+  val scalaTest = "1.9.1"
   val scue = "0.2.0"
   val servlet = "3.0.1"
   val shiro = "1.2.1"
@@ -120,7 +120,7 @@ object RootBuild extends Build {
   ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)  ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
   override lazy val settings = super.settings ++ Seq(
-    version := "1.2.0-SNAPSHOT",
+    version := "1.1.1-SNAPSHOT",
     organization := "org.eknet.publet",
     scalaVersion := Version.scala,
     publishTo := Some("eknet-maven2" at "https://eknet.org/maven2"),
