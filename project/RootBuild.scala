@@ -16,7 +16,7 @@ object Version {
   val colt = "1.2.0"
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
   val jdom = "1.1"
-  val jgit = "2.1.0.201209190230-r"
+  val jgit = "2.3.1.201302201838-r"
   val jetty = "8.1.8.v20121106"
   val googleClosureCompiler = "rr2079.1"
   val grizzled = "0.6.9"
