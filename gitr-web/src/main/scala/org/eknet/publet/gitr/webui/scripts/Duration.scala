@@ -50,7 +50,11 @@ object Duration {
 
     private lazy val ageStream = units.toStream.map(u => u -> in(u))
     lazy val age = ageStream.find(t => t._2 > 0).getOrElse((unit, number))
-    lazy val ageString = age._2 + " " + age._1.name+ (if (age._2 > 1) "s" else "")
+    lazy val ageString = age._1 match {
+      case Millis => "Moments ago"
+      case _ => age._2 + " " + age._1.name+ (if (age._2 > 1) "s" else "")
+    }
+
 
     def until(nwu: NumberWithUnit) = NumberWithUnit(nwu.inMillis - this.inMillis, Millis)
     def untilNow = NumberWithUnit(System.currentTimeMillis() - this.inMillis)
