@@ -107,7 +107,7 @@ title: Gitr Repository Admin
 
     $('#checkDelete').on('click', function(e) {
       var cb = $(e.target);
-      if (cb.attr('checked')) {
+      if (cb.prop('checked')) {
         $('#deleteRepoButton').removeAttr("disabled");
       } else {
         $('#deleteRepoButton').attr("disabled", "disabled");
