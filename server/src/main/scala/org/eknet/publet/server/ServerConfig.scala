@@ -45,7 +45,7 @@ trait ServerConfig {
   def keystorePath: String
 
   /**
-   * The password for the keystore.
+   * The password for the keystore. The default is 'secret'
    *
    * @return
    */
@@ -113,7 +113,6 @@ object ServerConfig {
   val propertyKeystorePath = "publet.server.keystorePath"
   val propertyKeystorePassword = "publet.server.keystorePassword"
   val propertyShutdownPort = "publet.server.shutdownPort"
-  val propertyAjpPort = "publet.server.ajpPort"
   val propertyBindAddress = "publet.server.bindAddress"
   val propertySslBindAddress = "publet.server.secureBindAddress"
   val propertyContextPath = "publet.server.contextPath"
@@ -127,7 +126,7 @@ class DefaultConfig extends ServerConfig {
   private var _port: Option[Int] = None
   private var _securePort: Option[Int] = None
   private var _keystorePath = ""
-  private var _keystorePassword = ""
+  private var _keystorePassword = "secret"
   private var _shutdownPort = 8099
   private var _bindAddress: Option[String] = None
   private var _sslBindAddress: Option[String] = None

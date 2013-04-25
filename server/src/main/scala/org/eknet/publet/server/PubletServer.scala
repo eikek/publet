@@ -51,11 +51,11 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
     server setStopTimeout (config.gracefulShutdownTimeout)
     server setStopAtShutdown true
 
-    config.port map (port => { server addConnector (createConnector(server, httpconfig, port)) })
-    config.securePort map (port => {
-      val conn = createSslConnector(server, httpconfig, port, config.keystorePath, config.keystorePassword)
-      server.addConnector(conn)
-    })
+    val connectors = List(
+      config.securePort.map(port => createSslConnector(server, httpconfig, port)),
+      config.port.map(port => createConnector(server, httpconfig, port))
+    ).flatten
+    server.setConnectors(connectors.toArray)
 
     //configure the webapp
     setter.configure(server, config)
@@ -98,29 +98,31 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
     sc
   }
 
-  def createSslConnector(server: Server, httpc: HttpConfiguration, port: Int, keystorePath: String, password: String): Connector = {
-    info(">>> Creating ssl connector for port "+ port + "; keystore="+keystorePath+"; bind="+config.sslBindAddress)
+  def createSslConnector(server: Server, httpc: HttpConfiguration, port: Int): Connector = {
+    info(">>> Creating ssl connector for port "+ port + "; keystore="+config.keystorePath+"; bind="+config.sslBindAddress)
+    httpc.setSecureScheme("https")
+    httpc.setSecurePort(port)
     val fac = new SslContextFactory
     val etcStore = file("etc"/"keystore.ks")
-    if (keystorePath.isEmpty) {
+    if (config.keystorePath.isEmpty) {
       fac.setKeyStorePath(etcStore.getAbsolutePath)
       if (!etcStore.exists()) {
+        etcStore.getParentFile.mkdirs()
         info(">>> Generating self-signed certificate for localhost...")
-        MakeCertificate.generateSelfSignedCertificate("localhost", etcStore, password)
+        MakeCertificate.generateSelfSignedCertificate("localhost", etcStore, config.keystorePassword)
       }
     } else {
-      fac.setKeyStorePath(keystorePath)
+      fac.setKeyStorePath(config.keystorePath)
     }
-    fac.setKeyStorePassword(password)
+    fac.setKeyStorePassword(config.keystorePassword)
 
     val https = new HttpConfiguration(httpc)
     https.addCustomizer(new SecureRequestCustomizer)
 
     val sc = new ServerConnector(server, new SslConnectionFactory(fac, "http/1.1"), new HttpConnectionFactory(https))
     sc.setPort(port)
-    sc.setSoLingerTime(-1)
-    sc.setIdleTimeout(30000)
-    fac.setRenegotiationAllowed(true) //currently publet required java 1.7
+    sc.setIdleTimeout(500000)
+    fac.setRenegotiationAllowed(true)
     config.sslBindAddress map (sc.setHost(_))
     sc
   }
