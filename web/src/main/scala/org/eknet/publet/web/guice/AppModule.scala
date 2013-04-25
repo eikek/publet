@@ -98,7 +98,6 @@ class AppModule(servletContext: ServletContext) extends ServletModule with Puble
 
     addInjectionListener(Matchers.any(), injectee => eventBus.register(injectee))
 
-    eventBus.register(PubletWeb)
     bind[Settings].in(Scopes.SINGLETON)
 
     install(new AuthModule)

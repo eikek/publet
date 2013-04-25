@@ -61,7 +61,7 @@ class CodeWebappConfigurer(pluginDir: Option[File]) extends WebAppConfigurer {
     webapp.setBaseResource(baseResource)
     val sessionManager = new HashSessionManager()
     sessionManager.setHttpOnly(true)
-    sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.ajpPort.isEmpty && config.port.isEmpty)
+    sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.port.isEmpty)
     webapp.getSessionHandler.setSessionManager(sessionManager)
     pluginDir.orElse(file("plugins").asFileIfPresent).foreach(dir => {
       entries(dir, f => f !=null && f.isFile).map(_.getAbsolutePath) match {

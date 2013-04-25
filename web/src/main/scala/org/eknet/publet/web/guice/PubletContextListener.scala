@@ -19,7 +19,7 @@ package org.eknet.publet.web.guice
 import javax.servlet.{ServletContext, ServletContextEvent}
 import org.eknet.publet.web.{RunMode, Config}
 import grizzled.slf4j.Logging
-import org.eknet.publet.web.util.AppSignature
+import org.eknet.publet.web.util.{PubletWeb, AppSignature}
 import com.google.inject.servlet.GuiceServletContextListener
 import com.google.inject._
 import ref.WeakReference
@@ -57,7 +57,9 @@ class PubletContextListener extends GuiceServletContextListener with Logging {
       if (config.mode == RunMode.development) {
         info("\n"+ ("-" * 75) + "\n !!! Publet is running in DEVELOPMENT Mode  !!!!\n" + ("-" * 75))
       }
-      bus.post(new PubletStartedEvent(sce.getServletContext))
+      val event = new PubletStartedEvent(sce.getServletContext)
+      PubletWeb.initialize(event)
+      bus.post(event)
       info(">>> publet initialized.\n")
     }
     catch {
@@ -67,7 +69,9 @@ class PubletContextListener extends GuiceServletContextListener with Logging {
 
   override def contextDestroyed(sce: ServletContextEvent) {
     val bus = findInjector.getInstance(classOf[EventBus])
-    bus.post(new PubletShutdownEvent(sce.getServletContext))
+    val event = new PubletShutdownEvent(sce.getServletContext)
+    bus.post(event)
+    PubletWeb.destroy(event)
     super.contextDestroyed(sce)
     this.sc.clear()
   }

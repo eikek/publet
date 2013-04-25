@@ -17,13 +17,13 @@ object Version {
   val findbugs = "1.3.9" //required for guava: https://groups.google.com/d/topic/guava-discuss/LV0oLNFpnAU/discussion
   val jdom = "1.1"
   val jgit = "2.3.1.201302201838-r"
-  val jetty = "8.1.8.v20121106"
+  val jetty = "9.0.2.v20130417"
   val googleClosureCompiler = "rr2079.1"
   val grizzled = "0.6.9"
-  val guava = "13.0.1"
+  val guava = "14.0.1"
   val guice = "3.0"
-  val logback = "1.0.9"
-  val milton = "2.2.3"
+  val logback = "1.0.11"
+  val milton = "2.4.2.7"
   val mimeUtil = "2.1.3"
   val orientdb = "1.3.0"
   val scalate = "1.6.1"
@@ -53,7 +53,6 @@ object Dependencies {
   val cglib = "cglib" % "cglib" % "2.2.2"
   val guiceServlet = "com.google.inject.extensions" % "guice-servlet" % Version.guice
   val guiceMultibindings = "com.google.inject.extensions" % "guice-multibindings" % Version.guice
-  val jettyAjp = "org.eclipse.jetty" % "jetty-ajp" % Version.jetty
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container"
   val jettyServer = "org.eclipse.jetty" % "jetty-webapp" % Version.jetty
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % Version.jgit
@@ -468,7 +467,7 @@ object Server extends Build {
     libraryDependencies ++= deps
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-  val deps = Seq(slf4jApi, grizzledSlf4j, jettyServer, jettyAjp, logbackClassic, bouncyCastleProv, bouncyCastleMail)
+  val deps = Seq(slf4jApi, grizzledSlf4j, jettyServer, logbackClassic, bouncyCastleProv, bouncyCastleMail)
 }
 
 object App extends Build {

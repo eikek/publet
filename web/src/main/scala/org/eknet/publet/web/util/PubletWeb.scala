@@ -66,13 +66,11 @@ object PubletWeb extends LookupSquire with Logging {
    * Initializes the web app
    * @param sce
    */
-  @Subscribe
   def initialize(sce: PubletStartedEvent) {
     this.servletContextI = new WeakReference[ServletContext](sce.sc)
   }
 
 
-  @Subscribe
   def destroy(sce: PubletShutdownEvent) {
     this.servletContextI.clear()
     this.servletContextI = null

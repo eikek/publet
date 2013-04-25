@@ -65,7 +65,7 @@ object ZipFileConfigurer extends WebAppConfigurer {
     }
     val sessionManager = new HashSessionManager()
     sessionManager.setHttpOnly(true)
-    sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.ajpPort.isEmpty && config.port.isEmpty)
+    sessionManager.setSecureRequestOnly(config.securePort.isDefined && config.port.isEmpty)
     webapp.getSessionHandler.setSessionManager(sessionManager)
 
     server.setHandler(webapp)

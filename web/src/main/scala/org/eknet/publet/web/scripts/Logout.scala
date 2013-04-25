@@ -33,9 +33,11 @@ object Logout extends ScalaScript {
       Security.subject.logout()
     }
     PubletWebContext.param("redirect") match {
-      case Some(uri) => PubletWebContext.redirect(uri)
-      case _ =>
+      case Some(uri) => {
+        PubletWebContext.redirect(uri)
+        None
+      }
+      case _ => makeJson(Map("success"->true, "message"->"Logged out."))
     }
-    makeJson(Map("success"->true, "message"->"Logged out."))
   }
 }

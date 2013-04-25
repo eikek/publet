@@ -16,14 +16,11 @@
 
 package org.eknet.publet.server
 
-import org.eclipse.jetty.server.{Connector, Server}
-import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.server.{SslConnectionFactory, HttpConnectionFactory, ServerConnector, SecureRequestCustomizer, HttpConfiguration, Connector, Server}
 import grizzled.slf4j.Logging
 import java.io.File
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import org.eclipse.jetty.util.ssl.SslContextFactory
-import org.eclipse.jetty.ajp.Ajp13SocketConnector
 import FileHelper._
 import org.eclipse.jetty.util.component.LifeCycle
 
@@ -46,18 +43,19 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
   System.setProperty("publet.standalone", "true")
 
   val server = {
-    val server = new Server
-    server setGracefulShutdown (config.gracefulShutdownTimeout)
-    server setSendServerVersion false
-    server setSendDateHeader true
+    val server = new Server(new QueuedThreadPool(config.serverThreads))
+    val httpconfig = new HttpConfiguration()
+    httpconfig.setSendDateHeader(true)
+    httpconfig.setSendServerVersion(false)
+
+    server setStopTimeout (config.gracefulShutdownTimeout)
     server setStopAtShutdown true
 
-    config.port map (port => { server addConnector (createConnector(port)) })
+    config.port map (port => { server addConnector (createConnector(server, httpconfig, port)) })
     config.securePort map (port => {
-      val conn = createSslConnector(port, config.keystorePath, config.keystorePassword)
+      val conn = createSslConnector(server, httpconfig, port, config.keystorePath, config.keystorePassword)
       server.addConnector(conn)
     })
-    config.ajpPort map (port => server.addConnector(createAjpConnector(port)))
 
     //configure the webapp
     setter.configure(server, config)
@@ -88,18 +86,19 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
     server.removeLifeCycleListener(listener)
   }
 
-  def createConnector(port: Int): Connector = {
+  def createConnector(server: Server, httpc: HttpConfiguration, port: Int): Connector = {
     info(">>> Creating http connector for port "+ port+"; bind="+config.bindAddress)
-    val conn = new SelectChannelConnector
-    conn.setSoLingerTime(-1)
-    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
-    conn.setPort(port)
-    conn.setMaxIdleTime(30000)
-    config.bindAddress map (conn.setHost(_))
-    conn
+    val sc = new ServerConnector(server, new HttpConnectionFactory(httpc))
+    sc.setPort(port)
+
+    sc.setSoLingerTime(-1)
+    sc.setIdleTimeout(30000)
+    config.bindAddress map (sc.setHost(_))
+
+    sc
   }
 
-  def createSslConnector(port: Int, keystorePath: String, password: String): Connector = {
+  def createSslConnector(server: Server, httpc: HttpConfiguration, port: Int, keystorePath: String, password: String): Connector = {
     info(">>> Creating ssl connector for port "+ port + "; keystore="+keystorePath+"; bind="+config.sslBindAddress)
     val fac = new SslContextFactory
     val etcStore = file("etc"/"keystore.ks")
@@ -113,25 +112,18 @@ class PubletServer(config: ServerConfig, setter: WebAppConfigurer) extends Loggi
       fac.setKeyStorePath(keystorePath)
     }
     fac.setKeyStorePassword(password)
-    fac.setAllowRenegotiate(true) //currently publet required java 1.7
 
-    val conn = new SslSelectChannelConnector(fac)
-    conn.setSoLingerTime(-1)
-    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
-    conn.setMaxIdleTime(30000)
-    conn.setPort(port)
-    config.sslBindAddress map (conn.setHost(_))
-    conn
+    val https = new HttpConfiguration(httpc)
+    https.addCustomizer(new SecureRequestCustomizer)
+
+    val sc = new ServerConnector(server, new SslConnectionFactory(fac, "http/1.1"), new HttpConnectionFactory(https))
+    sc.setPort(port)
+    sc.setSoLingerTime(-1)
+    sc.setIdleTimeout(30000)
+    fac.setRenegotiationAllowed(true) //currently publet required java 1.7
+    config.sslBindAddress map (sc.setHost(_))
+    sc
   }
-
-  def createAjpConnector(port: Int): Connector = {
-    info(">>> Creating AJP connector for port: "+ port)
-    val conn = new Ajp13SocketConnector
-    conn.setThreadPool(new QueuedThreadPool(config.connectorThreads))
-    conn.setPort(port)
-    conn
-  }
-
 
   private def file(path: FileHelper): File = (config.workingDirectory / path).asFile
 
