@@ -42,7 +42,7 @@ object PushContents extends ScalaScript with Logging {
         try {
           delete(Path(path))
           ctx.redirect(ctx.urlOf(EditorPaths.editHtmlPage.asString+"?resource="+path))
-          notify(success = true, msg = "File deleted!")
+          None
         } catch {
           case e:Exception => RenderUtils.renderMessage("Error", "Error while deleting.", "error")
         }

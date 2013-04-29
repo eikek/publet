@@ -30,9 +30,8 @@ $(function() {
             uri = uri +"?noLayout"
         }
         $.get(uri, function(data) {
-            jel.empty();
             jel.removeAttr("p:ref");
-            $(data).appendTo(jel);
+            jel.html(data);
         });
     });
 });
