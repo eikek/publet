@@ -300,22 +300,6 @@ object GitrWeb extends Build {
 
 }
 
-object Webdav extends Build {
-
-  lazy val module = Project(
-    id = "webdav",
-    base = file("webdav"),
-    settings = buildProperties
-  ) dependsOn Web.module
-
-  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
-    name := "publet-webdav",
-    libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
-
-  val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
-}
-
 object WebEditor extends Build {
 
   lazy val module = Project(
@@ -339,7 +323,7 @@ object Ext extends Build {
     id = "ext",
     base = file("ext"),
     settings = buildProperties
-  ) dependsOn (Publet.module, Web.module, GitrWeb.module, Webdav.module)
+  ) dependsOn (Publet.module, Web.module, GitrWeb.module)
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
@@ -482,4 +466,20 @@ object App extends Build {
     name := "publet-app"
   ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
+}
+
+object Webdav extends Build {
+
+  lazy val module = Project(
+    id = "webdav",
+    base = file("webdav"),
+    settings = buildProperties
+  ) dependsOn (Web.module, Ext.module)
+
+  val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
+    name := "publet-webdav",
+    libraryDependencies ++= deps
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+
+  val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
 }

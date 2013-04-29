@@ -111,3 +111,18 @@ The following clients seem to work:
 * Windows XP (using "network folder")
 * cadaver (Linux command line client)
 * `mvn deploy` and `sbt publish` ;-)
+
+
+## Directory Listing
+
+The browser can be pointed to webdav enabled paths. If a file is requested, it
+is streamed to the client as a regular download. The contents of a directory are
+listed by default. A template is used to wrap the listing into the look&feel of
+the configured layout template.
+
+You can specify a custom template, by dropping it into the special location
+
+    .allIncludes/_webdav-directory-listing.jade
+
+while the template can be of any type -- `jade` is not required. If such template
+is present, it will be used instead of the default template.

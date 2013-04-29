@@ -18,11 +18,15 @@ package org.eknet.publet.webdav
 
 import javax.servlet.http.HttpServletRequest
 import org.eknet.publet.web.filter._
-import org.eknet.publet.web.{ReqUtils, PubletRequestWrapper}
+import org.eknet.publet.web.{WebExtension, ReqUtils}
 import com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.req.{SuperFilter, RequestHandlerFactory}
 import RequestHandlerFactory._
 import org.eknet.publet.Publet
+import org.eknet.publet.web.guice.PubletStartedEvent
+import com.google.common.eventbus.Subscribe
+import org.eknet.publet.vfs.util.ClasspathContainer
+import org.eknet.publet.vfs.Path
 
 /**
  * Creates a filter chain to handle webdav requests.
@@ -31,7 +35,7 @@ import org.eknet.publet.Publet
  * @since 27.09.12 15:35
  */
 @Singleton
-class WebdavHandlerFactory @Inject() (publet: Publet) extends RequestHandlerFactory {
+class WebdavHandlerFactory @Inject() (webext: java.util.Set[WebExtension], publet: Publet) extends RequestHandlerFactory {
 
   def getApplicableScore(req: HttpServletRequest) = {
     val requtil = new ReqUtils(req) with WebdavRequestUtil
@@ -42,7 +46,13 @@ class WebdavHandlerFactory @Inject() (publet: Publet) extends RequestHandlerFact
     Filters.webContext,
     Filters.authc,
     Filters.exceptionHandler,
+    Filters.extensionRequest(webext),
     new WebdavFilter(publet)
   ))
 
+  @Subscribe
+  def mountDirectoryListingTemplate(e: PubletStartedEvent) {
+    val c = new ClasspathContainer(base = "/org/eknet/publet/webdav/templates")
+    publet.mountManager.mount(Path("/publet/webdav/listing/"), c)
+  }
 }

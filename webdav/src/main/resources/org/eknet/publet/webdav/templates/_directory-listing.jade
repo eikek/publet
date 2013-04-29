@@ -1,0 +1,44 @@
+=setAttribute("title", Some("Listing"))
+
+- import org.eknet.publet.ext.TreeInfo
+- import org.eknet.publet.ext.ResourceInfo
+- import org.eknet.publet.vfs.Path
+-@val directory: Path = Path(PubletWebContext.requestUri).copy(directory=true)
+-@val root: Option[Path] = None
+-
+  val isroot = {
+    root.map(rp => rp.size == directory.size) getOrElse(
+      PubletWeb.publet.mountManager.resolveMount(directory) match {
+        case Some((p, _)) if (p.size == directory.size) => true
+        case _ => false
+      }
+    )
+  }
+
+.page-header
+  h3 #{directory.asString}
+
+table.table.table-hover.table-condensed
+  thead
+    tr
+      th Name
+      th Size
+      - if (Security.isAuthenticated)
+        th Clicks
+  tbody
+    - if (! isroot)
+      tr
+        td
+          a(href="../") ..
+        td
+        - if (Security.isAuthenticated)
+          td
+    - for (r <- TreeInfo.children(directory))
+      tr
+        td
+          a(href={ (directory / r).asString }) #{r.name.fullName}
+        td
+          =ResourceInfo.getSizeString((directory / r).asString)
+        - if (Security.isAuthenticated)
+          td
+            =ResourceInfo.getAccessCount((directory / r).asString)

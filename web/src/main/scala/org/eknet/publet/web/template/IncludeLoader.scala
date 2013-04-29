@@ -21,16 +21,15 @@ import org.eknet.publet.vfs._
 import xml._
 import org.eknet.publet.web.{RunMode, Config}
 import org.eknet.publet.web.asset.{AssetManager, Kind}
-import scala.Some
-import scala.Some
 import org.eknet.publet.web.util.PubletWebContext
+import com.google.inject.Inject
 
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 19.05.12 21:12
  */
-class IncludeLoader(config: Config, publet: Publet, assetMgr: AssetManager) {
+class IncludeLoader @Inject() (config: Config, publet: Publet, assetMgr: AssetManager) {
 
   val allIncludesPath = Path(config.mainMount + "/" + Publet.allIncludes)
   val emptyResource = "/publet/templates/empty.ssp"

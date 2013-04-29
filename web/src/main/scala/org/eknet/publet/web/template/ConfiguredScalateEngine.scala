@@ -18,7 +18,7 @@ package org.eknet.publet.web.template
 
 import org.fusesource.scalate.TemplateEngine
 import org.eknet.publet.Publet
-import org.eknet.publet.engine.scalate.{ScalateEngineImpl, VfsResourceLoader, ScalateEngine}
+import org.eknet.publet.engine.scalate.{ScalateEngineImpl, VfsResourceLoader}
 import scalate.Boot
 import org.eknet.publet.web.Config
 import org.eknet.publet.web.asset.AssetManager
