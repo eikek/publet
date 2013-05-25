@@ -1,6 +1,6 @@
 package org.eknet.publet.actor
 
-import akka.actor.{ActorRef, Actor}
+import akka.actor.{Status, ActorRef, Actor}
 import scala.concurrent.Future
 import org.eknet.publet.content._
 import org.eknet.publet.actor.messages._
@@ -10,8 +10,7 @@ import org.eknet.publet.actor.messages.Conversion
 import org.eknet.publet.content.Resource.SimpleContent
 import org.eknet.publet.actor.docroot.ActorResource.Params
 import scala.Some
-import org.eknet.publet.actor.messages.Select
-import org.eknet.publet.actor.messages.Find
+import scala.util.{Failure, Success}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -26,24 +25,29 @@ private class FindContentActor extends Actor with Logging {
   implicit private val timeout: Timeout = 30.seconds
 
   def receive = {
-    case req @ FindContentReq(_, _, r) => {
+    case req @ FindContentReq(_, r) => {
       log.debug(s">>> 1. Incoming request: $r")
-      val stopTime = patterns.Stopwatch.start()
+      val stopTime = utils.Stopwatch.start()
       val f = findContent(req)
-      f.onComplete {
+      val origin = sender
+      f.andThen {
+        case Success(s) ⇒ origin ! s
+        case Failure(fail) ⇒ origin ! Status.Failure(fail)
+      } andThen {
         case result => {
-          log.debug(s">>> 3. Returning '$result'")
+          log.debug(s">>> 3. Returning '${result.map(o => o.map(_.name))}'")
           context.system.eventStream.publish(PubletResponse(req.req, result, stopTime()))
         }
+      } andThen {
+        case result => context.stop(self)
       }
-      f pipeTo sender
     }
   }
 
   private def evaluate(r: Resource, params: Map[String, String]) = {
     r match {
       case a: DynActorResource => a.eval(Params(r.name, params))
-      case r => Resource.evaluate(r, params)
+      case _ => Resource.evaluate(r, params)
     }
   }
 
@@ -55,14 +59,12 @@ private class FindContentActor extends Actor with Logging {
    * @return
    */
   private def findContent(m: FindContentReq): Future[Option[Resource]] = {
-    val resource = ask(m.contentTree, Find(m.req.path)).mapTo[Option[Resource]]
-      .flatMap(t => t match {
+    val resource = Publet(context.system).documentRoot().find(m.req.path) match {
       case Some(r) => evaluate(r, m.req.params)
       case None => Future.successful(None)
-    })
-      .map(f => f.collect({ case c: Content => c }))
+    }
 
-    resource.flatMap(or => or match {
+    resource.map(f => f.collect({ case c: Content => c })).flatMap(or => or match {
       case Some(c) if (m.isTargetType(c)) => {
         log.debug(">>> 2. Found resource "+ c.name.fullName)
         Future.successful(Some(c))
@@ -82,24 +84,19 @@ private class FindContentActor extends Actor with Logging {
    */
   private def convert(m: FindContentReq): Future[Option[Content]] = {
     val targetType = m.req.path.fileName.contentType.getOrElse(ContentType.unknown)
-    val list = ask(m.contentTree, Select(m.req.path.parent / m.req.path.fileName.withExtension("*")))
-        .mapTo[Iterable[(Path, Resource)]]
-    list.onSuccess {
-      case x => log.debug(s">>> 2. Not found. Try to find a conversion for: ${x.map(_._1.fileName).mkString(",")}")
-    }
+    val list = Publet(context.system).documentRoot().select(m.req.path.parent / m.req.path.fileName.withExtension("*"))
+    log.debug(s">>> 2. Not found. Try to find a conversion for: ${list.map(_._1.fileName).mkString(",")}")
 
-    val conversionReq = list.flatMap { iter =>
-      Future.sequence(iter.map(t => evaluate(t._2, m.req.params)))
-        .map(f => f.collect({ case Some(c: Content) => c }))
-        .map(list => Conversion(m.req.path, list.toList, targetType))
-    }
+    val conversionReq = Future.sequence(list.map(t => evaluate(t._2, m.req.params))
+      .map(f => f.collect({ case Some(c: Content) => c })))
+      .map(list => Conversion(m.req, list.toList, targetType))
 
     conversionReq.flatMap(req => m.engineReg ? req).mapTo[Option[Source]]
       .map(or => or.map(s => SimpleContent(m.req.path.fileName, s)))
   }
 }
 
-private case class FindContentReq(contentTree: ActorRef, engineReg: ActorRef, req: FindContent) {
+private case class FindContentReq(engineReg: ActorRef, req: FindContent) {
   def isTargetType(r: Resource) = r match {
     case c: Content => req.path.fileName.matchesType(c.contentType)
     case _ => req.path.fileName.contentType == r.name.contentType

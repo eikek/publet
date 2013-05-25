@@ -25,4 +25,6 @@ package object content {
   type PartitionSupplier = URI => Partition
 
   def uri(str: String) = new java.net.URI(str)
+
+  implicit def folderPartition(f: Folder) = new SimplePartition(f.children)
 }

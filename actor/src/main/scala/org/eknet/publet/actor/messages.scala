@@ -21,31 +21,16 @@ object messages {
 
   case class FindContent(path: Path, params: Map[String, String] = Map.empty)
 
-  sealed trait DocumentRootMessage
-  final case class Mount(ref: ActorRef, paths: Set[Path]) extends DocumentRootMessage
-  final case class MountUri(uri: URI, paths: Set[Path]) extends DocumentRootMessage
-  final case class Unmount(paths: Set[Path]) extends DocumentRootMessage
-
-  case class Find(path: Path) extends DocumentRootMessage
-  case class Select(path: Path) extends DocumentRootMessage
-  case class Listing(path: Path) extends DocumentRootMessage
-  case class GetResourceType(path: Path) extends DocumentRootMessage
-  case class CreateFolder(path: Path, info: ModifyInfo) extends DocumentRootMessage
-  case class CreateContent(path: Path, content: Content, info: ModifyInfo) extends DocumentRootMessage
-  case class Delete(path: Path, info: ModifyInfo) extends DocumentRootMessage
-
-  sealed trait PartitionFactoryMessage
-  final case class GetPartition(uri: URI) extends PartitionFactoryMessage
-  final case class InstallFactory(ref: ActorRef, schemes: Set[String]) extends PartitionFactoryMessage
-  final case class UninstallFactory(schemes: Set[String]) extends PartitionFactoryMessage
-
   sealed trait EngineRegistryMessage
   case class Register(ref: ActorRef, pattern: Set[Path]) extends EngineRegistryMessage
   case class Unregister(pattern: Set[Path]) extends EngineRegistryMessage
   case class GetEngine(path: Path) extends EngineRegistryMessage
-  case class Conversion(path: Path, sources: List[Content], target: ContentType) extends EngineRegistryMessage
+  case class Conversion(req: FindContent, sources: List[Content], target: ContentType) extends EngineRegistryMessage
 
   // others
   case class PubletResponse(req: FindContent, resp: Try[Option[Resource]], duration: Long)
+  case class FolderCreated(path: Path, folder: Folder, info: ModifyInfo)
+  case class ContentCreated(path: Path, content: Content, info: ModifyInfo)
+  case class ResourceDeleted(path: Path, info: ModifyInfo)
 
 }

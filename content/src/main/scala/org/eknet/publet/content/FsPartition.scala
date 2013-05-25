@@ -1,12 +1,13 @@
 package org.eknet.publet.content
 
-import java.nio.file.{Path => JPath, Paths, FileVisitResult, SimpleFileVisitor, Files}
-import java.io.{IOException, InputStream}
-import scala.util.{Try, Success}
+import java.nio.file.{Path => JPath, _}
+import java.io.IOException
+import scala.util.Try
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio
 import FsPath._
 import java.net.URI
+import scala.Some
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -56,8 +57,7 @@ class FsPartition(val directory: JPath, val name: Name) extends Partition with F
     val folder = fileAt(path)
     val file = folder.resolve(content.name.fullName)
     Files.createDirectories(folder)
-    Files.createFile(file)
-    Files.copy(content.inputStream, file)
+    Files.copy(content.inputStream, file, StandardCopyOption.REPLACE_EXISTING)
     new FsContent(file)
   }
 

@@ -22,18 +22,27 @@ object Source {
 
   def unapply(s: Source): Option[ContentType] = Some(s.contentType)
 
-  case object EmptySource extends Source {
+  case class EmptySource(override val contentType: ContentType) extends Source {
     def inputStream = new InputStream {
       def read() = -1
     }
+
+    override def length: Option[Long] = Some(0L)
+  }
+  object EmptySource {
+    def apply(): Source = EmptySource(ContentType.unknown)
   }
 
+  case class ByteArraySource(bytes: Array[Byte], override val contentType: ContentType, override val lastModification: Option[Long] = None) extends Source {
+    def inputStream = new ByteArrayInputStream(bytes)
+    override def length = Some(bytes.length.toLong)
+  }
   case class UrlSource(url: URL) extends Source {
     def inputStream = url.openStream()
     override def contentType = Path(url.getPath).fileName.contentType.getOrElse(ContentType.unknown)
   }
 
-  case class StringSource(str: String, override val contentType: ContentType = ContentType.`text/plain`) extends Source {
+  case class StringSource(str: String, override val contentType: ContentType = ContentType.`text/plain`, override val lastModification: Option[Long] = None) extends Source {
     def inputStream = new ByteArrayInputStream(str.getBytes(Charsets.utf8))
     override def length = Some(str.length.toLong)
   }
@@ -61,4 +70,5 @@ object Source {
   def json(str: String) = StringSource(str, ContentType.`application/json`)
   def markdown(str: String) = StringSource(str, ContentType.`text/x-markdown`)
   def textile(str: String) = StringSource(str, ContentType.`text/x-textile`)
+  def scala(str: String) = StringSource(str, ContentType.`text/x-scala`)
 }

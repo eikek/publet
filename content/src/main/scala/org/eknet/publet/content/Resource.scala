@@ -1,9 +1,8 @@
 package org.eknet.publet.content
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.InputStream
 import scala.annotation.tailrec
 import java.net.URL
-import scala.xml.NodeSeq
 import org.eknet.publet.content.Source.{StringSource, UrlSource}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable
@@ -64,6 +63,8 @@ object Resource {
   class MutableFolder(var name: Name, val children: mutable.Buffer[Resource] = mutable.Buffer.empty)
     extends ChildrenBasedPartition with Folder with PartitionSelect {
 
+    def toSimpleFolder = new SimpleFolder(name, children.toList)
+
     def add(r: Resource*) {
       children.append(r: _*)
     }
@@ -76,30 +77,34 @@ object Resource {
     }
 
     override def createContent(path: Path, content: Content, info: ModifyInfo) = {
-      val f = createFolder(path.parent, info)
+      val f = createFolder(path, info)
       f match {
-        case Success(mf: MutableFolder) => mf add content; Success(content)
-        case f => f.transform(f => Failure(sys.error(s"$f is not writable")), e => Failure(e))
+        case Success(mf: MutableFolder) => {
+          mf.children.find(_.name == content.name).map(mf.remove)
+          mf add content
+          Success(content)
+        }
+        case _ => f.transform(f => Failure(new IllegalArgumentException(s"$f is not writable")), e => Failure(e))
       }
     }
 
-    override def delete(path: Path, info: ModifyInfo) = {
+    override def delete(path: Path, info: ModifyInfo) = Try {
       find(path) match {
         case Some(r) => find(path.parent) match {
-          case Some(mf: MutableFolder) => Success(mf.remove(r))
-          case _ => Failure(sys.error(s"Cannot delete resource $r"))
+          case Some(mf: MutableFolder) => mf.remove(r)
+          case _ => sys.error(s"Cannot delete resource $r")
         }
-        case _ => Success(false)
+        case _ => false
       }
     }
 
-    override def createFolder(path: Path, info: ModifyInfo) = {
+    override def createFolder(path: Path, info: ModifyInfo): Try[MutableFolder] = {
       @tailrec
-      def createFolders(mf: MutableFolder, p: Path): Try[Folder] = {
+      def createFolders(mf: MutableFolder, p: Path): Try[MutableFolder] = {
         p match {
           case a / as => mf.find(a) match {
             case Some(f: MutableFolder) => createFolders(f, as)
-            case Some(x) => Failure(sys.error(s"cannot create folder in $x"))
+            case Some(x) => Failure(new IllegalArgumentException(s"cannot create folder in $x"))
             case None => {
               val newf = new MutableFolder(a)
               mf.add(newf)

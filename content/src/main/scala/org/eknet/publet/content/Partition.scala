@@ -15,15 +15,6 @@ import scala.collection.mutable
 trait Partition {
 
   /**
-   * Checks whether the path points to an existing
-   * content/folder or dynamic resource.
-   *
-   * @param path
-   * @return
-   */
-  def getResourceType(path: Path): Option[ResourceType]
-
-  /**
    * Looks up a resource at the given path.
    *
    * Since a partition also is a folder, the lookup for `EmptyPath`
@@ -99,14 +90,6 @@ object ModifyInfo {
 
 trait ReadOnlyPartition extends Partition {
 
-  def getResourceType(path: Path) = find(path) match {
-    case Some(r: DynamicContent) => Some(Dynamic)
-    case Some(c: Content) => Some(File)
-    case Some(f: Folder) => Some(Container)
-    case _ => None
-  }
-
-
   def createContent(path: Path, content: Content, info: ModifyInfo): Try[Content] = readOnlyError
   def delete(path: Path, info: ModifyInfo): Try[Boolean] = readOnlyError
   def createFolder(path: Path, info: ModifyInfo): Try[Folder] = readOnlyError
@@ -126,7 +109,7 @@ trait ReadOnlyPartition extends Partition {
  * implement is `find`.
  *
  */
-abstract class FindBasedPartition extends ReadOnlyPartition {
+trait FindBasedPartition extends ReadOnlyPartition {
 
   def children: Iterable[Resource] = find(Path.root) match {
     case Some(f: Folder) => f.children
@@ -148,16 +131,21 @@ abstract class FindBasedPartition extends ReadOnlyPartition {
  * implement is `children`.
  *
  */
-abstract class ChildrenBasedPartition extends ReadOnlyPartition {
+trait ChildrenBasedPartition extends ReadOnlyPartition {
 
-  def find(path: Path) = {
-    if (path.isEmpty) Some(thisFolder) else recursiveFind(path, children)
+  private val thisFolder = this match {
+    case f: Folder => f
+    case _ => new Folder {
+      def children = ChildrenBasedPartition.this.children
+      def name = Name("root")
+    }
   }
 
-  private val thisFolder = new Folder {
-    def children = ChildrenBasedPartition.this.children
-    def name = Name("root")
+  def find(path: Path) = path match {
+    case EmptyPath => Some(thisFolder)
+    case _ => recursiveFind(path, children)
   }
+
 
   @tailrec
   private final def recursiveFind(path: Path, children: Iterable[Resource]): Option[Resource] = {

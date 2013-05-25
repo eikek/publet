@@ -25,24 +25,22 @@ class ContentTreeSuite extends FunSuite with ShouldMatchers {
     EmptyContent("movie2.avi")
   ))
 
-  val cr = new ContentTree(root)
-
   test ("mount partitions") {
-
+    var cr = new ContentTree(root)
     cr.find("file1.md") should be (Some(EmptyContent("file1.md")))
 
-    cr.mount("/", texts)
+    cr = cr.mount("/", texts)
     cr.find("/file1.md") should be (None)
     cr.find("/text2.txt") should be (Some(EmptyContent("text2.txt")))
 
-    cr.unmount(Path.root)
+    cr = cr.unmount(Path.root)
     cr.find("/file1.md") should be (Some(EmptyContent("file1.md")))
 
-    cr.mount("/main/pages", texts)
+    cr = cr.mount("/main/pages", texts)
     cr.find("/file1.md") should be (Some(EmptyContent("file1.md")))
     cr.find("/main/pages/text1.txt") should be (Some(EmptyContent("text1.txt")))
 
-    cr.mount("/main/pages/movies", movies)
+    cr = cr.mount("/main/pages/movies", movies)
     cr.find("/file1.md") should be (Some(EmptyContent("file1.md")))
     cr.find("/main/pages/text1.txt") should be (Some(EmptyContent("text1.txt")))
     cr.find("/main/pages/movies/movie1.mpg") should be (Some(EmptyContent("movie1.mpg")))
@@ -50,12 +48,13 @@ class ContentTreeSuite extends FunSuite with ShouldMatchers {
   }
 
   test ("unmount partitions") {
-    cr.mount("/data", texts)
+    var cr = new ContentTree(root)
+    cr = cr.mount("/data", texts)
     cr.find("/data/text1.txt") should be (Some(EmptyContent("text1.txt")))
-    cr.mount("/data", movies)
+    cr = cr.mount("/data", movies)
     cr.find("/data/text1.txt") should be (None)
     cr.find("/data/movie2.avi") should be (Some(EmptyContent("movie2.avi")))
-    cr.unmount("/data")
+    cr = cr.unmount("/data")
     cr.find("/data/text1.txt") should be (Some(EmptyContent("text1.txt")))
     cr.find("/data/movie2.avi") should be (None)
   }

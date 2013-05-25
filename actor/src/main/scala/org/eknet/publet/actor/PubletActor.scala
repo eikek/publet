@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, PoisonPill, Props, Actor}
 import scala.concurrent.duration._
 import akka.util.Timeout
 import org.eknet.publet.actor.convert.Converter
-import org.eknet.publet.actor.docroot.{PartitionFactoryActor, DocumentRoot}
+import org.eknet.publet.actor.docroot.DocumentRoot
 import messages._
 import akka.routing.RoundRobinRouter
 import akka.actor.Status.Status
@@ -24,45 +24,33 @@ class PubletActor extends Actor with Logging {
   val settings = Publet(context.system).settings
 
   // actor components
-  val contentTree = context.actorOf(Props[DocumentRoot], name = "content-tree")
   val engineRegistry = context.actorOf(Props[Converter], name = "engine-registry")
-  val partFactory = context.actorOf(Props[PartitionFactoryActor], name = "partition-factory")
 
-  // process-content actors
-  val processing = context.actorOf(Props[FindContentActor].withRouter(
-    RoundRobinRouter(nrOfInstances = settings.nrOfInstances)))
-
-  private val stopTime = patterns.Stopwatch.start()
+  private val stopTime = utils.Stopwatch.start()
 
   def receive = {
     case req @ FindContent(_, _) => {
-      processing.forward(FindContentReq(contentTree, engineRegistry, req))
-    }
-    case req: DocumentRootMessage => {
-      contentTree.forward(req)
+      context.actorOf(Props[FindContentActor])
+        .forward(FindContentReq(engineRegistry, req))
     }
     case req: EngineRegistryMessage => {
       engineRegistry.forward(req)
-    }
-    case req: PartitionFactoryMessage => {
-      partFactory.forward(req)
     }
     case Starting => {
       startPlugins(self)
     }
     case PluginsDone(status) => status match {
       case Success(_) => {
-        import akka.pattern.ask
-        import akka.pattern.pipe
-        import context.dispatcher
-        implicit val timeout: Timeout = 20.seconds
+        val publet = Publet(context.system)
 
-        val f = Future.sequence(settings.mounts.map(t => {
-          contentTree ? MountUri(t._1, t._2)
-        }))
-        f.map(x => Initialized(Success("Ok")))
-          .recover({ case e => Initialized(Failure(e)) })
-          .pipeTo(self)
+        for ((uri, paths) <- settings.mounts) {
+          val part = publet.partitionFactory().create(uri)
+          for (p <- paths) {
+            publet.documentRoot.send(dr => dr.mount(p, part))
+          }
+        }
+
+        self ! Initialized(Success("Ok"))
       }
       case Failure(e) => self ! Initialized(Failure(e))
     }
@@ -104,7 +92,7 @@ class PubletActor extends Actor with Logging {
   private[actor] def startPlugins(actor: ActorRef) {
     import context.dispatcher
 
-    val sorted = sortLayers(settings.plugins.values)
+    val sorted = settings.pluginsSorted
     def startup(current: Future[_], list: List[List[String]]) {
       list match {
         case Nil => current.onComplete {
@@ -147,21 +135,4 @@ object PubletActor {
   }
   private case object Starting
 
-  // either the remaining tree or the list of layers
-  type SortedPlugins = Either[Map[String, Set[String]], List[List[String]]]
-
-  private def sortLayers(list: Iterable[Plugin]): SortedPlugins = {
-    val tree = list.map(el => (el.name -> el.dependsOn)).toMap
-
-    def recurse(tree: Map[String, Set[String]]): SortedPlugins = {
-      tree.filter(p => p._2.isEmpty) match {
-        case set if (set.isEmpty) => if (tree.isEmpty) Right(Nil) else Left(tree)
-        case set => {
-          val next = for ((k, ch) <- tree if (!set.contains(k))) yield (k, ch.filterNot(c => set.contains(c)))
-          recurse(next).right.map(tail => set.keys.toList :: tail)
-        }
-      }
-    }
-    recurse(tree)
-  }
 }

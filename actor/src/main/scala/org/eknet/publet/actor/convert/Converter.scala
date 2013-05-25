@@ -11,29 +11,27 @@ import messages._
  */
 class Converter extends ActorRefRegistry[Glob] with Actor with Logging {
 
-  private val fallbackRegistry = Publet(context.system).engineRegistry
-
   def receive: Receive = forwarding orElse manage
 
   def forwarding: Receive = {
     case Register(ref, pattern) => {
-      log.info(s"Registering engine ${pattern.map(_.absoluteString).mkString(", ")} -> $ref")
-      manage(AddRef(ref, pattern.map(p => Glob(p.absoluteString)).toSeq))
+      log.info(s"Registering engine ${pattern.map(_.toString).mkString(", ")} -> $ref")
+      manage(AddRef(ref, pattern.map(p => Glob(p.toString)).toSeq))
     }
     case Unregister(pattern) => {
-      log.info(s"Unregistering engine at ${pattern.map(_.absoluteString).mkString(", ")}")
-      manage(RemoveRef(pattern.map(p => Glob(p.absoluteString)).toSeq))
+      log.info(s"Unregistering engine at ${pattern.map(_.toString).mkString(", ")}")
+      manage(RemoveRef(pattern.map(p => Glob(p.toString)).toSeq))
     }
-    case GetEngine(p) => sender ! find(p).orElse(fallbackRegistry.find(p))
-    case req @ Conversion(p, s, t) => {
+    case GetEngine(p) => sender ! find(p)
+    case req @ Conversion(findReq, s, t) => {
       log.debug(s">>> Conversion requested for '${s.map(_.name.fullName).mkString(", ")}' -> $t")
       val response = req.sources match {
         case Nil => None
-        case list => find(p)
+        case list => list.map(s => find(findReq.path.parent / s.name)).find(_.isDefined).map(_.get)
       }
       log.debug(s">>> Returning engine actor '${response.map(_.path.name)}'")
       response.map { _.forward(req) } getOrElse {
-        sender ! fallbackRegistry.find(p)
+        sender ! None
       }
     }
   }

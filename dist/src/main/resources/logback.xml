@@ -4,12 +4,13 @@
     <!-- encoders are assigned the type
  ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>%date{ISO8601} %-5level [%X{sourceThread}] %logger{45} - %msg%n</pattern>
+      <pattern>%date{ISO8601} %-5level [%thread] [%X{sourceThread}] %logger{45} - %msg%n</pattern>
     </encoder>
   </appender>
 
   <!-- publet classes convert actor paths to dot-separated paths -->
   <logger name="user.publet-http" level="DEBUG" />
+  <logger name="org.eknet" level="DEBUG" />
 
   <!-- other loggers are normal actor paths -->
   <!--<logger name="akka://publet-server/user/io-bridge" level="DEBUG"/>-->

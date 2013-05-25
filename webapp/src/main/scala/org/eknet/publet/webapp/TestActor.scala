@@ -10,16 +10,21 @@ import org.eknet.publet.actor.messages.{PubletResponse, Available}
  */
 class TestActor extends Actor with Logging {
 
-  context.system.eventStream.subscribe(self, classOf[Available])
-  context.system.eventStream.subscribe(self, classOf[PubletResponse])
-
   def receive = {
     case Available(ref) => {
       log.info("+++++ publet available ++++++")
     }
     case PubletResponse(req, res, duration) => {
-      log.debug(s"~~~~~~~~~~~~~~~ publet '${req.path.absoluteString}' takes $duration ms ~~~~~~~~~~~~~~~~~~~")
+      log.info(s"~~~~~~~~~~~~~~~ publet '${req.path.absoluteString}' takes $duration ms ~~~~~~~~~~~~~~~~~~~")
+    }
+    case RequestCycle(req, resp, time) => {
+      log.info(s"~~~~~~~~~~~~~~~ http '${req.path}' takes $time ms ~~~~~~~~~~~~~~~~~~~")
     }
   }
 
+  override def preStart() {
+    context.system.eventStream.subscribe(self, classOf[Available])
+    context.system.eventStream.subscribe(self, classOf[PubletResponse])
+    context.system.eventStream.subscribe(self, classOf[RequestCycle])
+  }
 }

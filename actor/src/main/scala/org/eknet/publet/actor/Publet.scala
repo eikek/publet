@@ -5,7 +5,11 @@ import com.typesafe.config.{Config, ConfigFactory}
 import scala.reflect.ClassTag
 import java.nio.file.{Path => JPath, Files, Paths}
 import org.eknet.publet.content._
-import akka.event.LoggingAdapter
+import scala.collection.Map
+import scala.util.Success
+import org.eknet.publet.actor.messages.{ResourceDeleted, ContentCreated, FolderCreated}
+import akka.agent.Agent
+import org.eknet.publet.actor.docroot.DocumentRoot
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -18,6 +22,9 @@ object Publet extends ExtensionId[PubletExt] with ExtensionIdProvider {
   def createExtension(system: ExtendedActorSystem) = {
     new PubletExt(system)
   }
+
+  // either the remaining tree or the list of layers
+  type SortedPlugins = Either[Map[String, Set[String]], List[List[String]]]
 
 }
 
@@ -35,29 +42,23 @@ class PubletExt(system: ExtendedActorSystem) extends Extension {
    * `GetPartition` messages are then forwarded to them.
    *
    */
-  val partitionFactory = new PartitionFactory
-  partitionFactory.register("classpath", new ClasspathPartitonFactory(classLoader))
-  partitionFactory.register("var", new SubdirPartitionFactory(settings.workdir))
-  partitionFactory.register("tmp", new SubdirPartitionFactory(settings.tempdir))
-  partitionFactory.register("file", AbsoluteFsPartitionFactory)
+  val partitionFactory = Agent(createParitionSuppliers)(system)
+
+  def createPartition(uri: String) = partitionFactory().create(uri)
+
+  private def createParitionSuppliers = {
+    val map = new PartitionSupplierMap()
+    map.update("classpath", new ClasspathPartitonFactory(classLoader))
+      .update("var", new SubdirPartitionFactory(settings.workdir))
+      .update("tmp", new SubdirPartitionFactory(settings.tempdir))
+      .update("file", AbsoluteFsPartitionFactory)
+  }
 
   /**
-   * The document root which is used as fallback.
-   *
-   * The document-root-actor uses this instance, if no mounted
-   * actor can be found for a given path. It is therefore
-   * possible to send actor refs to the document-root-actor, which
-   * will then forward requests to them.
+   * The document root.
    */
-  val documentRoot = new ContentTree()
+  val documentRoot = Agent(new DocumentRoot(EmptyPartition, Map.empty, system.eventStream))(system)
 
-  /**
-   * The engine registry used as fallback, if no engine actor
-   * was found. As with `documentRoot` and `partitionFactory`,
-   * it is possible to send actor refs to the engine-registry
-   * instead of registering them here.
-   */
-  val engineRegistry = new EngineRegistry()
 
 }
 
@@ -88,15 +89,17 @@ class PubletSettings(system: ExtendedActorSystem) {
     entries.toMap
   }
 
-  val plugins =  {
+  val plugins = {
     val white = getStringList("publet.plugins").asScala.toSet
     val black = getStringList("publet.disabled-plugins").asScala.toSet
-    white.diff(black).map(cn => createInstanceOf[Plugin](cn).get).map(c => c.name -> c).toMap
-  }
+    white.diff(black).map(cn => createInstanceOf[Plugin](cn).get)
+  }.map(c => c.name -> c).toMap
+
+//  val plugins = pluginObjects.collect({ case p: Plugin => p }).map(c => c.name -> c).toMap
+
+  val pluginsSorted = sortLayers(plugins.values)
 
   val stopOnInitError = getBoolean("publet.stop-on-init-error")
-
-  val nrOfInstances = getInt("publet.publet-routing.nr-of-instances")
 
   private def createdir(path: JPath) = {
     Files.createDirectories(path)
@@ -106,9 +109,13 @@ class PubletSettings(system: ExtendedActorSystem) {
   def createInstanceOf[T: ClassTag](fqcn: String) = {
     lazy val loadObject = system.dynamicAccess.getObjectFor(fqcn)
     lazy val defctor = system.dynamicAccess.createInstanceFor(fqcn, Seq.empty)
-    lazy val settingsCtor = system.dynamicAccess.createInstanceFor(fqcn, Seq(classOf[PubletSettings] -> this))
     lazy val configCtor = system.dynamicAccess.createInstanceFor(fqcn, Seq(classOf[Config] -> config))
-    loadObject.orElse(settingsCtor).orElse(configCtor).orElse(defctor)
+    lazy val systemCtor = system.dynamicAccess.createInstanceFor(fqcn, Seq(classOf[ActorSystem] -> system))
+    loadObject.orElse(systemCtor).orElse(configCtor).orElse(defctor)
   }
 
+  private def sortLayers(list: Iterable[Plugin]): Publet.SortedPlugins = {
+    val tree = list.map(el => (el.name -> el.dependsOn)).toMap
+    utils.toposortLayers(tree)
+  }
 }

@@ -1,0 +1,23 @@
+-@ val body: String
+-@ val title : String = "Welcome"
+-@ val head: String = null
+-@ val highlightTheme: String = appSettings.highlightTheme
+-@ val assetGroups: String = appSettings.assetGroups
+- val highlightCss = urlFor("/publet/assets/groups/highlightjs/style/"+ highlightTheme +".css")
+!!! 5
+html
+  head
+    meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    - if (assetGroups != null || !assetGroups.isEmpty)
+      link(href={ urlFor("/publet/assets/compressed/css?name="+ assetGroups) } rel="stylesheet")
+      script(src={ urlFor("/publet/assets/compressed/js?name="+ assetGroups) } type="text/javascript")
+
+    - if (!highlightTheme.isEmpty)
+      link(href={ highlightCss } rel="stylesheet")
+
+    - if (head!=null)
+      !~~ head
+    title = title
+  body
+    #content.container
+      !~~ body
