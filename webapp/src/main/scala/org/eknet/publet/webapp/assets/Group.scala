@@ -1,6 +1,6 @@
 package org.eknet.publet.webapp.assets
 
-import org.eknet.publet.content.Glob
+import org.eknet.publet.content.{EmptyPath, Path, Name, Glob}
 import org.eknet.publet.webapp.assets.Group.GroupMagnet
 
 /**
@@ -19,6 +19,17 @@ case class Group(name: String, pathPattern: Glob = Glob("**"), assets: List[Asse
 
   def include(group: GroupMagnet, next: GroupMagnet*): Group = copy(includes = includes ++ group.names ++ next.flatMap(_.names))
 
+  def find(path: Path) = assets.filter(_.resource.name == path.fileName) match {
+    case Nil => None
+    case a :: Nil => Some(a)
+    case list => {
+      val thisTarget = path.parent match {
+        case EmptyPath => None
+        case x => Some(x.toString)
+      }
+      list.find(_.target == thisTarget)
+    }
+  }
 }
 
 object Group {

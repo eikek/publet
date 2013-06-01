@@ -22,7 +22,7 @@ object GitrPlugin extends Plugin {
 
   def load(ref: ActorRef, system: ActorSystem) = {
     implicit val timeout: Timeout = 7.seconds
-    val repoMan = system.actorOf(Props[RepositoryManager], name = "repo-man")
+    val repoMan = GitrExtension(system).repoMan
     val gitFactory: PartitionSupplier = uri => {
       val f = (repoMan ? GetPartition(uri)).mapTo[Partition]
       Await.result(f, Duration(5, SECONDS))

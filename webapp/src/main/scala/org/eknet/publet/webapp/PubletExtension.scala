@@ -1,15 +1,14 @@
 package org.eknet.publet.webapp
 
 import akka.actor.{ActorRef, Props}
-import org.eknet.publet.actor.{utils, PubletActor}
+import org.eknet.publet.actor.{Publet, PubletActor}
 import spray.http._
-import org.eknet.publet.content.Content
+import org.eknet.publet.content.{Folder, EmptyPath, Path, Content}
 import spray.http.HttpResponse
 import org.eknet.publet.actor.messages.FindContent
 import java.io.{PrintWriter, StringWriter}
 import com.typesafe.scalalogging.slf4j.Logging
 import akka.util.Timeout
-import org.eknet.publet.webapp.extensions.WebExtension
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

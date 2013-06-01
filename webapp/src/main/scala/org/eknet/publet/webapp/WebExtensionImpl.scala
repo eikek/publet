@@ -1,18 +1,18 @@
-package org.eknet.publet.webapp.extensions
+package org.eknet.publet.webapp
 
 import spray.routing._
 import akka.actor.{ActorRefFactory, ActorSystem, Actor}
 import org.eknet.publet.webapp.assets.AssetExtension
-import org.eknet.publet.webapp.RequestCycle
 import org.eknet.publet.actor.utils
 import org.eknet.publet.webapp.scalate.ScalateInit
+import org.eknet.publet.webapp.servlet.ServletExtension
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 14.05.13 19:07
  */
-private[extensions] class WebExtensionImpl(val webapp: ActorRefFactory, val system: ActorSystem) extends Collector
-  with WebExtension with Actor with ScalateInit with HttpServiceActor with AssetExtension {
+private[webapp] class WebExtensionImpl(val webapp: ActorRefFactory, val system: ActorSystem) extends Collector
+  with WebExtension with Actor with ScalateInit with HttpServiceActor with AssetExtension with ServletExtension with GitServletExtension {
 
   def receive = {
     val route = myroute(routes.reduce(_ ~ _))
@@ -28,7 +28,7 @@ private[extensions] class WebExtensionImpl(val webapp: ActorRefFactory, val syst
   }
 }
 
-private[extensions] abstract class Collector {
+private[webapp] abstract class Collector {
 
   private[this] val proutes = collection.mutable.ListBuffer[Route]()
 

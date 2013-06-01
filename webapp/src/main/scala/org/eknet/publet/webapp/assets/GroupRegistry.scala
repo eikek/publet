@@ -1,38 +1,36 @@
 package org.eknet.publet.webapp.assets
 
 import org.eknet.publet.content.{Glob, Path}
-import collection.mutable
 import com.typesafe.scalalogging.slf4j.Logging
-import org.eknet.publet.actor.{utils, PubletSettings}
-import org.eknet.publet.webapp.PubletWebSettings
+import org.eknet.publet.actor.utils
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 13.05.13 22:56
  */
-class GroupRegistry extends Logging {
-  private val graph = collection.mutable.Map[String, Group]()
+class GroupRegistry(graph: Map[String, Group]) extends Logging {
 
-  def setup(groups: Group*) {
-    //find group in tree or create new node
-    for (group <- groups) {
-      val next = graph.get(group.name).map(g => merge(g, group)) getOrElse group
-      graph.put(group.name, next)
-    }
+  def setup(groups: Group*) = {
+    val next = groups.foldLeft(graph)((graph, group) => {
+      val ng = graph.get(group.name).map(g => merge(g, group)) getOrElse group
+      graph + (group.name -> ng)
+    })
+    new GroupRegistry(next)
   }
 
-  def replace(groups: Group*): Seq[Group] = {
+  def replace(groups: Group*): GroupRegistry = {
     val replaced = for (
       g <- groups;
       n = graph.get(g.name) if (n.isDefined)
-    ) yield replace(n.get, g)
+    ) yield replaceGroup(n.get, g)
 
-    replaced.foreach(n => graph.put(n.name, n))
-    replaced
+    val next = replaced.foldLeft(graph)((graph, rg) => graph + (rg.name -> rg))
+    new GroupRegistry(next)
   }
 
   def getGroups = graph.values.toList.sortBy(g => g.name)
 
+  def getGroup(name: String) = graph.get(name)
 
   /**
    * Returns all sources registered with the given group in the
@@ -79,7 +77,7 @@ class GroupRegistry extends Logging {
       other.includes ++ self.includes)
   }
 
-  private def replace(self: Group, other: Group): Group = {
+  private def replaceGroup(self: Group, other: Group): Group = {
     val replaced = self.assets.map(r => other.assets.find(_.resource.name == r.resource.name).getOrElse(r))
     Group(self.name,
       if (other.pathPattern != Glob("**")) other.pathPattern else self.pathPattern,

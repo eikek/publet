@@ -34,7 +34,7 @@ class ScalaScriptEngine extends Actor with Logging {
   import context.dispatcher
 
   def receive = {
-    case Conversion(FindContent(path, params), sources, targetType) => {
+    case Conversion(FindContent(path, params), sources, targetType) if (!sources.isEmpty) => {
       val scala = sources.find(_.contentType == ContentType.`text/x-scala`)
       val conv = scala.map { c =>
         val sp = sourcePath(path, c)
@@ -54,10 +54,10 @@ class ScalaScriptEngine extends Actor with Logging {
     }
   }
 
-  private def sourcePath(path: Path, c: Content) = path.parent / c.name
+  private def sourcePath(path: Path, c: Content) = path.sibling(c.name)
 
   private def needsRecompile(path: Path, c: Content) = {
-    val clazzFile = path.parent / c.name.withExtension("class")
+    val clazzFile = path.sibling(c.name.withExtension("class"))
     scriptSources.find(clazzFile).collect({ case c:Content => c}).map { cf =>
       (c.lastModification, cf.lastModification) match {
         case (Some(sourceMod), Some(classMod)) => sourceMod > classMod

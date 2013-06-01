@@ -1,4 +1,4 @@
-package org.eknet.publet.webapp.extensions
+package org.eknet.publet.webapp
 
 import akka.actor.{ActorRefFactory, ActorSystem}
 import spray.routing.{Directives, Route}

@@ -10,7 +10,7 @@ final case class RepoName(name: Path) {
 
   require(name.fileName.fullName.matches("""[\w\._\- ]+"""), """Filename must match [\w\._\- ]+""")
 
-  val simpleName = name.parent / name.fileName.withExtension("")
-  val dotGit = name.parent / name.fileName.withExtension("git")
+  val simpleName = name.sibling(name.fileName.withExtension(""))
+  val dotGit = name.sibling(name.fileName.withExtension("git"))
 
 }

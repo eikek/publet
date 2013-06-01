@@ -1,14 +1,13 @@
-package org.eknet.publet.webapp.extensions
+package org.eknet.publet.webapp
 
-import scala.reflect.io.{AbstractFile, VirtualDirectory}
+import scala.reflect.io.AbstractFile
 import scala.tools.nsc.{Global, Settings}
 import akka.actor._
 import scala.reflect.internal.util.BatchSourceFile
 import scala.tools.nsc.interpreter.AbstractFileClassLoader
-import scala.util.{Success, Try}
+import scala.util.Try
 import com.typesafe.scalalogging.slf4j.Logging
 import scala.util.Success
-import org.eknet.publet.webapp.{PubletExtension, PubletWeb}
 import org.eknet.publet.actor.utils
 import java.nio.file.{Files, Path}
 import java.security.MessageDigest

@@ -1,20 +1,18 @@
 package org.eknet.publet.gitr
 
-import akka.actor.{Props, Actor}
-import org.eknet.publet.actor.{Publet, Logging}
-import java.nio.file.Paths
+import akka.actor.Actor
+import org.eknet.publet.actor.Logging
+import java.nio.file.{Path => JPath, Paths}
 import org.eknet.publet.gitr.RepositoryManager._
 import org.eknet.publet.gitr.RepositoryManager.GetRepo
-import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.net.URI
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 09.05.13 01:01
  */
-class RepositoryManager extends Actor with Logging {
+class RepositoryManager(root: JPath) extends Actor with Logging {
 
-  private val root = Paths.get(Publet(context.system).settings.config.getString("publet.gitr.root"))
   private val repoMan = new GitrManager(root)
 
   def receive = {
@@ -31,6 +29,13 @@ class RepositoryManager extends Actor with Logging {
       val tandem = repoMan.getTandem(name).getOrElse(repoMan.createTandem(name).get)
       sender ! tandem
     }
+    case SyncTandem(name) => {
+      val ref = repoMan.getTandem(name) map { t =>
+        log.info("Updating worktree of tandem: "+ name)
+        t.updateWorkTree()
+      }
+      sender ! ref
+    }
   }
 
 }
@@ -41,4 +46,5 @@ object RepositoryManager {
   final case class GetRepo(name: RepoName)
   final case class GetOrCreateTandem(name: RepoName)
   final case class GetPartition(uri: URI)
+  final case class SyncTandem(name: RepoName)
 }

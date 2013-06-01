@@ -1,10 +1,7 @@
 package org.eknet.publet.content
 
 import scala.util.{Failure, Try}
-import java.io.InputStream
-import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 /**
  * A partition controls a tree of resources.
@@ -179,7 +176,7 @@ object EmptyPartition extends FindBasedPartition {
  * @param loader
  * @param base
  */
-class ClasspathPartition(loader: ClassLoader = Thread.currentThread().getContextClassLoader, base: String = "") extends FindBasedPartition with PartitionSelect {
+class ClasspathPartition(loader: ClassLoader = Thread.currentThread().getContextClassLoader, base: String = "") extends FindBasedPartition {
 
   def find(path: Path) = {
     val name = Path(base) / path
@@ -187,4 +184,12 @@ class ClasspathPartition(loader: ClassLoader = Thread.currentThread().getContext
     url.map(Resource.forUrl)
   }
 
+  /**
+   * Since it is not (reasonable) possible to list resources within the
+   * classpath, this partition does not support `select`.
+   *
+   * @param path
+   * @return
+   */
+  def select(path: Path) = Nil
 }

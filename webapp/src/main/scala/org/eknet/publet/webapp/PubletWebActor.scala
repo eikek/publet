@@ -6,7 +6,6 @@ import org.eknet.publet.actor.messages.{ContentCreated, Available}
 import akka.actor.Terminated
 import spray.routing.HttpServiceActor
 import spray.http.HttpRequest
-import org.eknet.publet.webapp.extensions.ExtensionOven
 import com.typesafe.config.ConfigFactory
 
 /**

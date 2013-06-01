@@ -48,8 +48,8 @@ object TestPlugin extends Plugin {
         Source.html {
           <html>
             <head>
-              <link rel="stylesheet" href="/publet/assets/compressed/css/allof.css?name=default"></link>
-              <script type="text/javascript" src="/publet/assets/compressed/js/allof.js?name=default"></script>
+              <script src="/publet/webapp/includes/assetloader.js" type="text/javascript"></script>
+              <link href="http://localhost:8088/publet/assets/groups/highlightjs/style/default.css" rel="stylesheet"></link>
             </head>
             <body>
               <div id="content" class="container">

@@ -1,7 +1,7 @@
 package org.eknet.publet.actor.convert
 
 import akka.actor.Actor
-import org.eknet.publet.actor.{Publet, messages, ActorRefRegistry, Logging}
+import org.eknet.publet.actor.{messages, ActorRefRegistry, Logging}
 import org.eknet.publet.content.{Path, Glob}
 import messages._
 
@@ -27,7 +27,7 @@ class Converter extends ActorRefRegistry[Glob] with Actor with Logging {
       log.debug(s">>> Conversion requested for '${s.map(_.name.fullName).mkString(", ")}' -> $t")
       val response = req.sources match {
         case Nil => None
-        case list => list.map(s => find(findReq.path.parent / s.name)).find(_.isDefined).map(_.get)
+        case list => list.map(s => find(findReq.path.sibling(s.name))).find(_.isDefined).map(_.get)
       }
       log.debug(s">>> Returning engine actor '${response.map(_.path.name)}'")
       response.map { _.forward(req) } getOrElse {
@@ -39,8 +39,8 @@ class Converter extends ActorRefRegistry[Glob] with Actor with Logging {
   private[actor] def find(path: Path) = findName(path).flatMap(_.headOption)
 
   private[actor] def findName(path: Path) = {
-    keys.toList.sortBy(- _.pattern.length)
-      .find(g => g.matches(path.absoluteString))
+    val list = keys.toList.sortBy(- _.pattern.length)
+    list.find(g => g.matches(path.toString))
       .flatMap(k => get(k))
   }
 }

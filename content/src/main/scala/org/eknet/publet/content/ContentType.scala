@@ -112,6 +112,9 @@ object ContentType {
   val `text/x-markdown` = textUtf8("x-markdown", "md", "markdown", "mdown", "mkdn", "mdwn", "mdtxt", "mdtext")
   val `text/x-textile` = textUtf8("x-textile", "textile")
   val `text/x-confluence` = textUtf8("x-confluence", "conf")
+  val `text/x-ssp` = textUtf8("x-ssp", "ssp")
+  val `text/x-mutache` = textUtf8("x-mustache", "mustache")
+  val `text/x-scaml` = textUtf8("x-scaml", "scaml")
   val `text/css` = text("css", "css")
 
   val `application/xml` = app("xml", "xml", "xsl", "xsd")

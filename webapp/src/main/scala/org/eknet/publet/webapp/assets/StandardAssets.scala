@@ -19,12 +19,6 @@ object StandardAssets extends AssetCollection {
       .add(resource("jquery/jquery.form.js"))
   }
 
-  val jqueryMigrate = make {
-    Group("jquery.migrate")
-      .add(resource("jquery/jquery-migrate-1.1.1.min.js").noCompress)
-      .require(jquery)
-  }
-
   val spin =  make {
     Group("spinjs").add(resource("spinjs/spin.min.js").noCompress)
   }
@@ -78,8 +72,16 @@ object StandardAssets extends AssetCollection {
       .require(jquery)
   }
 
-  //last one adds all above as includes
+  //this adds all above as includes
   val defaultGroup = make {
     Group("default").include(toList)
   }
+
+
+  val jqueryMigrate = {
+    Group("jquery.migrate")
+      .add(resource("jquery/jquery-migrate-1.1.1.min.js").noCompress)
+      .require(jquery)
+  }
+
 }

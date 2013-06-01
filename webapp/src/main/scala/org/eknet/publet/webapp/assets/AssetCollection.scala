@@ -1,6 +1,6 @@
 package org.eknet.publet.webapp.assets
 
-import org.eknet.publet.content.{ClasspathPartition, Partition, Content}
+import org.eknet.publet.content.{Resource, ClasspathPartition, Partition, Content}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -25,7 +25,7 @@ abstract class AssetCollection {
 
   def classPathBase = ""
 
-  def resource(name: String): Asset = partition.find(name).collect({ case c: Content => c })
+  def resource(name: String): Asset = partition.find(name).collect(Resource.toContent)
     .getOrElse(sys.error(s"Unable to find resource $name"))
 
 }

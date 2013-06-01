@@ -19,6 +19,7 @@ sealed trait Path {
   def segments: List[String]
   def isEmpty: Boolean
   def parent: Path
+  def sibling(path: Path): Path
   def startsWith(other: Path): Boolean
   def mkString(sep: String): String
 
@@ -49,6 +50,7 @@ final case class / (head: String, tail: Path) extends Path {
     take(other.size) == other
   }
   def parent = if (tail.size == 0) EmptyPath else new /(head, tail.parent)
+  def sibling(path: Path) = parent / path
 
   def mkString(sep: String) = segments.mkString(sep)
 }
@@ -61,6 +63,7 @@ case object EmptyPath extends Path {
   def take(n: Int) = if (n==0) this else noElementError
   def fileName = noElementError
   def parent = noElementError
+  def sibling(path: Path) = path
 
   def isEmpty = true
   def /(other: Path) = other

@@ -59,18 +59,29 @@ private class FindContentActor extends Actor with Logging {
    * @return
    */
   private def findContent(m: FindContentReq): Future[Option[Resource]] = {
-    val resource = Publet(context.system).documentRoot().find(m.req.path) match {
-      case Some(r) => evaluate(r, m.req.params)
-      case None => Future.successful(None)
-    }
-
-    resource.map(f => f.collect({ case c: Content => c })).flatMap(or => or match {
-      case Some(c) if (m.isTargetType(c)) => {
-        log.debug(">>> 2. Found resource "+ c.name.fullName)
-        Future.successful(Some(c))
+    findResource(m) match {
+      case (mreq, Some(resource)) => evaluate(resource, mreq.req.params).map(f => f.collect(Resource.toContent)).flatMap {
+        or => or match {
+          case Some(c) if (mreq.isTargetType(c)) => {
+            log.debug(">>> 2. Found resource "+ c.name.fullName)
+            Future.successful(Some(c))
+          }
+          case _ => convert(mreq)
+        }
       }
-      case _ => convert(m)
-    })
+      case (mreq, None) => convert(mreq)
+    }
+  }
+
+  private def findResource(m: FindContentReq): (FindContentReq, Option[Resource]) = {
+    Publet(context.system).documentRoot().find(m.req.path) match {
+      case Some(f: Folder) => findResource(m.copy(req = m.req.copy(path = m.req.path / "index.html")))
+      case Some(r) => m -> Some(r)
+      case None => m.req.path match {
+        case EmptyPath => findResource(m.copy(req = m.req.copy(path = m.req.path / "index.html")))
+        case _ => m -> None
+      }
+    }
   }
 
   /**
@@ -84,7 +95,8 @@ private class FindContentActor extends Actor with Logging {
    */
   private def convert(m: FindContentReq): Future[Option[Content]] = {
     val targetType = m.req.path.fileName.contentType.getOrElse(ContentType.unknown)
-    val list = Publet(context.system).documentRoot().select(m.req.path.parent / m.req.path.fileName.withExtension("*"))
+    val selectPath = m.req.path.sibling(m.req.path.fileName.withExtension("*"))
+    val list = Publet(context.system).documentRoot().select(selectPath)
     log.debug(s">>> 2. Not found. Try to find a conversion for: ${list.map(_._1.fileName).mkString(",")}")
 
     val conversionReq = Future.sequence(list.map(t => evaluate(t._2, m.req.params))

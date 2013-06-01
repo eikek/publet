@@ -35,6 +35,9 @@ trait DynamicContent extends Resource {
 
 object Resource {
 
+  val toContent: PartialFunction[Resource, Content] = { case c: Content => c }
+  val toFolder: PartialFunction[Resource, Folder] = { case f: Folder => f }
+
   final case class EmptyFolder(name: Name) extends Folder {
     def children = Nil
   }

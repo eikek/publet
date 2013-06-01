@@ -3,6 +3,8 @@ package org.eknet.publet.webapp
 import org.eknet.publet.actor.{Publet, Plugin}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.util.Timeout
+import org.eknet.publet.content.SimplePartition
+import org.eknet.publet.webapp.assets.AssetLoader
 
 /**
  *
@@ -19,7 +21,14 @@ object WebappPlugin extends Plugin {
   def load(ref: ActorRef, system: ActorSystem) = {
     val publet = Publet(system)
     implicit val timeout = Timeout(4000)
-    publet.documentRoot.alter(dr => dr.mount("/publet/webapp/templates",
-      publet.createPartition("classpath:///org/eknet/publet/webapp/includes/templates")))
+
+    val templates = publet.createPartition("classpath:///org/eknet/publet/webapp/includes/templates")
+    val container = new SimplePartition(Seq(
+      new AssetLoader(PubletWeb(system).webSettings)
+    ))
+
+    publet.documentRoot alter { dr =>
+      dr.mount("/publet/webapp/includes", container).mount("/publet/webapp/templates", templates)
+    }
   }
 }
