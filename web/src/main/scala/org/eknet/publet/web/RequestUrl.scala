@@ -17,10 +17,10 @@
 package org.eknet.publet.web
 
 import javax.servlet.http.HttpServletRequest
-import java.net.{URLEncoder, URLDecoder}
 import org.eknet.publet.vfs.Path
 import util.{PubletWeb, Request, Key}
 import grizzled.slf4j.Logging
+import java.net.URI
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -32,7 +32,7 @@ trait RequestUrl extends Logging {
   protected def req: HttpServletRequest
 
   /** The complete request uri, from the hostname up to the query string. Decoded but untouched otherwise */
-  def requestUri = URLDecoder.decode(req.getRequestURI, "UTF-8")
+  def requestUri = URI.create(req.getRequestURI).getPath
 
   private val urlBaseKey = Key("urlBase", {
     case Request => Config("publet.urlBase").getOrElse {
@@ -72,7 +72,7 @@ trait RequestUrl extends Logging {
 
   private val fullUrlKey = Key("fullUrl", {
     case Request => {
-      val url = req.getRequestURI  //.substring((req.getContextPath+req.getServletPath).length)
+      val url = URI.create(req.getRequestURI).getPath  //.substring((req.getContextPath+req.getServletPath).length)
       val params = Option(req.getQueryString).map("?"+_).getOrElse("")
 
       (if (url.startsWith("/")) url.substring(1) else url) + params

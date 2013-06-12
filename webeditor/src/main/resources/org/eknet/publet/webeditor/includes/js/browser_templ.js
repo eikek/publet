@@ -39,7 +39,7 @@ $(function () {
     var file = data.files[i - offset];
     if (file && !file.container) {
       if ((file.mimeBase && file.mimeBase == "text") || fupload.length == 0) {
-        window.location = "/publet/webeditor/scripts/edit.html?resource=" + file.sourceRef;
+        window.location = "/publet/webeditor/scripts/edit.html?resource=" + encodeURIComponent(file.sourceRef);
       } else {
         if (fupload.length > 0) {
           fupload.fileupload('option', 'done').call(fupload, null, {
