@@ -37,7 +37,7 @@ trait RequestParams {
 
   def param(name: String): Option[String] = {
     Option(req.getParameter(name)).orElse {
-      multipartFormFields.find(_.getFieldName==name).map(_.getString)
+      multipartFormFields.find(_.getFieldName==name).map(_.getString("UTF-8"))
     }
   }
 
