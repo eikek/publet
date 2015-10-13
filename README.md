@@ -1,4 +1,4 @@
-# Publet
+# Publet (discontinued)
 
 Publet is a web application written in [Scala](http://www.scala-lang.org/) where you can edit
 pages like in a wiki. Besides three wiki languages, you can also write Scala scripts and choose

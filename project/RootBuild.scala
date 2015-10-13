@@ -111,12 +111,12 @@ object RootBuild extends Build {
       Doc.module,
       App.module,
       Webdav.module
-    )
+  ) 
 
   val buildSettings = Project.defaultSettings ++ Seq(
     name := "publet-parent",
     libraryDependencies ++= deps
-  ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)  ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) ++ container.deploy("/" -> War.module) ++ Seq(PluginKeys.port in container.Configuration := 8081)
 
   override lazy val settings = super.settings ++ Seq(
     version := "1.2.1-SNAPSHOT",
@@ -156,7 +156,7 @@ object Publet extends Build {
     libraryDependencies ++= deps,
     ReflectPlugin.reflectPackage := "org.eknet.publet.reflect",
     sourceGenerators in Compile <+= ReflectPlugin.reflect
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  )
 
   lazy val deps = Seq(slf4jApi, grizzledSlf4j, mimeUtil, findbugs, guava, scalaTest)
 
@@ -266,7 +266,7 @@ object Web extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-web",
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
 
   val deps = Seq(servletApiProvided,
     slf4jApi, grizzledSlf4j,
@@ -294,7 +294,7 @@ object GitrWeb extends Build {
   lazy val buildSettings = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-gitr-web",
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  )
 
   lazy val deps = Seq(grizzledSlf4j, servletApiProvided, guice, jgitHttpServer, scalaTest)
 
@@ -311,7 +311,7 @@ object WebEditor extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webeditor",
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  )
 
   val deps = Seq(servletApiProvided, grizzledSlf4j, scalaTest)
 
@@ -328,7 +328,7 @@ object Ext extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-ext",
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
 
   val deps = Seq(squareMail, servletApiProvided, grizzledSlf4j, scalaTest, blueprintsCore, colt, orientdb, blueprintsOrient, scue)
 
@@ -387,7 +387,7 @@ object War extends Build {
       }
     },
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
 
   val deps = Seq(slf4jApi, slf4jJcl, servletApiProvided, logbackClassic)
 }
@@ -449,7 +449,7 @@ object Server extends Build {
       zipFile
     },
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
 
   val deps = Seq(slf4jApi, grizzledSlf4j, jettyServer, logbackClassic, bouncyCastleProv, bouncyCastleMail)
 }
@@ -464,7 +464,7 @@ object App extends Build {
 
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-app"
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
 
 }
 
@@ -479,7 +479,9 @@ object Webdav extends Build {
   val buildProperties = Project.defaultSettings ++ Seq[Project.Setting[_]](
     name := "publet-webdav",
     libraryDependencies ++= deps
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
+  ) 
+
+
 
   val deps = Seq(servletApiProvided, miltonApi, miltonServlet) ++ miltonApiDeps
 }
